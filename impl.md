@@ -33,7 +33,7 @@
 | Phase | Title | Status | Commit | Notes |
 |---|---|---|---|---|
 | 01 | Repository & Stitch analysis | `done` | `5dfeb44` | pushed to `origin/main` |
-| 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `done` | pending-commit | verified: typecheck/lint/test/build/e2e |
+| 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `done` | `6eabea5` | verified: typecheck/lint/test/build/e2e |
 | 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `pending` | — | |
 | 04 | Landing page migration (`/` from Stitch) | `pending` | — | |
 | 05 | Database foundation (Drizzle schema + client + migrate + seed) | `pending` | — | |
@@ -204,7 +204,7 @@ shadcn/ui scaffold, ESLint/Prettier, Vitest, Playwright, drizzle config, env sca
 
 ### Commit / push
 
-- `<filled-after-commit>` `Phase 02: Next.js + TS + Tailwind + tooling foundation`
+- `6eabea5` `Phase 02: Next.js + TS + Tailwind + tooling foundation`
 - pushed to `origin/main`; `git status` clean afterwards.
 
 ### Hand-off notes for Phase 03
