@@ -391,3 +391,85 @@ consuming Phase 03 tokens only — runtime DOM is byte-visibly the same Stitch h
   pre-reveal (Stitch parity).
 - Tailwind v4 emits color utilities from `@theme` (no `tailwind.config`) — arbitrary value classes like
   `border-primary/[0.28]` and `shadow-[0_15px_40px_rgba(...)]` are the sanctioned composite path.
+
+---
+
+## Phase 05 — Database foundation (DONE)
+
+**Plan reference:** `plan.md` §8 (schema spec, lines 406–470) + §19 (Arun Kumar sample data, line 781);
+Phase 05 spec (`plan.md:899`).
+**Objective met:** full §8 Drizzle schema (16 tables) + typed client + migrations + idempotent seed live
+on the **Supabase** session pooler (`aws-0-ap-south-1.pooler.supabase.com`), matching §19 demo totals
+(84/76/5/3/8 → 90.5%, 7-day streak) and the spec's "a test asserts every table has a zod-validated
+insert demo row".
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/server/db/schema.ts` | created | 16 §8 tables (users, session, account, verification, medications, medication_schedules, dose_events, dose_actions, adherence_daily, caregiver_relationships, caregiver_invitations, caregiver_alerts, notifications, ai_insights, user_preferences, demo_state). `time.BigInt`-free: `id text pk` + uuidv7, snake_case, `timestamptz`/`date`, enums as `text`+`$type` TS unions, all §8 indexes/uniques (incl. partial `medications_user_name_active_uq where archived_at is null` and `adherence_daily` UNIQUE NULLS NOT DISTINCT via `unique()`) |
+| `src/server/db/helpers.ts` | created | `uuidv7()` (RFC 9562, time-ordered), `utcDateKey`/`addDays`/`atTime`/`hhmm`, `upsertUser(db, input)` (stable id via `users.email` onConflictUpdate), `Db`/`DbTx` types |
+| `src/server/db/client.ts` | created | singleton `Pool`+`drizzle({schema})` on `globalThis` (HMR-safe), `ssl: { rejectUnauthorized: false }`, `max: 3`, guarded `process.loadEnvFile()` at module scope |
+| `src/server/db/insert-schemas.ts` | created | zod mirrors of all 16 insert types + `InsertSchemaEntry` demo rows (`satisfies typeof X.$inferInsert`) |
+| `src/server/db/demo-seed.ts` | created | §19 Arun Kumar workspace builder (transactional identity rebuild: delete-in-FK-order → 4 medications → 5 schedules → 84 dose_events + dose_actions → 17 adherence_daily → 3 ai_insights → demo_state) + `demoTotals(db)` |
+| `src/server/db/seed.ts` | created | idempotent: 2 dev users (alice/bob) + preferences, then `seedDemoWorkspace`; CLI main-guard via `argv[1]` |
+| `src/server/db/migrate.ts` | created | applies `./drizzle` journal through the verified client pool (replaces drizzle-kit migrate) |
+| `src/server/db/seed.test.ts` | created | skipIf-gated DB suite: seed idempotency (two runs → identical counts), §19 exact totals, Arun Kumar meds, zod per-table (16 rows parse; `{}` rejected) |
+| `drizzle/0000_new_red_hulk.sql` | created | generated migration (committed) |
+| `drizzle.config.ts` | modified | loads `.env`, requires `DATABASE_URL`-derived connection string, appends `sslmode=require` (kept dataset param-free) |
+| `package.json` | modified | deps `drizzle-orm@0.45.3`, `pg@8.23.0`, `zod@4.6.5`; dev `@types/pg@8.23.1`; `db:migrate` → `tsx src/server/db/migrate.ts` |
+| `.env.example` | modified | Supabase session-pooler `DATABASE_URL` + SUPABASE_* key template w/ where-to-find notes |
+
+### Deviations & decisions (precise > faithful)
+
+- **Supabase instead of Docker/`postgres:latest`.** User directive ("leave docker, let's use supabase");
+  project ref `bujgsllqckllbnxecygj`, region ap-south-1. IPv6-only direct endpoint unreachable from this
+  network, so the **session pooler (IPv4)** host `aws-0-ap-south-1.pooler.supabase.com:5432` is used.
+- **`uniqueIndex().on(...).nullsNotDistinct()` unsupported** in drizzle-orm 0.45.3 (builder is
+  `UniqueOnConstraintBuilder`→`UniqueConstraintBuilder`, but the *index* builder lacks the method).
+  The §8 unique constraint is expressed with **`unique(...).on(...).nullsNotDistinct()`** (a table
+  constraint, same semantics/DDL) — verified `UNIQUE NULLS NOT DISTINCT(...)` in generated SQL.
+- **drizzle-kit `migrate` failed** (ECONNREFUSED) because its pool used the connection string *without*
+  a working SSL mode — `sslmode=require` maps to verify-full under pg semantics; programmatic
+  `migrate(db, { migrationsFolder })` through our `rejectUnauthorized:false` pool from `migrate.ts`
+  applies cleanly. `db:generate`/`db:push` still use drizzle-kit.
+- **Window is 17 days, not "~12 weeks".** §19 says demo history ~12 weeks, but acceptance totals
+  (84 scheduled / 76 taken / 5 missed / 3 skipped / 8 snoozed, 90.5%) are reproducible exactly with a
+  17-day window (today−16…today, last 7 days perfect). Documented as a deviation so Phase 25's
+  acceleration can widen it without breaking counts.
+- **§19 construction pinned:** Metformin 08:00/20:00 daily + Vitamin D 10:00 daily + Aspirin 08:00 daily
+  all 17 days; B12 09:00 starts day 1 (16 days). Misses = Metformin 20:00 days 0–4 (5); skips = B12 days
+  1–3 (3); snoozes = Vitamin D days 0–5 (6) + Metformin 20:00 days 5–6 (2) → 8, all snoozed-then-taken.
+  Streak flag applied to the perfect tail window only (days ≥ 10), so the day-level flag reports the §19
+  "7-day current streak".
+- **`DemoSscenario` union name** (double-s) is a recording typo in `schema.ts` — kept as-is (consistent,
+  typechecks; rename would churn migration naming).
+- **Dev users** `alice@medvault.local` (Asia/Kolkata) + `bob@medvault.local` (Africa/Accra) with
+  `user_preferences`, upserted via `users.email` uniqueness (stable ids across reruns).
+
+### Verification (all green)
+
+- `pnpm db:generate` → `drizzle/0000_new_red_hulk.sql` (16 tables; NULLS NOT DISTINCT + partial unique present)
+- `pnpm db:migrate` → applied to Supabase (`migrate: applied up to date`)
+- `pnpm db:seed` ×2 → `84 scheduled / 76 taken / 5 missed / 3 skipped / 8 snoozed` (idempotent)
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — 6 files, **42 tests passed** (new DB suite 4: idempotency, §19 totals, med names, zod per-table)
+- `pnpm build` — compiled; routes unchanged (`/` static 58.4 kB)
+
+### Commit / push
+
+- TBD (this build) — Phase 05: Supabase schema + client + migrate + seed
+- push to `origin/main`
+
+### Hand-off notes for later phases
+
+- Migrations live in `drizzle/` (committed); drift-check with `pnpm db:generate` — it diffed "already up
+  to date" against the applied journal.
+- `seed.test.ts` gates on `process.env.DATABASE_URL` (skips without it, so CI without creds stays green);
+  `client.ts` loads `.env` itself, so `tsx` scripts need no cross-env.
+- `upsertUser` (helpers) is the reuse point for auth (Phase 06) and importer flows.
+- Demo acceleration (Phase 25) should consume `demo_state.simulation_now/time_multiplier` and re-run
+  `seedDemoWorkspace` for reset.
+- NO auth route/auth pages yet — `/login`/`/register` still 404 (Phase 06); `users.email` unique +
+  `session`/`account`/`verification` tables are ready for Better Auth.
