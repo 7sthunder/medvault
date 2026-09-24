@@ -42,7 +42,7 @@
 | 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
 | 09 | Global shell & navigation `(app)` | `done` | `a583979` | pushed to `origin/main` |
 | 10 | Onboarding | `pending` | — | built after 11/12 (depends on `medicationService.create`) |
-| 11 | Medication domain service (server) | `done` | `[commit-11]` | verified: typecheck/lint/test/build |
+| 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
 | 12 | Medication schedule & dose-event generation (domain) | `pending` | — | |
 | 13 | Dose state machine + reconcile (missed detection) (domain) | `pending` | — | |
 | 14 | Today's Schedule page + dose UI | `pending` | — | |
