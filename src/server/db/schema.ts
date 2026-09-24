@@ -40,6 +40,7 @@ export const users = pgTable("users", {
 
 export const sessions = pgTable("session", {
   id: text("id").primaryKey(),
+  email: text("email"),
   token: text("token").notNull().unique(),
   userId: text("user_id")
     .notNull()
@@ -48,6 +49,7 @@ export const sessions = pgTable("session", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const accounts = pgTable("account", {
@@ -59,10 +61,13 @@ export const accounts = pgTable("account", {
     .references(() => users.id, { onDelete: "cascade" }),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
   scope: text("scope"),
+  password: text("password"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  passwordHash: text("password_hash"),
 });
 
 export const verifications = pgTable("verification", {
@@ -71,6 +76,7 @@ export const verifications = pgTable("verification", {
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 /* ── §8 enums (text + union; single source used by seed + services) ── */

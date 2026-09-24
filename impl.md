@@ -36,8 +36,8 @@
 | 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `done` | `6eabea5` | verified: typecheck/lint/test/build/e2e |
 | 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done` | `1721431` | verified: typecheck/lint/test/build/e2e |
 | 04 | Landing page migration (`/` from Stitch) | `done` | `1340f05` | verified: typecheck/lint/test/build/e2e |
-| 05 | Database foundation (Drizzle schema + client + migrate + seed) | `pending` | — | |
-| 06 | Authentication & session plumbing (Better Auth) | `pending` | — | |
+| 05 | Database foundation (Drizzle schema + client + migrate + seed) | `done` | `016f1be` | verified: typecheck/lint/test/build |
+| 06 | Authentication & session plumbing (Better Auth) | `done` | `fe2c6d5` | verified: typecheck/lint/test/build/e2e |
 | 07 | Shared contracts & validation layer | `pending` | — | |
 | 08 | Reusable component system completion | `pending` | — | |
 | 09 | Global shell & navigation `(app)` | `pending` | — | |
@@ -473,3 +473,84 @@ insert demo row".
   `seedDemoWorkspace` for reset.
 - NO auth route/auth pages yet — `/login`/`/register` still 404 (Phase 06); `users.email` unique +
   `session`/`account`/`verification` tables are ready for Better Auth.
+
+## Phase 06 — Authentication & session plumbing (Better Auth)
+
+**Plan reference:** Phase 06 spec (`plan.md:919`), §13 credentials validation (lines 704–716), Stitch
+`AuthShell`/`AuthFooter`/`Brand`/`PasswordInput` pngs, §5 login/register/onboarding screens.
+**Objective met:** Better Auth (^1.7.5) server + client + Next handler over the Phase 05 tables, Stitch
+login/register UI (`/login`, `/register`) with shared zod (`loginSchema`/`registerSchema`) built on the UI
+kit primitives, `(app)` gate (requireUser → `/login?next=…` with open-redirect guard), tRPC
+(`me`/`whoami`/`setOnboardingComplete`), and placeholders for `/dashboard` + `/onboarding`. Registered
+users land on `/onboarding`, skip → `/dashboard`, logout → `/`, re-login → `/dashboard`.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `drizzle/0001_auth_adapter_columns.sql` | created | additive migration (schema-step1 trick): account `id_token`, `access_token_expires_at`, `refresh_token_expires_at`; session `email`, `updated_at`; verification `updated_at` |
+| `drizzle/0002_password_hash_rename.sql` | created | `ALTER TABLE "account" RENAME COLUMN "password_hash" TO "password";` (Better Auth 1.7 expects `password`) |
+| `drizzle/meta/0001_snapshot.json`, `drizzle/meta/_journal.json` | modified | snapshot key `password_hash`→`password` + journal `idx: 2` appended so `db:generate` stays idempotent |
+| `src/server/auth/server.ts` | created | `betterAuth({ appName, drizzleAdapter(db…), emailAndPassword{minPasswordLength:8}, secret/baseURL from env, user.additionalFields{timezone,onboardingCompleted,isDemo} input:false, session{expiresIn 7d, updateAge 1d} })` |
+| `src/app/api/auth/[...all]/route.ts` | created | `toNextJsHandler(auth)` GET+POST |
+| `src/lib/auth-client.ts` | created | `createAuthClient()`; re-exports `authClient`, `useSession`, `signIn`, `signUp`, `signOut` |
+| `src/server/trpc/context.ts` | created | `createContext` resolves `auth.api.getSession({ headers })` → `{ db, user, session }` |
+| `src/server/trpc/trpc.ts` | created | `router`/`publicProcedure`/`protectedProcedure` (UNAUTHORIZED) |
+| `src/server/trpc/routers/auth.ts` + `root.ts` | created | `me` (public), `whoami` + `setOnboardingComplete` (protected) |
+| `src/app/api/trpc/[trpc]/route.ts` | created | `fetchRequestHandler` (GET+POST) |
+| `middleware.ts` | created | injects `x-pathname` header (matcher excludes static/assets) |
+| `src/server/auth/require-user.ts` | created | redirect gate → `/login?next=` (safe, guarded) |
+| `src/shared/validations/auth.ts` + `auth.test.ts` | created | §13 schemas: name trim 2–100, email trim/lower, password ≥8 + letter + number; loginSchema + normalized email, `rememberMe` as required boolean |
+| `src/features/auth/flow.ts` + `flow.test.ts` | created | `safeNext()` (open-redirect/auth-route guard) + `hasOnboarded(Record<string, unknown>)` |
+| `src/features/auth/auth-error.ts` | created | better-auth error-code → UI message mapping |
+| `src/features/auth/*.tsx` (AuthShell, AuthFooter, PasswordInput, LoginForm, RegisterForm, SignOutButton, SkipOnboardingButton) | created | Stitch screens from UI-kit primitives, RHF+zodResolver, error Alert (destructive) |
+| `src/components/icons/google-icon.tsx` | created | Google "G" mark for the disabled SSO button (hex exempt — outside `src/features`) |
+| `src/app/(auth)/layout.tsx` + `login/page.tsx` + `register/page.tsx` | created | pre-authed redirect (+onboarding), heading, next-preserving swap link |
+| `src/app/(app)/layout.tsx` + `dashboard/page.tsx` + `onboarding/page.tsx` | created | requireUser gate + placeholder screens (email, sign out, skip-onboarding) |
+| `e2e/auth.spec.ts` | created | unauthenticated redirect + register→onboarding→dashboard→logout→login round trip |
+| `.env` | modified | `BETTER_AUTH_SECRET` (base64 via node crypto — no `openssl` on PATH) + `BETTER_AUTH_URL` |
+| `.env.example` | modified | `BETTER_AUTH_URL=http://localhost:3000` export |
+
+### Deviations & decisions (precise > faithful)
+
+- **drizzle-kit 0.31.11 can't rename non-interactively.** A conflicting diff (rename + additions) triggered
+  its interactive TTY prompt (throws in CI). Solved: generated the **additive** 0001 against a temp schema
+  (dropped `password_hash` from the file, deleted afterwards), then **hand-wrote** `0002` rename SQL and
+  patched `drizzle/meta/0001_snapshot.json` + `_journal.json` (`idx: 2`) so `db:generate` reports
+  "No schema changes". This keeps drizzle-kit as the drift-checker without fighting its prompts.
+- **Better Auth client can't carry `user.additionalFields`** — `BetterAuthClientOptions` has no `user` key
+  (TS2353), so the client stays plain and the session user is typed without additionalFields;
+  `hasOnboarded` widens to `Record<string, unknown>`.
+- **`rememberMe` is a required boolean** (no `.default(false)`) — RHF `Resolver` input/output typing breaks
+  with defaults; the form supplies it via `defaultValues`.
+- **Browser→tRPC fetch needs `Content-Type: application/json`** (415 UNSUPPORTED_MEDIA_TYPE otherwise);
+  `SkipOnboardingButton` posts `body: "{}"` for the no-input mutation.
+- **`(auth)` layout redirect logic:** authed+onboarded → `/dashboard`, authed not-onboarded → `/onboarding`;
+  `next` is preserved through login/register swap and validated by `safeNext` (no `//`, no `/login*`,
+  internal paths only).
+- **e2e cold-compile flake:** first click raced the dev-server first compilation (button stuck `disabled`).
+  Fixed with 30s `toHaveURL` timeouts; register→onboarding verified stable.
+- **Heading text asserts with `/Welcome\s*back\.?/i`** — Stitch `<br/>` in "Welcome<br/>back." renders as
+  "Welcomeback." (no space) in the accessibility tree.
+
+### Verification (all green)
+
+- `pnpm db:migrate` → `applied up to date`; `pnpm db:generate` → `No schema changes, nothing to migrate`
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — 9 files, **62 tests passed** (auth + flow + forms suites)
+- `pnpm build` — ok (sign-in/out static routes unchanged; `/login`, `/register`, `/onboarding`, `/dashboard`, API routes dynamic)
+- `pnpm test:e2e` — **6 passed** (auth.spec 2 + home + design-system)
+
+### Commit / push
+
+- `fe2c6d5` `Phase 06: Better Auth login/register + (app) gate + tRPC`
+- pushed to `origin/main`; `git status` clean afterwards.
+
+### Hand-off notes for later phases
+
+- Only e2e-registered users have passwords (seeded `alice`/`bob` don't) — login works for anything you sign up.
+- Phase 10 (onboarding) replaces the `onboarding/page.tsx` placeholder; keep the `setOnboardingComplete`
+  mutation as its completion path.
+- tRPC is scaffolded to be the shared-call surface for Phase 07 contracts; `protectedProcedure` is the gate.
+- Google SSO button is intentionally disabled until a provider is configured.

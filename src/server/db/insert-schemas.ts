@@ -68,6 +68,8 @@ export const INSERT_SCHEMAS: InsertSchemaEntry[] = [
       expiresAt: ts,
       ipAddress: z.string().nullable().optional(),
       userAgent: z.string().nullable().optional(),
+      email: z.string().nullable().optional(),
+      updatedAt: tsOpt,
     }),
     demoRow: {
       id: "session-demo",
@@ -86,8 +88,11 @@ export const INSERT_SCHEMAS: InsertSchemaEntry[] = [
       userId: z.string(),
       accessToken: z.string().nullable().optional(),
       refreshToken: z.string().nullable().optional(),
+      idToken: z.string().nullable().optional(),
+      accessTokenExpiresAt: tsOpt,
+      refreshTokenExpiresAt: tsOpt,
       scope: z.string().nullable().optional(),
-      passwordHash: z.string().nullable().optional(),
+      password: z.string().nullable().optional(),
     }),
     demoRow: {
       id: "account-demo",
@@ -103,6 +108,7 @@ export const INSERT_SCHEMAS: InsertSchemaEntry[] = [
       identifier: z.string(),
       value: z.string(),
       expiresAt: ts,
+      updatedAt: tsOpt,
     }),
     demoRow: {
       id: "verification-demo",

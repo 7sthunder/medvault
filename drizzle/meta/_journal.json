@@ -8,6 +8,20 @@
       "when": 1790251317380,
       "tag": "0000_new_red_hulk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790253177242,
+      "tag": "0001_auth_adapter_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790253900000,
+      "tag": "0002_password_hash_rename",
+      "breakpoints": true
     }
   ]
 }
