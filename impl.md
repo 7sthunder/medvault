@@ -40,7 +40,7 @@
 | 06 | Authentication & session plumbing (Better Auth) | `done` | `3006415` | verified: typecheck/lint/test/build/e2e |
 | 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
 | 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
-| 09 | Global shell & navigation `(app)` | `done` | — | shipped on `main` (track consolidations aside) |
+| 09 | Global shell & navigation `(app)` | `done` | `a583979` | pushed to `origin/main` |
 | 10 | Onboarding | `pending` | — | |
 | 11 | Medication domain service (server) | `pending` | — | |
 | 12 | Medication schedule & dose-event generation (domain) | `pending` | — | |
@@ -803,7 +803,7 @@ map) + the frozen `NotificationBell.tsx` stub (`3c427aa`, committed on `main`).
 
 ### Commit / push
 
-- `<<COMMIT>>` `Phase 09: global application shell & navigation` — pushed to `origin/main`.
+- `a583979` `Phase 09: global application shell & navigation` — pushed to `origin/main`.
 - Note: the `aadhi` track work log (`aadhi.md`) was superseded — this section in `impl.md` is canonical.
 
 ### Hand-off notes for later phases
