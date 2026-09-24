@@ -9,11 +9,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
+  // Cold `next dev` compiles of fresh routes can exceed 30s on this machine.
+  timeout: 60_000,
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
-    // Cold `next dev` compiles of fresh routes can exceed 30s on this machine.
-    timeout: 60_000,
   },
   projects: [
     {
