@@ -45,38 +45,51 @@ This document is the single source of truth for building the application. A codi
 
 ---
 
-## 2. REPOSITORY INSPECTION SUMMARY (current state)
+## 2. REPOSITORY INSPECTION SUMMARY (verified — Phase 01)
 
-The repository currently contains one commit (`621377a "Add MedVault landing page"`) and a single directory:
+> Every claim below was verified against the tracked tree and source bytes during Phase 01.
+> The full line-anchored inventory, import graph, asset/MD5 duplicate map, and port list are in
+> `docs/stitch-analysis.md` — the authoritative Phase 01 deliverable.
 
-```
-D:\My ShYts\MedVault\
-├─ .git/                 (git repo, branch main)
-└─ Landingpage/          (Stitch-generated Vite + React SPA — DESIGN REFERENCE)
-```
+The repository has two commits on `main`:
+- `621377a "Add MedVault landing page"` (all of `Landingpage/`)
+- `7d8e76e "Add MediTrack AI implementation plan (plan.md)"`
 
-`Landingpage/` is a **Vite + React 19 + Tailwind v4** single-page site. It is NOT a Next.js app and NOT the product app; it is the marketing/landing page plus the two design compositions that define the visual language. Key files:
+Tracked tree: root `plan.md` + `Landingpage/` (33 tracked files). On disk but **ignored**:
+`Landingpage/node_modules/`, `Landingpage/dist/` (stale build — never reference), `Landingpage/.vscode/`.
+
+`Landingpage/` is a **Vite + React 19 + Tailwind v4** single-page site. It is NOT a Next.js app
+and NOT the product app; it is the marketing/landing page plus standalone design compositions
+that define the visual language. Key files:
 
 | File | Role for this build |
 |---|---|
-| `src/App.jsx` (1304 lines) | Full landing page: nav, hero, "How It Works", "Features", testimonials, CTA, footer, floating AI chat. **Primary design token source.** |
-| `src/components/HeroVisual.jsx` | Hero phone + floating notification chips. Defines the "notification card" motif. |
-| `src/components/FloatingCard.jsx` | Glass card recipe (used as dashboard/insight card motif). |
-| `src/mobile.jsx` | Full phone mockup (screen + bottom nav + floating cards). Defines the **mobile app UI visual** (feed rows, bottom nav, list chips). |
-| `MedVaultAuthIllustration.jsx` | Login/Sign-up split screen. **Direct design reference for `/login` and `/register`.** |
-| `MedVaultPhoneSection.jsx` | Additional phone mockup composition (sparkles, snooze pill, badge). |
-| `src/index.css`, `src/App.css` | Left-over Vite template CSS (dark-mode CSS vars are **not** part of the design; ignore `--accent:#aa3bff`). |
-| `public/favicon.svg` | Purple Vite-style bolt favicon (leftover). The MedVault favicon used in the nav is the **emerald→cyan gradient square + white HeartPulse** logo, defined in `App.jsx`. |
-| `public/icons.svg` | Leftover Vite social sprite. Ignore. |
-| `public/{hero,how-it-works,images,imagessss}` | PNG/JPG assets used by the landing page; port into the Next app `public/`. |
+| `src/App.jsx` (1304 lines, verified) | Full landing page: setup styles + mascots (49–268), dashboard-mockup components (270–538), Nav (694–747), Hero (749–876), How It Works (878–955), Features ×3 (957–1070), Trust (1072–1083), Final CTA (1085–1148), Footer (1150–1219), floating AI chat (1221–1297). **Primary design token source.** |
+| `src/components/HeroVisual.jsx` | Hero phone + 4 floating notification chips. Defines the "notification card" glass-chip motif. Imports `../mobile`. |
+| `src/components/FloatingCard.jsx` | Glass-card recipe (dashboard/insight card motif). **Not imported at runtime** — recipe-only reference. |
+| `src/mobile.jsx` | Phone mockup part 1: CSS recipes, feed rows + section labels + bottom nav (PhoneScreen 129–234), parallax scene. Defines the **mobile app UI visual** (list rows, bottom tab with active dot). |
+| `MedVaultAuthIllustration.jsx` **(root, not `src/`)** | Login/Sign-up split screen. **Direct design reference for `/login` and `/register`.** |
+| `MedVaultPhoneSection.jsx` **(root, not `src/`)** | Phone mockup part 2: floating glass-card composition (AI Insight, Report Upload, Medicine reminder, Snooze pill, `8:00 PM` badge). **Not imported anywhere** — composition reference; defines the dashboard insight-card + DoseCard snooze motifs. |
+| `src/index.css`, `src/App.css` | Left-over Vite template CSS (`@import "tailwindcss"` + a `:root`/dark-mode var block). The var block is **not** part of the design — ignore `--accent:#aa3bff`. |
+| `public/favicon.svg` | Purple Vite bolt (`#863bff`), linked only by `index.html`. Leftover — the MedVault favicon is the **emerald→cyan gradient square + white HeartPulse** (`App.jsx:709–720`). |
+| `public/icons.svg` | Leftover Vite social sprite; unreferenced. Ignore. |
+| `public/how-it-works/{ai-doctor,prescription,reminders-mobile}.png` | **Referenced** at runtime (`App.jsx:192,172,219`). Port. |
+| `public/imagessss/login_page.jpeg` | **Referenced** (auth left panel, `MedVaultAuthIllustration.jsx:187`). Port (rename dir — "imagessss" is a Stitch typo). |
+| `public/hero/hero-art.png`, `public/hero/hero-phone-mockup.png`, `public/images/mascots-team.png` | Present but **referenced by no runtime code** (mascots are inline SVG). Do not port unless needed later. |
+| `public/images/hero-final.png` | **MD5-identical** to root `Gemini_Generated_Image_jr77vyjr77vyjr77.png` (duplicate, unreferenced). |
+| root `imagessss/{login_page.jpeg, login ku.png}` | **Duplicates/strays** of the public/auth assets; unreferenced. Ignore. |
+| `src/assets/hero.png`, `react.svg`, `vite.svg`, `src/Untitled` | Vite template leftovers / scratch text (`"AI Analyzes Your Data"`). Ignore. |
 | `dist/` | Stale build output. Ignore (never reference at runtime). |
 
 Screens designed by Stitch that MUST be honored:
 1. **Landing page** (hero, how-it-works, features x3, trust, CTA, footer, AI chat FAB).
-2. **Auth split screen** (image left, form right, logo, big headline, inputs with emerald focus ring, emerald primary button, Google button, back button).
-3. **Mobile phone app UI** (feed/list rows with tinted icon chips, section labels with green `›`, bottom tab bar with active-dot, floating "AI Insight"/"Report Upload"/"Medicine reminder" glass cards, green snooze pill, 8:00 PM status badge).
+2. **Auth split screen** (image left ≥900px, form right max-w 460, logo, big headline, inputs with emerald focus ring + `0 0 0 4px rgba(16,185,129,0.12)`, emerald primary button + arrow, Google button, back button).
+3. **Mobile phone app UI** (feed/list rows with tinted icon chips, section labels with green `›`, bottom tab bar with active-dot, floating "AI Insight"/"Report Upload"/"Medicine reminder" glass cards, green snooze pill, `8:00 PM` status badge).
 
-There is **no existing application code** to build on top of; everything product-side is greenfield. The Next.js app will live at the repository root, with `Landingpage/` kept intact.
+There is **no existing application code** to build on top of; everything product-side is
+greenfield. The Next.js app will live at the repository root, with `Landingpage/` kept intact.
+Breakpoint facts (nav links hidden `<768`, auth image hidden `<900`, hero phone 820/580 heights)
+are logged in `docs/stitch-analysis.md` §8.
 
 ---
 
@@ -237,7 +250,7 @@ D:\My ShYts\MedVault\
 ### 5.2 Typography
 - Font family: **Plus Jakarta Sans** (400–900). Load via `next/font/google`. Fallback `system-ui, 'Segoe UI', Roboto, sans-serif`. Phone-mockup motif may use DM Sans but the app uses PJ Sans.
 - Display/hero H1: `clamp(42px,5.5vw,72px)`, weight 900, `line-height 1.08`, `letter-spacing -0.03em`, color `#0f172a`.
-- Section H2: `clamp(26px,4vw,52px)`, weight 900, `letter-spacing -0.025em`.
+- Section H2: weight 900, `letter-spacing -0.025em`, `color #0f172a`. **Verified two scale tiers in the Stitch source** (`docs/stitch-analysis.md` §7.3): How-It-Works `clamp(26px,4vw,48px)`, Features `clamp(32px,4vw,52px)`; white variant for Final CTA `clamp(28px,4.5vw,56px)` → implement as one `h2-section` token plus a `h2-section-lg` modifier.
 - Feature H3: `clamp(28px,3.5vw,44px)`, weight 800, `letter-spacing -0.025em`, `line-height 1.15`.
 - Kicker/eyebrow: `13px`, weight 800, `letter-spacing 0.12em`, `uppercase`, colored per-section (`#10b981` emerald, `#f472b6` pink, `#06b6d4` cyan).
 - Body: `15–17px`, weight 400–500, `#475569`/`#64748b`, `line-height 1.6–1.8`.
@@ -326,21 +339,44 @@ D:\My ShYts\MedVault\
 ### 5.7 Dark mode
 Default = the Stitch light theme. `settings/appearance` offers light/dark/system. Dark variant maps tokens tastefully (page `#0f172a`, cards `#1e293b`, borders `#2e303a`-style, headings white, primary stays `#10b981` with brighter tints), matching the footer/dark surfaces of the Stitch export. No neon/cyberpunk.
 
+### 5.8 Source verification (Phase 01 — do not regress)
+Every §5.1–§5.6 token/recipe was spot-checked against `Landingpage/` source bytes. Full tables with
+file:line anchors live in `docs/stitch-analysis.md` §7. Summary of the non-obvious findings:
+
+- **Two §5.3 tokens are NOT in the Stitch export** and are plan-introduced for the §12 status
+  chip system: `--color-red-tint #fee2e2`, `--color-amber-tint #fef3c7` (Tailwind red-100/amber-100
+  family, matching the existing hue system). Do not claim Stitch provenance for them (token test
+  must special-case these two, or source them from the §12 spec block).
+- **All other §5.3 tokens are verified verbatim**, including the exact hero gradient
+  `linear-gradient(150deg,#f0fdf4 0%,#f8fafc 50%,#f0f9ff 100%)` (`App.jsx:755`).
+- **Glass-card radius has no single source value**: 16 px (`FloatingCard.jsx` / feature records
+  mock), 18 px (`MedVaultPhoneSection .mvp-fc`), 22 px (`HeroVisual` notifications). Adopt
+  `--radius-glass: 18px` (matches the phone motifs).
+- **Phone-mockup text uses `#9ab5ad`/`#0d1f1a` (phone tokens)**, app surfaces use ink tokens;
+  keep the two namespaces separate (§5.3).
+- Wordmark weights/sizes by surface: nav 20px/900, footer 19px/900, auth headline 26px/800.
+- `docs/stitch-analysis.md` §7.5 lists all remaining nuances (grids that don't collapse, etc.).
+
 ---
 
 ## 6. SCREENS → ROUTES MAPPING
 
-| Stitch screen | Product screen | Route(s) |
-|---|---|---|
-| Landing page | Marketing home | `/` (app `(marketing)` group) |
-| Auth split screen | Login / Register | `/login`, `/register` |
-| Phone feed (Recent Reports / Upcoming) | Today's Schedule / History feeds (same list-row motifs) | `/schedule`, `/history`, `/notifications` |
-| Floating "AI Insight" glass card | AI Insight cards on Dashboard & `/insights` | `/dashboard`, `/insights` |
-| "Medicine reminder … Snooze" card | DoseCard with Snooze/Take/Skip | `/schedule`, `/schedule/[doseId]`, `/dashboard` |
-| Snooze pill + time badge | Dose action controls + Due time badge | all dose surfaces |
-| Bottom nav (home active w/ dot) | Mobile bottom navigation | `(app)` shell on mobile |
-| "AI chat" FAB | Help/insight chat entry (decorative→links to /help) | shell, `/help` |
-| Footer / trust sections | /help and marketing footer (port) | `/`, `/help` |
+Verified against the actual compositions during Phase 01 — the source location for each row is in
+`docs/stitch-analysis.md` §9. Non-goal motifs (Report Upload/OCR, Vitals, appointments) keep their
+visual language but map to **no route** (§3 non-goals).
+
+| Stitch screen | Source composition | Product screen | Route(s) |
+|---|---|---|---|
+| Landing page | `App.jsx` (whole) | Marketing home | `/` (app `(marketing)` group) |
+| Auth split screen | `MedVaultAuthIllustration.jsx` | Login / Register | `/login`, `/register` |
+| Phone feed (Recent Reports / Upcoming) | `mobile.jsx` PhoneScreen | Today's Schedule / History feeds (same list-row motifs) | `/schedule`, `/history`, `/notifications` |
+| Floating "AI Insight" glass card | `MedVaultPhoneSection.jsx` c1 | AI Insight cards on Dashboard & `/insights` | `/dashboard`, `/insights` |
+| "Medicine reminder … Snooze" card | `MedVaultPhoneSection.jsx` c3/c4 | DoseCard with Snooze/Take/Skip | `/schedule`, `/schedule/[doseId]`, `/dashboard` |
+| Snooze pill + time badge | `MedVaultPhoneSection.jsx` c4 (`.mvp-snooze`, `8:00 PM` badge) | Dose action controls + Due time badge | all dose surfaces |
+| Bottom nav (home active w/ dot) | `mobile.jsx:186–230` | Mobile bottom navigation | `(app)` shell on mobile |
+| "AI chat" FAB | `App.jsx:1221–1297` (decorative MedVault AI panel) | Help/insight chat entry (decorative→links to /help) | shell, `/help` |
+| Footer / trust sections | `App.jsx:1072–1219` | /help and marketing footer (port) | `/`, `/help` |
+| "Report Upload"/"Vitals Tracked"/"Upcoming Visit" chips | `MedVaultPhoneSection.jsx` c2/c4, `HeroVisual.jsx:104–130` | design language only — **no route** (OCR/upload, vitals, appointments are non-goals) | — |
 
 Routes with no Stitch equivalent (dashboard grid, medication forms, tables, charts, caregiver, reports, settings, history filters, demo) inherit the design system from §5 (cards, tokens, inputs, status chips, charts use the palette).
 
