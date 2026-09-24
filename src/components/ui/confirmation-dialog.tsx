@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 export interface ConfirmationDialogProps
-  extends Omit<ComponentProps<typeof Dialog>, "children"> {
+  extends Omit<ComponentProps<typeof Dialog>, "children" | "onOpenChange"> {
   title: string
   description?: ReactNode
   confirmLabel?: string
@@ -21,6 +21,8 @@ export interface ConfirmationDialogProps
   tone?: "primary" | "destructive"
   confirmDisabled?: boolean
   onConfirm: () => void
+  /** Consumers get a simple (open) callback; Base UI's event details stay internal. */
+  onOpenChange?: (open: boolean) => void
 }
 
 /**
@@ -39,12 +41,11 @@ export function ConfirmationDialog({
   onConfirm,
   ...rest
 }: ConfirmationDialogProps) {
-  /** Base UI dialogs expect (open, eventDetails) — consumers only pass open. */
-  const setOpen = (next: boolean) =>
-    onOpenChange?.(next, {} as Parameters<NonNullable<typeof onOpenChange>>[1]);
+  /** Consumers only pass `open` — the Base UI event details stay internal. */
+  const setOpen = (next: boolean) => onOpenChange?.(next);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} {...rest}>
+    <Dialog open={open} onOpenChange={(next) => onOpenChange?.(next)} {...rest}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

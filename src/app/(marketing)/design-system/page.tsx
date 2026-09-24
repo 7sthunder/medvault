@@ -41,7 +41,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Chip } from "@/components/ui/chip"
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table"
 import { DatePicker } from "@/components/ui/date-picker"
+import { TrendChart } from "@/components/ui/chart"
+import { NavIcon } from "@/components/ui/nav-icon"
+import { RangePicker, type DateRange } from "@/components/ui/range-picker"
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog"
 import {
   Dialog,
   DialogContent,
@@ -122,6 +127,48 @@ const MEDS = [
   { name: "Ibuprofen 400mg", dose: "1 tablet · as needed", time: "12:00", status: "missed" },
 ] as const
 
+interface TableRow {
+  name: string
+  dose: string
+  time: string
+  status: "taken" | "due-now" | "upcoming" | "missed" | "skipped"
+}
+
+const TABLE_ROWS: TableRow[] = [
+  { name: "Metformin 500mg", dose: "1 tablet", time: "08:00 · 14:00 · 20:00", status: "taken" },
+  { name: "Atorvastatin 20mg", dose: "1 tablet", time: "21:00", status: "due-now" },
+  { name: "Levothyroxine 50µg", dose: "1 tablet", time: "07:30", status: "upcoming" },
+  { name: "Ibuprofen 400mg", dose: "1 tablet", time: "12:00", status: "missed" },
+  { name: "Vitamin D3 1000 IU", dose: "1 softgel", time: "10:00", status: "taken" },
+  { name: "Metformin 500mg", dose: "1 tablet", time: "08:00 · 14:00 · 20:00", status: "skipped" },
+  { name: "Amlodipine 5mg", dose: "1 tablet", time: "08:00", status: "taken" },
+  { name: "Pantoprazole 40mg", dose: "1 tablet", time: "07:00", status: "taken" },
+  { name: "Aspirin 81mg", dose: "1 tablet", time: "08:00", status: "taken" },
+  { name: "B12 1000µg", dose: "1 lozenge", time: "09:00", status: "upcoming" },
+]
+
+const TABLE_COLUMNS: DataTableColumn<TableRow>[] = [
+  { key: "name", header: "Medication", value: (r) => r.name },
+  { key: "dose", header: "Dose", value: (r) => r.dose, hideBelow: "md" },
+  { key: "time", header: "Times", value: (r) => r.time, hideBelow: "sm" },
+  {
+    key: "status",
+    header: "Status",
+    value: (r) => r.status,
+    render: (r) => <StatusBadge status={r.status} />,
+  },
+]
+
+const ADHERENCE_DATA = [
+  { day: "2026-05-14", taken: 88, missed: 12 },
+  { day: "2026-05-15", taken: 96, missed: 4 },
+  { day: "2026-05-16", taken: 92, missed: 8 },
+  { day: "2026-05-17", taken: 100, missed: 0 },
+  { day: "2026-05-18", taken: 91, missed: 9 },
+  { day: "2026-05-19", taken: 96, missed: 4 },
+  { day: "2026-05-20", taken: 100, missed: 0 },
+]
+
 function StorySection({
   id,
   kicker,
@@ -178,6 +225,8 @@ export default function DesignSystemPage() {
   const [remember, setRemember] = useState(true)
   const [remindVia, setRemindVia] = useState("push")
   const [tab, setTab] = useState("today")
+  const [range, setRange] = useState<DateRange>({ from: "2026-05-14", to: "2026-05-20" })
+  const [responsiveOpen, setResponsiveOpen] = useState(false)
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -199,6 +248,7 @@ export default function DesignSystemPage() {
             <SectionLink href="#forms">Forms</SectionLink>
             <SectionLink href="#status">Status</SectionLink>
             <SectionLink href="#meds">Med story</SectionLink>
+            <SectionLink href="#data">Data & charts</SectionLink>
             <SectionLink href="#overlays">Overlays</SectionLink>
           </nav>
         </div>
@@ -510,8 +560,106 @@ export default function DesignSystemPage() {
           </div>
         </StorySection>
 
+        {/* ============ DATA + CHARTS ============ */}
+        <StorySection id="data" kicker="07 · Data" title="Table, charts, range picker">
+          <div className="grid gap-8">
+            <div className="grid gap-3">
+              <p className="text-xs font-medium text-muted-foreground">
+                DataTable · sortable headers + internal pagination (§5 table recipe)
+              </p>
+              <DataTable<TableRow>
+                ariaLabel="Design system medications"
+                columns={TABLE_COLUMNS}
+                rows={TABLE_ROWS}
+                rowKey={(row) => row.name}
+                pageSize={4}
+                emptyTitle="No medications matched"
+              />
+            </div>
+
+            <div className="grid gap-3 lg:grid-cols-2">
+              <div className="grid gap-3 rounded-xl border border-border bg-card p-5">
+                <p className="text-xs font-medium text-muted-foreground">
+                  TrendChart · area (7-day adherence, §5.3 palette)
+                </p>
+                <TrendChart
+                  kind="area"
+                  data={ADHERENCE_DATA}
+                  xKey="day"
+                  series={[
+                    { key: "taken", name: "Taken", color: "var(--color-chart-1)" },
+                    { key: "missed", name: "Missed", color: "var(--color-chart-4)" },
+                  ]}
+                  formatValue={(v) => `${v}%`}
+                  xTickFormatter={(v) => String(v).slice(5)}
+                  legend
+                />
+              </div>
+              <div className="grid gap-3 rounded-xl border border-border bg-card p-5">
+                <p className="text-xs font-medium text-muted-foreground">
+                  TrendChart · empty state (graceful, never blank)
+                </p>
+                <TrendChart kind="line" data={[]} xKey="day" series={[{ key: "taken", name: "Taken" }]} />
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              <p className="text-xs font-medium text-muted-foreground">
+                RangePicker · presets + custom dates (date-fns/§10.9)
+              </p>
+              <RangePicker value={range} onChange={setRange} timeZone="UTC" />
+              <p className="text-xs text-muted-foreground">
+                Range summary: {range.from} → {range.to}
+              </p>
+            </div>
+
+            <div className="grid gap-3 rounded-xl border border-border bg-card p-5">
+              <p className="text-xs font-medium text-muted-foreground">
+                ResponsiveDialog · dialog ≥ md, bottom sheet below
+              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <ResponsiveDialog
+                  open={responsiveOpen}
+                  onOpenChange={setResponsiveOpen}
+                  trigger={<Button variant="outline" />}
+                  title="Adjust reminders"
+                  description="Timing changes apply to future doses only."
+                  footer={
+                    <>
+                      <Button variant="outline" onClick={() => setResponsiveOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={() => setResponsiveOpen(false)}>Save</Button>
+                    </>
+                  }
+                >
+                  Open dialog
+                  <RangePicker value={range} onChange={setRange} timeZone="UTC" />
+                </ResponsiveDialog>
+                <span className="text-sm text-muted-foreground">
+                  Resize the window below 768px to see it become a sheet.
+                </span>
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              <p className="text-xs font-medium text-muted-foreground">
+                NavIcon · shared nav icon map (§14 / Phase 08)
+              </p>
+              <div className="flex flex-wrap gap-4 rounded-xl border border-border bg-card p-5">
+                {(["dashboard", "medications", "schedule", "history", "adherence", "insights", "reports", "caregiver", "notifications", "settings", "help", "home", "plus", "more"] as const).map((name) => (
+                  <span key={name} className="grid items-center gap-1 text-center">
+                    <NavIcon name={name} className="mx-auto size-5 text-ink-600" />
+                    <span className="text-[10px] text-muted-foreground">{name}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </StorySection>
+
         {/* ============ DATA + FEEDBACK ============ */}
-        <StorySection id="feedback" kicker="07 · Feedback" title="Alerts, chips, skeletons">
+        <StorySection id="feedback" kicker="08 · Feedback" title="Alerts, chips, skeletons">
           <div className="grid gap-4 lg:grid-cols-2">
             <Alert>
               <BellRing className="size-4" aria-hidden="true" />
@@ -544,7 +692,7 @@ export default function DesignSystemPage() {
         </StorySection>
 
         {/* ============ OVERLAYS ============ */}
-        <StorySection id="overlays" kicker="08 · Overlays" title="Dialog, drawer, menus, tabs, tooltips">
+        <StorySection id="overlays" kicker="09 · Overlays" title="Dialog, drawer, menus, tabs, tooltips">
           <StoryGrid className="items-end">
             <StoryTile label="Dialog">
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
