@@ -8,4 +8,8 @@
  * Each value is a `router({ ... })` result (nested-router composition). Example:
  *   export const aadhiRouters = { schedule: scheduleRouter, dose: doseRouter };
  */
-export const aadhiRouters: Record<string, unknown> = {};
+import { medicationRouter } from "./medication";
+
+export const aadhiRouters = {
+  medication: medicationRouter,
+};

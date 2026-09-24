@@ -41,8 +41,8 @@
 | 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
 | 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
 | 09 | Global shell & navigation `(app)` | `done` | `a583979` | pushed to `origin/main` |
-| 10 | Onboarding | `pending` | — | |
-| 11 | Medication domain service (server) | `pending` | — | |
+| 10 | Onboarding | `pending` | — | built after 11/12 (depends on `medicationService.create`) |
+| 11 | Medication domain service (server) | `done` | `[commit-11]` | verified: typecheck/lint/test/build |
 | 12 | Medication schedule & dose-event generation (domain) | `pending` | — | |
 | 13 | Dose state machine + reconcile (missed detection) (domain) | `pending` | — | |
 | 14 | Today's Schedule page + dose UI | `pending` | — | |
@@ -816,3 +816,77 @@ map) + the frozen `NotificationBell.tsx` stub (`3c427aa`, committed on `main`).
   `/schedule`; Phase 15 owns `/medications` — each wakes its sidebar group out of the root-404 fallback.
 - `NavIconName` lucide map is the only sanctioned nav-icon path in the shell; `nav-model.ts` is the only
   place active/breadcrumb logic may live.
+
+---
+
+## Phase 11 — Medication domain service (server)
+
+**Plan reference:** `plan.md` §21 Phase 11 (`plan.md:1019`) + §10.1 (`plan.md:635`) + §13 validation.
+**Objective met:** full server-side medication CRUD (list/get/create/update/setStatus/archive) with
+owner filtering, soft delete with preserved history, duplicate-active-name guard, dosage numeric
+validation (via `medicationSchema` at the router boundary), `frequencyLabel` derivation, and a
+`ensureDoseEvents`/`voidFutureEvents` seam that Phase 12 realises; all behind tRPC `protectedProcedure`.
+
+> **Ordering note (deviation recorded):** `plan.md:1005` explicitly permits building Phase 11 before
+> Phase 10 so onboarding's optional sample-med flows through the real `medicationService.create`.
+> Phase 11 shipped first; Phase 10 was pulled into dependency order after Phase 12.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/validations/medication.ts`, `schedule.ts` | read/unchanged | §13 contracts consumed by the router (`medicationSchema`, `scheduleSchema`) |
+| `src/server/domain/medications/slot-builder.ts` | created | `defaultSlot` (08:00 daily fallback) → validated `ScheduleSlotInput`; `toSlotInsert(slot, medicationId)` casting numerics to string for drizzle |
+| `src/server/domain/medications/repo.ts` | created | raw CRUD: `listActiveMedications`, `listArchivedMedications` (desc `archivedAt`), `listSlotsByMedicationIds`, `getMedicationById`, `findActiveByName` (partial-unique guard w/ `excludeId`), `insertMedication`, `replaceSlots` (delete+insert, owner-scoped), `updateMedication`, `setMedicationStatus`, `archiveMedication` (archivedAt + status→paused). All accept `Db | DbTx` |
+| `src/server/domain/medications/mapper.ts` | created | `frequencyLabelOf` (once-daily / twice-daily / n-times-daily / custom-weekdays), `toScheduleSlotDTO`, `toMedicationLite`, `toMedicationDTO` (casts numeric columns, sorts slots by time, `MedicationDTOExtras` placeholders) |
+| `src/server/domain/doseEvents/service.ts` | created (seam) | `ensureDoseEvents` + `voidFutureEvents` phase-11 no-op stubs typed `Db | DbTx`; Phase 12 fills in the real generator/voider |
+| `src/server/domain/medications/service.ts` | created | `medicationService.{list,get,create,update,setStatus,archive}` — each owner-scoped; create defaults to a single 08:00 daily slot when no schedule (§10.1); update diffs schedule (void+regenerate seam); archive soft-deletes and voids future events; all in `db.transaction` |
+| `src/server/trpc/routers/medication.ts` | created | list/get/create/update/setStatus/archive, all `protectedProcedure`; bodies `{ medication, schedule? }` validated by `medicationSchema`/`scheduleSchema`; service errors mapped to friendly messages |
+| `src/server/trpc/routers/aadhi.ts` | edited | registers `medication: medicationRouter` in `aadhiRouters` (Phase 09 territory: routers register here) |
+| `src/server/domain/medications/mapper.test.ts` | created | pure unit tests for `frequencyLabelOf` + DTO mapping (always runs, no DB) |
+| `src/server/domain/medications/service.test.ts` | created | DB-gated (`skipIf(!DATABASE_URL)`) integration: create/list/get round-trip, duplicate-name CONFLICT, foreign-owner NOT_FOUND, update rewrites slots, update foreign-owner denied, archive soft-delete+history — each wrapped in a rollback-only transaction |
+
+### Deviations & decisions (precise > faithful)
+
+- **`reminderBeforeMinutes` validated but NOT persisted.** §8 schema is frozen: `medications` has
+  `remindersEnabled` only, no `reminderBeforeMinutes` column. The router accepts the field (UI stays
+  forward-compatible) and the service drops it at persistence (insert `medications` omits it); Phase 15
+  UI must not pretend persistence, and Phase 24 (settings) may not rely on it. Documented, not silently
+  changed.
+- **Test DB hygiene:** `service.test.ts` runs inside transactions that always roll back (a
+  `RollbackSignal` sentinel forces the outer `db.transaction` to abort after assertions). This keeps the
+  file invisible to other parallel workers — `seed.test.ts` (which asserts whole-table row counts are
+  stable across a second `seedAll`) was failing with +3 users/+3 meds until the rollback wrapper landed.
+- **Drizzle numeric columns read back as `string`.** Mappers cast (`Number(row.dosageAmount)`); repo
+  inserts call `String(...)`. This mirrors the Phase 05 numeric-string convention.
+- **`todayKey(timezone)`** uses the demo-aware clock (`localDateKey(now(), timezone)`) — a
+  Phase-25-correct seam for the schedule/dose-event horizon.
+- **Phase choose keeps `ensureDoseEvents`/`voidFutureEvents` as no-op stubs** returning `{ensured:0}`/`0`
+  so create/update/setStatus/archive are complete and testable on their own; Phase 12 swaps in the real
+  bodies without touching the medication service's call sites.
+- **`update` tolerates a missing `schedule`** (master-field-only edit); when present it voids future
+  events from today and regenerates.
+- Mapper `nextDoseAt`/`adherencePercent` extras are left `null`/`0` placeholders — Phase 12/16 compute them.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **24 files, 187 tests passed**; new: mapper 6, service DB-gated 6 (real DB against
+  `DATABASE_URL`), plus the previously-flaky `seed.test.ts` back to green
+- `pnpm build` — compiled clean (10 routes unchanged; `/api/trpc/[trpc]` + `/onboarding`/`/dashboard` dynamic)
+- `pnpm test:e2e` — untouched in this phase (no UI surface changed)
+
+### Commit / push
+
+- Phase 11 changes committed on `main` (see matrix row for hash) — pushed to `origin/main`.
+
+### Hand-off notes for later phases
+
+- Phase 12 replaces `doseEvents/service.ts` stubs with `shared/calc/schedule.ts` pure expansion +
+  idempotent `(medicationId, scheduledFor)` upsert + `voidFutureEvents` real voiding; the
+  `ensureDoseEvents(tx, …)` call sites in `medicationService` are already correct.
+- Phase 10 onboarding can now call `medicationService.create` for "Add Metformin 500mg 2×/day" — the
+  sample-med path is real, not stubbed.
+- `medicationService` methods accept `Db | DbTx`; keep that when adding Phase 12 internals.
+- `aadhiRouters` is the Phase 09-territory router aggregation point — every Phase 10–15 router registers there.
