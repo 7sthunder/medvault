@@ -1,13 +1,24 @@
 import type { ReactNode } from "react";
 
+import { AppShell } from "@/components/layout/AppShell";
 import { requireUser } from "@/server/auth/require-user";
 
-/**
- * Phase 06 — protected shell for the post-auth app (plan §14). Every route under
- * a child page here is gated server-side; unauthenticated visits are sent to
- * `/login?next=…`.
- */
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  await requireUser();
-  return <>{children}</>;
+  const session = await requireUser();
+  const user = session.user;
+
+  return (
+    <AppShell
+      user={{
+        id: user.id,
+        name: user.name,
+        email: user.email ?? "",
+        image: user.image ?? null,
+        timezone: user.timezone ?? "UTC",
+        onboardingCompleted: user.onboardingCompleted ?? false,
+      }}
+    >
+      {children}
+    </AppShell>
+  );
 }

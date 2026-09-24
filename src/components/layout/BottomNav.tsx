@@ -1,0 +1,88 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { cn } from "cn";
+
+import { NavIcon } from "@/components/ui/nav-icon";
+import { isNavItemActive } from "@/components/layout/nav-model";
+import { MoreSheet } from "@/components/layout/MoreSheet";
+import { useShell } from "@/components/layout/shell-context";
+import { BOTTOM_NAV } from "@shared/nav";
+
+export function BottomNav() {
+  const { pathname } = useShell();
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  return (
+    <>
+      <nav
+        aria-label="Bottom navigation"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background md:hidden"
+      >
+        <div className="mx-auto grid h-16 max-w-md grid-cols-4">
+          {BOTTOM_NAV.map((item) => {
+            if (item.add) {
+              return (
+                <span key={item.href} className="flex items-start justify-center pt-1.5">
+                  <Link
+                    href={item.href}
+                    aria-label={item.label}
+                    className="-mt-4 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-primary-btn transition-transform active:scale-95"
+                  >
+                    <NavIcon name={item.icon} className="size-5" />
+                  </Link>
+                </span>
+              );
+            }
+
+            const active = item.href === "more" ? moreOpen : isNavItemActive(item.href, pathname);
+
+            if (item.href === "more") {
+              return (
+                <button
+                  key={item.href}
+                  type="button"
+                  onClick={() => setMoreOpen(true)}
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+                    active ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <span className="relative flex items-center justify-center">
+                    <NavIcon name={item.icon} className="size-5" />
+                    {active && (
+                      <span className="absolute top-full h-1 w-1 rounded-full bg-primary" aria-hidden="true" />
+                    )}
+                  </span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+                  active ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                <span className="relative flex items-center justify-center">
+                  <NavIcon name={item.icon} className="size-5" />
+                  {active && (
+                    <span className="absolute top-full h-1 w-1 rounded-full bg-primary" aria-hidden="true" />
+                  )}
+                </span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+      <MoreSheet open={moreOpen} onOpenChange={setMoreOpen} />
+    </>
+  );
+}

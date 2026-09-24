@@ -40,7 +40,7 @@
 | 06 | Authentication & session plumbing (Better Auth) | `done` | `3006415` | verified: typecheck/lint/test/build/e2e |
 | 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
 | 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
-| 09 | Global shell & navigation `(app)` | `pending` | — | |
+| 09 | Global shell & navigation `(app)` | `done` | — | shipped on `main` (track consolidations aside) |
 | 10 | Onboarding | `pending` | — | |
 | 11 | Medication domain service (server) | `pending` | — | |
 | 12 | Medication schedule & dose-event generation (domain) | `pending` | — | |
@@ -734,3 +734,85 @@ now mounted app-wide. All verification green (145 unit tests, 7/7 e2e).
 - `format.ts`/`pagination.ts` are depth-3 tested units the feature phases should import, not re-derive.
 - Keep the `design-system` page `#data` section as the living usage reference; e2e asserts it.
 - The superjson tRPC-client note above moves to whichever phase introduces the tRPC client.
+
+## Phase 09 — Global shell & navigation `(app)` (DONE)
+
+**Plan reference:** `plan.md` §21 Phase 09 (`plan.md:979`) + §7 shell spec (`plan.md:385`) + §16 responsive
+rules; consumed frozen `src/shared/nav.ts` (nav model) + `src/components/ui/nav-icon.tsx` (single lucide
+map) + the frozen `NotificationBell.tsx` stub (`3c427aa`, committed on `main`).
+**Objective met:** `requireUser()` gate stays in `(app)/layout.tsx`; the shell = `Sidebar` (persistent
+`≥lg` + `<lg` Drawer), `TopNav` (hamburger / Brand / Breadcrumbs / bell / profile menu), content column,
+`BottomNav` + `MoreSheet`; group `loading` / `error` / `not-found` boundaries; nav-manifest unit guard;
+`e2e/shell.spec.ts`. This phase was built on the `aadhi` work track and consolidated onto `main` directly
+(no merge), per the territory contract's "aadhi merges first" ordering.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/components/layout/nav-model.ts` + `nav-model.test.ts` | created | pure helpers `isNavItemActive` / `getPageContext` (SECTION_ROOTS prefix match, settings-wildcard active rule, breadcrumb title + dynamic-child label detection) — single source for Sidebar/TopNav/Breadcrumbs/BottomNav/MoreSheet; 12 tests |
+| `src/components/layout/shell-context.ts` | created | `ShellContext` / `useShell` (throws outside provider), `ShellUser` + `ShellState` (pathname) |
+| `src/components/layout/AppShell.tsx` + `AppShell.test.tsx` | created | client shell: mounts `TRPCProvider` once, provides shell context, composes Sidebar/TopNav/content/BottomNav; 6 jsdom tests (mocked next/navigation, next/link, auth-client) |
+| `src/components/layout/{Sidebar,TopNav,Breadcrumbs,ProfileMenu,BottomNav,MoreSheet}.tsx` | created | the shell components (§7) |
+| `src/components/layout/nav-manifest.test.ts` | created | nav invariants + `ROUTE_MANIFEST` (owner/phase/existsNow) covering every `ALL_NAV_HREFS` href + file-exists check for `existsNow` routes — the merge-time dead-link guard |
+| `src/app/(app)/layout.tsx` | modified | Phase 06 placeholder rewritten: `requireUser()` → shell; stays provider-agnostic (see deviations) |
+| `src/app/(app)/{loading,error,not-found}.tsx` | created | group boundaries: skeleton layout (`role=status` "Loading your vault"), client `ErrorState` + reset, branded 404 ("Page not found" + "Back to dashboard") |
+| `e2e/shell.spec.ts` | created | desktop (sidebar states, shell persistence across registered routes, profile-menu sign-out) + mobile 390×844 (bottom nav, Schedule fallback, More sheet → Notifications); self-contained, own helpers inline |
+
+### Design details worth pinning
+
+- Sidebar: persistent `hidden lg:flex` aside + Base UI `Drawer` for `<lg` (`lg:hidden` on backdrop/popup —
+  Base UI `Drawer` has **no `side` prop**, positioning is CSS). "Main navigation" landmark, active pill
+  `bg-primary-tint text-primary-dark` + `aria-current="page"`, bottom "Account" footer group.
+- TopNav: sticky h-14; hamburger `hidden md:inline-flex lg:hidden`; Brand `md:hidden` → `/dashboard`;
+  Breadcrumbs `hidden md:flex`; frozen `NotificationBell` on the right + `ProfileMenu`.
+- ProfileMenu: DropdownMenu whose label group needs a `DropdownMenuGroup` wrapper (Base UI GroupLabel
+  throws "MenuGroupContext is missing" otherwise); Sign out = destructive item → `authClient.signOut()` +
+  `router.push("/")` + `router.refresh()`.
+- BottomNav: `md:hidden`, 4 slots from `BOTTOM_NAV`, raised Add FAB → `/medications/new`, More →
+  `MoreSheet` (frozen `ui/drawer` bottom sheet, Title "Menu" / Description "Everything in your vault.",
+  reuses `nav.ts` list, links close the sheet).
+- Breadcrumbs/title + all active-state logic live in `nav-model.ts`, not in components.
+- Session user fields use `??` fallbacks (`email ?? ""`, `timezone ?? "UTC"`,
+  `onboardingCompleted ?? false`) — better-auth session types make them optional.
+
+### Deviations & decisions (precise > faithful)
+
+- **`<TRPCProvider>` is mounted inside `AppShell` (client component), not directly in `(app)/layout.tsx`.**
+  Frozen `src/lib/trpc.tsx` has **no `"use client"` directive** and calls `useState`, so importing it from
+  the server layout fails `next build`. The layout must remain a server component (`requireUser()` gate)
+  and provider-agnostic for downstream pages. `AppShell` renders `<TRPCProvider>` once at the top of the
+  client shell subtree — still "inside the shell, once" (build-verified).
+- **Unbuilt routes render Next's ROOT 404, not `(app)/not-found.tsx`.** Next does not mount a route
+  group's layout for never-registered segments (e.g. `/schedule` pre-Phase 14), so the branded group 404
+  only engages when a *registered* page calls `notFound()`/throws. `e2e/shell.spec.ts` asserts the real
+  default 404 for nav links to unbuilt routes and shell persistence across registered routes
+  (`/dashboard` ↔ `/onboarding`).
+- **No config/package changes.** `playwright.config.ts` and `package.json` frozen; the shell spec's
+  cold-compile contention is the pre-existing repo condition documented in Phase 08, not new risk.
+- Nav-manifest test lives in `src/components/layout/` (not `src/shared/`) to avoid a zero-conflict
+  collision with Phase 27's test-completion pass.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **22 files, 171 tests passed** (new: nav-model 12, AppShell 6, nav-manifest)
+- `pnpm build` — compiled clean (10 routes; `(app)` children dynamic — confirms the `TRPCProvider` mount)
+- `pnpm test:e2e` — **9/9 passed** at frozen `workers: 2` (auth 2, home 2, design-system 3, shell 2)
+
+### Commit / push
+
+- `<<COMMIT>>` `Phase 09: global application shell & navigation` — pushed to `origin/main`.
+- Note: the `aadhi` track work log (`aadhi.md`) was superseded — this section in `impl.md` is canonical.
+
+### Hand-off notes for later phases
+
+- **Merge-time invariant:** `ROUTE_MANIFEST` in `nav-manifest.test.ts` pins owner+phase for every nav
+  href; the full graph goes green as downstream routes land under `(app)`. Do not broaden `existsNow`
+  without the actual page file.
+- Keep `(app)/layout.tsx` provider-agnostic and `TRPCProvider` in `AppShell`.
+- Phase 10 replaces the `onboarding` placeholder (keep `setOnboardingComplete`); Phase 14 owns
+  `/schedule`; Phase 15 owns `/medications` — each wakes its sidebar group out of the root-404 fallback.
+- `NavIconName` lucide map is the only sanctioned nav-icon path in the shell; `nav-model.ts` is the only
+  place active/breadcrumb logic may live.
