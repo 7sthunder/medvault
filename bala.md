@@ -1,101 +1,67 @@
 # BALA — Insights & Reporting Track (Phases 16–20, 24, 26)
 
-> Branch plan for **`bala`** derived from `plan.md` §21. Companion to `impl.md`.
-> This track answers *"How well am I following my schedule?"*: the single-source adherence
-> engine, its UI surfaces (adherence, dashboard, history, reports), the settings center,
-> and the final global a11y/responsive sweep. It is **one of two tracks (with hp) that
-> build on aadhi's spine** — Phase 09 shell + Phase 13 statuses are prerequisites.
+> Your branch is **100% file-isolated** from `aadhi` and `hp`: no file you create or
+> edit exists on their branches, and no file they create/edit exists on yours — by
+> contract. Follow the TERRITORY / FROZEN / SEAMS sections below strictly. Tomorrow
+> all three merge into `main` (order: aadhi → bala → hp); if everyone stayed in
+> their territory, `git merge` succeeds with **zero conflicts**.
 
-| | |
+- Branch: `bala` · Base: `main` @ `3c427aa` (merged in) · Merge target: `main` (**second**)
+- Phases: **16, 17, 18, 19, 20, 24, 26** — in this order. 26 runs on `main` after everyone merges.
+
+---
+
+## 1. YOUR TERRITORY (only you create/edit these)
+
+| Kind | Paths |
 |---|---|
-| Branch | `bala` (base: `main` @ `ee1ee99`) |
-| Assigned phases | **16, 17, 18, 19, 20, 24, 26** |
-| Merge target | `main` — merge **after** aadhi lands |
-| Working order | 16 → 17 → 20 → 19 → 18 → 24 → 26 (dashboard last composes everything) |
+| Router registration | `src/server/trpc/routers/bala.ts` — **the only file you register routers in** |
+| tRPC routers | `src/server/trpc/routers/{adherence,dashboard,history,reports,settings}.ts` |
+| Domain | `src/server/domain/adherence/`, `dashboard/`, `history/`, `reports/`, `settings/` |
+| App routes | `src/app/(app)/dashboard/page.tsx` (replace Phase 06 placeholder), `src/app/(app)/adherence/`, `src/app/(app)/history/`, `src/app/(app)/reports/`, `src/app/(app)/settings/` (all **new** dirs, incl. `settings/layout.tsx`) |
+| Features | `src/features/dashboard/`, `src/features/adherence/`, `src/features/history/`, `src/features/reports/`, `src/features/settings/` |
+| Domain calc | `src/shared/calc/adherence.ts`, `src/shared/calc/streaks.ts`, `src/shared/calc/performance.ts` (new files) |
+| A11y helpers | `src/lib/a11y.ts` (Phase 26) — the only new `src/lib/*` file allowed |
+| E2E | `e2e/adherence.spec.ts`, `e2e/dashboard.spec.ts`, `e2e/reports.spec.ts`, `e2e/history.spec.ts` (new files, self-contained, no `e2e/helpers`) |
+| This plan | `bala.md` (your work log lives here, not in `impl.md`) |
 
----
+## 2. FROZEN — shared files you MUST NOT edit
 
-## Non-negotiables (from plan §21/§22)
+- `src/server/trpc/root.ts` — composition only; registers `...balaRouters` via your `bala.ts` record.
+- `src/lib/trpc.tsx` — the shared typed client: `import { api, TRPCProvider } from "@/lib/trpc"`. Use it, never edit it.
+- `src/shared/nav.ts`, `src/shared/enums.ts`, `src/shared/types.ts`, `src/shared/times.ts`, `src/shared/status.ts`, `src/shared/brand.ts`, `src/shared/constants.ts`, `src/shared/validations/*` — all track contracts are already here (incl. `reportsSchemaFor`, `adherence` DTOs, `RangePresets`). Consume, don't modify.
+- `src/server/db/schema.ts`, `src/server/db/*` — schema is done; **no schema changes**.
+- `src/server/domain/doseEvents/` and `doseActions/` (aadhi's) — you READ their tables (`dose_events`, `dose_actions`, `medications`) read-only. **Never** import or edit aadhi service files.
+- `src/components/ui/**`, `src/components/brand/**`, `src/components/layout/**` — Phase 08 + aadhi's shell, frozen until **Phase 26**, which you run on `main` after merges. Do not touch any of these on your branch.
+- `src/app/(app)/layout.tsx` (aadhi's shell), `src/features/auth/*`, `(marketing)/**`, `(auth)/**`, `src/lib/*` (except your new `a11y.ts`), `src/server/trpc/routers/{aadhi,bala,hp}.ts` shells except your own, `package.json`, `pnpm-lock.yaml`, `impl.md`, `jobs/`, `e2e/{shell,schedule,medication-crud,home,design-system,auth}.spec.ts`.
+- **No new dependencies on this branch** — `package.json`/lockfile are frozen (CSV export uses Node built-ins).
 
-- Every page handles the four §15 states (loading / empty / error / success).
-- Every tRPC procedure is **authed + owner-checked** (`protectedProcedure`).
-- **Adherence numbers must come from one source** — `adherence.summary` — never recomputed in a UI.
-- Always import shared contracts via `@shared/*`; never duplicate business logic.
-- Never hardcode brand hex/rgba in `src/features/**` (eslint gate, active since Phase 03).
-- Phase DoD = `pnpm typecheck` + `pnpm lint` + `pnpm test` + `pnpm build` all green.
-- On completion of each phase append the impl-log section to `impl.md` and flip the matrix row.
+## 3. SEAMS & integration by contract (no shared-file edits)
 
----
+- **Adherence must be computed lazily + idempotently.** aadhi's dose services do NOT call into your `materialize` (that would cross file boundaries). Instead `adherence.summary(…)` recomputes the bounded window on read and updates `adherence_daily` itself. Same numbers everywhere, zero coupling.
+- **Register routers** by building `adherenceRouter`, then in `routers/bala.ts`:
+  `import { adherenceRouter } …; export const balaRouters = { adherence: adherenceRouter, … }`. No `root.ts` edits.
+- **Stubs you ship (filled by hp on `main` after you merge):** in `features/dashboard/InsightWidget.tsx` and `CaregiverStatus.tsx` keep the props/DTO seams — hp fills these later. In `settings/caregiver/page.tsx` ship a neutral placeholder linking to `/caregiver` — hp replaces it as a post-merge step on `main`. You and hp never edit the same file in parallel.
+- **Dashboard composition calls your own routers + aadhi's** (`api.schedule.*`, `api.dose.*`) — fine at the API level (types resolve per-branch); your branch only owns *calls*, never aadhi's files.
+- **demoNow()**: drive charts/`rangeByPreset` from `@shared/times` + session timezone; do not write time logic.
 
-## Phase 16 — Adherence engine (domain + aggregation service)
+## 4. Phase objectives (detail in `plan.md` §21)
 
-**Dependencies:** 05, 07, 13 (statuses from aadhi). **DB:** reads dose_events, writes adherence_daily. **Routes:** tRPC only.
+- **16 Adherence engine:** `shared/calc/{adherence,streaks,performance}.ts` (pure §10.5), `domain/adherence/{service,summary,materialize}.ts`, `routers/adherence.ts`. **The §19 test must pass: seeded data ⇒ exactly 84/76/5/3, 90.5% (1dp), 7-day streak.** Missing-data days = gaps, not zeros.
+- **17 Adherence UI:** `features/adherence/*` on `/adherence` + `/adherence/medications`, all values from one `AdherenceSummaryDTO`, reuse Phase 08 `TrendChart`/`DataTable`.
+- **18 Dashboard:** `domain/dashboard/service.ts`, `routers/dashboard.ts` (single `dashboard.get`), `features/dashboard/*` incl. the two stubs above, `dashboard/page.tsx`. `NextDoseHero`/`TodayFeed` consume the reconciled day from `api.schedule.*`.
+- **19 History:** `domain/doseActions/history.ts` (reads aadhi's audit tables read-only), `routers/history.ts`, `features/history/*`.
+- **20 Reports:** `domain/reports/service.ts`, `routers/reports.ts`, `src/app/api/reports/export/route.ts`, `features/reports/*`. **On the server boundary call `reportsSchemaFor(serverToday)`** (never the loose client schema).
+- **24 Settings:** `routers/settings.ts`, `domain/settings/service.ts`, `features/settings/*`, `(app)/settings/layout.tsx` + 5 pages. Appearance toggles the `dark` class only.
+- **26 A11y/responsive (run on `main` AFTER merges):** fixes across `src/app/**/{error,loading,not-found}` + `src/components/ui/**` are fine **on main only** — that's your post-merge pass, not a parallel-branch edit.
 
-- **Files:** `src/shared/calc/adherence.ts`, `streaks.ts`, `performance.ts` (pure); `src/server/domain/adherence/{service,summary,materialize}.ts`; `src/server/trpc/routers/adherence.ts` (summary, byMedication, patterns).
-- **Details:** exact §10.5 formulas; single `summary()` consumed by **every** surface (dashboard 18, adherence UI 17, reports 20, insights on hp 23). Materialization updated by dose-service hooks (aadhi Phase 13) and schedule changes (aadhi Phase 12) — add a documented idempotent `recomputeDay/range` that those call, plus prune-beyond-window. In-progress-today semantics for streaks.
-- **Critical test:** the §19 seeded dataset must yield **exactly 84 / 76 / 5 / 3, 90.5% (1dp), 7-day streak**; streak edge cases (today in-progress, gaps, miss=0); bucket counts; per-med aggregation; materialize/prune correctness.
-- **DoD:** aggregation single-sourced & matches §19 sample.
+## 5. Verify before you commit
 
-## Phase 17 — Adherence UI + medication performance
+- `pnpm typecheck` · `pnpm lint` · `pnpm test` · `pnpm build` — all green on your branch.
+- Unit/component tests for routers/services/features (jsdom, RTL); wrap components with `TRPCProvider` or mock `api`. Your e2e specs target routes that render inside aadhi's shell — that shell does not exist on your branch, so **defer running your 4 e2e specs until aadhi merges** (they stay committed, run green on `main`). Router/service unit tests cover you now.
+- Keep your work log in `bala.md`. Do not touch `impl.md`.
 
-**Dependencies:** 08, 09 (aadhi shell), 16. **Routes:** `/adherence`, `/adherence/medications`.
+## 6. What you can assume about aadhi/hp
 
-- **Files:** `src/features/adherence/{AdherencePage,RangeSelector,StatRail,MissedHeatStrip,MedicationPerformanceTable,PerformanceCell}.tsx` (TrendChart + TimeOfDayPattern reuse the Phase 08 `TrendChart`/`DataTable`), tRPC wiring.
-- **Details:** all values from the one `AdherenceSummaryDTO`; missing-data days render as **gaps, not zeros**; med rows link `/medications/[id]` (route owned by aadhi).
-- **Testing:** component renders DTO numbers (text match `90.5%`); e2e seeded demo adherence shows 84/76/5/3/8.
-- **DoD:** adherence page matches dashboard numbers (same DTO).
-
-## Phase 20 — Reports
-
-**Dependencies:** 16 (same aggregates), 08. **Routes:** `/reports`, `/api/reports/export`.
-
-- **Files:** `src/server/domain/reports/service.ts`, `src/server/trpc/routers/reports.ts`, `src/app/api/reports/export/route.ts` (authed, streams attachment), `src/features/reports/{ReportsPage,GranularityTabs,SummaryTable,MissedAnalysis,TrendChartBlock,DownloadButton}.tsx`.
-- **Details:** granularity/range/scope controls per §10.9; server builds `ReportDTO`; **server boundary must call `reportsSchemaFor(serverToday)`** (see impl.md Phase 07 hand-off — never the loose client schema). CSV consistent with dashboard (same adherence service).
-- **Testing:** aggregation equals adherence service; CSV format snapshot; e2e download contains 84 rows.
-
-## Phase 19 — History
-
-**Dependencies:** 13 (audit, aadhi), 08, 09. **Routes:** `/history`.
-
-- **Files:** `src/server/domain/doseActions/history.ts` (query + group, joins medications by id — soft delete keeps rows), `src/server/trpc/routers/history.ts`, `src/features/history/{HistoryPage,FilterBar,HistoryTimeline,HistoryRowMenu}.tsx`.
-- **Details:** filters (range, med, status); take-late shows both events; pagination cursor (`HISTORY_PAGE_SIZE`); archived meds still listed.
-- **Testing:** filter interactions; e2e create → take → history row present; archived med still listed.
-
-## Phase 18 — Dashboard
-
-**Dependencies:** 14 (dose UI, aadhi), 16, 17 (charts), 09 (shell). **Routes:** `/dashboard`.
-
-- **Files:** `src/server/domain/dashboard/service.ts` (aggregates), `src/server/trpc/routers/dashboard.ts` (single `dashboard.get`), `src/features/dashboard/{DashboardPage,NextDoseHero,TodayFeed,AdherenceWidget,MedSummary,InsightWidget,CaregiverStatus,QuickActions}.tsx`.
-- **Details:** §11.4 order/priority; one procedure; `demoNow()` respected. **`InsightWidget` + `CaregiverStatus` are stubs** (filled by hp 21/23) — ship the stub with a clean props/DTO seam. Caregiver variant = read-only when accessed by a caregiver (hp adds the guard; keep page tolerant).
-- **Testing:** service composition test (all sections in DTO flags); component renders each §11.4 state; e2e seeded demo dashboard.
-- **Acceptance:** dashboard answers both product questions instantly; numbers match adherence service.
-
-## Phase 24 — Settings (profile/reminders/caregiver/appearance/data)
-
-**Dependencies:** 07, 08, 09, 21 (caregiver mgmt reuse on hp), 05. **Routes:** `/settings/profile`, `/settings/reminders`, `/settings/caregiver`, `/settings/appearance`, `/settings/data`.
-
-- **Files:** `src/server/trpc/routers/settings.ts` (get/update each area; export; delete), `src/server/domain/settings/service.ts`, `src/features/settings/{ProfileForm,ReminderSettings,CaregiverSettings,AppearancePanel,DataOverview,ExportButtons,DeleteFlow}.tsx`, `src/app/(app)/settings/layout.tsx` (menu).
-- **Details:** appearance toggles `dark` class on `<html>` (§5.7 tokens ready); reminders per §11.14; data export streams CSV (meds+events); delete-all transactional (children first, keep account). **Cross-branch:** the caregiver section may need hp's caregiver router — implement against a stable settings get/update contract and wire the hp router on merge.
-- **Testing:** forms + toggles; e2e theme persists, export downloads, delete-all empties but account remains.
-
-## Phase 26 — Global states, accessibility & responsive refinement
-
-**Dependencies:** all features exist (post all-merge). **Files:** touch `src/app/**/{error,loading,not-found,empty-state}.tsx`, `src/lib/a11y.ts` helpers, skip-link, focus-visible rings, reduced-motion, contrast fixes (`#64748b` minimum on white).
-
-- **Details:** §16 responsive audit at 1280/1024/768/390; every status indicator = icon + text + aria; dialogs trap + restore focus; dexa etc. Use axe-core scan (Playwright) on representative routes + keyboard-only e2e on nav.
-- **Acceptance:** zero critical a11y violations; audit report committed to `docs/`.
-
----
-
-## Cross-branch contract (owned by bala — consumers rely on it)
-
-| Surface | Phase | Consumer contract |
-|---|---|---|
-| `adherence.summary` (single DTO) | 16 | Dashboard (18), Reports (20), hp insights (23) consume it; **never duplicate the math** |
-| `materialize.recomputeDay/range` | 16 | aadhi Phase 12/13 hooks call it on dose/schedule changes; keep idempotent |
-| `adherence_daily` pruning | 16 | Matches §10.5 window; don't prune caller-visible history |
-| `reportsSchemaFor(serverToday)` | 20 | Strict server-side ceiling; client uses loose `reportsSchema` |
-| Dashboard `InsightWidget`/`CaregiverStatus` stubs | 18 | hp 21/23 fill them — define DTO props now, they conform |
-| Settings appearance toggle | 24 | `dark` class only; §5.7 semantic surfaces already flip |
-
-**Merge order:** `aadhi` → `main` first; then `bala`; then `hp`. Consolidation 26–30 in `impl.md` is balanced across branches — this branch owns **26**.
+- aadhi — Phases 09–15: the `(app)` shell, `TRPCProvider` (yours to mount? No — aadhi mounts it; your pages render inside), `api.schedule.*` / `api.dose.*`, `dose_actions` audit rows. It never creates/edits any of your files.
+- hp — Phases 21–23, 25: fills your dashboard stubs + `settings/caregiver` ONLY as a post-merge step on `main`; never on branches in parallel.
