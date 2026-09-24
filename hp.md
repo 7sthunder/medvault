@@ -1,95 +1,69 @@
 # HP — Ecosystem & Delivery Track (Phases 21–23, 25, 27–30)
 
-> Branch plan for **`hp`** derived from `plan.md` §21. Companion to `impl.md`.
-> This track ships the human-facing ecosystem (caregiver, notifications, AI insights),
-> the college-demo mode, and the final delivery layers: test completion, the full e2e
-> suite, integration verification, and deployment/handoff. It is **one of two tracks
-> (with bala) that build on aadhi's spine** — attach your hooks to aadhi's defined seams.
+> Your branch is **100% file-isolated** from `aadhi` and `bala`: no file you create or
+> edit exists on their branches, and no file they create/edit exists on yours — by
+> contract. Follow the TERRITORY / FROZEN / SEAMS sections below strictly. Tomorrow
+> all three merge into `main` (order: aadhi → bala → hp). Phases 27–30 run on the
+> **fully merged** `main` (you merge last). If everyone stayed in their territory,
+> `git merge` succeeds with **zero conflicts**.
 
-| | |
+- Branch: `hp` · Base: `main` @ `3c427aa` (merged in) · Merge target: `main` (**last**)
+- Phases: **21, 22, 23, 25** now · **27, 28, 29, 30** post-merge on `main`
+
+---
+
+## 1. YOUR TERRITORY (only you create/edit these)
+
+| Kind | Paths |
 |---|---|
-| Branch | `hp` (base: `main` @ `ee1ee99`) |
-| Assigned phases | **21, 22, 23, 25, 27, 28, 29, 30** |
-| Merge target | `main` — merge **last** (depends on aadhi + bala) |
-| Working order | 21 → 22 → 23 → 25 → then post-merge 27 → 28 → 29 → 30 |
+| Router registration | `src/server/trpc/routers/hp.ts` — **the only file you register routers in** |
+| tRPC routers | `src/server/trpc/routers/{caregiver,notifications,insights,demo}.ts` |
+| Domain | `src/server/domain/caregiver/`, `notifications/`, `insights/`, `demo/` |
+| Auth context (yours, Phase 25) | `src/server/trpc/context.ts` — the ONLY shared file you own; nobody else edits it |
+| App routes | `src/app/(app)/notifications/`, `(app)/insights/`, `(app)/caregiver/` (+ `caregiver/accept`, `caregiver/alerts/[id]`), `src/app/demo/` — **new** dirs only |
+| Features | `src/features/caregiver/`, `src/features/notifications/`, `src/features/insights/`, `src/features/demo/` |
+| Bell (yours) | `src/components/layout/NotificationBell.tsx` — frozen stub on `main`; you re-implement it live in Phase 22 as a post-merge edit on `main` (aadhi never edits it) |
+| E2E | `e2e/{register,onboarding,caregiver,notifications,insights,demo,missed-dose,dose-actions,auth-guard,medication-lifecycle,adherence-consistency}.spec.ts` + `e2e/helpers/{demo-login,seed}.ts` — all new files |
+| This plan | `hp.md` (your work log lives here, not in `impl.md`) |
 
----
+## 2. FROZEN — shared files you MUST NOT edit
 
-## Non-negotiables (from plan §21/§22)
+- `src/server/trpc/root.ts` — composition only; registers `...hpRouters` via your `hp.ts` record.
+- `src/lib/trpc.tsx` — use `api`/`TRPCProvider`, never edit.
+- `src/server/domain/doseEvents/attachments.ts` — missed-dose registry. You **register** handlers into it; you never edit the file. (aadhi calls it; you call `registerMissedDoseHandlers`.)
+- `src/shared/nav.ts`, `enums.ts`, `types.ts`, `times.ts`, `status.ts`, `brand.ts`, `constants.ts`, `validations/*` — all your enums/DTOs/schemas are already here (caregiver, notification types, insight categories, demo scenarios, `DEMO_SCENARIOS`). Consume, don't modify. Use the existing `@shared/times` `now()/setNowImpl()` seam — don't touch `times.ts`.
+- `src/server/db/schema.ts`, `src/server/db/*` — schema done; **no schema changes**.
+- `src/server/domain/doseEvents/`, `doseActions/`, `src/server/domain/doseEvents/` (aadhi's): read their output (audit, `reconcile`) read-only, drive via the `attachments.ts` registration — never import service internals from aadhi files.
+- `src/server/trpc/context.ts` — read-only for you until **Phase 25** (then it's yours).
+- `src/components/ui/**`, `src/components/brand/**`, `src/components/layout/*` (except `NotificationBell`), `src/app/(app)/layout.tsx`, `src/features/{auth,landing}`, `src/lib/*`, `package.json`, `pnpm-lock.yaml`, `impl.md`, `jobs/`, existing `e2e/*.spec.ts`.
+- **No new dependencies on this branch** — `package.json`/lockfile frozen. AI provider = server-side `fetch` to the Gemini API (env `AI_GEMINI_API_KEY`); no new SDK. If you truly need a dep, note it in `hp.md` and add it at merge time.
 
-- Every page handles the four §15 states (loading / empty / error / success).
-- Every tRPC procedure **authed + owner-checked**; caregiver = strongest authz boundary.
-- **AI boundary:** insights only surface adherence patterns; never diagnose/prescribe. AI is called **server-side only**; output is zod-validated; no mutation of meds/schedules.
-- Always import shared contracts via `@shared/*`; never duplicate business logic.
-- Never hardcode brand hex/rgba in `src/features/**` (eslint gate).
-- Phase DoD = `pnpm typecheck` + `pnpm lint` + `pnpm test` + `pnpm build` all green.
-- On completion of each phase append the impl-log section to `impl.md` and flip the matrix row.
+## 3. SEAMS & integration by contract (no shared-file edits)
 
----
+- **Register routers:** build `caregiverRouter`, then in `routers/hp.ts`:
+  `import { caregiverRouter } …; export const hpRouters = { caregiver: caregiverRouter, … }`. No `root.ts` edits.
+- **Attach notifications + caregiver alerts to aadhi's auto-miss:** in your OWN bootstrap module under `src/server/domain/notifications/` (or `caregiver/`) call `registerMissedDoseHandlers(…)` from the frozen `attachments.ts`. Because your `routers/hp.ts` imports that bootstrap, registration happens at module load. You never edit aadhi's `reconcile.ts`.
+- **Scheduler rule:** `jobs/scheduler.ts` is aadhi's. Your due-reminder/demo producers run via **on-read catchUp + your own registration**, never edits to `jobs/`.
+- **Insight snapshot:** build it from `api.adherence.*` DTOs (bala's) by contract — call, don't import bala's internals.
+- **Fill bala's stubs on `main` (post-merge, never in parallel):** after bala merges, replace the bodies of `src/features/dashboard/InsightWidget.tsx`, `CaregiverStatus.tsx`, and `src/app/(app)/settings/caregiver/page.tsx` with live data. Those files are neutral placeholders so you and bala never edit the same file on branches.
+- **Bell (Phase 22):** re-implement `src/components/layout/NotificationBell.tsx` on `main` after aadhi merges — aadhi only imports the frozen stub and never edits it.
 
-## Phase 21 — Caregiver system (domain + flows + UI)
+## 4. Phase objectives (detail in `plan.md` §21)
 
-**Dependencies:** 13 (missed→alert source on aadhi), 05, 08, 09. **Routes:** `/caregiver`, `/caregiver/accept`, `/caregiver/alerts/[id]`.
+- **21 Caregiver:** `domain/caregiver/service.ts` (invite/accept/revoke/permissions/alerts, **once-per-dose-relationship dedupe**), **separate patient-scope vs caregiver-scope routers** + `requireCaregiverAccess(patientId)`, `features/caregiver/*`. Strongest authz boundary; read-only enforcement server-side.
+- **22 Notifications:** `domain/notifications/service.ts` (+ `channels.ts` in-app/console), `routers/notifications.ts`, `features/notifications/*`, real bell. Producers: missed (via `attachments.ts`), insight ready, caregiver alert, due reminder (on-read). **No scattered `INSERT notifications` in features.**
+- **23 AI insights:** `domain/insights/service.ts` (snapshot → AI → zod-validate → fallback → persist/prune), `routers/insights.ts`, `features/insights/*`; never-mutate boundary; server-side only.
+- **25 Demo mode:** `domain/demo/service.ts`, `routers/demo.ts`, `src/app/demo/` layout + dock, `features/demo/*`; demo cookie in `context.ts` (yours); uses `seedDemoWorkspace` + `demo_state`. Isolation test: real account data unchanged after demo.
+- **27 Tests / 28 E2E / 29 Integration / 30 Deploy:** on `main` after merges. 28 includes `adherence-consistency.spec` (validates §20 propagation). 29 writes `docs/consistency-verification.md`. 30 updates `README.md` runbook.
 
-- **Files:** `src/server/domain/caregiver/service.ts` (invite/accept/revoke/permissions/alerts with **once-per-dose-relationship dedupe**), `src/server/trpc/routers/caregiver.ts` (**separate patient-scope vs caregiver-scope routers** — `requireCaregiverAccess(patientId)` guard), `src/features/caregiver/{InviteForm,AcceptInvite,RelationshipList,PermissionsEditor,AlertFeed,AlertDetailPage,CaregiverOverview}.tsx`, wire `src/shared/validations/caregiver.ts` (done in Phase 07).
-- **Details:** invite → token → accept via `/caregiver/accept?token=`; revoke stops alerts; **attach to aadhi Phase 13's missed-dose hook** (it will call your alert creation for relationships with the right permission); alerts acknowledge/resolve. **Read-only enforcement is server-side** — a caregiver must not query another patient or mutate.
-- **Testing:** unit invitation lifecycle + alert dedupe; unit tests assert cross-patient isolation; e2e: invite → redeem → real missed dose (demo clock) → alert + notification → revoke stops.
-- **DoD:** caregiver read-only enforced server-side.
+## 5. Verify before you commit
 
-## Phase 22 — Notifications (domain + bell + center + preferences)
+- `pnpm typecheck` · `pnpm lint` · `pnpm test` · `pnpm build` — all green on your branch.
+- Unit/component tests for routers/services/features (jsdom, RTL). Your e2e specs (incl. caregiver loop, demo tour) depend on aadhi's shell + bala's pages — they render correctly only on merged `main`; keep them committed, run them as part of Phase 28 **post-merge**.
+- Phase 25 `context.ts` edit is a single branch-time edit — keep it additive (demo cookie) and owner-scoped so merging it never touches aadhi/bala diffs.
+- Keep your work log in `hp.md`. Do not touch `impl.md`.
 
-**Dependencies:** 13 (producers on aadhi), 10 (insights producer), 08/09 (bell stub — aadhi Phase 09 left a clean seam). **Routes:** `/notifications`.
+## 6. What you can assume about aadhi/bala
 
-- **Files:** `src/server/domain/notifications/service.ts` (+ `channels.ts` interface: in-app + console), `src/server/trpc/routers/notifications.ts` (list/unread/markRead/markAllRead), `src/features/notifications/{NotificationsPage,NotificationList}.tsx`, replace aadhi's `NotificationBell` stub, preference gating.
-- **Details:** producers: missed (hook aadhi 13), insight ready (23), caregiver alert (21), due reminder, demo; **dedupe once per entity+objective**; preference filter at creation.
-- **Testing:** unit dedupe/gating; bell count component; e2e missed → notification appears and opens.
-- **DoD:** notification logic centralized — **no scattered `INSERT notifications` in features**.
-
-## Phase 23 — AI insights (domain + service + UI)
-
-**Dependencies:** 16 (snapshot data on bala), 08, 22. **Routes:** `/insights`.
-
-- **Files:** `src/server/domain/insights/service.ts` (buildSnapshot, generate, fallback, validate, persist/prune), `src/shared/validations/insight.ts` (output schema), `src/server/trpc/routers/insights.ts`, `src/features/insights/{InsightsPage,InsightCard,RegenerateButton}.tsx`, fill bala's dashboard `InsightWidget` stub.
-- **Details:** provider-agnostic AI SDK, env-selected provider (`AI_GEMINI_API_KEY`); system-prompt constant with explicit prohibitions; zod-validated output (strip unknown keys, constrain categories); **deterministic fallback rule engine** when AI fails; never-mutate boundary (functions receive read-only snapshot); `source` tag visible; snapshot stored; prune to `INSIGHT_MAX_ROWS`.
-- **Testing:** snapshot builder from seeded data; fallback deterministic; schema rejects diagnostic/prescriptive text; never-mutate compile+test; e2e regenerate.
-
-## Phase 25 — Demo mode (domain + seed reuse + UX)
-
-**Dependencies:** 05 (demo seed), 13/16 (services on aadhi/bala), 08/09 shell, 21, 23, all main pages. **Routes:** `/demo` (reuses all `(app)` page components inside the demo shell).
-
-- **Files:** `src/server/domain/demo/service.ts` (enter/leave/reset/action/scenario/time/insight/alert), `src/server/trpc/routers/demo.ts`, `src/app/demo/layout.tsx` (banner + dock), `src/features/demo/{DemoDock,DemoClock,ScenarioControl,ResetButton}.tsx`, demo cookie handling in `server/trpc/context.ts` + `@shared/times` (`demoNow()`).
-- **Details:** short-lived demo cookie per §10.8; Arun Kumar (§19) demo user refreshed by reset; simulation actions **route through real services** (demo user + `demoNow`) so all surfaces react live; `setTime` shifts `simulationNow`; scenario buttons mutate recent days via seeded blocks (keeps totals semantics). **Isolation test:** after demo, real account data unchanged.
-- **Testing:** scenario totals invariant; isolation; e2e full demo tour incl. each simulate button + reset.
-
-## Phase 27 — Unit & component test completion
-
-**Dependencies:** all shipped code (post-merge). **Files:** new `*.test.ts(x)` beside code; `vitest.config.ts` coverage thresholds (shared/calc ≥ 95%, domain ≥ 80%, key components ≥ 70%); transactional rollback DB helper.
-- **Details:** exhaustive calc matrices; interaction tests (optimistic updates, disabling in flight, idempotent double-click); authz denial tests included.
-
-## Phase 28 — End-to-end test suite
-
-**Dependencies:** everything (post-merge). **Files:** `e2e/{register,onboarding,medication-lifecycle,dose-actions,missed-dose,adherence-consistency,caregiver,reports,demo,auth-guard,shell}.spec.ts` + `e2e/helpers/{demo-login,seed}.ts`.
-- **Details:** deterministic time via demo clock; seeded DB snapshot per suite; **`adherence-consistency.spec` validates the §20 propagation matrix** (dashboard × adherence × history × reports numbers match); runs in CI chromium.
-
-## Phase 29 — Integration verification & final consistency pass
-
-**Dependencies:** all phases. **Files:** `docs/consistency-verification.md` log; scripted checks (a)–(g) from plan §21 Phase 29 (single-source adherence numbers, full med propagation, caregiver alert traceable to a real dose event, no feature imports raw db client, no hardcoded brand hex, every nav link real, brand via `brand.ts`). Full `pnpm build/typecheck/lint/test` run.
-
-## Phase 30 — Deployment & handoff polish
-
-**Dependencies:** 29. **Files:** `README.md` runbook (`pnpm install → db:migrate → db:seed → dev`), AI env keys optional note, demo flow docs, optional CI workflow. Acceptance: reproducible on a clean machine; clean repo (no secrets).
-
----
-
-## Cross-branch hook points (aadhi/bala seams you attach to)
-
-| Hook / seam | Set by | You use it |
-|---|---|---|
-| Missed-dose hook (`onMissedDose(dose, now)`) | aadhi Phase 13 | Notifications (22) + Caregiver alerts (21) attach here — enforce dedupe |
-| `NotificationBell` count seam | aadhi Phase 09 stub | Replace with real `unreadCount` (22); poll on focus + dropdown of recent 5 |
-| `adherence.summary` DTO | bala Phase 16 | Insight snapshot source (23) — never recompute |
-| Dashboard `InsightWidget` / `CaregiverStatus` stubs | bala Phase 18 | Fill with real data (21/23) — conform to the DTO props bala defined |
-| `reconcile` for demo day-shifting | aadhi Phase 13 | Demo can call reconcile as `simulationNow` changes to drive missed detection live |
-| Demo seed (`seedDemoWorkspace`, §19 totals) | Phase 05 | Reset/re-seed for `/demo`; keep 84/76/5/3/8 + 90.5% invariants |
-
-**Merge order:** `aadhi` → `main` first; then `bala`; then `hp` (you merge last — your Phases 27–30 run against the fully merged tree).
+- aadhi — Phases 09–15: `(app)` shell + `TRPCProvider`, `api.schedule.*`/`api.dose.*`, missed-dose hook calls the frozen registry (you register). Never creates/edits your files.
+- bala — Phases 16–20, 24, 26: `api.adherence.*`/`api.dashboard.*` DTOs (your insight snapshot source), dashboard stubs + `settings/caregiver` placeholder left for you to fill on `main`. Never creates/edits your files.
