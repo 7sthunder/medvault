@@ -63,5 +63,5 @@
 
 ## 6. What you can assume about aadhi/hp
 
-- aadhi — Phases 09–15: the `(app)` shell, `TRPCProvider` (yours to mount? No — aadhi mounts it; your pages render inside), `api.schedule.*` / `api.dose.*`, `dose_actions` audit rows. It never creates/edits any of your files.
+- aadhi — Phases 09–15: the `(app)` shell with `<TRPCProvider>` mounted, `api.schedule.*` / `api.dose.*`, `dose_actions` audit rows. It never creates/edits any of your files.
 - hp — Phases 21–23, 25: fills your dashboard stubs + `settings/caregiver` ONLY as a post-merge step on `main`; never on branches in parallel.
