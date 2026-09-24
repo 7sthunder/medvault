@@ -37,7 +37,7 @@
 | 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done` | `1721431` | verified: typecheck/lint/test/build/e2e |
 | 04 | Landing page migration (`/` from Stitch) | `done` | `1340f05` | verified: typecheck/lint/test/build/e2e |
 | 05 | Database foundation (Drizzle schema + client + migrate + seed) | `done` | `016f1be` | verified: typecheck/lint/test/build |
-| 06 | Authentication & session plumbing (Better Auth) | `done` | `fe2c6d5` | verified: typecheck/lint/test/build/e2e |
+| 06 | Authentication & session plumbing (Better Auth) | `done` | `3006415` | verified: typecheck/lint/test/build/e2e |
 | 07 | Shared contracts & validation layer | `pending` | — | |
 | 08 | Reusable component system completion | `pending` | — | |
 | 09 | Global shell & navigation `(app)` | `pending` | — | |
@@ -544,7 +544,7 @@ users land on `/onboarding`, skip → `/dashboard`, logout → `/`, re-login →
 
 ### Commit / push
 
-- `fe2c6d5` `Phase 06: Better Auth login/register + (app) gate + tRPC`
+- `3006415` `Phase 06: Better Auth login/register + (app) gate + tRPC`
 - pushed to `origin/main`; `git status` clean afterwards.
 
 ### Hand-off notes for later phases
