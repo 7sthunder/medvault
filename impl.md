@@ -35,7 +35,7 @@
 | 01 | Repository & Stitch analysis | `done` | `5dfeb44` | pushed to `origin/main` |
 | 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `done` | `6eabea5` | verified: typecheck/lint/test/build/e2e |
 | 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done` | `1721431` | verified: typecheck/lint/test/build/e2e |
-| 04 | Landing page migration (`/` from Stitch) | `pending` | — | |
+| 04 | Landing page migration (`/` from Stitch) | `done` | `1340f05` | verified: typecheck/lint/test/build/e2e |
 | 05 | Database foundation (Drizzle schema + client + migrate + seed) | `pending` | — | |
 | 06 | Authentication & session plumbing (Better Auth) | `pending` | — | |
 | 07 | Shared contracts & validation layer | `pending` | — | |
@@ -376,7 +376,7 @@ consuming Phase 03 tokens only — runtime DOM is byte-visibly the same Stitch h
 
 ### Commit / push
 
-- `<pending — see matrix row>` `Phase 04: Stitch landing migrated to (marketing)/`
+- `1340f05` `Phase 04: Stitch landing migrated to (marketing)/`
 - pushed to `origin/main`; `git status` clean afterwards.
 
 ### Hand-off notes for later phases
