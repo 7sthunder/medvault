@@ -459,8 +459,8 @@ insert demo row".
 
 ### Commit / push
 
-- TBD (this build) — Phase 05: Supabase schema + client + migrate + seed
-- push to `origin/main`
+- `016f1be` `Phase 05: Supabase schema + client + migrate + seed`
+- pushed to `origin/main`; `git status` clean afterwards.
 
 ### Hand-off notes for later phases
 
