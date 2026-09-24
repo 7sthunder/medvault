@@ -4,40 +4,112 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * MedVault design system — Stitch export turned into Tailwind v4 tokens.
+ * Source of truth: plan.md §5 (verified against Landingpage/ in docs/stitch-analysis.md §7).
+ *
+ * Strategy:
+ * - Static Stitch brand palette + shadows live in `@theme` (Tailwind emits them as :root vars,
+ *   generating utilities: bg-primary, text-ink-600, border-border, shadow-card, ...).
+ * - Dark-sensitive surfaces (background/foreground/card/popover/muted/accent/border/input/sidebar)
+ *   are `@theme inline` reference to CSS vars that flip in `.dark`.
+ * - Two extended tokens (`--red-tint`, `--amber-tint`) are plan-introduced for §12 status chips
+ *   (NOT in the Stitch export) — see docs/stitch-analysis.md §7.1.
+ */
+
+@theme {
+  /* Fonts (next/font/google Plus Jakarta Sans wired in layout.tsx) */
+  --font-sans: var(--font-jakarta);
+  --font-heading: var(--font-jakarta);
+
+  /* §5.3 core brand */
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-primary-tint: #d1fae5;
+  --color-primary-tint-2: #a7f3d0;
+  --color-primary-soft: #f0fdf4;
+  --color-primary-foreground: #ffffff;
+  --color-primary-ring: rgba(16, 185, 129, 0.12);
+  --color-secondary: #06b6d4;
+  --color-secondary-tint: #cffafe;
+  --color-secondary-soft: #f0f9ff;
+  --color-secondary-foreground: #ffffff;
+
+  /* §5.3 feature accents */
+  --color-magenta: #f472b6;
+  --color-magenta-tint: #fce7f3;
+  --color-violet: #8b5cf6;
+  --color-blue: #3b82f6;
+  --color-blue-tint: #dbeafe;
+  --color-amber: #f59e0b;
+  --color-amber-tint: #fef3c7;
+  --color-teal: #14b8a6;
+
+  /* §12 status red + plan-extended tint */
+  --color-red: #ef4444;
+  --color-red-tint: #fee2e2;
+
+  /* §5.3 ink scale */
+  --color-ink-900: #0f172a;
+  --color-ink-800: #1e293b;
+  --color-ink-700: #334155;
+  --color-ink-600: #475569;
+  --color-ink-500: #64748b;
+  --color-ink-400: #94a3b8;
+
+  /* §5.3 phone-mockup namespace */
+  --color-phone-muted: #9ab5ad;
+  --color-phone-ink: #0d1f1a;
+
+  /* §5.3 surfaces */
+  --color-border-strong: #cbd5e1;
+  --color-bg-soft: #f1f5f9;
+  --color-surface-dark: #0f172a;
+
+  /* shadcn semantic colours that don't flip in dark */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-ring: #10b981;
+  --color-chart-1: #10b981;
+  --color-chart-2: #06b6d4;
+  --color-chart-3: #f472b6;
+  --color-chart-4: #f59e0b;
+  --color-chart-5: #8b5cf6;
+
+  /* §5.4 shadows */
+  --shadow-card-sm: 0 2px 12px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 12px 48px rgba(0, 0, 0, 0.04);
+  --shadow-glass: 0 8px 32px rgba(16, 185, 129, 0.13);
+  --shadow-glass-lg: 0 20px 50px rgba(0, 0, 0, 0.15);
+  --shadow-primary-btn: 0 12px 24px rgba(16, 185, 129, 0.25);
+  --shadow-primary-btn-lg: 0 12px 40px rgba(16, 185, 129, 0.6);
+  --shadow-fab: 0 8px 28px rgba(16, 185, 129, 0.6);
+  --shadow-leafs: 0 4px 12px rgba(16, 185, 129, 0.1);
+  --shadow-logo: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+/* Dark-sensitive surfaces — light defaults, `.dark` overrides below. */
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
   --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,84 +120,127 @@
 }
 
 :root {
-  /* Font (Next font Google): Plus Jakarta Sans wired via layout.tsx `--font-jakarta`. */
+  /* Font map — Plus Jakarta Sans via next/font/google */
   --font-sans: var(--font-jakarta);
 
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* §5.7 light theme surfaces */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #d1fae5;
+  --accent-foreground: #059669;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0fdf4;
+  --sidebar-accent-foreground: #059669;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #10b981;
+
+  /* §5.4 base radius 14px (inputs/buttons); cards derive at xl/2xl */
+  --radius: 0.875rem;
+
+  /* §5.3 hero (marketing/auth) gradient */
+  --hero-gradient: linear-gradient(150deg, #f0fdf4 0%, #f8fafc 50%, #f0f9ff 100%);
+
+  /* §5.1 logo tile + §5.3 glass-card borders */
+  --logo-gradient: linear-gradient(135deg, #10b981, #06b6d4);
+  --glass-border: 1px solid rgba(16, 185, 129, 0.28);
 }
 
+/* §5.7 dark theme (settings/appearance "dark"; no neon) */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #e2e8f0;
+  --popover: #1e293b;
+  --popover-foreground: #e2e8f0;
+  --muted: #25303f;
+  --muted-foreground: #94a3b8;
+  --accent: rgba(16, 185, 129, 0.15);
+  --accent-foreground: #a7f3d0;
+  --border: #334155;
+  --input: #334155;
+  --sidebar: #0f172a;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(16, 185, 129, 0.18);
+  --sidebar-accent-foreground: #a7f3d0;
+  --sidebar-border: #334155;
+  --sidebar-ring: #10b981;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-foreground antialiased;
   }
-  html {
-    @apply font-sans;
+
+  /* §5.5 scrollbar (track = bg-soft, thumb = border) */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+  }
+
+  ::selection {
+    background: rgba(16, 185, 129, 0.2);
+  }
+}
+
+@layer utilities {
+  /* §5.3 hero gradient + logo tile, used by marketing/auth + brand */
+  .bg-hero-gradient {
+    background-image: var(--hero-gradient);
+  }
+
+  /* §5.5 glass card recipe */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: var(--glass-border);
+    box-shadow: var(--shadow-glass);
+  }
+  .glass-card-strong {
+    background: rgba(255, 255, 255, 0.95);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: var(--glass-border);
+    box-shadow: var(--shadow-glass-lg);
+  }
+
+  /* §5.7 dark variants of glass surfaces */
+  .dark .glass-card,
+  .dark .glass-card-strong {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(16, 185, 129, 0.35);
+  }
+
+  /* §5.4 leaf-shadow focus helper (app state emphasis) */
+  .focus-leaf {
+    box-shadow: var(--shadow-leafs);
   }
 }
