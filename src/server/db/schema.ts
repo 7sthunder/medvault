@@ -13,6 +13,40 @@ import {
   unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import {
+  ALERT_STATUSES,
+  CAREGIVER_ALERT_TYPES,
+  CAREGIVER_RELATIONSHIP_STATUSES,
+  DEMO_SCENARIOS,
+  DOSE_ACTION_TYPES,
+  DOSE_EVENT_STATUSES,
+  DOSE_SOURCES,
+  INSIGHT_CATEGORIES,
+  INSIGHT_SOURCES,
+  INVITATION_STATUSES,
+  MEDICATION_STATUSES,
+  NOTIFICATION_TYPES,
+  RELATION_TYPES,
+  SUGGESTED_ACTIONS,
+  THEMES,
+  UI_DENSITIES,
+  type AlertStatus,
+  type CaregiverAlertType,
+  type CaregiverRelationshipStatus,
+  type DemoSscenario,
+  type DoseActionType,
+  type DoseEventStatus,
+  type DoseSource,
+  type InsightCategory,
+  type InsightSource,
+  type InvitationStatus,
+  type MedicationStatus,
+  type NotificationType,
+  type RelationType,
+  type SuggestedAction,
+  type Theme,
+  type UiDensity,
+} from "@shared/enums";
 
 /**
  * Phase 05 — full §8 schema (Drizzle, PostgreSQL, Supabase-owned database).
@@ -79,80 +113,48 @@ export const verifications = pgTable("verification", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/* ── §8 enums (text + union; single source used by seed + services) ── */
+/* ── §8 enums — single source is `src/shared/enums.ts` (Phase 07). The constants
+   below are re-exported so Phase 05-era imports (`@/server/db/schema`) keep working
+   while every literal lives in shared. `DoseStatus` (the display union incl. due-now
+   and paused) is intentionally NOT re-exported here: dose_events only stores the
+   persistent model statuses. */
 
-export const MEDICATION_STATUSES = ["active", "paused"] as const;
-export type MedicationStatus = (typeof MEDICATION_STATUSES)[number];
-
-export const DOSE_EVENT_STATUSES = ["upcoming", "due", "snoozed", "taken", "missed", "skipped", "canceled"] as const;
-export type DoseEventStatus = (typeof DOSE_EVENT_STATUSES)[number];
-
-export const DOSE_SOURCES = ["generated", "demo"] as const;
-export type DoseSource = (typeof DOSE_SOURCES)[number];
-
-export const DOSE_ACTIONS = [
-  "take",
-  "skip",
-  "snooze",
-  "unsnooze",
-  "missed_auto",
-  "restored",
-  "voided",
-  "demo",
-] as const;
-export type DoseActionType = (typeof DOSE_ACTIONS)[number];
-
-export const CAREGIVER_RELATIONSHIP_STATUSES = ["pending", "active", "declined", "revoked"] as const;
-export type CaregiverRelationshipStatus = (typeof CAREGIVER_RELATIONSHIP_STATUSES)[number];
-
-export const RELATION_TYPES = ["family", "friend", "professional", "other"] as const;
-export type RelationType = (typeof RELATION_TYPES)[number];
-
-export const INVITATION_STATUSES = ["pending", "accepted", "expired", "revoked"] as const;
-export type InvitationStatus = (typeof INVITATION_STATUSES)[number];
-
-export const CAREGIVER_ALERT_TYPES = ["missed_dose", "adherence_drop", "insight", "demo"] as const;
-export type CaregiverAlertType = (typeof CAREGIVER_ALERT_TYPES)[number];
-
-export const ALERT_STATUSES = ["new", "acknowledged", "resolved"] as const;
-export type AlertStatus = (typeof ALERT_STATUSES)[number];
-
-export const NOTIFICATION_TYPES = [
-  "upcoming_dose",
-  "due_dose",
-  "missed_dose",
-  "caregiver_alert",
-  "system",
-  "insight",
-  "demo",
-] as const;
-export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
-
-export const INSIGHT_CATEGORIES = [
-  "timing_pattern",
-  "adherence_decline",
-  "adherence_improvement",
-  "snooze_pattern",
-  "medication_difference",
-  "missed_analysis",
-  "general",
-] as const;
-export type InsightCategory = (typeof INSIGHT_CATEGORIES)[number];
-
-export const INSIGHT_SOURCES = ["ai", "fallback", "demo"] as const;
-export type InsightSource = (typeof INSIGHT_SOURCES)[number];
-
-export const SUGGESTED_ACTIONS = ["review_schedule", "review_reminders", "encourage", "review_caregiver"] as const;
-export type SuggestedAction = (typeof SUGGESTED_ACTIONS)[number];
-
-export const THEMES = ["light", "dark", "system"] as const;
-export type Theme = (typeof THEMES)[number];
-
-export const UI_DENSITIES = ["comfortable", "compact"] as const;
-export type UiDensity = (typeof UI_DENSITIES)[number];
-
-export const DEMO_SCENARIOS = ["baseline", "decline", "improvement", "caregiver_demo"] as const;
-export type DemoSscenario = (typeof DEMO_SCENARIOS)[number];
+export {
+  ALERT_STATUSES,
+  CAREGIVER_ALERT_TYPES,
+  CAREGIVER_RELATIONSHIP_STATUSES,
+  DEMO_SCENARIOS,
+  DOSE_ACTION_TYPES,
+  DOSE_EVENT_STATUSES,
+  DOSE_SOURCES,
+  INSIGHT_CATEGORIES,
+  INSIGHT_SOURCES,
+  INVITATION_STATUSES,
+  MEDICATION_STATUSES,
+  NOTIFICATION_TYPES,
+  RELATION_TYPES,
+  SUGGESTED_ACTIONS,
+  THEMES,
+  UI_DENSITIES,
+};
+export type {
+  AlertStatus,
+  CaregiverAlertType,
+  CaregiverRelationshipStatus,
+  DemoSscenario,
+  DoseActionType,
+  DoseEventStatus,
+  DoseSource,
+  InsightCategory,
+  InsightSource,
+  InvitationStatus,
+  MedicationStatus,
+  NotificationType,
+  RelationType,
+  SuggestedAction,
+  Theme,
+  UiDensity,
+};
 
 /* ── §8.3 medications ── */
 

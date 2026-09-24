@@ -22,11 +22,13 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@date-fns/tz": "^1.5.0",
     "@hookform/resolvers": "^5.9.1",
     "@trpc/server": "^11.19.0",
     "better-auth": "^1.7.5",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
+    "date-fns": "^4.4.0",
     "drizzle-orm": "^0.45.3",
     "framer-motion": "^12.43.0",
     "lucide-react": "^0.453.0",

@@ -10,25 +10,22 @@ import {
   PauseCircle,
 } from "lucide-react";
 
+import { DOSE_STATUSES } from "./enums";
+import type { DoseStatus } from "./enums";
+
+export { DOSE_STATUSES };
+export type { DoseStatus };
+
 /**
  * Medication dose statuses for the app shell + history (plan §12).
+ *
+ * The display union itself lives in `shared/enums.ts` (Phase 07 single source);
+ * this module maps each status to its §12 colour/icon/meta recipe.
  *
  * The §12 table is the single source for status → color/icon. Chip backgrounds use the
  * Stitch tint tokens (bg/fg classes) so statuses stay consistent across light/dark and
  * the token set stays the only colour authority.
  */
-export const DOSE_STATUSES = [
-  "taken",
-  "upcoming",
-  "due-now",
-  "missed",
-  "skipped",
-  "snoozed",
-  "paused",
-  "canceled",
-] as const;
-
-export type DoseStatus = (typeof DOSE_STATUSES)[number];
 
 export type StatusTone =
   | "emerald"

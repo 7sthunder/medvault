@@ -1,23 +1,14 @@
 import { z } from "zod";
 
+import { emailSchema, nameSchema } from "./common";
+
 /**
- * Phase 06 — auth form contracts (plan §13). Shared both ends:
+ * Phase 06/07 — auth form contracts (plan §13). Shared both ends:
  * the client validates instantly (react-hook-form + zodResolver),
  * the server re-validates the same rules on submit (authoritative).
  */
-
-const emailSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .email("Enter a valid email address.");
-
 export const registerSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, "Name must be at least 2 characters.")
-    .max(100, "Name must be at most 100 characters."),
+  name: nameSchema,
   email: emailSchema,
   password: z
     .string()

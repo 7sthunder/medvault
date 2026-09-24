@@ -38,7 +38,7 @@
 | 04 | Landing page migration (`/` from Stitch) | `done` | `1340f05` | verified: typecheck/lint/test/build/e2e |
 | 05 | Database foundation (Drizzle schema + client + migrate + seed) | `done` | `016f1be` | verified: typecheck/lint/test/build |
 | 06 | Authentication & session plumbing (Better Auth) | `done` | `3006415` | verified: typecheck/lint/test/build/e2e |
-| 07 | Shared contracts & validation layer | `pending` | — | |
+| 07 | Shared contracts & validation layer | `done` | pending | pushed to `origin/main` |
 | 08 | Reusable component system completion | `pending` | — | |
 | 09 | Global shell & navigation `(app)` | `pending` | — | |
 | 10 | Onboarding | `pending` | — | |
@@ -554,3 +554,92 @@ users land on `/onboarding`, skip → `/dashboard`, logout → `/`, re-login →
   mutation as its completion path.
 - tRPC is scaffolded to be the shared-call surface for Phase 07 contracts; `protectedProcedure` is the gate.
 - Google SSO button is intentionally disabled until a provider is configured.
+
+## Phase 07 — Shared contracts & validation layer (DONE)
+
+**Plan reference:** Phase 07 spec (`plan.md:937`), §9 `src/shared/` file contract (enums/constants/
+types/times/nav/validations), §10.5 (time buckets), §10.7 (`DoseStatus` display union), §12 (status
+chips), §14 (`NavIconName`/nav model), §8 (schema value unions), §13 (validation schemas), §10.8 (demo
+clock), §19 (demo scenario enums).
+**Objective met:** `src/shared/` is now a dependency-light, server+client-safe contract layer: every
+value union has a single source (`enums.ts`, machine-checked by `enums.test.ts`), all §13 form/server
+schemas live in `validations/` (zod v4 with shared primitives in `common.ts`), timezone math is
+centralised in `times.ts` (date-fns v4 + `@date-fns/tz`), DTOs for every §9 model shape in `types.ts`,
+nav model in `nav.ts`, and all validation bounds are declared once in `constants.ts`
+(`VALUE_LIMITS`).
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/enums.ts` | created | **Single source** for: DOSE_STATUSES, DOSE_EVENT_STATUSES, MEDICATION_STATUSES, DOSE_SOURCES, DOSE_ACTION_TYPES, USER_DOSE_ACTIONS, CAREGIVER_RELATIONSHIP_STATUSES, RELATION_TYPES, INVITATION_STATUSES, CAREGIVER_ALERT_TYPES, ALERT_STATUSES, NOTIFICATION_TYPES(+TABS), INSIGHT_CATEGORIES, INSIGHT_SOURCES, SUGGESTED_ACTIONS, THEMES, UI_DENSITIES, DEMO_SCENARIOS (+`DemoScenario` alias), FREQUENCY_LABELS(-_TEXT), TIME_BUCKETS(-_TEXT), REPORT_GRANULARITIES(-_TEXT), RANGE_PRESETS(-_TEXT) |
+| `src/shared/status.ts` | modified | `DOSE_STATUSES`/`DoseStatus` now re-exported from `enums.ts` (display union members sourced once) |
+| `src/server/db/schema.ts` | modified | imports + re-exports value/type enums from `@shared/enums` (deleted 16 local `[...] as const` + type unions) |
+| `src/server/db/insert-schemas.ts` | modified | `DOSE_ACTIONS` import → `DOSE_ACTION_TYPES` |
+| `src/shared/constants.ts` | created | defaults (MISSED_AFTER_DEFAULT=30, SNOOZE_MIN_DEFAULT=10, MAX_SNOOZES_DEFAULT=3, REMINDER_BEFORE_DEFAULT=5, HORIZON_DAYS=14, RECENT_INSIGHTS=5, MAX_SCHEDULE_SLOTS=6, HISTORY_PAGE_SIZE=25, LIST_PAGE_SIZE=20, INVITATION_TTL_DAYS=7, INSIGHT_MAX_ROWS=20), `VALUE_LIMITS` (single source for ranges), name/note/dosage/report caps, DEMO identities, TIME_BUCKET_BOUNDS (§10.5) |
+| `src/shared/times.ts` | created | localDateKey, isSameLocalDay, parseHhMm + `HHMM_REGEX`, combineDateAndTime, startOfLocalDay, addLocalDays, rangeByPreset (overload: numeric presets optional opts / `custom` requires from/to), bucketOf, now()/setNowImpl()/resetNowImpl() (§10.8 seam) |
+| `src/shared/types.ts` | created | §9 DTOs: UserProfile, Medication(+Lite), ScheduleSlot, DoseEvent, DoseAction, AdherenceDay, StreakSummary, Trend, TimeBucketStats, AdherenceSummary, MedicationPerformance, Dashboard, Notif, Caregiver+Permissions(+DEFAULT_*), Insight, Report(+Row/TrendPoint), ReminderSettings, AppearanceSettings, TimeRange |
+| `src/shared/nav.ts` | created | §14 nav model: `NavIconName` (string names — shared stays free of lucide/React), NAV_ITEMS, SETTINGS_NAV, BOTTOM_NAV, NAV_GROUP_ORDER, ALL_NAV_HREFS |
+| `src/shared/validations/common.ts` | created | emailSchema (trim/lower), dateKeySchema, uuidSchema, nameSchema, cappedTextSchema, boundedTextSchema, TIMEZONE_LIST + timezoneSchema |
+| `src/shared/validations/auth.ts` | modified | rebuilt on `common.ts` primitives (same §13 rules as Phase 06) |
+| `src/shared/validations/{onboarding,medication,schedule,doseAction,caregiver,settings,reports}.ts` | created | all remaining §13 schemas (see deviations for exact shapes) |
+| `src/shared/enums.test.ts`, `src/shared/times.test.ts`, `src/shared/validations/validations.test.ts` | created | Phase 07 unit suites |
+| `package.json` | modified | deps `date-fns@4.4.0`, `@date-fns/tz@1.5.0` |
+
+### Deviations & decisions (precise > faithful)
+
+- **DOSE_ACTIONS → DOSE_ACTION_TYPES.** Plan §8 named the audit union `DOSE_ACTIONS`; the §13 form
+  action input union also reads "actions", but they are different sets (model FINITE: take/snooze/skip
+  with reasons vs. audit log with notes/tokens). Renamed the model union and did **not** keep the old
+  name as an alias — the only consumer (`insert-schemas.ts`) was updated in the same commit, and the
+  cleaner name prevents confusion in Phase 12/25.
+- **Display union moved to shared/enums.** `DOSE_STATUSES` (9 members incl. `due-now`/`paused`) is now
+  declared in `enums.ts` (not kept as a separate draft in `status.ts`); `schema.ts` re-exports it for
+  data-model `$type`s and **deliberately does not** re-export `DOSE_STATUSES` (`due-now`/`paused` are
+  derived, never persisted) — grep-able via `enums.test.ts` "Display = model − {due} + {due-now, paused}".
+- **DTO instants are `Date`** (JS instants, `timestamptz`-mapped). JSON-serialising DTOs across the
+  tRPC boundary needs a `Date` transformer — superjson is planned with the tRPC **client** in Phase 08
+  (server DTOs stay plain; this phase only defines the shapes).
+- **Validation bounds centralised in `VALUE_LIMITS`.** §13 repeats ranges in onboarding/settings/reports;
+  `constants.ts` now holds the single source so no profile/reminder/report drift across phases.
+- **`reportsSchemaFor(todayKey?)`.** The "to ≤ today+1" ceiling needs the *server's* clock — the factory
+  takes an optional `todayKey`; the loopback suite tests both the loose client schema and the strict
+  server factory with a fixed day. (First draft used a `"9999-12-31"` sentinel whose `addDayKey` crossed
+  into a 5-digit year and broke string comparisons — replaced by the optional-arg design.)
+- **`rangeByPreset` semantics:** numeric presets return `[from = start-of-first-day, to = end of today
+  (23:59 local)]` — inclusive windows; `custom` returns the caller's from/to unmodified and throws at
+  runtime if omitted (compile time already enforces via overloads).
+- **`@date-fns/tz`·`TZDate.toISOString()` renders wall-clock + offset** (e.g. `2026-06-15T00:00:00.000+05:30`),
+  not `Z` — tests compare `getTime()` against `Date.UTC(...)` for absolutes instead of ISO strings.
+- **`formatInTimeZone` not exported** by `@date-fns/tz@1.5.0`; local-day keys use
+  `format(new TZDate(date, tz), "yyyy-MM-dd")` instead (verified identical output).
+- **`HHMM_RE` needs both minutes and seconds captured** (early draft captured only the hour group →
+  `minute: NaN`); fixed to `^([01]\d|2[0-3]):([0-5]\d)$`.
+- **`nav.ts` icon names not lucide components** — keeps `src/shared` free of any React/Brand import;
+  Phase 08 maps `NavIconName` → concrete lucide nodes.
+- Zod v4 idioms used throughout: `z.coerce.number().int()`, `z.uuid()`, `z.discriminatedUnion`,
+  `.superRefine`, `.nullish()`, `z.enum(ARRAY)`.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **12 files, 111 tests passed** (new: enums 4, times 22, validations 23)
+- `pnpm build` — compiled clean
+
+### Commit / push
+
+- `pending` (hash filled after commit)
+- pushed to `origin/main`; `git status` clean afterwards.
+
+### Hand-off notes for later phases
+
+- Phase 08 consumes: `times.ts` for DateRange/Timezone selectors, `nav.ts` + `NavIconName`→lucide map,
+  `types.ts` DTOs for dashboard/caregiver/insight components, and wires a superjson `Date` transformer
+  into the tRPC client (server root stays transformer-less this phase).
+- Phase 10 uses `onboardingSchema` + `common.ts` primitives; keep the Phase 06 `setOnboardingComplete`
+  mutation as the completion path.
+- Report/server forms call `reportsSchemaFor(serverToday)` — never the loose `reportsSchema` — on the
+  server boundary (Phase 20).
+- If any later phase needs a new persisted enum, add it to `enums.ts` (not `schema.ts`) and extend
+  `enums.test.ts` lists.
