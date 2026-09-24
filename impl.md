@@ -33,7 +33,7 @@
 | Phase | Title | Status | Commit | Notes |
 |---|---|---|---|---|
 | 01 | Repository & Stitch analysis | `done` | `5dfeb44` | pushed to `origin/main` |
-| 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `pending` | — | |
+| 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `done` | pending-commit | verified: typecheck/lint/test/build/e2e |
 | 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `pending` | — | |
 | 04 | Landing page migration (`/` from Stitch) | `pending` | — | |
 | 05 | Database foundation (Drizzle schema + client + migrate + seed) | `pending` | — | |
@@ -119,5 +119,103 @@ screen→route map confirmed (§6). No `Landingpage/` changes (per Phase 01 cons
   special-case the two extended tokens noted above.
 - Open decisions for Phase 03/04 are tracked in `docs/stitch-analysis.md` §12.
 - `Landingpage/` must stay untouched and un-referenced at runtime (plan §1).
+
+---
+
+## Phase 02 — Project foundation (DONE)
+
+**Plan reference:** `plan.md` §4.1, §16 (breakpoints), §18 (testing); Phase 02 spec (`plan.md:839`).
+**Objective met:** working Next.js App Router app at repo root with pnpm, strict TS, Tailwind v4,
+shadcn/ui scaffold, ESLint/Prettier, Vitest, Playwright, drizzle config, env scaffolding.
+
+### Files created
+
+| Path | Purpose |
+|---|---|
+| `package.json` (`meditrack-ai`) | scripts: `dev/build/start/typecheck/lint/lint:fix/format/format:check/test/test:watch/test:coverage/test:e2e/db:generate/db:migrate/db:push/db:seed` |
+| `pnpm-lock.yaml` | lockfile |
+| `pnpm-workspace.yaml` | `allowBuilds` (esbuild, unrs-resolver) |
+| `next.config.ts` | `reactStrictMode: true` |
+| `tsconfig.json` | strict + `noUncheckedIndexedAccess`, bundler resolution, path maps `@/* @shared/* @server/* @features/* @components/* @lib/* @db/*` |
+| `next-env.d.ts` | Next generated-types reference |
+| `eslint.config.mjs` | FlatCompat → `next/core-web-vitals` + `next/typescript`, ignores `Landingpage/**` |
+| `postcss.config.mjs` | `@tailwindcss/postcss` |
+| `drizzle.config.ts` | postgresql dialect, schema `src/server/db/schema.ts`, out `./drizzle` |
+| `vitest.config.ts` | jsdom per-file via pragma, aliases, oxc JSX runtime, coverage on `src/shared/calc` |
+| `vitest.setup.ts` | `@testing-library/jest-dom/vitest` |
+| `playwright.config.ts` | chromium project, `testDir ./e2e`, `webServer pnpm dev :3000` |
+| `.env.example` | `DATABASE_URL`, `BETTER_AUTH_SECRET`, `AI_GEMINI_API_KEY`, `DEMO_CLOCK_OFFSET_MINUTES` |
+| `.gitignore` | `node_modules .next out build .env* e2e-report playwright-report test-results coverage` |
+| `.prettierrc.json` | 100-print-width, semicolons, double quotes |
+| `components.json` | shadcn v4 "base-nova" style, RSC, `css: src/app/globals.css`, lucide icons |
+| `src/app/layout.tsx` | **Plus Jakarta Sans** via `next/font/google` (`--font-jakarta`), metadata (MedVault · MediTrack AI) |
+| `src/app/globals.css` | Tailwind v4 + shadcn neutral theme tokens + `@import "shadcn/tailwind.css"` + `tw-animate-css` + font mapping + `.dark` block |
+| `src/app/page.tsx` | placeholder `/` (brand tile §5.1 + Button); replaced by landing in Phase 04 |
+| `src/lib/utils.ts` | `export { cn } from "cn"` (shadcn v4) |
+| `src/shared/breakpoints.ts` | breakpoint constants doc (plan §16) incl. Stitch-specific 900/820/580 |
+| `src/components/ui/button.tsx` | shadcn scaffold (Base UI Button, cva variants default/outline/secondary/ghost/destructive/link, sizes) |
+| `src/components/ui/input.tsx` | shadcn scaffold |
+| `src/components/ui/button.test.tsx` | example component test (jsdom) |
+| `e2e/home.spec.ts` | example e2e hitting `/` (heading MedVault + "Get started" button) |
+
+### Pinned versions (deliberate, deviations from plan wording)
+
+| Package | Version | Why |
+|---|---|---|
+| `next` | 15.5.26 | plan: Next 15; latest 15.x |
+| `react` / `react-dom` | 19.2.0 | plan: React 19; 19.3.0 not supported by Next 15 peer range |
+| `lucide-react` | 0.453.0 | plan + Stitch export parity (latest is 1.x — incompatible icon API) |
+| `typescript` | 5.9.3 | 7.x (native tsgo) not supported by eslint-config-next Next 15 |
+| `eslint` | 9.39.5 | 10.x outside eslint-config-next 15 peer range |
+| `tailwindcss` / `@tailwindcss/postcss` | 4.3.3 | Tailwind v4 (Stack §4) |
+| `vitest` | 5.0.1 | — |
+| `@playwright/test` | 1.63.0 | — |
+| `drizzle-kit` | 0.31.11 | — |
+| shadcn stack (via CLI) | `shadcn@4.21.0`, `@base-ui/react`, `cva`, `cn`, `tw-animate-css` | new shadcn v4 |
+
+### Deviations & decisions (precise > faithful)
+
+- **shadcn v4 uses Base UI (`@base-ui/react`) instead of Radix** for primitives. Plan §4/§18
+  pre-supposed "Radix primitives"; the 2026 shadcn registry ("base-nova" style) generates Base UI
+  components. Behavior/a11y intent is unchanged — Phase 03 restyles visuals to Stitch tokens.
+  Recorded so Phase 03/08 lists are checked against what the registry actually emits.
+- `cn` util: plan asked for clsx+tailwind-merge in `src/lib/utils.ts`. shadcn v4 instead ships a
+  `cn` package; `src/lib/utils.ts` re-exports it so `@/lib/utils` stays the import surface.
+- **shadcn CLI misfires caught and reverted:**
+  1. `init` globbed the Vite template CSS and wrote the theme into `Landingpage/src/index.css`
+     (violating Phase 01's untouched rule) — reverted via `git checkout`, theme relocated to
+     `src/app/globals.css`, `components.json` css path fixed to `src/app/globals.css`.
+  2. `init` injected a `Geist` font + rewrote the root layout — reverted; layout keeps
+     **Plus Jakarta Sans** only (plan requirement). `--font-sans` maps to `--font-jakarta`.
+- Status bar: `pnpm dev`/builds on Windows show a benign vitest "configLoader native" ESM-in-CJS
+  warning — cosmetic, suppressed by nothing; leave as-is (or rename to `.mjs` later).
+- pnpm 11.8: build-script approval now lives in `pnpm-workspace.yaml` under **`allowBuilds`**
+  (legacy `onlyBuiltDependencies` in package.json is ignored) — required to run esbuild postinstall.
+- Vitest 5 uses the **oxc** transform (Vite 8): `vitest.config.ts` sets
+  `oxc.jsx = { runtime: "automatic" }` (tsconfig `jsx: preserve` otherwise breaks test parsing).
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors/0 warnings after naming the postcss config export)
+- `pnpm test` — 1 file, 2 tests passed (jsdom RTL on Button scaffold)
+- `pnpm build` — `next build` compiled, types/lint pass, 4 static pages generated
+- `pnpm test:e2e` — 1 chromium test passed (dev-server smoke via Playwright webServer)
+
+### Commit / push
+
+- `<filled-after-commit>` `Phase 02: Next.js + TS + Tailwind + tooling foundation`
+- pushed to `origin/main`; `git status` clean afterwards.
+
+### Hand-off notes for Phase 03
+
+- Phase 03 replaces the neutral shadcn tokens in `src/app/globals.css` with the **Stitch
+  `@theme`** tokens — source tables in `docs/stitch-analysis.md` §7; two extended tokens caveat
+  (`#fee2e2`/`#fef3c7`) from Phase 01 stands.
+- The `/design-system` dev page (plan Phase 03) will mount under `src/app/(marketing)/` — that
+  route group does not exist yet.
+- Base UI components differ from the Radix-era shadcn docs; check `@base-ui/react` API when
+  restyling `button.tsx`/`input.tsx` and when adding primitives in Phase 08.
+- `components.json` `css` and `aliases` point at the real locations now; keep them in sync when repo structure changes.
 
 ---
