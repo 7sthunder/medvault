@@ -305,3 +305,89 @@ avatar/tooltip/dialog/dropdown-menu/popover/tabs/sonner/alert/skeleton/paginatio
 - Dark theme flips surfaces only (§5.7); status chips/glass stay light-first — per plan dark polish
   lands with Phase 26 (`appearance` toggling); `@custom-variant dark` is already wired.
 - Component tests depend on RTL `cleanup()` now in `vitest.setup.ts` — keep it for Phase 27 suites.
+
+---
+
+## Phase 04 — Landing page migration (`/` from Stitch)
+
+**Plan reference:** `plan.md` §21; port list `docs/stitch-analysis.md` §10 (exact `→ target` paths);
+Stitch sources `Landingpage/src/App.jsx`, `Landingpage/src/components/{HeroVisual,FloatingCard}.jsx`,
+`Landingpage/src/mobile.jsx`, `Landingpage/index.html`.
+**Objective met:** Stitch landing now renders at Next `/` under a `(marketing)` route group,
+consuming Phase 03 tokens only — runtime DOM is byte-visibly the same Stitch hero→footer composition;
+`src/features/**` hex/rgba lint gate stays green.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/features/landing/use-in-view.ts` | created | Stitch `useInView` port (threshold 0.12, once) |
+| `src/features/landing/mascots.tsx` | created | Doctor/Robot/Nurse mascot SVGs + 3 `<img>` how-it-works mascots (eslint-disable no-img-element) |
+| `src/features/landing/PhoneMockup.tsx` | created | mobile.jsx phone screen + CSS port (756×729, sparks/dots, `.mvp-*`) |
+| `src/features/landing/HeroVisual.tsx` | created | floating-notification stack over phone (tone→`var(--color-*)`) |
+| `src/features/landing/FloatingCard.tsx` | created | glass recipe (Stitch markup never mounts it; kept for auth/hero compositions) |
+| `src/features/landing/{Nav,Hero,HowItWorks,Features,Testimonials,FinalCta,Footer,AiChatFab,ScrollingServices}.tsx` | created | §10 ported sections |
+| `src/app/(marketing)/layout.tsx` | created | children-only wrapper (design-system unaffected) |
+| `src/app/(marketing)/page.tsx` | created | landing composition + metadata; replaces `/` |
+| `src/app/page.tsx` | deleted | Phase 02 placeholder `/` (superseded) |
+| `src/app/icon.svg` | created | brand-tile favicon (32×32 rounded gradient + HeartPulse path) |
+| `src/app/globals.css` | modified | `--mascot-*` vars; body `overflow-x: hidden`; landing keyframes (`float`/`shadowPulse`/`softPulse`/`gradShift`/`fadeUp`/`spin`/`slideIn`/`mvp-*`); `@layer components` (`.cta-primary/.cta-ghost/.nav-login/.nav-link/.dot-grid/.cta-white/.cta-ghost-light/.hero-visual-container/.mvp-*`); `@layer utilities` (`.bg-blob-*/.bg-dot-grid-light/.map-grid/.footer-link`) |
+| `public/landing/how-it-works/*.png`, `public/auth/login-page.jpeg` | created | copied from `Landingpage/public/...` (Phase 04 asset move, verified source sizes) |
+| `src/features/landing/landing.test.tsx` | created | jsdom smoke: Nav routes + Hero heading/CTAs (`next/link` + `next/dynamic` mocked, IO stub) |
+| `e2e/home.spec.ts` | rewritten | landing headline visible + nav "Create Vault" → `toHaveURL(/\/register\/?$/)` (URL-only: route 404s until Phase 06) |
+| `package.json` | modified | `framer-motion@^12.38.0` → resolved **12.43.0** |
+
+### Deviations & decisions (precise > faithful)
+
+- **DM Sans remote `@import` dropped.** Stitch `index.html` loaded DM Sans via Google Fonts; Next only
+  bundles Plus Jakarta Sans (`next/font/google`). Slide-up/cards remain idempotent; the small font
+  difference is an accepted footprint/runtime decision (no network font at build/SSR).
+- **`pulse` keyframe renamed → `softPulse`.** Stitch defined its own `pulse`; Tailwind v4 already ships
+  an `animate-pulse` utility — reusing the name would collide. Function identical, name namespaced.
+- **`.mvp-nav-dot` synthesized.** Stitch `mobile.jsx:191` references `.mvp-nav-dot` (active-session dot)
+  but the source CSS never defines it (Stitch renders the dot invisible). Added as 4px
+  `var(--color-primary)` circle — precision fix, documented so later phases don't "fix" it back.
+- **Glass cards** keep Stitch's literal composite shadows (`0 24px 48px rgba(...)`) — the lint rule
+  only bans literals *starting* with `#`/`rgba(`, composites are exempt; token-var substitution used
+  wherever a §5 token maps. `bg-white/90 backdrop-blur-*` carry the glass body.
+- **FloatingNotification chip tint** `${color}18` (≈9.4%) renders as `color-mix(in srgb, var(--color-*)
+  9.4%, transparent)`; icon colour via the tone var.
+- **FinalCta "Get Started"** ports Stitch's inline submit-form as **`<a href="/register">`** (Styled form
+  submit would navigate/q reload; `<a>` is the correct semantic for a link to registration and stays
+  lint-clean). Input kept as decorative email field.
+- **Testimonials pfizer‑gap**: source holds generic `Person A–G` entries (App.jsx:1072–1083) — ported
+  verbatim (names/roles), not invented personas.
+- **HeroVisual** stays `next/dynamic ssr:false` with a `loading` placeholder (hero container keeps height);
+  framer-motion floats render client-side only (Stitch parity).
+- **Favicon:** `src/app/icon.svg` (file-based, App Router convention) instead of a `public/` static —
+  same brand tile, no extra fetch of both.
+- **Deleting `src/app/page.tsx`** leaves stale `.next/types/app/page.ts`; regenerated via
+  `npx next typegen` (not a code change) — recorded so future route moves run typegen after deletion.
+- Matching `textContent` across `<br/>` in the H1 joins with no space (jsdom & Chromium both) — unit +
+  e2e assertions use `/Your entire\s*medical life/i`.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (after `next typegen`; fix in `use-in-view.ts` entry guard + `DoctorMascot color` prop)
+- `pnpm lint` — clean (0 errors / 0 warnings; removed unused `Sparkles` import)
+- `pnpm test` — 5 files, **38 tests passed** (new landing smoke 2)
+- `pnpm build` — compiled; `/` static 58.4 kB (First Load 173 kB), `/design-system` 115 kB
+- `pnpm test:e2e` — 4 chromium tests passed (home headline + /register route, design-system stories + swatches)
+
+### Commit / push
+
+- `<pending — see matrix row>` `Phase 04: Stitch landing migrated to (marketing)/`
+- pushed to `origin/main`; `git status` clean afterwards.
+
+### Hand-off notes for later phases
+
+- `/login` → Nav "Log In" and `/register` → Nav/Create Vault + Hero/FinalCta CTAs are **hard-coded
+  routes**; they 404 until Phase 06 lands auth pages. e2e asserts URL only (`toHaveURL`), so the suite
+  stays green across that gap.
+- `/demo`, `/help`, `/privacy`, `/terms`, `/accessibility`, `/report`, `/status` footer/section links
+  are likewise future-route stubs.
+- `public/auth/login-page.jpeg` + `public/landing/how-it-works/*` are ready for Phase 05+/auth pages.
+- `HowItWorks`/`mascots.tsx` keep `minHeight: 200` rows (`.mvp-*` grid) so layout never collapses
+  pre-reveal (Stitch parity).
+- Tailwind v4 emits color utilities from `@theme` (no `tailwind.config`) — arbitrary value classes like
+  `border-primary/[0.28]` and `shadow-[0_15px_40px_rgba(...)]` are the sanctioned composite path.
