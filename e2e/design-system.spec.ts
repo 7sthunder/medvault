@@ -25,3 +25,18 @@ test("design system catalogue shows the token swatches", async ({ page }) => {
   await expect(page.getByText("--shadow-card", { exact: true })).toBeVisible();
   await expect(page.getByText("#10b981", { exact: false }).first()).toBeVisible();
 });
+
+test("design system data section: table, chart, range picker", async ({ page }) => {
+  await page.goto("/design-system");
+
+  // DataTable renders rows + pagination summary
+  await expect(page.getByLabel("Design system medications")).toBeVisible();
+  await expect(page.getByText("1–4 of 10")).toBeVisible();
+
+  // TrendChart renders the SVG with live data and the empty state gracefully
+  await expect(page.locator("[data-slot='trend-chart'] svg").first()).toBeVisible();
+  await expect(page.getByText("No data in this range")).toBeVisible();
+
+  // RangePicker preset button is interactive
+  await expect(page.getByRole("button", { name: "Last 7 days" })).toBeVisible();
+});

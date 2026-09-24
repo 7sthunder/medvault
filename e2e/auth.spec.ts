@@ -18,9 +18,9 @@ test("register -> onboarding -> dashboard -> logout -> login round trip", async 
   await page.getByPlaceholder("At least 8 chars, letter + number").fill(PASSWORD);
   await page.getByRole("button", { name: /Create Vault/i }).click();
 
-  await expect(page).toHaveURL(/\/onboarding/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/onboarding/, { timeout: 60_000 });
   await page.getByRole("button", { name: /Continue to dashboard/i }).click();
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
 
   await expect(page.getByText(email)).toBeVisible();
   await page.getByRole("button", { name: /Sign out/i }).click();
@@ -31,6 +31,6 @@ test("register -> onboarding -> dashboard -> logout -> login round trip", async 
   await page.getByPlaceholder("••••••••").fill(PASSWORD);
   await page.getByRole("button", { name: /Access Vault/i }).click();
 
-  await expect(page).toHaveURL(/\/dashboard/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
   await expect(page.getByText(email)).toBeVisible();
 });

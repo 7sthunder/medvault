@@ -39,7 +39,7 @@
 | 05 | Database foundation (Drizzle schema + client + migrate + seed) | `done` | `016f1be` | verified: typecheck/lint/test/build |
 | 06 | Authentication & session plumbing (Better Auth) | `done` | `3006415` | verified: typecheck/lint/test/build/e2e |
 | 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
-| 08 | Reusable component system completion | `pending` | — | |
+| 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
 | 09 | Global shell & navigation `(app)` | `pending` | — | |
 | 10 | Onboarding | `pending` | — | |
 | 11 | Medication domain service (server) | `pending` | — | |
@@ -643,3 +643,94 @@ nav model in `nav.ts`, and all validation bounds are declared once in `constants
   server boundary (Phase 20).
 - If any later phase needs a new persisted enum, add it to `enums.ts` (not `schema.ts`) and extend
   `enums.test.ts` lists.
+## Phase 08 � Reusable component system completion (DONE)
+
+**Plan reference:** Phase 08 spec (`plan.md:959`); �15.2 (charts), �5 data/table recipe, plan.tsx:961
+component list (charts wrapper, DataTable, pagination, DateRange, Toast wiring, ConfirmationDialog,
+StatusIndicator finalization). Testing requirements: pagination math, chart empty-data graceful,
+confirmation dialog requires confirm.
+**Objective met:** the catalog is finished with data/behavior primitives and its own hero section on the
+dev-only `/design-system` page: `TrendChart` (recharts, glass tooltip, graceful empty state),
+`DataTable` (typed sortable + paginated, loading/empty/error states), `RangePicker` (preset segmented
+control; bottom sheet on mobile), `ResponsiveDialog` (Dialog =md / Drawer <md), `NavigationIcon` map
+(NavIconName ? lucide), plus the `format`/`pagination`/chart-theme/media-query lib helpers. Toaster is
+now mounted app-wide. All verification green (145 unit tests, 7/7 e2e).
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/lib/format.ts` + `format.test.ts` | created | date-key heads, 12/24h `formatHhmm`, percent/count/compact, plural, date-range, duration labels (�5 copy recipes) |
+| `src/lib/pagination.ts` + `pagination.test.ts` | created | `clampPage`/`paginate`/`getPageItems` (ellipsis window)/`pageSummary` |
+| `src/lib/chart-theme.ts` | created | `CHART_PALETTE` (emerald/cyan/magenta/amber/violet via `--color-chart-1..5`), `CHART_GRID #e2e8f0`, axis/font constants, `chartColor(i)` |
+| `src/lib/use-media-query.ts` | created | SSR-safe `useMediaQuery` + `useIsMobile`/`useIsDesktop` (match < 768 `BREAKPOINTS.md`) |
+| `src/components/ui/chart.tsx` + `chart-types.ts` + `chart.test.tsx` | created | `TrendChart` (area/line/bar, empty?EmptyState, glass tooltip, container heights) |
+| `src/components/ui/data-table.tsx` + `data-table.test.tsx` | created | generic `DataTable<T>` (sortable headers w/ `aria-sort`, internal pagination, loading skeleton, error+retry, empty state) |
+| `src/components/ui/range-picker.tsx` + `range-picker.test.tsx` | created | 7d/30d/90d/custom presets over `rangeByPreset`/`localDateKey`, custom twin `DatePicker`s, mobile bottom sheet |
+| `src/components/ui/responsive-dialog.tsx` + `responsive-dialog.test.tsx` | created | `ResponsiveDialog` � centered Dialog =md / Drawer <md |
+| `src/components/ui/confirmation-dialog.tsx` + `confirmation-dialog.test.tsx` | modified/created | narrowed `onOpenChange` to 1-arg consumer callback (see deviations) + confirm/cancel suite |
+| `src/components/ui/nav-icon.tsx` | created | `NAV_ICONS: Record<NavIconName, LucideIcon>` (all 14 names) + `NavigationIcon` |
+| `src/app/layout.tsx` | modified | `<Toaster position="top-center" richColors />` mounted in `body` (sonner, Phase 03 dep) |
+| `src/app/(marketing)/design-system/page.tsx` | modified | new `#data` "07 � Data" section: DataTable demo, TrendChart (area + empty) demos, RangePicker (now state), ResponsiveDialog + NavIcon row, table/chart datasets; feedback?08, overlays?09; nav link `#data` |
+| `e2e/design-system.spec.ts` | modified | added data-section e2e: DataTable rows + pagination summary, trend svg + empty state, RangePicker preset button |
+| `playwright.config.ts` | modified | `workers: 2`, `timeout: 60_000` � dev-server cold-compile hardening (see verification) |
+| `e2e/auth.spec.ts` | modified | explicit waits 30s?60s to match the hardened config |
+| `package.json` | modified | dep `recharts@3.10.1` (only new runtime dep this phase) |
+
+### Deviations & decisions (precise > faithful)
+
+- **DataTable pagination is internal, �5 anchors only wire count + page.** Header cells keep
+  `aria-sort` on the `th`; the sort button is `aria-label="Sort by <column>"` (up/down/neutral arrow).
+  Sort cycles asc ? desc ? off. `pageSize` 0 disables paging; footer summary renders `1�4 of 10`.
+- **Chart palette via CSS vars, not recharts presets.** `.fill/gr/stroke` reference
+  `--color-chart-1..5` (declared in `@theme` for Stitch chart parity �15.2); `chartColor(i)` cycles
+  the palette. Grid is literal `#e2e8f0` � allowed: the hex lint gate targets `src/features/**` only.
+- **Tooltip is a glass readout** (per �15.2) with `formatValue`/`xTickFormatter` pass-through; an empty
+  dataset renders `EmptyState` (`data-slot="trend-chart-empty"`) instead of a blank canvas � the DoD
+  "chart renders empty gracefully" is asserted in `chart.test.tsx` under a jsdom `ResizeObserver` stub.
+- **`recharts` in jsdom needs a `ResizeObserver` + `getBoundingClientRect` stub** � added per-test in
+  `chart.test.tsx`; the svg-render assertion is wrapped in `waitFor` (ResponsiveContainer renders async).
+- **`ResponsiveDialog` uses `useIsMobile` for the variant, not CSS.** `use-media-query` returns `false`
+  on first render (hydration-safe), so desktop defaults and mobile flips to the Drawer after mount;
+  both variants are controlled and share title/description/footer.
+- **`ConfirmationDialog.onOpenChange` narrowed from Base UI's 2-arg to `(open: boolean) => void`.** The
+  inherited `DialogRootChangeEventDetails` type made a Cancel-button payload awkward; consumers only
+  pass `open`. Base UI's real event details stay internal via a forwarding wrapper. Its destructive
+  confirm variant (`text-destructive`) is asserted in the new test.
+- **RangePicker detection:** the active preset is derived from the current range (7/30/90d match via
+  `rangeByPreset` windows; anything else ? `custom`); clicking the active preset is a no-op, and a
+  custom edit emits `{ from, to }` via `onChange`. `now`/`timeZone` are injectable props for the
+  Phase 10+ clock seam (`shared/times.now()` stays the runtime default).
+- **NavigationIcon maps lucide to `NavIconName`** � Phase 09 consumes this (and only this) map, keeping
+  `src/shared` free of React imports.
+- **superjson tRPC-client transformer (Phase 07 hand-off) NOT wired this phase** � the tRPC **client**
+  does not exist yet (Phase 06 client is Better Auth's, not tRPC). Deferred deliberately to the phase
+  that actually creates the tRPC client; recorded here so Phase 08's commit does not claim it.
+- **Recharts is the only new runtime dependency**; no pin changes to existing deps.
+
+### Verification (all green)
+
+- `pnpm typecheck` � clean (one `noUncheckedIndexedAccess` fix in `chart-theme.ts`)
+- `pnpm lint` � clean (0 errors / 0 warnings; removed unused `RANGE_PRESETS` import + a stray `beforeEach`)
+- `pnpm test` � **19 files, 145 tests passed** (new: format 8, pagination 9, data-table 5, chart 3,
+  range-picker 4, responsive-dialog 2, confirmation-dialog 2)
+- `pnpm build` � compiled clean (static pages unchanged; 3 dynamic route groups)
+- `pnpm test:e2e` � **7/7 passed** (data-section checks added). NOTE: two auth tests flaked on cold
+  dev-server compiles (register?onboarding re-navigation timed out at 30s while the rest of the suite
+  passed) � pre-existing Phase 06 flake coinciding with shared-server contention. Hardened config
+  (`workers: 2`, `use.timeout: 60_000`, spec waits 60s) and re-verified: full suite passes 7/7 both
+  against a pre-warmed dev server and end-to-end from cold.
+
+### Commit / push
+
+- `e23dc9b` `Phase 08: data components, charts, range picker, toast wiring`
+- pushed to `origin/main`; `git status` clean afterwards.
+
+### Hand-off notes for later phases
+
+- Phase 09 consumes `nav.ts` + `nav-icon.tsx` (single lucide map) for the shell/bottom-nav.
+- Dashboard/reports/history (18�20) consume `TrendChart` + `DataTable` + `RangePicker` with shared
+  `ChartSeries`/`DataTableColumn` types; pass `timeZone` from the session user profile.
+- `format.ts`/`pagination.ts` are depth-3 tested units the feature phases should import, not re-derive.
+- Keep the `design-system` page `#data` section as the living usage reference; e2e asserts it.
+- The superjson tRPC-client note above moves to whichever phase introduces the tRPC client.
