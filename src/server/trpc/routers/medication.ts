@@ -48,5 +48,7 @@ export const medicationRouter = router({
 
   archive: protectedProcedure
     .input(z.object({ id: uuidSchema }))
-    .mutation(async ({ ctx, input }) => medicationService.archive(ctx.db, ctx.user.id, input.id)),
+    .mutation(async ({ ctx, input }) =>
+      medicationService.archive(ctx.db, ctx.user.id, ctx.user.timezone ?? "UTC", input.id),
+    ),
 });

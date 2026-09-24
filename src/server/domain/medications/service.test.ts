@@ -183,7 +183,7 @@ dbTests("medicationService CRUD (§10.1)", () => {
       const name = `Metformin ${uuidv7().slice(0, 8)}`;
       await inRollbackTransaction("Med Crud Archive", "med-crud-archive@medvault.local", async (tx, userId) => {
         const created = await medicationService.create(tx, userId, "UTC", { medication: validMedication(name) });
-        const archived = await medicationService.archive(tx, userId, created.id);
+        const archived = await medicationService.archive(tx, userId, "UTC", created.id);
         expect(archived.archivedAt).not.toBeNull();
         expect(archived.status).toBe("paused");
 

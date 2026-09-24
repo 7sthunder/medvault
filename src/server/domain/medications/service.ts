@@ -116,12 +116,12 @@ export const medicationService = {
       );
       await replaceSlots(tx, id, slotInserts);
 
-      // Phase 12 realises this seam (idempotent `(medicationId, scheduledFor)` upsert).
+      // §10.2: expand from startDate through the horizon (idempotent upsert).
       await ensureDoseEvents(tx, {
         userId,
         medicationId: id,
+        timeZone: timezone,
         from: medication.startDate,
-        to: todayKey(timezone),
       });
 
       const rows = await listSlotsByMedicationIds(tx, [id]);
@@ -170,14 +170,14 @@ export const medicationService = {
 
       if (schedule?.slots) {
         // Diff: void anything generated from today onward, then regenerate (idempotent).
-        await voidFutureEvents(tx, userId, id, todayKey(timezone));
+        await voidFutureEvents(tx, userId, id, todayKey(timezone), timezone);
         await replaceSlots(tx, id, schedule.slots.map((s) => toSlotInsert(s, id)));
         if (med.status === "active") {
           await ensureDoseEvents(tx, {
             userId,
             medicationId: id,
+            timeZone: timezone,
             from: med.startDate,
-            to: todayKey(timezone),
           });
         }
       }
@@ -205,13 +205,13 @@ export const medicationService = {
       await repoSetStatus(tx, userId, id, status);
 
       if (status === "paused") {
-        await voidFutureEvents(tx, userId, id, todayKey(timezone));
+        await voidFutureEvents(tx, userId, id, todayKey(timezone), timezone);
       } else {
         await ensureDoseEvents(tx, {
           userId,
           medicationId: id,
+          timeZone: timezone,
           from: med.startDate,
-          to: todayKey(timezone),
         });
       }
 
@@ -223,7 +223,7 @@ export const medicationService = {
   },
 
   /** archive → soft delete; history preserved; future events voided (§8.3). */
-  async archive(db: Db | DbTx, userId: string, id: string): Promise<MedicationDTO> {
+  async archive(db: Db | DbTx, userId: string, timezone: string, id: string): Promise<MedicationDTO> {
     return db.transaction(async (tx) => {
       const med = await getMedicationById(tx, userId, id);
       if (!med) throw new TRPCError({ code: "NOT_FOUND", message: "Medication not found." });
@@ -231,7 +231,7 @@ export const medicationService = {
       const archived = await repoArchive(tx, userId, id);
       if (!archived) throw new TRPCError({ code: "NOT_FOUND", message: "Medication not found." });
 
-      await voidFutureEvents(tx, userId, id, todayKey("UTC"));
+      await voidFutureEvents(tx, userId, id, todayKey(timezone), timezone);
 
       const rows = await listSlotsByMedicationIds(tx, [id]);
       return toMedicationDTO(archived, rows);

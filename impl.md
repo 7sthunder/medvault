@@ -43,7 +43,7 @@
 | 09 | Global shell & navigation `(app)` | `done` | `a583979` | pushed to `origin/main` |
 | 10 | Onboarding | `pending` | — | built after 11/12 (depends on `medicationService.create`) |
 | 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
-| 12 | Medication schedule & dose-event generation (domain) | `pending` | — | |
+| 12 | Medication schedule & dose-event generation (domain) | `done` | `[commit-12]` | verified: typecheck/lint/test/build |
 | 13 | Dose state machine + reconcile (missed detection) (domain) | `pending` | — | |
 | 14 | Today's Schedule page + dose UI | `pending` | — | |
 | 15 | Medication CRUD UI (list / detail / new / edit) | `pending` | — | |
@@ -890,3 +890,74 @@ validation (via `medicationSchema` at the router boundary), `frequencyLabel` der
   sample-med path is real, not stubbed.
 - `medicationService` methods accept `Db | DbTx`; keep that when adding Phase 12 internals.
 - `aadhiRouters` is the Phase 09-territory router aggregation point — every Phase 10–15 router registers there.
+
+---
+
+## Phase 12 — Medication schedule & dose-event generation (domain)
+
+**Plan reference:** `plan.md` §21 Phase 12 (`plan.md:1039`) + §10.2 (`plan.md:503`).
+**Objective met:** the scheduling engine per §10.2 — pure `expandSchedule` in
+`shared/calc/schedule.ts`, idempotent `(medicationId, scheduledFor)` upsert in
+`doseEvents/service.ts` (`ensureDoseEvents`), `voidFutureEvents` (only unresolved rows),
+`extendHorizon`/`catchUp` entry points, an hourly `jobs/scheduler.ts` skeleton, and a
+schedule read-facade in `medicationSchedules/service.ts`. Medication CRUD now threads the
+user's timezone through every generation/void seam.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/calc/schedule.ts` | created (pure) | `expandSchedule(med, slots, from, to, tz)` — deterministic day×enabled-slot expansion, med start/end bounds, weekday filter, per-slot dosage override, tz-correct instants, guard loop ceiling |
+| `src/shared/calc/schedule.test.ts` | created | 10 pure tests: once/twice/custom-weekdays, dosage override + fallback, inclusive start/end, disabled slots, weekdays filter, determinism, inverted/empty windows, tz-offset instants, leap/year rollover |
+| `src/server/domain/doseEvents/service.ts` | rewritten | Phase 11 stubs → real engine: `ensureDoseEvents` (clamped window ⊆ [startDate,endDate] ∪ today+HORIZON, `onConflictDoNothing` on the `(medicationId, scheduledFor)` unique, paused/archived → skipped), `voidFutureEvents` (statuses `upcoming/due/snoozed` + `scheduledFor ≥ fromDay` only), `extendHorizon`, `catchUp` (Phase 12 → gap-fill; Phase 13 folds reconcile) |
+| `src/server/domain/medicationSchedules/service.ts` | created | read facade: `listScheduleSlots(db, medicationId)` + `listSchedulesByMedicationIds` → `ScheduleSlotDTO` map, reused by Phase 14+ reads |
+| `src/server/domain/jobs/scheduler.ts` | created | `runCatchUpPass(db)` (all onboarded users → `catchUp`), `startScheduler({intervalMs})` (server-side `setInterval`, fires once immediately, `stop()` handle, crash-safe fire-and-forget) |
+| `src/server/domain/doseEvents/service.test.ts` | created | DB-gated 5 tests in rollback-only tx: 2/day boundary count, idempotency across default horizon, void preserves history, extend/catchUp parity, paused-skip |
+| `src/server/domain/medications/service.ts` | edited | seams now pass `timeZone`/`timezone`; `archive` gains a `timezone` param so voiding uses the user's clock |
+| `src/server/trpc/routers/medication.ts` | edited | `archive` passes `ctx.user.timezone ?? "UTC"` |
+
+### Deviations & decisions (precise > faithful)
+
+- **`ensureDoseEvents` requires a per-call `timeZone`** rather than defaulting to UTC. §10.2
+  schedules are *local* times, so a wrong zone silently shifts every instant (fatal for
+  dashboard/schedule consistency). The Phase 12 seam contracts the caller to pass it.
+- **Explicit `to` bypasses the horizon clamp** (only *omitted* `to` = `today + HORIZON_DAYS`).
+  This lets the acceptance test assert `2/day` on a fixed past window while the prod code
+  path still grows to the horizon; deterministic `from ≤ to` guard returns early instead of
+  looping on inverted windows.
+- **`dose_events.scheduleId` links generation to the producing slot** and `statusUpdatedAt`
+  is stamped to `scheduledFor` so reconcile/dashboard ordering matches the schedule.
+- **`voidFutureEvents` never touches resolved rows** (`taken/skipped/missed`) — §10.2
+  "history preserved". It also deliberately does not write a `voided` audit row yet: that
+  lands with Phase 13's `reconcile.ts` (which owns the `dose_actions` audit contract).
+- **`jobs/scheduler.ts` is opt-in** — it never auto-starts (no side effects on import),
+  matching the frozen-config/no-surprise policy; a future integration point (Phase 13/14)
+  calls `startScheduler` from the server bootstrap.
+- **`medicationSchedules/service.ts` stays read-only**; the *write* path remains the
+  medication service's `replaceSlots` (Phase 11 owns schedule writes).
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **26 files, 202 tests passed** (new: calc schedule 10, dose-events DB 5;
+  `seed.test.ts` count-stability still green thanks to the rollback-only DB tests)
+- `pnpm build` — compiled clean (10 routes, `(app)` children dynamic)
+- `pnpm test:e2e` — untouched (no UI surface changed in this phase)
+
+### Commit / push
+
+- Phase 12 changes committed on `main` (see matrix row for hash) — pushed to `origin/main`.
+
+### Hand-off notes for later phases
+
+- Phase 13 implements `shared/calc/doseState.ts` (pure status machine §10.3) and wires
+  `reconcile.run(...)` into `catchUp` + the scheduler tick; the seam `doseEvents/service.ts`
+  and `jobs/scheduler.ts` are ready for it.
+- Phase 10 onboarding can call `medicationService.create` (sample med 2×/day) — its
+  `ensureDoseEvents(...)` seam now generates real events; the "Add Metformin" call produces
+  genuine 2/day rows immediately.
+- Phase 14's `/schedule` reads should call `catchUp` (or reuse a `reconcile` superset) before
+  querying so stale-past days are guaranteed generated.
+- `medicationSchedules.listSchedulesByMedicationIds` is the join shape Phase 15's detail page
+  wants; keep it the single schedule read facade.
