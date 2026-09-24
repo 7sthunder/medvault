@@ -34,7 +34,7 @@
 |---|---|---|---|---|
 | 01 | Repository & Stitch analysis | `done` | `5dfeb44` | pushed to `origin/main` |
 | 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `done` | `6eabea5` | verified: typecheck/lint/test/build/e2e |
-| 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `pending` | — | |
+| 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done` | `1721431` | verified: typecheck/lint/test/build/e2e |
 | 04 | Landing page migration (`/` from Stitch) | `pending` | — | |
 | 05 | Database foundation (Drizzle schema + client + migrate + seed) | `pending` | — | |
 | 06 | Authentication & session plumbing (Better Auth) | `pending` | — | |
@@ -219,3 +219,89 @@ shadcn/ui scaffold, ESLint/Prettier, Vitest, Playwright, drizzle config, env sca
 - `components.json` `css` and `aliases` point at the real locations now; keep them in sync when repo structure changes.
 
 ---
+
+## Phase 03 — Design system implementation (Stitch tokens → Tailwind theme + primitives)
+
+**Plan reference:** `plan.md` §5, §12, §5.5 (input/button recipes), §1/§2 (medication card +
+list-row stories); Phase 03 spec (`plan.md:859`). Token facts: `docs/stitch-analysis.md` §7.
+**Objective met:** every §5.3/§5.4 colour/shadow is a declared Tailwind v4 token in
+`src/app/globals.css` (machine-checked by `src/lib/token-doc.test.ts`); brand assets, the full
+`ui/` catalog, custom primitives, and a dev-only `/design-system` catalogue with the two Stitch
+stories (medication card stack + list rows) are in place. Features are lint-forbidden from
+hardcoding brand hex.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/app/globals.css` | rewritten | static `@theme` (Stitch palette §5.3 + shadows §5.4 + radius 0.875rem), `@theme inline` semantic surfaces flipping in `.dark` (§5.7), glass utilities, hero-gradient var, scrollbar/selection/focus-visible base |
+| `src/lib/token-doc.ts` | created | machine-readable §5 map (colour + shadow tokens, `provenance: stitch/extended`, radius/gradient constants) |
+| `src/lib/token-doc.test.ts` | created | asserts globals.css carries exactly the token `cssVar:value` pairs (§3/§5 drift check), extended-token caveat, light+dark surface overrides, label uniqueness |
+| `src/shared/status.ts` | created | §12 DoseStatus union + `DOSE_STATUS_META` (label/tone/aria/icon/tint-classes/raw hex) |
+| `src/shared/brand.ts` | created | §5.1 brand constants (`BRAND`, `LOGO`, AI brand) |
+| `src/components/brand/{Logo,Wordmark,Brand}.tsx` | created | §5.1 tile (36–44px radius 10–12 gradient + leaf shadow), wordmark (Med+Vault), lockup + `AiBrandLockup` |
+| `src/components/ui/status-{indicator,badge}.tsx` | created | §12 compact + pill chips, never colour-only (icon + text + aria-label, ping ring for due-now) |
+| `src/components/ui/{chip,section-label,stat-card,list-row,empty-state,error-state,form-field,time-picker,date-picker}.tsx` | created | §5.5/§2 custom primitives |
+| `src/components/ui/{drawer,confirmation-dialog}.tsx` | created | bottom-sheet (Base UI Drawer) + confirm dialog wrappers |
+| `src/components/ui/button.tsx` | modified | §5.5 restyle: default adds `shadow-primary-btn` + `hover:bg-primary-dark`; **secondary variant now neutral white+border** (see deviation) |
+| `src/components/ui/input.tsx` | modified | §5.5 restyle: h-9, stronger border `border-strong`, 4px `primary-ring` focus, white bg |
+| `src/app/page.tsx` | modified | placeholder now uses `Brand` lockup + tokens (per Phase 03 spec) |
+| `src/app/(marketing)/design-system/page.tsx` | created | dev-only catalogue: tokens, type §5.2, buttons, forms, §12 status grid, med-card/list-row stories, overlays, feedback |
+| `eslint.config.mjs` | modified | `src/features/**` hex/rgba literal ban + `next-env.d.ts` triple-slash exemption |
+| `vitest.setup.ts` | modified | added RTL `cleanup()` `afterEach` (tests share a jsdom document otherwise) |
+| `src/components/ui/primitives.test.tsx`, `status-indicator.test.tsx` | created | primitive smoke + §12 a11y tests (36 total) |
+| `e2e/design-system.spec.ts` | created | dev-server checks: Stitch stories + 8 status chips + token swatch presence |
+
+20-registry-primitive batch (textarea/select/checkbox/radio-group/switch/label/badge/card/separator/
+avatar/tooltip/dialog/dropdown-menu/popover/tabs/sonner/alert/skeleton/pagination) came from
+`pnpm dlx shadcn@latest add ...` and adds `@base-ui/react@^1.8` + `sonner@^2.0.8`.
+
+### Deviations & decisions (precise > faithful)
+
+- **`--color-secondary` name collision (plan decides):** the Stitch token is `#06b6d4` and keeps the
+  `secondary` name (Stitch's "secondary" *is* cyan). shadcn's *semantic* secondary (grey) is
+  repurposed: Button's `secondary` variant now renders white bg + border + ink text (§5.5
+  "secondary/neutral" button). Cyan surfaces stay reachable via `bg-secondary`.
+- **Status chips:** `paused` uses `bg-border` (#e2e8f0) and `canceled` an outline chip
+  (`bg-background` + border + ink-400) instead of solid `#f8fafc` — solid near-white on a white card
+  reads as "no chip". `due-now` keeps Stitch's pulsing primary ring.
+- **Violet has no tint in Stitch** (§7.1 verified). Violet chips use default-palette
+  `violet-100`/`violet-600`; chip *text* uses contrast-adjusted default shades
+  (cyan-800/pink-600/blue-600/amber-600) because the §12 tint+full-colour pairing fails AA on small
+  text — Stitch's own chips used the darker shades.
+- **Semantic surfaces:** dark-aware tokens (background/foreground/card/popover/muted/accent/border/
+  input/sidebar) are `@theme inline` + `:root`/`.dark`; brand palette stays a static `@theme` so
+  `bg-primary`/`text-ink-600`/`shadow-card` emit as utilities AND CSS vars (the token test reads the
+  emitted vars).
+- **Focus tokens:** §5.3 focus mask kept as `primary-ring` (`rgba(16,185,129,0.12)`), distinct from
+  the `ring` focus-visible outline colour `#10b981`.
+- **Drawer:** `@base-ui/react@1.8` ships a native `drawer` (bottom-sheet, swipe, snap, trap-focus);
+  wrapped instead of hand-rolling a sheet.
+- **`/design-system` gating:** rendered only when `NODE_ENV === "development"`, else
+  `redirect("/")` at module top — satisfies "dev-only"; production build verified static.
+- **ESLint hex ban** targets `src/features/**` (not created yet) — documented now so Phase 07+
+  features are token-clean from day one (DoD Phase 03 #4).
+- `next-env.d.ts` triple-slash path reference (typed routes) trips `@typescript-eslint/
+  triple-slash-reference`; Next regenerates the file — exempted via override.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — 4 files, **36 tests passed** (token-doc 8, status/§12 18, primitives 8, button 2)
+- `pnpm build` — compiled; `/`, `/_not-found`, `/design-system` all static (3 routes)
+- `pnpm test:e2e` — 3 chromium tests passed (home smoke + design-system stories + token swatches)
+
+### Commit / push
+
+- `1721431` `Phase 03: Stitch token system + design-system catalogue + primitives`
+- pushed to `origin/main`; `git status` clean afterwards.
+
+### Hand-off notes for later phases
+
+- Phase 04 consumes `docs/stitch-analysis.md` §10 port list; `(marketing)` currently only carries
+  `/design-system`, Phase 04 adds `(marketing)/layout.tsx` + the landing `/`.
+- Phase 05+ must render through the token set — the `src/features/**` hex lint gate is active.
+- Dark theme flips surfaces only (§5.7); status chips/glass stay light-first — per plan dark polish
+  lands with Phase 26 (`appearance` toggling); `@custom-variant dark` is already wired.
+- Component tests depend on RTL `cleanup()` now in `vitest.setup.ts` — keep it for Phase 27 suites.
