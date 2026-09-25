@@ -33,6 +33,7 @@ All values go in `.env` (git-ignored, never commit secrets). See `.env.example` 
 | `BETTER_AUTH_SECRET`                                                | Auth signing secret — `openssl rand -base64 32`                                |
 | `BETTER_AUTH_URL`                                                   | App origin (`http://localhost:3000` in dev)                                    |
 | `AI_GEMINI_API_KEY`                                                 | Optional — Gemini key for AI insights                                          |
+| `AI_GEMINI_MODEL`                                                   | Optional — insight text model (default `gemini-3.1-flash-lite`)                |
 | `DEMO_CLOCK_OFFSET_MINUTES`                                         | Optional — demo clock offset (`0` = real time)                                 |
 
 ---
