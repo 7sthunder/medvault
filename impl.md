@@ -433,7 +433,7 @@ insert demo row".
   17-day window (today−16…today, last 7 days perfect). Documented as a deviation so Phase 25's
   acceleration can widen it without breaking counts.
 - **§19 construction pinned:** Metformin 08:00/20:00 daily + Vitamin D 10:00 daily + Aspirin 08:00 daily
-  all 17 days; B12 09:00 starts day 1 (16 days). Misses = Metformin 20:00 days 0–4 (5); skips = B12 days
+  all 17 days; B12 09:00 starts day 1 (16 days). Misses = Metformin 20:00 days 0–3 + 9 (5); skips = B12 days
   1–3 (3); snoozes = Vitamin D days 0–5 (6) + Metformin 20:00 days 5–6 (2) → 8, all snoozed-then-taken.
   Streak flag applied to the perfect tail window only (days ≥ 10), so the day-level flag reports the §19
   "7-day current streak".

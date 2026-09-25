@@ -10,8 +10,10 @@
  */
 import { medicationRouter } from "./medication";
 import { onboardingRouter } from "./onboarding";
+import { adherenceRouter } from "./adherence";
 
 export const aadhiRouters = {
   medication: medicationRouter,
   onboarding: onboardingRouter,
+  adherence: adherenceRouter,
 };

@@ -22,6 +22,9 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
+    // DB-backed suites (seed, dose events, adherence) share the live Supabase demo user;
+    // serialize files so concurrent `seedDemoWorkspace` runs can't clobber one another.
+    fileParallelism: false,
     coverage: {
       provider: "v8",
       include: ["src/shared/calc/**"],

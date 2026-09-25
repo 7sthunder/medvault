@@ -26,7 +26,7 @@ export const DEMO_PATIENT_NAME = "Arun Kumar";
    Window: today-16 … today (17 calendar days). 84 doses total:
    Metformin 08:00 + 20:00 daily (17d), Vitamin D 10:00 daily (17d), Aspirin 08:00 daily
    (17d), Vitamin B12 09:00 daily (16d — starts day 1). The final 7 days are perfect.
-   Outcomes: 5 missed (Metformin evening, days 0-4), 3 skipped (B12, days 1-3),
+   Outcomes: 5 missed (Metformin evening, days 0-3 + 9), 3 skipped (B12, days 1-3),
    8 snoozed-then-taken (Vitamin D morning pattern 6 + Metformin evening 2).
    Totals: 84 scheduled / 76 taken / 5 missed / 3 skipped → 76/84 = 90.5%. */
 
@@ -38,7 +38,7 @@ const MEDS = [
 ] as const;
 
 const DAY_COUNT = 17; // days 0..16; >=10 is the perfect streak window
-const MET_PM_MISSED_DAYS = [0, 1, 2, 3, 4] as const; // 5 missed (Metformin 20:00)
+const MET_PM_MISSED_DAYS = [0, 1, 2, 3, 9] as const; // 5 missed (Metformin 20:00); last miss on day 9 so the honest §10.5 rule yields exactly the 7-day tail streak
 const B12_SKIPPED_DAYS = [1, 2, 3] as const; // 3 skipped
 const VITD_SNOOZED_DAYS = [0, 1, 2, 3, 4, 5] as const; // 6 snoozes (morning pattern)
 const MET_PM_SNOOZED_DAYS = [5, 6] as const; // 2 more snoozes → 8 total

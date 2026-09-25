@@ -63,6 +63,9 @@ export const INSTRUCTION_OVERRIDE_MAX = 200;
 /** Maximum report span in days (§13 reportsSchema). */
 export const REPORT_MAX_SPAN_DAYS = 366;
 
+/** Days of `adherence_daily` rows kept per user (prune scope §10.5). */
+export const ADHERENCE_PRUNE_DAYS = 120;
+
 /* ── §19 / §10.8 — Demo identities ────────────────────────────────────────── */
 
 export const DEMO_USER_EMAIL = "demo@medvault.demo";

@@ -9,6 +9,9 @@ export type Db = NodePgDatabase<typeof schema>;
 /** Transaction client type handed to `db.transaction` callbacks. */
 export type DbTx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
+/** Both a migrated client and a nested transaction accept the same SQL surface. */
+export type DbClient = Db | DbTx;
+
 /**
  * RFC 9562 UUIDv7 — time-ordered so IDs sort by creation. Used for every `id text primary key`.
  * Falls back through the same crypto source as `crypto.randomUUID()`.
