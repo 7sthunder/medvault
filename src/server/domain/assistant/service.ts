@@ -49,6 +49,7 @@ import {
   nextQuestion,
   unitHint,
 } from "./intake";
+import { buildSnapshot } from "./snapshot";
 
 /* ── System prompts ──────────────────────────────────────────────────────── */
 
@@ -100,6 +101,18 @@ const EXTRACTION_PROMPT = [
   "  short summary of what you collected and ask them to confirm it.",
   "- `reply` is speech only. It is NEVER stored and NEVER treated as data, so do not put new",
   "  medicine details in it — only ask a question.",
+  "",
+  "ANSWERING QUESTIONS ABOUT THEIR OWN DATA:",
+  "Each turn includes a FACTS block describing that patient's own record. Use it, and only it:",
+  "- If the patient asks a question about their medicines, schedule or recent doses, set",
+  '  `intent` to "question", put the answer in `reply`, and set EVERY medication field to null.',
+  "- Answer ONLY from the FACTS block. If the answer is not in it, say plainly that you do not",
+  "  have that information. NEVER guess, estimate, or fill a gap from general knowledge.",
+  "- Quote their own numbers back to them (names, doses, times, counts) exactly as written.",
+  "- NEVER give clinical advice. Do not say to start, stop, skip, change or double a dose, and",
+  "  do not name or suggest a condition. Point them to their prescriber or pharmacist instead.",
+  '- `intent` stays "intake" when they are dictating a medicine, even if the sentence also',
+  "  contains words like 'take' or 'daily'.",
 ].join("\n");
 
 const TRANSCRIBE_PROMPT = [
@@ -240,9 +253,28 @@ export const assistantService = {
       };
     }
 
-    // 2. What did they just say?
-    const patch = await extract(key, utterance, draft, todayKey, timeZone);
+    // 2. What did they just say? The prompt carries a read-only snapshot of their own record
+    // so the same call can also answer a question, with no extra round trip. A snapshot failure
+    // must never break intake, so it degrades to "no facts" and the prompt rules then make the
+    // model say it has no information rather than invent any.
+    const facts = await buildSnapshot(userId, timeZone, at, db)
+      .then((s) => s.text)
+      .catch(() => "");
+    const patch = await extract(key, utterance, draft, todayKey, timeZone, facts);
     const language = patch.language ?? detectLanguage(utterance);
+
+    // 2b. A question about their own data. The draft is deliberately left alone: answering
+    // "which medicines do I have?" must not look like intake, and must not request a slot.
+    if (patch.intent === "question") {
+      return {
+        status: "answered",
+        draft,
+        missing: missingSlots(draft),
+        question: patch.reply ?? "I do not have that information yet.",
+        language,
+        medicationId: null,
+      };
+    }
 
     if (patch.offTopic || !patch.understood) {
       const missing = missingSlots(draft);
@@ -326,6 +358,7 @@ async function extract(
   draft: MedicationDraft,
   todayKey: string,
   timeZone: string,
+  facts: string,
 ): Promise<ExtractionPatch> {
   const known = knownSoFar(draft, todayKey);
   const payload = await geminiGenerate(key, {
@@ -334,6 +367,7 @@ async function extract(
       {
         text: [
           `Today's date is ${todayKey} (timezone ${timeZone}).`,
+          `FACTS about this patient (read-only, the only data you may answer from):\n${facts}`,
           known ? `Already collected: ${known}.` : "Nothing collected yet.",
           `Patient says: "${utterance}"`,
         ].join("\n"),

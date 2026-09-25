@@ -24,6 +24,13 @@ const DRAFT_LABELS: { key: keyof MedicationDraft; label: string }[] = [
   { key: "startDate", label: "Start" },
 ];
 
+/** Opening suggestions, so it is obvious the bot reads their record and not just intake. */
+const STARTERS = [
+  "Which medicines am I taking?",
+  "What's my next dose?",
+  "How have I done this week?",
+];
+
 export function AssistantThread({
   variant,
   className,
@@ -75,12 +82,28 @@ export function AssistantThread({
     >
       <div aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
         {messages.length === 0 ? (
-          <EmptyState
-            compact
-            icon={Mic}
-            title="Tell me about a medicine"
-            description="Speak or type. I will ask for anything I miss, then read it back before saving."
-          />
+          <div className="py-2">
+            <EmptyState
+              compact
+              icon={Mic}
+              title="Tell me about a medicine, or ask me something"
+              description="I can add a medication by listening, and answer questions about your own record."
+            />
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              {STARTERS.map((text) => (
+                <Button
+                  key={text}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy}
+                  onClick={() => void send(text)}
+                >
+                  {text}
+                </Button>
+              ))}
+            </div>
+          </div>
         ) : (
           messages.map((m) => (
             <ChatBubble key={m.id} role={m.kind === "system" ? "system" : m.role}>

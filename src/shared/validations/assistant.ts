@@ -109,6 +109,11 @@ export const extractionPatchSchema = z.object({
    * only reads the typed fields above.
    */
   reply: z.string().trim().min(1).max(300).nullish().default(null),
+  /**
+   * What the patient was doing. `question` means they asked about their own data and want an
+   * answer, not intake — the draft is left untouched and no follow-up slot is requested.
+   */
+  intent: z.enum(["intake", "question"]).nullish().default("intake"),
 });
 export type ExtractionPatch = z.infer<typeof extractionPatchSchema>;
 
@@ -131,6 +136,8 @@ export const ASSISTANT_TURN_STATUSES = [
   "saved",
   /** Nothing usable was understood this turn. */
   "unclear",
+  /** The patient asked about their own data and got an answer. The draft is unchanged. */
+  "answered",
 ] as const;
 export type AssistantTurnStatus = (typeof ASSISTANT_TURN_STATUSES)[number];
 

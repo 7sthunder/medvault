@@ -34,6 +34,7 @@ const nothing = (over: Partial<ExtractionPatch> = {}): ExtractionPatch => ({
   times: [],
   language: null,
   reply: null,
+  intent: "intake",
   ...over,
 });
 

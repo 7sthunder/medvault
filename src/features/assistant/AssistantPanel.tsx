@@ -48,12 +48,14 @@ export function AssistantPanel({
         <header className="mb-3">
           <h1 className="font-heading text-2xl font-extrabold text-ink-900">Voice assistant</h1>
           <p className="mt-1 text-sm text-ink-600">
-            Add a medication by talking. I will ask for anything I miss and read it back before
-            saving.
+            Add a medication by talking, or ask about your own record — your medicines, your next
+            dose, how this week has gone.
           </p>
         </header>
       ) : (
-        <p className="mb-3 text-sm text-ink-600">Add a medication by talking.</p>
+        <p className="mb-3 text-sm text-ink-600">
+          Add a medication by talking, or ask me something.
+        </p>
       )}
       <AssistantThread variant={variant} className="min-h-0 flex-1" />
     </div>

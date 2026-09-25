@@ -169,6 +169,55 @@ describe("assistantService.turn", () => {
     expect(turn.language).toBe("English");
     expect(turn.question).toMatch(/how much/i);
   });
+
+  it("answers a question about their own data without touching the draft", async () => {
+    fetchMock.mockResolvedValue(
+      textResponse(
+        JSON.stringify({
+          understood: true,
+          offTopic: false,
+          intent: "question",
+          // A hostile model might still fill fields while answering; they must be ignored.
+          name: "Metformin",
+          dosageAmount: 500,
+          dosageUnit: "mg",
+          startInDays: 0,
+          times: [{ hour: 9, minute: 0, daysOfWeek: [] }],
+          language: "English",
+          reply: "You are taking Metformin 500 mg.",
+        }),
+      ),
+    );
+
+    const turn = await assistantService.turn(db, "user-1", TZ, {
+      utterance: "what medicines am I taking?",
+    });
+
+    expect(turn.status).toBe("answered");
+    expect(turn.question).toBe("You are taking Metformin 500 mg.");
+    // The draft is untouched, so answering a question can never half-fill a medication.
+    expect(turn.draft).toEqual(emptyDraft());
+    expect(turn.draft.name).toBeNull();
+    expect(turn.draft.slots).toEqual([]);
+  });
+
+  it("puts the patient's own facts in the prompt, and only the extraction call", async () => {
+    fetchMock.mockResolvedValue(
+      textResponse(JSON.stringify({ understood: false, offTopic: false, intent: "intake" })),
+    );
+
+    await assistantService.turn(db, "user-1", TZ, { utterance: "hello" });
+
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body ?? "{}")) as {
+      contents: { parts: { text: string }[] }[];
+    };
+    const prompt = (body.contents?.[0]?.parts ?? []).map((p) => p.text).join("");
+
+    expect(prompt).toContain("FACTS about this patient");
+    expect(prompt).toContain('Patient says: "hello"');
+    // Exactly one model call: answering a question must not cost a second round trip.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("assistantService.transcribe", () => {
