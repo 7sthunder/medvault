@@ -11,6 +11,7 @@ export default defineConfig({
   reporter: "list",
   // Cold `next dev` compiles of fresh routes can exceed 30s on this machine.
   timeout: 60_000,
+  expect: { timeout: 15_000 },
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
@@ -22,7 +23,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm dev",
+    // Dev server by default, as before. Set E2E_TARGET=prod to run against the production build,
+    // which is faster and matches what users get, but note that dev-only pages such as
+    // /design-system redirect to / outside development.
+    command: process.env.E2E_TARGET === "prod" ? "pnpm start" : "pnpm dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

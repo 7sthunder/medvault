@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
 
+// The /design-system catalogue intentionally redirects to / outside development
+// (src/app/(marketing)/design-system/page.tsx), so it only applies to E2E_TARGET=prod runs.
+test.skip(
+  process.env.E2E_TARGET === "prod",
+  "dev-only catalogue; redirect to / under the production server",
+);
+
 test("design system catalogue renders Stitch stories + status chips", async ({ page }) => {
   await page.goto("/design-system");
 
