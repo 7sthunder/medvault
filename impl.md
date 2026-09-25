@@ -45,7 +45,7 @@
 | 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
 | 12 | Medication schedule & dose-event generation (domain) | `done` | `4f6e5b4` | verified: typecheck/lint/test/build |
 | 13 | Dose engine & adherence engine (domain) | `done` | `9a72716` | verified: typecheck/lint/test |
-| 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `in_progress` | — | schedule UI + routers; adherence pages split to parallel worker |
+| 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `done` | `14f378f` | verified: typecheck/lint/test; adherence pages split to parallel worker |
 | 15 | Medication CRUD UI + Dashboard | `pending` | — | |
 | 16 | History + Reports + Notifications | `pending` | — | |
 | 17 | Caregiver system + AI insights | `pending` | — | |
