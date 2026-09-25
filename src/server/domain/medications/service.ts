@@ -22,6 +22,7 @@ import {
   updateMedication,
 } from "./repo";
 import { ensureDoseEvents, voidFutureEvents } from "../doseEvents/service";
+import { medicationExtras } from "./extras";
 
 export interface CreateMedicationArgs {
   /** Validated by `medicationSchema` at the router boundary. */
@@ -50,7 +51,7 @@ function todayKey(timezone: string): string {
 
 export const medicationService = {
   /** All active meds + the archived bucket (§10.1 "non-archived + archived bucket"). */
-  async list(db: Db | DbTx, userId: string): Promise<MedicationListResult> {
+  async list(db: Db | DbTx, userId: string, timezone = "UTC"): Promise<MedicationListResult> {
     const [meds, archived] = await Promise.all([
       listActiveMedications(db, userId),
       listArchivedMedications(db, userId),
@@ -65,19 +66,34 @@ export const medicationService = {
       bucket.push(slot);
       slotsByMed.set(slot.medicationId, bucket);
     }
+    const dtos = (m: (typeof meds)[number]) => toMedicationDTO(m, slotsByMed.get(m.id) ?? []);
+    const active = meds.map(dtos);
+    const archivedDtos = archived.map(dtos);
+    const extras = await medicationExtras(db, userId, timezone, active);
     return {
-      medications: meds.map((m) => toMedicationDTO(m, slotsByMed.get(m.id) ?? [])),
-      archived: archived.map((m) => toMedicationDTO(m, slotsByMed.get(m.id) ?? [])),
+      medications: active
+        .map((dto) => {
+          const extra = extras.get(dto.id);
+          if (!extra) return dto;
+          return { ...dto, nextDoseAt: extra.nextDoseAt, adherencePercent: extra.adherencePercent };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      archived: archivedDtos,
     };
   },
 
-  async get(db: Db | DbTx, userId: string, id: string): Promise<MedicationDTO> {
+  async get(db: Db | DbTx, userId: string, id: string, timezone = "UTC"): Promise<MedicationDTO> {
     const med = await getMedicationById(db, userId, id);
     if (!med) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Medication not found." });
     }
     const slots = await listSlotsByMedicationIds(db, [med.id]);
-    return toMedicationDTO(med, slots);
+    const dto = toMedicationDTO(med, slots);
+    const extras = await medicationExtras(db, userId, timezone, [
+      { id: dto.id, name: dto.name, color: dto.color, frequencyLabel: dto.frequencyLabel },
+    ]);
+    const extra = extras.get(dto.id);
+    return extra ? { ...dto, nextDoseAt: extra.nextDoseAt, adherencePercent: extra.adherencePercent } : dto;
   },
 
   /** create → master row + schedule slots + dose-event generation seam (§10.1). */

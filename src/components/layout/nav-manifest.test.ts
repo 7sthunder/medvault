@@ -23,10 +23,10 @@ interface RouteOwner {
 
 const ROUTE_MANIFEST: Readonly<Record<string, RouteOwner>> = {
   "/dashboard": { owner: "bala", phase: 18, existsNow: true },
-  "/medications": { owner: "aadhi", phase: 15 },
+  "/medications": { owner: "aadhi", phase: 15, existsNow: true },
   "/schedule": { owner: "aadhi", phase: 14 },
   "/history": { owner: "bala", phase: 19 },
-  "/adherence": { owner: "bala", phase: 16 },
+  "/adherence": { owner: "bala", phase: 16, existsNow: true },
   "/insights": { owner: "hp", phase: 23 },
   "/reports": { owner: "bala", phase: 20 },
   "/caregiver": { owner: "hp", phase: 21 },
@@ -37,17 +37,25 @@ const ROUTE_MANIFEST: Readonly<Record<string, RouteOwner>> = {
   "/settings/appearance": { owner: "bala", phase: 24 },
   "/settings/data": { owner: "bala", phase: 24 },
   "/help": { owner: "hp", phase: 30 },
-  "/medications/new": { owner: "aadhi", phase: 15 },
-  "/medications/[id]": { owner: "aadhi", phase: 15 },
-  "/medications/[id]/edit": { owner: "aadhi", phase: 15 },
+  "/medications/new": { owner: "aadhi", phase: 15, existsNow: true },
+  "/medications/[id]": { owner: "aadhi", phase: 15, existsNow: true },
+  "/medications/[id]/edit": { owner: "aadhi", phase: 15, existsNow: true },
   "/schedule/[doseId]": { owner: "aadhi", phase: 14 },
-  "/adherence/medications": { owner: "bala", phase: 17 },
+  "/adherence/medications": { owner: "bala", phase: 17, existsNow: true },
   "/caregiver/alerts/[id]": { owner: "hp", phase: 21 },
   "/caregiver/accept": { owner: "hp", phase: 21 },
 };
 
 const EXPECTED_ROUTE_FILES: Readonly<Record<string, string>> = {
   "/dashboard": "src/app/(app)/dashboard/page.tsx",
+  "/medications": "src/app/(app)/medications/page.tsx",
+  "/medications/new": "src/app/(app)/medications/new/page.tsx",
+  "/medications/[id]": "src/app/(app)/medications/[id]/page.tsx",
+  "/medications/[id]/edit": "src/app/(app)/medications/[id]/edit/page.tsx",
+  "/adherence": "src/app/(app)/adherence/page.tsx",
+  "/adherence/medications": "src/app/(app)/adherence/medications/page.tsx",
+  "/schedule": "src/app/(app)/schedule/page.tsx",
+  "/schedule/[doseId]": "src/app/(app)/schedule/[doseId]/page.tsx",
 };
 
 describe("nav model invariants", () => {

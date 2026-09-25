@@ -19,6 +19,8 @@ export function useDoseActions() {
     void utils.schedule.day.invalidate({ date: today });
     void utils.schedule.get.invalidate();
     void utils.adherence.summary.invalidate();
+    void utils.dashboard.get.invalidate();
+    void utils.medication.list.invalidate();
   };
 
   const take = api.dose.take.useMutation({ onSuccess: invalidateDoseViews });

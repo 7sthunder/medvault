@@ -46,7 +46,7 @@
 | 12 | Medication schedule & dose-event generation (domain) | `done` | `4f6e5b4` | verified: typecheck/lint/test/build |
 | 13 | Dose engine & adherence engine (domain) | `done` | `9a72716` | verified: typecheck/lint/test |
 | 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `done` | `14f378f` | verified: typecheck/lint/test; adherence pages split to parallel worker |
-| 15 | Medication CRUD UI + Dashboard | `pending` | — | |
+| 15 | Medication CRUD UI + Dashboard | `done` | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section |
 | 16 | History + Reports + Notifications | `pending` | — | |
 | 17 | Caregiver system + AI insights | `pending` | — | |
 | 18 | Settings + Demo mode + /help | `pending` | — | |
@@ -1063,6 +1063,74 @@ display atoms. The adherence *pages* were split to a parallel worker (they consu
   should add a next-dose/due-now widget via `schedule.day` (or a future `dashboard.*` router).
 - Adherence pages should map `AdherenceDay[]`/`TrendDTO`/`TimeBucketStats` onto
   `TrendChart`/`StatCard`/`DataTable` — all shapes already exist on the `adherence.*` router.
+
+---
+
+## Phase 15 — Medication CRUD UI + Dashboard (+ deferred `/adherence` pages)
+
+**Plan reference:** `plan.md` §21 Phase 15 (phase bundle for medication CRUD + dashboard) + §11.4
+(`plan.md:613` dashboard reads), §11.8 adherence pages (`plan.md:655`), §10.6/§10.7 medication
+contracts. **Objective met:** dashboard read domain service + `dashboard.*` router registered on
+`aadhi`, dashboard feature widgets + `/dashboard`, medication CRUD UI from the parallel worker
+session (verified & committed together here), and the Phase 14-deferred `/adherence` +
+`/adherence/medications` pages — closing the entire §11.4/§11.8 UI surface.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/server/domain/dashboard/service.ts` | created | `dashboardService.get(db, userId, timeZone)` — composes `scheduleService.day`, `adherenceService.summary` (7-day window), `medicationService.list`, latest `ai_insights` row, caregiver counts → `DashboardDTO` |
+| `src/server/trpc/routers/dashboard.ts` | created | `dashboard.get` protected procedure |
+| `src/server/trpc/routers/aadhi.ts` | edited | registered `dashboard: dashboardRouter` |
+| `src/server/domain/medications/extras.ts` | created | `medicationExtras(db, userId, timeZone, meds)` — bulk `nextDoseAt` (soonest unresolved dose ≥ local-day start) + `adherencePercent` (30-day window via shared `medicationPerformance`) → `Map` |
+| `src/server/domain/medications/service.ts` | edited | `list`/`get` now fill `nextDoseAt`/`adherencePercent` via extras (were null placeholders); `timezone` param defaults `"UTC"` |
+| `src/features/dashboard/*` (9 files) | created | `DashboardPage`, `StatRail`, `NextDoseHero`, `TodayFeed`, `AdherenceWidget`, `MedSummary`, `InsightWidget`, `CaregiverStatus`, `QuickActions` |
+| `src/app/(app)/dashboard/page.tsx` | rewritten | server component (`requireUser`) → client `DashboardPage` |
+| `src/features/medications/*`, `src/app/(app)/medications/**` | created (worker) | medication CRUD UI: list table, detail page, new/edit forms — verified + committed here |
+| `src/features/adherence/{AdherencePage,MedicationAdherencePage}.tsx` | created | §11.8 pages: `RangePicker` (7/30/90d+custom), stat rail, trend line + 7-day avg, time-of-day bars, missed-dose heat strip; per-med `DataTable` |
+| `src/app/(app)/adherence/*`, `medications/page.tsx` | created | server wrappers → client pages |
+| `src/features/dose/useDoseActions.ts` | edited | invalidation extended: `schedule.day/get`, `adherence.summary`, `dashboard.get`, `medication.list` |
+| `src/components/layout/nav-manifest.test.ts` | edited | `existsNow: true` for the phase-15 routes (medications CRUD, adherence, dashboard) |
+| `src/server/domain/dashboard/service.test.ts` | created | 5 DB-gated tests: empty dashboard, seeded nextDose, frozen-clock missedToday, extras fill, latest insight |
+| `impl.md` | edited | Phase 15 row → `done`; this section appended |
+
+### Deviations & decisions (precise > faithful)
+
+- **Dashboard composes the existing canonical readers** (`schedule.day`, `adherence.summary`,
+  `medication.list`) instead of a bespoke read path — one source of truth per number.
+- **`adherencePercent`/`nextDoseAt` came directly from the med list** via `medicationExtras`
+  (bulk two-query, no N+1) so the med table + dashboard show live values, closing the Phase 11
+  "null until later" gap.
+- **`currentStreak` reflects the 7-day window** (summary is windowed); not a full-history streak.
+  Cost is small for the dashboard; `adherence.summary` unpicked ranges still give true streaks.
+- **Caregiver tile**: `newAlerts` caps at 50 and counts alerts where the user is patient *or*
+  caregiver; `connectedCount` = active relationships where I'm either side (deliberately quiet
+  until Phase 17 builds the full caregiver pages).
+- **No dead links**: `QuickActions` targets `/medications` (not the unbuilt `/reports`); the
+  insight widget renders no `/insights` link until that route exists.
+- **Adherence pages shipped in Phase 15** (they were the Phase 14 parallel-worker deferral) —
+  same `adherence.*` router, `RangePicker`/`TrendChart`/`StatCard`/`DataTable` primitives.
+- Ranges use `rangeByPreset` + `localDateKey` so the URL-independent picker stays in the user's
+  TZ; the router receives `{ range: "custom", from, to }` or a preset name.
+
+### Verification
+
+- `pnpm typecheck` — clean (one transient unused-var warning fixed; null→`ChartDatum` casts for
+  Recharts gap handling)
+- `pnpm eslint .` — clean (0 errors / 0 warnings)
+- `pnpm vitest run src/components src/shared src/lib src/features/dashboard src/features/medications src/features/adherence` —
+  **23 files, 204 tests passed** incl. the 5 DB-gated dashboard service tests (real DB, not skipped)
+- `pnpm vitest run src/components/layout/nav-manifest.test.ts src/server/domain/dashboard/service.test.ts` —
+  4 files / 31 tests passed
+
+### Hand-off notes for later phases
+
+- Phase 16 (history/reports/notifications) reuses the same `adherence.summary` shapes for
+  `/reports`; the `RangePicker` custom-range input is already wired.
+- `medicationExtras` is the seam later phases should reuse for any "next dose"/"adherence %"
+  enrichment (don't re-query in widgets).
+- The dashboard insight tile already reads the latest `ai_insights` row — Phase 17's AI insight
+  generation just has to write rows the same way.
 
 ---
 

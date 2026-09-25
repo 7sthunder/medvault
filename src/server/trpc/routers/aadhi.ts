@@ -13,6 +13,7 @@ import { onboardingRouter } from "./onboarding";
 import { adherenceRouter } from "./adherence";
 import { scheduleRouter } from "./schedule";
 import { doseRouter } from "./dose";
+import { dashboardRouter } from "./dashboard";
 
 export const aadhiRouters = {
   medication: medicationRouter,
@@ -20,4 +21,5 @@ export const aadhiRouters = {
   adherence: adherenceRouter,
   schedule: scheduleRouter,
   dose: doseRouter,
+  dashboard: dashboardRouter,
 };
