@@ -53,10 +53,7 @@ export async function seedSampleLogin() {
     }
   }
 
-  await db
-    .insert(userPreferences)
-    .values({ userId, theme: "light" })
-    .onConflictDoNothing();
+  await db.insert(userPreferences).values({ userId, theme: "light" }).onConflictDoNothing();
 
   return { userId, accounts: existing.length === 0 ? 1 : existing.length };
 }
