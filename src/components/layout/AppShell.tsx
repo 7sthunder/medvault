@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -8,7 +8,19 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { ClockProvider } from "@/components/layout/clock-context";
 import { ShellContext, type ShellUser } from "@/components/layout/shell-context";
+import { VoiceIntake } from "@/features/assistant/VoiceIntake";
 import { TRPCProvider } from "@/lib/trpc";
+import { cn } from "cn";
+
+const SIDEBAR_STORAGE_KEY = "meditrackai.sidebar-collapsed";
+
+function readStoredCollapsed(): boolean {
+  try {
+    return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
 
 export function AppShell({
   children,
@@ -31,6 +43,24 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Applied after mount so the server-rendered markup and the first client render agree.
+  useEffect(() => {
+    setSidebarCollapsed(readStoredCollapsed());
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
+      } catch {
+        // Storage can be unavailable (private mode); the toggle still works for this session.
+      }
+      return next;
+    });
+  };
 
   return (
     <TRPCProvider>
@@ -38,9 +68,22 @@ export function AppShell({
         <ShellContext.Provider value={{ pathname, user, isDemo, basePath }}>
           <div className="min-h-dvh bg-background">
             <SkipLink />
-            <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
-            <div className="flex min-h-dvh flex-col lg:pl-64">
-              <TopNav onOpenSidebar={() => setSidebarOpen(true)} />
+            <Sidebar
+              open={sidebarOpen}
+              onOpenChange={setSidebarOpen}
+              collapsed={sidebarCollapsed}
+            />
+            <div
+              className={cn(
+                "flex min-h-dvh flex-col transition-[padding] duration-200",
+                sidebarCollapsed ? "lg:pl-16" : "lg:pl-64",
+              )}
+            >
+              <TopNav
+                onOpenSidebar={() => setSidebarOpen(true)}
+                sidebarCollapsed={sidebarCollapsed}
+                onToggleSidebar={toggleSidebar}
+              />
               {/* Skip-link target. Deliberately a plain focusable div, not a second <main>: every
                 feature page already renders its own <main> landmark, and nesting or duplicating
                 them is invalid and trips axe's `landmark-no-duplicate-main`. */}
@@ -54,6 +97,10 @@ export function AppShell({
             </div>
             <BottomNav />
             {overlay}
+            {/* Conversational "add a medication" entry, available from any screen. Renders
+                nothing when no Gemini key is configured, so a self-hosted instance without
+                AI never shows a dead microphone button. */}
+            <VoiceIntake />
           </div>
         </ShellContext.Provider>
       </ClockProvider>

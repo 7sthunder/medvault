@@ -1,13 +1,13 @@
-# MedVault
+# MediTrack AI
 
-**AI-assisted medication adherence & tracking.** MedVault answers two questions: _"What medicine do I need to take now?"_ and _"How well am I following my schedule?"_
+**AI-assisted medication adherence & tracking.** MediTrack AI answers two questions: _"What medicine do I need to take now?"_ and _"How well am I following my schedule?"_
 
 - Next.js 15 (App Router) · React 19 · TypeScript (strict)
 - Tailwind CSS v4 + shadcn/ui (Base UI) · Lucide icons
 - PostgreSQL (Supabase) · Drizzle ORM · Better Auth
 - Vitest + React Testing Library · Playwright · pnpm
 
-> **AI boundary:** MedVault AI only surfaces adherence patterns (missed doses, timing, trends). It never diagnoses, prescribes, or makes clinical decisions.
+> **AI boundary:** MediTrack AI only surfaces adherence patterns (missed doses, timing, trends). It never diagnoses, prescribes, or makes clinical decisions.
 
 ---
 
@@ -34,6 +34,8 @@ All values go in `.env` (git-ignored, never commit secrets). See `.env.example` 
 | `BETTER_AUTH_URL`                                                   | App origin (`http://localhost:3000` in dev)                                    |
 | `AI_GEMINI_API_KEY`                                                 | Optional — Gemini key for AI insights                                          |
 | `AI_GEMINI_MODEL`                                                   | Optional — insight text model (default `gemini-3.1-flash-lite`)                |
+| `AI_GEMINI_STT_MODEL`                                               | Optional — voice intake speech→text (default `gemini-3.5-transcribe`)          |
+| `AI_GEMINI_TTS_MODEL`                                               | Optional — voice intake text→speech (default `gemini-3.8-flash-tts`)           |
 | `DEMO_CLOCK_OFFSET_MINUTES`                                         | Optional — demo clock offset (`0` = real time)                                 |
 
 ---

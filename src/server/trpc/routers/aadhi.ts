@@ -22,6 +22,7 @@ import { caregiverRouter } from "./caregiver";
 import { insightsRouter } from "./insights";
 import { settingsRouter } from "./settings";
 import { demoRouter } from "./demo";
+import { assistantRouter } from "./assistant";
 
 export const aadhiRouters = {
   medication: medicationRouter,
@@ -38,4 +39,5 @@ export const aadhiRouters = {
   insights: insightsRouter,
   settings: settingsRouter,
   demo: demoRouter,
+  assistant: assistantRouter,
 };

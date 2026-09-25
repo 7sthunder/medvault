@@ -13,7 +13,11 @@
 
 import { INSIGHT_CATEGORIES, SUGGESTED_ACTIONS } from "@/shared/enums";
 import { BRAND } from "@/shared/brand";
-import { log } from "@/lib/log";
+import {
+  firstText,
+  geminiGenerate as geminiRequest,
+  GEMINI_TIMEOUT_MS,
+} from "@/server/gemini/client";
 import type { InsightItem, InsightSnapshot } from "@/shared/validations/insight";
 
 /** Fixed, in-code coaching prompt (§10.10). Behavioral only. */
@@ -40,7 +44,7 @@ export interface AiInsightProvider {
   generate(snapshot: InsightSnapshot): Promise<unknown>;
 }
 
-export const AI_REQUEST_TIMEOUT_MS = 10_000;
+export const AI_REQUEST_TIMEOUT_MS = GEMINI_TIMEOUT_MS;
 
 /**
  * Default text model. Every `gemini-2.x` model now 404s for newly issued API keys
@@ -50,9 +54,6 @@ export const AI_REQUEST_TIMEOUT_MS = 10_000;
  * Override with `AI_GEMINI_MODEL`.
  */
 export const AI_DEFAULT_MODEL = "gemini-3.1-flash-lite";
-
-/** Backoff before retrying a retryable response (503 high demand / 429 rate limit). */
-const AI_RETRY_DELAYS_MS = [400, 1200] as const;
 
 /** Provider resolution — null (fallback) unless a Gemini key is configured. */
 export function resolveAiProvider(): AiInsightProvider | null {
@@ -66,17 +67,10 @@ export function resolveAiProvider(): AiInsightProvider | null {
 }
 
 async function geminiGenerate(key: string, snapshot: InsightSnapshot): Promise<unknown> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
   const model = process.env.AI_GEMINI_MODEL || AI_DEFAULT_MODEL;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  const body = JSON.stringify({
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: `${AI_SYSTEM_PROMPT}\n\nSnapshot:\n${JSON.stringify(snapshot)}` }],
-      },
-    ],
+  const payload = await geminiRequest(key, {
+    model,
+    parts: [{ text: `${AI_SYSTEM_PROMPT}\n\nSnapshot:\n${JSON.stringify(snapshot)}` }],
     generationConfig: {
       responseMimeType: "application/json",
       temperature: 0.3,
@@ -87,56 +81,9 @@ async function geminiGenerate(key: string, snapshot: InsightSnapshot): Promise<u
       thinkingConfig: { thinkingBudget: 0 },
     },
   });
-  const init: RequestInit = {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-    body,
-    signal: controller.signal,
-  };
-  try {
-    const res = await fetchWithRetry(url, init);
-    if (!res.ok) {
-      // Log the body, not just the status: "no longer available to new users" was invisible
-      // behind a bare 404 and every insight shipped from the rule engine instead.
-      const detail = await res.text().catch(() => "");
-      log.warn("Gemini generateContent failed", { model, status: res.status, body: detail });
-      throw new Error(`gemini generateContent failed: ${res.status} (${model})`);
-    }
-    const payload = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error("gemini returned no text candidate");
-    return JSON.parse(text) as unknown;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-/** Retry only the transient statuses — a 400/404 will not fix itself. */
-function isRetryable(status: number): boolean {
-  return status === 429 || status === 500 || status === 503;
-}
-
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-/**
- * Bounded retry for free-tier 503 "high demand" and 429 rate limits. Every attempt shares the
- * caller's AbortSignal, so the overall request still dies at `AI_REQUEST_TIMEOUT_MS`.
- */
-async function fetchWithRetry(url: string, init: RequestInit): Promise<Response> {
-  let last: Response | undefined;
-  for (let attempt = 0; attempt <= AI_RETRY_DELAYS_MS.length; attempt++) {
-    last = await fetch(url, init);
-    if (last.ok || !isRetryable(last.status)) return last;
-    const delay = AI_RETRY_DELAYS_MS[attempt];
-    if (delay === undefined) return last;
-    // Drain the body so the socket can be reused, then back off.
-    await last.text().catch(() => "");
-    log.warn("Gemini retryable error", { status: last.status, attempt: attempt + 1 });
-    await sleep(delay);
-  }
-  return last as Response;
+  const text = firstText(payload);
+  if (!text) throw new Error("gemini returned no text candidate");
+  return JSON.parse(text) as unknown;
 }
 
 /** Make a bespoke item for tests/tooling without touching the LLM. */
