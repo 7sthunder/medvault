@@ -39,6 +39,7 @@ export async function requireUser(next?: string | null) {
           isDemo: true,
           role: demoUser.role ?? "patient",
           accessCode: demoUser.accessCode ?? "MV-DEMO01",
+          animationTheme: demoUser.animationTheme ?? "batman",
           emailVerified: true,
           createdAt: demoUser.createdAt,
           updatedAt: demoUser.updatedAt,

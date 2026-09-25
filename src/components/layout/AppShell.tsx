@@ -17,7 +17,7 @@ export function AppShell({ user, children }: AppShellProps) {
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground flex">
+    <div className="relative min-h-screen text-foreground flex">
       {/* Ambient Theme Background Animation */}
       <DynamicBackground initialTheme={(user?.animationTheme as "batman" | "spidergwen" | "medical") || "medical"} />
 
@@ -36,7 +36,7 @@ export function AppShell({ user, children }: AppShellProps) {
       <Sidebar user={user} className="hidden lg:flex" />
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen pb-16 md:pb-0">
+      <div className="relative z-10 flex-1 min-w-0 flex flex-col min-h-screen pb-16 md:pb-0">
         <TopNav user={user} />
         <main
           id="main-content"

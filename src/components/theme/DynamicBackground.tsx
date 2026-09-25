@@ -23,23 +23,23 @@ export const THEME_CONFIG: Record<
   batman: {
     name: "Batman Dark Knight",
     image: "/themes/batman.jpg",
-    glow1: "rgba(59, 130, 246, 0.12)",
-    glow2: "rgba(15, 23, 42, 0.45)",
-    accentClass: "from-blue-900/10 via-slate-900/20 to-background",
+    glow1: "rgba(59, 130, 246, 0.35)",
+    glow2: "rgba(14, 165, 233, 0.25)",
+    accentClass: "from-slate-950/40 via-blue-950/20 to-transparent",
   },
   spidergwen: {
     name: "Spider-Gwen Neon",
     image: "/themes/spidergwen.jpg",
-    glow1: "rgba(244, 114, 182, 0.14)",
-    glow2: "rgba(6, 182, 212, 0.12)",
-    accentClass: "from-pink-900/10 via-cyan-900/15 to-background",
+    glow1: "rgba(244, 114, 182, 0.40)",
+    glow2: "rgba(6, 182, 212, 0.30)",
+    accentClass: "from-purple-950/35 via-pink-950/15 to-transparent",
   },
   medical: {
     name: "Medical Neutral Glass",
     image: "/themes/medical.jpg",
-    glow1: "rgba(16, 185, 129, 0.12)",
-    glow2: "rgba(6, 182, 212, 0.10)",
-    accentClass: "from-emerald-900/8 via-teal-900/10 to-background",
+    glow1: "rgba(16, 185, 129, 0.30)",
+    glow2: "rgba(6, 182, 212, 0.25)",
+    accentClass: "from-emerald-950/30 via-teal-950/15 to-transparent",
   },
 };
 
@@ -82,42 +82,42 @@ export function DynamicBackground({ initialTheme = "medical" }: DynamicBackgroun
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden select-none"
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none"
     >
-      {/* Cinematic Wallpaper Backdrop with soft blur & opacity */}
-      <div className="absolute inset-0 opacity-20 dark:opacity-30 transition-opacity duration-700 ease-in-out scale-105">
+      {/* Cinematic Wallpaper Backdrop with rich visual clarity */}
+      <div className="absolute inset-0 opacity-75 dark:opacity-65 transition-opacity duration-700 ease-in-out scale-100">
         <Image
           src={config.image}
           alt=""
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center filter blur-[1px]"
+          className="object-cover object-center"
         />
       </div>
 
-      {/* Ambient Gradient Wash for Readability */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${config.accentClass} backdrop-blur-[2px]`} />
+      {/* Subtle Ambient Gradient Wash to Ensure Content Readability */}
+      <div className={`absolute inset-0 bg-gradient-to-b ${config.accentClass} backdrop-blur-[0.5px]`} />
 
       {/* Floating Animated Ambient Glow Orbs */}
       <div
-        className="absolute top-[-10%] left-[15%] w-[45vw] h-[45vw] rounded-full blur-[100px] animate-pulse"
+        className="absolute top-[-10%] left-[15%] w-[45vw] h-[45vw] rounded-full blur-[90px] animate-pulse"
         style={{
           background: `radial-gradient(circle, ${config.glow1} 0%, transparent 70%)`,
-          animationDuration: "9s",
+          animationDuration: "8s",
         }}
       />
       <div
-        className="absolute bottom-[-10%] right-[10%] w-[50vw] h-[50vw] rounded-full blur-[120px] animate-pulse"
+        className="absolute bottom-[-10%] right-[10%] w-[50vw] h-[50vw] rounded-full blur-[110px] animate-pulse"
         style={{
           background: `radial-gradient(circle, ${config.glow2} 0%, transparent 70%)`,
-          animationDuration: "12s",
-          animationDelay: "3s",
+          animationDuration: "11s",
+          animationDelay: "2s",
         }}
       />
 
       {/* Floating Dust / Bokeh Spec Particles */}
-      <div className="absolute inset-0 bg-dot-grid-light opacity-30" />
+      <div className="absolute inset-0 bg-dot-grid-light opacity-25" />
     </div>
   );
 }

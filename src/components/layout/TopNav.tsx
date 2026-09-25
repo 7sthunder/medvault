@@ -4,6 +4,7 @@ import { HeartHandshake } from "lucide-react";
 import { Brand } from "@/components/brand/Brand";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ProfileMenu, type ProfileMenuUser } from "@/components/layout/ProfileMenu";
 
@@ -32,8 +33,9 @@ export function TopNav({ user }: TopNavProps) {
         </div>
       </div>
 
-      {/* Right section: language switcher, notifications & user profile */}
+      {/* Right section: theme switcher, language switcher, notifications & user profile */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <ThemeSwitcher />
         <LanguageSwitcher variant="pill" />
         <NotificationBell />
         <div className="h-4 w-px bg-border/80" aria-hidden="true" />
