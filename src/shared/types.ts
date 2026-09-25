@@ -18,6 +18,7 @@ import type {
   CaregiverRelationshipStatus,
   DoseActionType,
   DoseEventStatus,
+  DoseStatus,
   FrequencyLabel,
   InsightCategory,
   InsightSource,
@@ -102,7 +103,8 @@ export interface DoseEventDTO {
   scheduleId: string | null;
   /** Instant the dose is scheduled for, in the user's timezone. */
   scheduledFor: Date;
-  status: DoseEventStatus;
+  /** Display status (§12 display set, incl. derived `due-now`). */
+  status: DoseStatus;
   missedDeadline: Date | null;
   takenAt: Date | null;
   skippedAt: Date | null;
@@ -112,6 +114,20 @@ export interface DoseEventDTO {
   statusUpdatedAt: Date;
   source: "generated" | "demo";
   medication: MedicationLite;
+}
+
+/** One calendar day of dose feed (§11.7 Today's Schedule reads). */
+export interface ScheduleDayDTO {
+  /** Local `YYYY-MM-DD` the events belong to. */
+  date: string;
+  events: DoseEventDTO[];
+}
+
+/** `/schedule/[doseId]` detail — event + the med snapshot + append-only action history. */
+export interface DoseDetailDTO {
+  event: DoseEventDTO;
+  /** Owned action rows for this event (newest first), for snooze/miss timeline. */
+  history: DoseActionDTO[];
 }
 
 export interface DoseActionDTO {

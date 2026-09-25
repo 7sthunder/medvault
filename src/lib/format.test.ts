@@ -8,8 +8,10 @@ import {
   formatDayHeading,
   formatDurationLabel,
   formatHhmm,
+  formatInstant,
   formatPercent,
   plural,
+  shiftDateKey,
 } from "@/lib/format";
 
 describe("lib/format — dates & times", () => {
@@ -28,6 +30,22 @@ describe("lib/format — dates & times", () => {
     expect(formatHhmm("20:30")).toBe("8:30 PM");
     expect(formatHhmm("00:00")).toBe("12:00 AM");
     expect(formatHhmm("08:00", { hour12: false })).toBe("08:00");
+  });
+
+  it("formats an instant as a user-timezone wall-clock time", () => {
+    expect(formatInstant("2026-05-20T08:00:00.000Z", "UTC")).toBe("8:00 AM");
+    expect(formatInstant("2026-05-20T06:30:00.000Z", "Asia/Kolkata")).toBe("12:00 PM");
+    expect(formatInstant("2026-05-20T08:00:00.000Z", "America/New_York")).toBe("4:00 AM");
+  });
+});
+
+describe("lib/format — schedule day-shift (phase 14)", () => {
+  it("shifts date keys by whole days across month and year boundaries", () => {
+    expect(shiftDateKey("2026-05-20", 1)).toBe("2026-05-21");
+    expect(shiftDateKey("2026-05-20", -1)).toBe("2026-05-19");
+    expect(shiftDateKey("2026-05-01", -1)).toBe("2026-04-30");
+    expect(shiftDateKey("2026-01-01", -1)).toBe("2025-12-31");
+    expect(shiftDateKey("2026-12-31", 1)).toBe("2027-01-01");
   });
 });
 

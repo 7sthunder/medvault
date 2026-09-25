@@ -32,6 +32,11 @@ export function formatHhmm(hhmm: string, options: { hour12?: boolean } = {}): st
   return format(d, pattern);
 }
 
+/** An instant shown as local wall-clock time in `timeZone`, e.g. `"8:30 AM"`. */
+export function formatInstant(instant: Date | string | number, timeZone: string): string {
+  return format(new TZDate(new Date(instant), timeZone), "h:mm a");
+}
+
 /** `0.905` → `"90.5%"`; `1` → `"100%"`. Rounds to `fractionDigits`. */
 export function formatPercent(value: number, fractionDigits = 1): string {
   const pct = Math.round(value * 100 * 10 ** fractionDigits) / 10 ** fractionDigits;
@@ -78,4 +83,18 @@ export function formatDateRange(from: string, to: string): string {
 /** `5` → `"5-day streak"` style window label. */
 export function formatDurationLabel(days: number): string {
   return days === 1 ? "1 day" : formatCount(days) + " days";
+}
+
+/**
+ * Whole-day shift on a `YYYY-MM-DD` key (clamped-shifts; no end-of-year handling:
+ * the schedule header shows ± a few days around today, so overflow is unreachable).
+ * Input is assumed already-validated by callers.
+ */
+export function shiftDateKey(dateKey: string, days: number): string {
+  const [y, m, d] = dateKey.split("-").map(Number) as [number, number, number];
+  const shifted = new Date(Date.UTC(y, m - 1, d + days));
+  const yy = shifted.getUTCFullYear();
+  const mm = String(shifted.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(shifted.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
 }

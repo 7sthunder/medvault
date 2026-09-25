@@ -15,6 +15,7 @@ export interface ConfirmationDialogProps
   extends Omit<ComponentProps<typeof Dialog>, "children" | "onOpenChange"> {
   title: string
   description?: ReactNode
+  children?: ReactNode
   confirmLabel?: string
   cancelLabel?: string
   /** "destructive" gives the confirm action the red treatment */
@@ -34,6 +35,7 @@ export function ConfirmationDialog({
   onOpenChange,
   title,
   description,
+  children,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   tone = "destructive",
@@ -53,6 +55,7 @@ export function ConfirmationDialog({
             <DialogDescription>{description}</DialogDescription>
           )}
         </DialogHeader>
+        {children}
         <DialogFooter showCloseButton={false}>
           <Button variant="outline" onClick={() => setOpen(false)}>
             {cancelLabel}

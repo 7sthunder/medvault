@@ -11,9 +11,13 @@
 import { medicationRouter } from "./medication";
 import { onboardingRouter } from "./onboarding";
 import { adherenceRouter } from "./adherence";
+import { scheduleRouter } from "./schedule";
+import { doseRouter } from "./dose";
 
 export const aadhiRouters = {
   medication: medicationRouter,
   onboarding: onboardingRouter,
   adherence: adherenceRouter,
+  schedule: scheduleRouter,
+  dose: doseRouter,
 };

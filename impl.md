@@ -44,8 +44,8 @@
 | 10 | Onboarding | `done` | `b3933d8` | verified: typecheck/lint/test/build; e2e deferred |
 | 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
 | 12 | Medication schedule & dose-event generation (domain) | `done` | `4f6e5b4` | verified: typecheck/lint/test/build |
-| 13 | Dose engine & adherence engine (domain) | `pending` | — | |
-| 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `pending` | — | |
+| 13 | Dose engine & adherence engine (domain) | `done` | `9a72716` | verified: typecheck/lint/test |
+| 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `in_progress` | — | schedule UI + routers; adherence pages split to parallel worker |
 | 15 | Medication CRUD UI + Dashboard | `pending` | — | |
 | 16 | History + Reports + Notifications | `pending` | — | |
 | 17 | Caregiver system + AI insights | `pending` | — | |
@@ -956,6 +956,113 @@ user's timezone through every generation/void seam.
   querying so stale-past days are guaranteed generated.
 - `medicationSchedules.listSchedulesByMedicationIds` is the join shape Phase 15's detail page
   wants; keep it the single schedule read facade.
+
+---
+
+## Phase 13 — Dose engine & adherence engine (domain)
+
+**Plan reference:** `plan.md` §21 Phase 13 (`plan.md:1069`) + §10.3/§10.4/§10.5 (`plan.md:540`–`plan.md:584`) + §12 statuses.
+**Objective met:** the pure dose-state machine (§10.3, `shared/calc/doseState.ts`), the adherence
+engine (§10.5, `shared/calc/adherence.ts` + `doseEvents/reconcile.ts` + `adherence/materialize.ts`),
+the audit-append dose actions (§10.4, `doseActions/service.ts`), the adherence read service
+(`adherence/service.ts`), and the canonical status pass that keeps stored rows consistent with the
+walking clock. Domain-only — the UI surfaces land in Phase 14.
+
+### Files created/modified (commit `9a72716`)
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/calc/doseState.ts` | created | pure status machine: `deriveNextStatus`, `canTake/Snooze/SkipDoseStatus`, `canTakeUpcoming`, `applySnooze`, transition table, deadline math |
+| `src/shared/calc/doseState.test.ts` | created | 158-line transition + deadline + snooze-math suite |
+| `src/shared/calc/adherence.ts` | created | pure adherence math (`AdherenceDay`, bucketing, rates) |
+| `src/shared/calc/adherence.test.ts` | created | adherence calc suite |
+| `src/shared/calc/streaks.ts` / `performance.ts` | created | streak + per-med performance pure helpers |
+| `src/server/domain/doseEvents/reconcile.ts` | created | owner-scoped reconcile pass (pending → due/missed/snooze-expired) with `voided`/`missed_auto` audit rows |
+| `src/server/domain/doseEvents/producers.ts` | created | system-authored audit producers |
+| `src/server/domain/doseActions/service.ts` | created | take/snooze/skip single-transaction actions (idempotent, audit-append, adherence recompute) |
+| `src/server/domain/adherence/{materialize,summary,service}.ts` | created | `recomputeDay`/`recomputeRange`/`pruneAdherence`, `buildSummary`, and the router-facing `summary`/`byMedication`/`patterns` |
+| `src/server/domain/adherence/materialize.test.ts` | created | DB-gated recompute tests |
+| `src/server/trpc/routers/adherence.ts` | created | `adherence.summary` / `adherence.byMedication` / `adherence.patterns` (preset or clamped-custom range) |
+| `src/server/trpc/routers/aadhi.ts` | edited | registered `adherence` router |
+| `src/server/domain/jobs/scheduler.ts` | edited | folds reconcile into the catch-up tick |
+| `src/server/db/{helpers,demo-seed}.ts`, `src/shared/constants.ts`, `impl.md`, `vitest.config.ts` | edited | tx helper shims / demo-seed tweak / `REPORT_MAX_SPAN_DAYS` / log row / worker config |
+
+### Deviations & decisions
+
+- **Display vs persistent status**: `DOSE_STATUSES` (display) is a superset of `DOSE_EVENT_STATUSES`
+  (persistent) — `due-now` and `paused` are display-only. Persistent rows stay in the persistent set;
+  every read maps to the display set (Phase 14 does this in `doseEvents/mapper.ts`).
+- **Actions are idempotent by construction** (conditional `UPDATE … WHERE status IN (...)` + audit
+  append), so racing/repeated taps never double-transition; `take` also allows the `missed → taken`
+  restore edge.
+- **Reconcile is read-path-safe**: no mutation is written when the derived status equals the stored one.
+
+### Verification
+
+- `pnpm typecheck` / `pnpm lint` — clean; `pnpm test` — **32 files, 244 tests passed**.
+- Phase 13 landed as commit `9a72716` on `main`.
+
+---
+
+## Phase 14 — Dose & adherence UI (Today's Schedule + Adherence pages)
+
+**Plan reference:** `plan.md` §21 Phase 14 (phase bundle for the dose/adherence UI) + §10.3/§10.4
+(dose state + actions), §11.7 (`plan.md:650` Today's Schedule reads), §12 statuses.
+**Objective met:** the canonical `schedule.day` / `schedule.get` read routers, the missing
+`dose.take/snooze/skip` action routers, the schedule read service + dose DTO mappers, Today's
+Schedule + dose-detail pages with take/snooze/skip-in-place, and the shared action/colour
+display atoms. The adherence *pages* were split to a parallel worker (they consume the Phase 13
+`adherence.*` router unchanged).
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/server/domain/doseEvents/mapper.ts` | created | `displayStatusOf` (persistent → display, incl. `due-now`), `toDoseEventDTO`, `toDoseActionDTO`, `toMedicationLiteMap` |
+| `src/server/domain/schedule/service.ts` | created | `scheduleService.day` (reconcile + catchUp + local-day window) and `.get` (event + audit timeline) |
+| `src/server/trpc/routers/schedule.ts` | created | `schedule.day(date)` + `schedule.get(id)` (protected) |
+| `src/server/trpc/routers/dose.ts` | created | `dose.take` / `dose.snooze` / `dose.skip` via `doseActionSchema` + `doseActionsService` |
+| `src/server/trpc/routers/aadhi.ts` | edited | registered `schedule` + `dose` routers |
+| `src/shared/types.ts` | edited | `DoseEventDTO.status` widened to the display `DoseStatus`; added `ScheduleDayDTO`, `DoseDetailDTO` |
+| `src/shared/actions.ts` | created | `DOSE_ACTION_META` labels for the audit log (§8.6) |
+| `src/shared/medColor.ts` (+ test) | created | med hex → semantic colour prefix (swatch overrides + channel heuristic) |
+| `src/lib/format.ts` (+ test) | edited | added `formatInstant(instant, tz)`, `shiftDateKey(key, days)` |
+| `src/components/ui/confirmation-dialog.tsx` | edited | accept optional `children` (skip-reason field) |
+| `src/features/dose/{DoseCard,DoseDetailPage,SkipDialog,useDoseActions,types}.tsx/ts` | created | dose row, detail + timeline, skip-confirm (+ reason), idempotent action hooks w/ cache invalidation, display atoms |
+| `src/features/dose/models.test.ts` | created | `actionableStatus` / `actionLabel` tests |
+| `src/features/schedule/{SchedulePage,useMedicationStatuses}.tsx/ts` | created | day feed: prev/today/next, grouped sections, empty/error/skeleton; med status map for action gating |
+| `src/app/(app)/schedule/page.tsx` + `[doseId]/page.tsx` | created | server wrappers (`requireUser`) → client pages |
+| `src/shared/medColor.test.ts`, `src/lib/format.test.ts` | created/edited | colour + date/time atom tests |
+| `impl.md` | edited | Phase 13 row → `done` (`9a72716`); Phase 14 row → `in_progress` |
+
+### Deviations & decisions (precise > faithful)
+
+- **`schedule.day` re-runs the full reconcile + horizon catch-up before querying** (§11.7's "canonical
+  read"), so past days are never stale and the future window is always generated on demand.
+- **`dose` router mutations pass inputs verbatim from the shared `doseActionSchema`** — the UI sends
+  `{ doseId, action: "take" | "snooze" | "skip", skipReason? }`; the service owns all validation.
+- **`due-now` is never persisted** (display-only); `DoseEventDTO.status` is the display union, so the
+  schedule UI renders §12 chips straight from the DTO.
+- **Snoozed/skip reasons stay optional** and are audited (`skipReason` ≤ `SKIP_REASON_MAX`).
+- **Med status gating is client-side** via `medication.list` (read-only reuse of the Phase 11 service);
+  the card disables actions for paused/archived medications.
+- **The `/adherence` pages themselves** are owned by a parallel worker session (they consume the
+  committed `adherence.*` router + `RangePicker`/`TrendChart`/`StatCard` without touching servers).
+
+### Verification
+
+- `pnpm typecheck` — clean · `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **34 files, 250 tests passed** (+2 dose-feature models, +3 colour, +2 format/time)
+- `pnpm build` — compiled clean (the only build failure during Phase 14 was a parallel worker's
+  in-flight `src/features/medications/medication-utils.ts` type error, fixed by that session, not Phase 14 code)
+- Committed on `main` — see matrix row for hash.
+
+### Hand-off notes for later phases
+
+- Phase 15 (medication CRUD + dashboard) reuses `useDoseActions` + the `dose`/`schedule` routers and
+  should add a next-dose/due-now widget via `schedule.day` (or a future `dashboard.*` router).
+- Adherence pages should map `AdherenceDay[]`/`TrendDTO`/`TimeBucketStats` onto
+  `TrendChart`/`StatCard`/`DataTable` — all shapes already exist on the `adherence.*` router.
 
 ---
 
