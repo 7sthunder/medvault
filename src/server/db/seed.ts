@@ -1,5 +1,6 @@
 import { db, pool } from "./client";
 import { seedDemoWorkspace } from "./demo-seed";
+import { seedDevPatients } from "./patient-seed";
 import type { Db } from "./helpers";
 import { upsertUser } from "./helpers";
 import { userPreferences } from "./schema";
@@ -33,8 +34,9 @@ export async function seedAll(target: Db = db) {
       .onConflictDoNothing();
   }
 
+  const devPatients = await seedDevPatients(target);
   const demo = await seedDemoWorkspace(target);
-  return { devUsers: DEV_USERS.length, demo };
+  return { devUsers: DEV_USERS.length, devPatients, demo };
 }
 
 async function main() {

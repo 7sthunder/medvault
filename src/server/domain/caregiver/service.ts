@@ -1070,6 +1070,61 @@ export async function connectWithAccessCode(
     body: `${caregiverUser?.name ?? "A caregiver"} has connected to your account using your access code.`,
   }).catch(() => {});
 
+  // Proactively generate alerts for any recent missed doses so the caregiver feed is active
+  try {
+    const recentMissed = await db
+      .select({
+        id: doseEvents.id,
+        medicationId: doseEvents.medicationId,
+        scheduledFor: doseEvents.scheduledFor,
+        medName: medications.name,
+        dosageAmount: medications.dosageAmount,
+        dosageUnit: medications.dosageUnit,
+      })
+      .from(doseEvents)
+      .innerJoin(medications, eq(medications.id, doseEvents.medicationId))
+      .where(and(eq(doseEvents.userId, patientUser.id), eq(doseEvents.status, "missed")))
+      .orderBy(desc(doseEvents.scheduledFor))
+      .limit(3);
+
+    for (const missed of recentMissed) {
+      const existing = await db
+        .select({ id: caregiverAlerts.id })
+        .from(caregiverAlerts)
+        .where(
+          and(
+            eq(caregiverAlerts.caregiverUserId, caregiverUserId),
+            eq(caregiverAlerts.doseEventId, missed.id),
+          ),
+        )
+        .limit(1);
+
+      if (existing.length === 0) {
+        await db.insert(caregiverAlerts).values({
+          id: uuidv7(),
+          patientUserId: patientUser.id,
+          caregiverUserId,
+          relationshipId,
+          doseEventId: missed.id,
+          type: "missed_dose",
+          title: `Missed dose: ${missed.medName}`,
+          body: `${patientUser.name} missed their scheduled ${missed.medName} ${missed.dosageAmount} ${missed.dosageUnit} dose.`,
+          data: {
+            patientName: patientUser.name,
+            medicationName: missed.medName,
+            dosage: `${missed.dosageAmount} ${missed.dosageUnit}`,
+            scheduledFor: missed.scheduledFor,
+            doseEventId: missed.id,
+          },
+          status: "new",
+          createdAt: currentNow,
+        });
+      }
+    }
+  } catch {
+    /* non-blocking alert bootstrap */
+  }
+
   return {
     id: relationshipId,
     patientUserId: patientUser.id,

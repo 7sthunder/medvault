@@ -67,7 +67,7 @@ export function AppointmentsWidget({
             <h3 className="font-heading text-sm font-bold text-foreground">
               Doctor Appointments
             </h3>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
               {patientName ? `Upcoming visits for ${patientName}` : "Upcoming consultations & clinic visits"}
             </p>
           </div>
@@ -96,7 +96,7 @@ export function AppointmentsWidget({
 
       {!isLoading && (!appointments || appointments.length === 0) && (
         <div className="rounded-xl border border-dashed border-border/70 p-4 text-center">
-          <p className="text-xs text-muted-foreground">No upcoming doctor appointments.</p>
+          <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">No upcoming doctor appointments.</p>
           {canManage && (
             <Button
               type="button"
@@ -133,7 +133,7 @@ export function AppointmentsWidget({
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-600 dark:text-slate-300 font-medium">
                     <span className="flex items-center gap-1">
                       <Clock className="size-3 text-primary" />
                       {format(dateObj, "MMM d, h:mm a")}
@@ -144,13 +144,13 @@ export function AppointmentsWidget({
                         {apt.clinicName}
                       </span>
                     )}
-                    <span className="text-[10px] text-muted-foreground/80">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                       ({formatDistanceToNow(dateObj, { addSuffix: true })})
                     </span>
                   </div>
 
                   {apt.notes && (
-                    <p className="text-[11px] text-muted-foreground italic line-clamp-1">
+                    <p className="text-[11px] text-slate-700 dark:text-slate-300 italic line-clamp-1 font-medium">
                       &quot;{apt.notes}&quot;
                     </p>
                   )}

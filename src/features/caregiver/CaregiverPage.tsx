@@ -51,7 +51,7 @@ export function CaregiverPage() {
           <h1 className="font-heading text-2xl font-bold tracking-tight text-ink-900 sm:text-3xl dark:text-ink-100">
             Caregiver Network
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-slate-700 dark:text-slate-200 font-medium">
             Coordinate with loved ones, manage health monitors, and review adherence alerts.
           </p>
         </div>
@@ -82,7 +82,7 @@ export function CaregiverPage() {
       </div>
 
       {/* Primary Tab Navigation */}
-      <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/60 p-1 w-fit">
+      <div className="flex items-center gap-1 rounded-xl border border-secondary/20 bg-card/80 backdrop-blur-md p-1 w-fit shadow-xs">
         <button
           type="button"
           role="tab"
@@ -91,7 +91,7 @@ export function CaregiverPage() {
           className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold tracking-wide transition-all ${
             activeTab === "overview"
               ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
-              : "text-muted-foreground hover:text-ink-900"
+              : "text-slate-700 hover:text-ink-900 dark:text-slate-300 dark:hover:text-ink-100"
           }`}
         >
           <HeartHandshake className="size-4" />
@@ -106,7 +106,7 @@ export function CaregiverPage() {
           className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold tracking-wide transition-all ${
             activeTab === "caregivers"
               ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
-              : "text-muted-foreground hover:text-ink-900"
+              : "text-slate-700 hover:text-ink-900 dark:text-slate-300 dark:hover:text-ink-100"
           }`}
         >
           <UserCheck className="size-4" />
@@ -121,7 +121,7 @@ export function CaregiverPage() {
           className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold tracking-wide transition-all ${
             activeTab === "invite"
               ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
-              : "text-muted-foreground hover:text-ink-900"
+              : "text-slate-700 hover:text-ink-900 dark:text-slate-300 dark:hover:text-ink-100"
           }`}
         >
           <UserPlus className="size-4" />

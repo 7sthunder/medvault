@@ -129,7 +129,7 @@ export function CaregiverOverview({
                 {selectedPatient?.relationType}
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">{selectedPatient?.patientEmail}</p>
+            <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5 font-medium">{selectedPatient?.patientEmail}</p>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export function CaregiverOverview({
         <div className="flex flex-wrap items-center gap-2.5">
           {patients.length > 1 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground">{t("caregiver.switchPatient", "Switch Patient")}:</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{t("caregiver.switchPatient", "Switch Patient")}:</span>
               <select
                 aria-label="Switch monitored patient"
                 value={selectedPatientId}
@@ -169,7 +169,7 @@ export function CaregiverOverview({
               variant="ghost"
               size="sm"
               onClick={() => setLeavingTarget(selectedPatient.id)}
-              className="text-xs h-9 text-muted-foreground hover:text-rose-600 rounded-xl"
+              className="text-xs h-9 text-slate-600 dark:text-slate-300 hover:text-rose-600 rounded-xl font-medium"
             >
               Stop Monitoring
             </Button>
@@ -178,13 +178,13 @@ export function CaregiverOverview({
       </div>
 
       {/* Caregiver Actions Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-secondary/20 bg-secondary/5 p-5 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-secondary/30 bg-card/90 dark:bg-card/85 p-5 backdrop-blur-xl shadow-card-sm">
         <div>
           <h3 className="font-heading text-sm font-extrabold text-foreground flex items-center gap-2">
             <HeartHandshake className="size-4 text-secondary" />
             Caregiver Actions for {selectedPatient?.patientName}
           </h3>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5 font-medium">
             Coordinate medications, schedule clinic consultations, or dispatch real-time reminder nudges.
           </p>
         </div>
@@ -252,7 +252,7 @@ export function CaregiverOverview({
           {/* 1. Adherence Metrics (if permission granted) */}
           {overviewQuery.data.permissions.viewAdherence && overviewQuery.data.adherenceSummary && (
             <div className="space-y-3">
-              <h3 className="font-heading text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              <h3 className="font-heading text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                 Adherence Performance
               </h3>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -314,7 +314,7 @@ export function CaregiverOverview({
                     <h3 className="font-heading text-sm font-bold text-ink-900 dark:text-ink-100">
                       Recent Dose Schedule
                     </h3>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
                       Chronological intake logged for {selectedPatient?.patientName}
                     </p>
                   </div>
@@ -339,7 +339,7 @@ export function CaregiverOverview({
                               ? ` (${dose.medication.dosageAmount} ${dose.medication.dosageUnit})`
                               : ""}
                           </p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
                             Scheduled for {new Date(dose.scheduledFor).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                           </p>
                         </div>
@@ -363,9 +363,9 @@ export function CaregiverOverview({
               </div>
             ) : (
               <div className="rounded-2xl border border-border bg-card p-5 shadow-card-sm flex flex-col items-center justify-center text-center p-6 space-y-2">
-                <Clock className="size-8 text-muted-foreground/60" />
-                <h4 className="text-xs font-semibold text-foreground">No recent doses logged</h4>
-                <p className="text-[11px] text-muted-foreground">
+                <Clock className="size-8 text-secondary/60" />
+                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">No recent doses logged</h4>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300">
                   Dose events will appear here when recorded.
                 </p>
               </div>

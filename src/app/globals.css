@@ -133,7 +133,7 @@
   --popover: #ffffff;
   --popover-foreground: #0f172a;
   --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --muted-foreground: #334155;
   --accent: #d1fae5;
   --accent-foreground: #059669;
   --border: #e2e8f0;
@@ -175,7 +175,7 @@
   --popover: #1e293b;
   --popover-foreground: #e2e8f0;
   --muted: #25303f;
-  --muted-foreground: #94a3b8;
+  --muted-foreground: #cbd5e1;
   --accent: rgba(16, 185, 129, 0.15);
   --accent-foreground: #a7f3d0;
   --border: #334155;

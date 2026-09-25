@@ -85,7 +85,7 @@ export function StatCard({
         aria-hidden="true"
       />
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-sm font-semibold text-slate-800 dark:text-slate-200">{title}</CardTitle>
         {Icon && (
           <CardAction>
             <span
@@ -104,7 +104,7 @@ export function StatCard({
         <span className="font-heading text-2xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
           {value}
         </span>
-        {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
+        {subtitle && <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{subtitle}</span>}
       </CardContent>
       {footer && <CardFooter>{footer}</CardFooter>}
     </Card>

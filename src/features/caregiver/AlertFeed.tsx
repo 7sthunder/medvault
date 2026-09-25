@@ -60,21 +60,21 @@ export function AlertFeed({ patientUserId, className }: AlertFeedProps) {
             <h3 className="font-heading text-base font-semibold text-ink-900 dark:text-ink-100">
               Caregiver Alerts
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
               Notifications triggered by missed doses or adherence drops
             </p>
           </div>
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/60 p-0.5 text-xs">
+        <div className="flex items-center gap-1 rounded-lg border border-border bg-card/80 p-0.5 text-xs shadow-xs">
           <button
             type="button"
             onClick={() => setFilter("all")}
-            className={`rounded-md px-2.5 py-1 font-medium transition-all ${
+            className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
               filter === "all"
                 ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
-                : "text-muted-foreground hover:text-ink-900"
+                : "text-slate-700 hover:text-ink-900 dark:text-slate-300 dark:hover:text-ink-100"
             }`}
           >
             All
@@ -82,10 +82,10 @@ export function AlertFeed({ patientUserId, className }: AlertFeedProps) {
           <button
             type="button"
             onClick={() => setFilter("new")}
-            className={`rounded-md px-2.5 py-1 font-medium transition-all ${
+            className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
               filter === "new"
                 ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
-                : "text-muted-foreground hover:text-ink-900"
+                : "text-slate-700 hover:text-ink-900 dark:text-slate-300 dark:hover:text-ink-100"
             }`}
           >
             New
@@ -93,10 +93,10 @@ export function AlertFeed({ patientUserId, className }: AlertFeedProps) {
           <button
             type="button"
             onClick={() => setFilter("resolved")}
-            className={`rounded-md px-2.5 py-1 font-medium transition-all ${
+            className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
               filter === "resolved"
                 ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
-                : "text-muted-foreground hover:text-ink-900"
+                : "text-slate-700 hover:text-ink-900 dark:text-slate-300 dark:hover:text-ink-100"
             }`}
           >
             Resolved
@@ -162,16 +162,16 @@ export function AlertFeed({ patientUserId, className }: AlertFeedProps) {
                       >
                         {alert.status}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-slate-700 dark:text-slate-300">
                         for <strong>{alert.patientName}</strong>
                       </span>
                     </div>
 
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
                       {alert.body}
                     </p>
 
-                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground/80 pt-0.5">
+                    <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
                       <span>{new Date(alert.createdAt).toLocaleString()}</span>
                       {alert.medicationName && (
                         <span>• Med: {alert.medicationName}</span>

@@ -125,24 +125,28 @@ export function LinkPatientDialog({
               <Sparkles className="size-3.5 text-teal-500" />
               1-Click Connect Demo Patient
             </span>
-            <span className="text-[10px] text-muted-foreground">Ready to test</span>
+            <span className="text-[10px] text-slate-600 dark:text-slate-300 font-medium">Ready to test</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
-              { name: "Alice Hartono", code: "MV-CE8XKS", desc: "4 Active Meds" },
-              { name: "Bob Mensah", code: "MV-RPUJ6B", desc: "Hypertension Care" },
-            ].map((p) => (
-              <button
-                key={p.code}
-                type="button"
-                onClick={() => handleConnectWith(p.code, "family")}
-                disabled={connectMutation.isPending}
-                className="flex flex-col items-start p-2 rounded-lg border border-teal-500/30 bg-card hover:bg-teal-500/10 text-left transition-all hover:scale-[1.02]"
-              >
-                <span className="text-xs font-bold text-ink-900 dark:text-ink-100">{p.name}</span>
-                <span className="text-[10px] font-mono text-teal-600 dark:text-teal-400">{p.code}</span>
-              </button>
-            ))}
+              { name: "Alice Hartono", code: "MV-CE8XKS", desc: "4 Meds • 96% Adh" },
+              { name: "Bob Mensah", code: "MV-RPUJ6B", desc: "2 Meds • 90% Adh" },
+              { name: "Arun Kumar", code: "MV-W23TAS", desc: "4 Meds • 91% Adh" },
+            ]
+              .filter((p) => !userAccessCode || p.code.toUpperCase() !== String(userAccessCode).toUpperCase())
+              .map((p) => (
+                <button
+                  key={p.code}
+                  type="button"
+                  onClick={() => handleConnectWith(p.code, "family")}
+                  disabled={connectMutation.isPending}
+                  className="flex flex-col items-start p-2 rounded-lg border border-teal-500/30 bg-card hover:bg-teal-500/10 text-left transition-all hover:scale-[1.02]"
+                >
+                  <span className="text-xs font-bold text-ink-900 dark:text-ink-100">{p.name}</span>
+                  <span className="text-[10px] text-slate-600 dark:text-slate-300 font-medium">{p.desc}</span>
+                  <span className="text-[10px] font-mono font-bold text-teal-600 dark:text-teal-400 mt-0.5">{p.code}</span>
+                </button>
+              ))}
           </div>
         </div>
 
