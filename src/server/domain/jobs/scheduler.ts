@@ -6,6 +6,7 @@ import { catchUp } from "@/server/domain/doseEvents/service";
 import { reconcileUser } from "@/server/domain/doseEvents/reconcile";
 import { pruneAdherence } from "@/server/domain/adherence/materialize";
 import { caregiverService } from "@/server/domain/caregiver/service";
+import { withRealClock } from "@/shared/times";
 import { log } from "@/lib/log";
 
 /**
@@ -29,11 +30,21 @@ export interface ReconcilePassResult {
 
 let active = false;
 
+/** Default tick. A reminder has to land *at* the scheduled minute, so this is minutes, not hours. */
+export const DEFAULT_INTERVAL_MS = 15_000;
+
 /**
  * Run one catch-up + reconcile + prune pass for all users that finished onboarding.
  * Returns the tally for logging/test assertions.
+ *
+ * The whole pass is pinned to real wall time (see `withRealClock`) because `createContext`
+ * installs a demo clock process-globally; a push must never fire at a simulated instant.
  */
-export async function runReconcilePass(db: Db): Promise<ReconcilePassResult> {
+export async function runReconcilePass(
+  db: Db,
+  options: { now?: Date } = {},
+): Promise<ReconcilePassResult> {
+  const at = options.now ?? new Date();
   const onboarded = await db
     .select({ id: users.id, timezone: users.timezone })
     .from(users)
@@ -46,7 +57,7 @@ export async function runReconcilePass(db: Db): Promise<ReconcilePassResult> {
   for (const user of onboarded) {
     const res = await catchUp(db, user.id, user.timezone);
     ensured += res.ensured;
-    const rec = await reconcileUser(db, user.id);
+    const rec = await reconcileUser(db, user.id, { now: at });
     reconciled += rec.reconciled;
     missed += rec.missed;
     adherenceDropAlerts += await caregiverService.evaluateAdherenceDrop(db, user.id, user.timezone);
@@ -59,21 +70,25 @@ export async function runReconcilePass(db: Db): Promise<ReconcilePassResult> {
 export const runCatchUpPass = runReconcilePass;
 
 /**
- * Start the interval job. `intervalMs` defaults to one hour (dose horizon is 14 days, so a
- * drift of one hour is immaterial). Returns a handle with `stop()` for shutdown.
+ * Start the interval job. `intervalMs` defaults to {@link DEFAULT_INTERVAL_MS} — the pass has to
+ * be frequent enough that a reminder fires at the minute it is scheduled for, not up to an hour
+ * late. Returns a handle with `stop()` for shutdown.
+ *
+ * Idempotent per process: calling it twice (Next.js dev hot-reload re-evaluates modules) returns
+ * the existing handle instead of stacking a second interval, which would double-fire pushes.
  */
 export function startScheduler(
   db: Db,
   options: { intervalMs?: number } = {},
 ): { stop: () => void; tick: () => Promise<ReconcilePassResult>; running: () => boolean } {
-  const intervalMs = options.intervalMs ?? 60 * 60 * 1000;
+  const intervalMs = options.intervalMs ?? DEFAULT_INTERVAL_MS;
 
   const runOnce = async (): Promise<ReconcilePassResult> => {
     if (active)
       return { users: 0, ensured: 0, reconciled: 0, missed: 0, pruned: 0, adherenceDropAlerts: 0 };
     active = true;
     try {
-      return await runReconcilePass(db);
+      return await withRealClock(() => runReconcilePass(db));
     } finally {
       active = false;
     }

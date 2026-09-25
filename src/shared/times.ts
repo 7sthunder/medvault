@@ -160,3 +160,22 @@ export function resetNowImpl(): void {
  * Prefer `now()` going forward.
  */
 export const demoNow = (): Date => now();
+
+/**
+ * Run `fn` with the shared clock forced to real wall time, restoring the previous implementation
+ * afterwards.
+ *
+ * Background jobs must use this. `createContext` swaps `nowImpl` process-globally on every tRPC
+ * request (demo mode), so a worker calling `now()` directly could pick up a demo offset installed
+ * by an unrelated concurrent request. Firing a reminder at a simulated time would be wrong, so
+ * the scheduler pins the real clock for the duration of its pass.
+ */
+export async function withRealClock<T>(fn: () => Promise<T>): Promise<T> {
+  const previous = nowImpl;
+  nowImpl = () => new Date();
+  try {
+    return await fn();
+  } finally {
+    nowImpl = previous;
+  }
+}

@@ -15,6 +15,7 @@ import { scheduleRouter } from "./schedule";
 import { doseRouter } from "./dose";
 import { dashboardRouter } from "./dashboard";
 import { notificationsRouter } from "./notifications";
+import { pushRouter } from "./push";
 import { historyRouter } from "./history";
 import { reportsRouter } from "./reports";
 import { caregiverRouter } from "./caregiver";
@@ -30,6 +31,7 @@ export const aadhiRouters = {
   dose: doseRouter,
   dashboard: dashboardRouter,
   notifications: notificationsRouter,
+  push: pushRouter,
   history: historyRouter,
   reports: reportsRouter,
   caregiver: caregiverRouter,

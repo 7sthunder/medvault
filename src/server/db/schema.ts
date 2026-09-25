@@ -405,7 +405,34 @@ export const notifications = pgTable(
   ],
 );
 
-/* ── §8.12 ai_insights ── */
+/* ── §8.11b push_subscriptions (web push) ── */
+
+/**
+ * One row per browser/device that granted the push permission for `userId`. `endpoint` is the
+ * push service URL and is globally unique, so re-subscribing the same browser upserts onto the
+ * existing row instead of accumulating duplicates. Rows are deleted by the server when the push
+ * service reports 404/410 (the subscription is gone) and cascade when the user is deleted.
+ */
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("push_subscriptions_endpoint_key").on(t.endpoint),
+    index("push_subscriptions_user_idx").on(t.userId),
+  ],
+);
+
 
 export const aiInsights = pgTable(
   "ai_insights",
