@@ -4,11 +4,38 @@
  *
  * VAPID keys are read lazily (not at module load) so a missing key degrades to "push disabled"
  * instead of crashing the server at import time, and so tests can stub `process.env`.
+ *
+ * The library itself is also loaded lazily, through `createRequire`, rather than a static
+ * `import`. `web-push` reaches `agent-base`, which does a bare `require("http")` that webpack
+ * cannot resolve when the module is bundled, so a static import breaks the whole server build
+ * ("Module not found: Can't resolve 'http'") from anything that transitively imports this file
+ * — including `src/instrumentation.ts`. Resolving it at runtime keeps it out of the module graph.
  */
 
-import webpush from "web-push";
+import { createRequire } from "node:module";
 
 import { log } from "@/lib/log";
+
+/** Type-only, so it is erased at compile time and never becomes a runtime import. */
+type WebPushClient = typeof import("web-push");
+
+const requireRuntime = createRequire(`${process.cwd()}/package.json`);
+
+let cached: WebPushClient | null = null;
+
+/** Resolve `web-push` on first use. Returns null if it is missing or unloadable. */
+function getWebPush(): WebPushClient | null {
+  if (cached) return cached;
+  try {
+    cached = requireRuntime("web-push") as WebPushClient;
+  } catch (error) {
+    log.warn("web-push could not be loaded; push delivery is disabled", {
+      message: (error as Error).message,
+    });
+    return null;
+  }
+  return cached;
+}
 
 export interface PushSubscriptionRecord {
   endpoint: string;
@@ -42,7 +69,7 @@ export function readVapidConfig(): VapidConfig | null {
   return {
     publicKey,
     privateKey,
-    subject: process.env.VAPID_SUBJECT?.trim() || "mailto:dev@medvault.local",
+    subject: process.env.VAPID_SUBJECT?.trim() || "mailto:dev@meditrackai.local",
   };
 }
 
@@ -63,6 +90,8 @@ export function publicVapidKey(): string | null {
 function ensureConfigured(): VapidConfig | null {
   const config = readVapidConfig();
   if (!config) return null;
+  const webpush = getWebPush();
+  if (!webpush) return null;
   if (configuredFor !== config.privateKey) {
     webpush.setVapidDetails(config.subject, config.publicKey, config.privateKey);
     configuredFor = config.privateKey;
@@ -91,11 +120,16 @@ export async function sendPush(
     return { status: "skipped", reason: "vapid-not-configured" };
   }
 
+  const webpush = getWebPush();
+  if (!webpush) {
+    return { status: "skipped", reason: "web-push-unavailable" };
+  }
+
   const body = JSON.stringify({
     title: payload.title,
     body: payload.body,
     url: payload.url ?? "/notifications",
-    tag: payload.tag ?? payload.notificationId ?? "medvault",
+    tag: payload.tag ?? payload.notificationId ?? "meditrackai",
     notificationId: payload.notificationId,
   });
 
