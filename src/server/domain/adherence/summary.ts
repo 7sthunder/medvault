@@ -23,12 +23,14 @@ export interface SummaryScope {
   timeZone: string;
   from: Date;
   to: Date;
+  /** Scope to one medication (per-med rollup) — reports reuse this read path. */
+  medicationId?: string | null;
 }
 
 const RESOLVED = ["taken", "missed", "skipped"] as const;
 
 export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<AdherenceSummaryDTO> {
-  const { userId, timeZone } = scope;
+  const { userId, timeZone, medicationId } = scope;
   const at = now();
 
   // Canonical read path: reconcile before any read so statuses are instant-correct.
@@ -36,7 +38,14 @@ export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<A
 
   const fromKey = localDateKey(scope.from, timeZone);
   const toKey = localDateKey(scope.to, timeZone);
-  const recDays = await recomputeRange(db, { userId, fromKey, toKey, timeZone, now: at });
+  const recDays = await recomputeRange(db, {
+    userId,
+    fromKey,
+    toKey,
+    timeZone,
+    now: at,
+    medicationId: medicationId ?? null,
+  });
   const byDay = new Map(recDays.map((d) => [d.date, d]));
 
   // Full contiguous calendar window — days without regimen become "no data" gaps.
@@ -63,7 +72,7 @@ export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<A
   const totals = sumCounts(days);
   const streak = computeStreaks(recDays, localDateKey(at, timeZone));
   const trend = computeTrend(days, localDateKey(at, timeZone));
-  const byBucket = await bucketStatsFor(db, userId, timeZone, fromKey, toKey);
+  const byBucket = await bucketStatsFor(db, userId, timeZone, fromKey, toKey, medicationId ?? null);
 
   return {
     from: scope.from,
@@ -81,7 +90,14 @@ export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<A
   };
 }
 
-async function bucketStatsFor(db: DbClient, userId: string, timeZone: string, fromKey: string, toKey: string) {
+async function bucketStatsFor(
+  db: DbClient,
+  userId: string,
+  timeZone: string,
+  fromKey: string,
+  toKey: string,
+  medicationId: string | null = null,
+) {
   const start = combineDateAndTime(fromKey, "00:00", timeZone);
   const end = addLocalDays(combineDateAndTime(toKey, "00:00", timeZone), 1, timeZone);
   const rows = await db
@@ -94,6 +110,7 @@ async function bucketStatsFor(db: DbClient, userId: string, timeZone: string, fr
     .where(
       and(
         eq(doseEvents.userId, userId),
+        medicationId ? eq(doseEvents.medicationId, medicationId) : undefined,
         gte(doseEvents.scheduledFor, start),
         lt(doseEvents.scheduledFor, end),
         inArray(doseEvents.status, RESOLVED),

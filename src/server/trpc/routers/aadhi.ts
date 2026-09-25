@@ -14,6 +14,9 @@ import { adherenceRouter } from "./adherence";
 import { scheduleRouter } from "./schedule";
 import { doseRouter } from "./dose";
 import { dashboardRouter } from "./dashboard";
+import { notificationsRouter } from "./notifications";
+import { historyRouter } from "./history";
+import { reportsRouter } from "./reports";
 
 export const aadhiRouters = {
   medication: medicationRouter,
@@ -22,4 +25,7 @@ export const aadhiRouters = {
   schedule: scheduleRouter,
   dose: doseRouter,
   dashboard: dashboardRouter,
+  notifications: notificationsRouter,
+  history: historyRouter,
+  reports: reportsRouter,
 };

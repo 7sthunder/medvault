@@ -47,7 +47,7 @@
 | 13 | Dose engine & adherence engine (domain) | `done` | `9a72716` | verified: typecheck/lint/test |
 | 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `done` | `14f378f` | verified: typecheck/lint/test; adherence pages split to parallel worker |
 | 15 | Medication CRUD UI + Dashboard | `done` | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section |
-| 16 | History + Reports + Notifications | `pending` | — | |
+| 16 | History + Reports + Notifications | `done` | `(this log)` | verified: typecheck/lint/test — see Phase 16 section |
 | 17 | Caregiver system + AI insights | `pending` | — | |
 | 18 | Settings + Demo mode + /help | `pending` | — | |
 | 19 | Quality sweep, test completion, E2E & delivery | `pending` | — | |
@@ -1131,6 +1131,84 @@ session (verified & committed together here), and the Phase 14-deferred `/adhere
   enrichment (don't re-query in widgets).
 - The dashboard insight tile already reads the latest `ai_insights` row — Phase 17's AI insight
   generation just has to write rows the same way.
+
+---
+
+## Phase 16 — History + Reports + Notifications
+
+**Plan reference:** `plan.md` §21 Phase 16 bundle: §11.10 history page (`plan.md:667`), §10.9 reports
+(`plan.md:575` — build *exclusively* from `adherenceService`, CSV export `GET /api/reports/export`),
+§11.11 `/reports` page (`plan.md:659`), §11.13 notifications (`plan.md:667`), §10.7 notification
+domain. **Objective met:** three new domains (history, reports, notifications) with tRPC routers
+registered on `aadhi`, three new pages under `/history`, `/reports`, `/notifications`, the live
+notification bell in the shell, producers wired for dose events, plus the CSV export route.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/calc/report.ts` | created | pure aggregation: `periodKey` (daily / ISO-week `YYYY-Www` / monthly `YYYY-MM`), `aggregateReport(days, granularity)` → `{ table, trend }`, `periodLabel` — no I/O, unit-testable |
+| `src/server/domain/history/service.ts` | created | `historyService.query(db, userId, timeZone, q)` — cursor pages of `dose_actions` joined to the current med snapshot (archived meds still resolve) + event status; range / med / status filters |
+| `src/server/trpc/routers/history.ts` | created | `history.query` protected procedure (`historyQuerySchema`, `timeZone = ctx.user.timezone ?? "UTC"`) |
+| `src/features/history/{HistoryPage,FilterBar,HistoryTimeline,HistoryRow,HistorySkeleton}.tsx` | created | §11.10 page: day-grouped timeline, status + med + range filters, "was missed / archived" badges |
+| `src/app/(app)/history/page.tsx` | created | server wrapper → client `HistoryPage` |
+| `src/server/domain/reports/service.ts` | created | `reportsService.generate(db, userId, timeZone, input)` — `adherenceService.summary` → `aggregateReport` (no bespoke read path) |
+| `src/server/trpc/routers/reports.ts` | created | `reports.generate` with `reportsSchemaFor(localDateKey(now(), "UTC"))` (from≤to, span≤366d, to≤today+1) |
+| `src/app/api/reports/export/route.ts` | created | CSV export: Better Auth session check, `reportsSchemaFor` `safeParse`, deterministic header `period,scheduled,taken,missed,skipped,adherence_percent`, `Content-Disposition` attachment |
+| `src/features/reports/*` (7 files) | created | `ReportsPage`, `RangePicker` reuse, `GranularityTabs`, `SummaryTable`, `MissedAnalysis`, `TrendChartBlock`, `DownloadButton` (client `fetch` → blob download) |
+| `src/app/(app)/reports/page.tsx` | created | server wrapper → client `ReportsPage` |
+| `src/server/domain/notifications/{service.ts,channels.ts}` | created | §10.7: single writer `notificationsService.create` (pref gate → dedupe → channel fan-out), `list`/`unreadCount`/`markRead`/`markAllRead`; `inAppChannel` (authoritative row), `consoleChannel`, `defaultChannels` |
+| `src/server/trpc/routers/notifications.ts` | created | `notifications.list/unreadCount/markRead/markAllRead` protected procedures |
+| `src/features/notifications/*`, `src/components/layout/NotificationBell.tsx` | created | §11.13 page (tab filter), popover bell wired to `unreadCount` + live event bus |
+| `src/app/(app)/notifications/page.tsx` | created | server wrapper → client `NotificationsPage` |
+| `src/server/domain/adherence/{summary.ts,service.ts}` | edited | `SummaryScope.medicationId` optional; `bucketStatsFor` gained a `medicationId` filter; `adherenceService.summary(db, userId, timeZone, window, medicationId?)` |
+| `src/server/domain/doseEvents/service.ts` (miss path) | edited | missed-dose producer writes `notificationsService.create(...{type:"missed_dose"})` |
+| `src/server/trpc/routers/aadhi.ts` | edited | registered `history`, `reports`, `notifications` routers |
+| `src/components/layout/nav-manifest.test.ts` | edited | `existsNow: true` + `EXPECTED_ROUTE_FILES` for `/history`, `/reports`, `/notifications` |
+| `src/shared/validations/{history.ts,reports.ts}` | created | zod schemas incl. `reportsSchemaFor(todayKey)` generator |
+| `src/shared/types.ts`, `src/shared/constants.ts`, `src/shared/enums.ts` | edited | `HistoryPageDTO`, `ReportDTO`, `HISTORY_PAGE_SIZE`, `NOTIFICATION_*` type/tab sets |
+| `src/shared/calc/report.test.ts` | created | 7 pure aggregation tests (daily/weekly ISO-week/monthly rolls, no-data suppression, trend alignment) |
+| `src/server/domain/history/service.test.ts` | created | 6 DB-gated tests (newest-first, taken incl. take-late, snoozed rows, med scope, cursor pagination, archived med) |
+| `src/server/domain/notifications/service.test.ts` | created | 6 DB-gated tests (insert+list, entityId dedupe, system no-dedupe, pref gate, unread-first + mark-read/all, tab filter) |
+| `src/server/domain/reports/service.test.ts` | created | 3 DB-gated tests reusing the §19 demo fixture (84/76/5/3 → 90.5% across daily/weekly/monthly) |
+| `impl.md` | edited | Phase 16 row → `done`; this section appended |
+
+### Deviations & decisions (precise > faithful)
+
+- **History under `server/domain/history/`** (not `doseActions/`): the append-only `dose_actions`
+  log is the source but the history domain owns the join/mapping — keeps `doseActions` a pure
+  action writer (see Phase 13).
+- **Status filter semantics:** `snoozed` matches only `action = "snooze"` rows (snooze is an audit
+  event; the final event status is still pending/taken); every other status filters on the event's
+  *resolved* status (`doseEvents.status`) — take-late events resolve to `taken` with `meta.takenLate`
+  and correctly appear under "taken". Tested explicitly.
+- **Archived meds resolve in history** via a left-join to the soft-deleted `medications` row (stable
+  name/colour) rather than falling back to "Unknown" — `toMedicationLiteMap` on the page's med ids.
+- **Reports build exclusively from `adherenceService.summary`** per `plan.md:575` — the summary
+  correctly integrated medication scoping. `aggregateReport` is a pure module so the layout math
+  (ISO-week Monday anchoring, monthly `YYYY-MM`) is unit-tested without a DB.
+- **CSV export is a hand-rolled route** (not an opendoc/blob) to keep the column order deterministic
+  per plan; values come from the same `aggregateReport` table so table + export always agree.
+- **Notification dedupe is once-per-`(type, entityId)`** for `missed_dose`/`due_dose`/
+  `caregiver_alert` only; system rows never dedupe. Pref gate short-circuits before dedupe.
+- **Tests caught a real bug:** `typeFilter` originally used `and(...)` across a tab's type list
+  (an impossible `type = A AND type = B`), which made every tab filter return no rows — fixed to
+  `or(...)`. Caught by the tab-filter DB test and covered by a regression assertion.
+
+### Verification
+
+- `pnpm typecheck` — clean
+- `pnpm eslint .` — clean (0 errors / 0 warnings; removed 2 unused-variable warnings: `timeZone`
+  prop on `NotificationsList`, `TabInput` type in notifications service)
+- `pnpm vitest run src/shared/calc/report.test.ts src/server/domain/notifications/service.test.ts src/server/domain/history/service.test.ts src/server/domain/reports/service.test.ts` —
+  **4 files, 22 tests passed** (DB-gated tests ran against the real DB, not skipped)
+
+### Hand-off notes for later phases
+
+- Phase 17 (caregiver/AI) should reuse `notificationsService.create` as the single writer for
+  `caregiver_alert`/`insight` — gating + dedupe already handled; just add producers.
+- The report CSV route is ready for Phase 19 E2E to assert the `Content-Disposition` attachment.
+- `periodLabel`/`trend` shapes are the seam for any future `insights` visualization.
 
 ---
 

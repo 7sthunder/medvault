@@ -142,6 +142,14 @@ export interface DoseActionDTO {
   eventScheduledFor: Date;
 }
 
+/* ── History (§11.10) ─────────────────────────────────────────────────────── */
+
+/** One page of the append-only dose-action log with its cursor. */
+export interface HistoryPageDTO {
+  items: DoseActionDTO[];
+  nextCursor: string | null;
+}
+
 /* ── Adherence (§10.5) ────────────────────────────────────────────────────── */
 
 export interface AdherenceDay {

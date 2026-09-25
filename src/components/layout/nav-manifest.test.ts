@@ -25,12 +25,12 @@ const ROUTE_MANIFEST: Readonly<Record<string, RouteOwner>> = {
   "/dashboard": { owner: "bala", phase: 18, existsNow: true },
   "/medications": { owner: "aadhi", phase: 15, existsNow: true },
   "/schedule": { owner: "aadhi", phase: 14 },
-  "/history": { owner: "bala", phase: 19 },
+  "/history": { owner: "bala", phase: 19, existsNow: true },
   "/adherence": { owner: "bala", phase: 16, existsNow: true },
   "/insights": { owner: "hp", phase: 23 },
-  "/reports": { owner: "bala", phase: 20 },
+  "/reports": { owner: "bala", phase: 20, existsNow: true },
   "/caregiver": { owner: "hp", phase: 21 },
-  "/notifications": { owner: "hp", phase: 22 },
+  "/notifications": { owner: "hp", phase: 22, existsNow: true },
   "/settings/profile": { owner: "bala", phase: 24 },
   "/settings/reminders": { owner: "bala", phase: 24 },
   "/settings/caregiver": { owner: "bala", phase: 24 },
@@ -56,6 +56,9 @@ const EXPECTED_ROUTE_FILES: Readonly<Record<string, string>> = {
   "/adherence/medications": "src/app/(app)/adherence/medications/page.tsx",
   "/schedule": "src/app/(app)/schedule/page.tsx",
   "/schedule/[doseId]": "src/app/(app)/schedule/[doseId]/page.tsx",
+  "/history": "src/app/(app)/history/page.tsx",
+  "/reports": "src/app/(app)/reports/page.tsx",
+  "/notifications": "src/app/(app)/notifications/page.tsx",
 };
 
 describe("nav model invariants", () => {

@@ -25,9 +25,15 @@ export interface AdherenceWindow {
 const RESOLVED = ["taken", "missed", "skipped"] as const;
 
 export const adherenceService = {
-  /** One shape for every adherence surface (§10.5 note). */
-  async summary(db: DbClient, userId: string, timeZone: string, window: AdherenceWindow): Promise<AdherenceSummaryDTO> {
-    return buildSummary(db, { userId, timeZone, from: window.from, to: window.to });
+  /** One shape for every adherence surface (§10.5 note). Optional per-med scope. */
+  async summary(
+    db: DbClient,
+    userId: string,
+    timeZone: string,
+    window: AdherenceWindow,
+    medicationId?: string | null,
+  ): Promise<AdherenceSummaryDTO> {
+    return buildSummary(db, { userId, timeZone, from: window.from, to: window.to, medicationId });
   },
 
   /** Per-medication performance for the period (aggregates all owned meds). */
