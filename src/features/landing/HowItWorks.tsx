@@ -59,7 +59,7 @@ export default function HowItWorks() {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6" style={{ alignItems: "stretch", width: "100%" }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6" style={{ alignItems: "stretch", width: "100%" }}>
         {STEPS.map((step, i) => (
           <div
             key={step.num}

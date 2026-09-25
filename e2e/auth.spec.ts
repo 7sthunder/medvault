@@ -22,8 +22,9 @@ test("register -> onboarding -> dashboard -> logout -> login round trip", async 
   await page.getByRole("button", { name: /Continue to dashboard/i }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
 
+  await page.getByLabel(/User menu/i).click();
   await expect(page.getByText(email)).toBeVisible();
-  await page.getByRole("button", { name: /Sign out/i }).click();
+  await page.getByRole("menuitem", { name: /Sign out/i }).click();
   await expect(page).toHaveURL("/");
 
   await page.goto("/login");
@@ -32,5 +33,6 @@ test("register -> onboarding -> dashboard -> logout -> login round trip", async 
   await page.getByRole("button", { name: /Access Vault/i }).click();
 
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
+  await page.getByLabel(/User menu/i).click();
   await expect(page.getByText(email)).toBeVisible();
 });

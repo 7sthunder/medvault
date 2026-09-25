@@ -1309,7 +1309,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **Business logic:** §10.8 scenario bricks; token issuance.
 - **Validation:** action/input schemas (clamped).
 - **State/flow:** demo cookie + demoNow threaded through procedures; refetch on time change.
-- **States:** enter loading; real-session preserved notice; reset confirm; empty demo (if seed cleared) → reseed CTA.
+- **States:** enter loading; real-session preserved notice; reset confirm; empty demo (if seed cleared) → reseed CTA. 
 - **Responsive:** dock compact on mobile (collapsible sheet).
 - **Security:** demo cookie short-lived, can't read real user data; real cookie untouched; reset scoped to demo userId.
 - **Testing:** unit scenario totals invariant; isolation (real user unseen by demo ctx and vice-versa); e2e full demo tour incl. each simulate button + reset.

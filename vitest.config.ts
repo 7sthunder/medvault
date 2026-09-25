@@ -24,8 +24,35 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
-      include: ["src/shared/calc/**"],
-      reporter: ["text", "html"],
+      // Include calc + domain services + lib helpers
+      include: [
+        "src/shared/calc/**",
+        "src/server/domain/**/*.ts",
+        "src/lib/**/*.ts",
+      ],
+      // Exclude test files and type-only files
+      exclude: [
+        "**/*.test.{ts,tsx}",
+        "**/*.d.ts",
+        "**/index.ts",
+        "src/server/domain/**/schema.ts",
+      ],
+      reporter: ["text", "html", "json-summary"],
+      // Phase 27 thresholds: calc ≥ 95%, domain services ≥ 80%
+      thresholds: {
+        "src/shared/calc/**": {
+          statements: 95,
+          branches: 80,
+          functions: 95,
+          lines: 95,
+        },
+        "src/server/domain/**": {
+          statements: 80,
+          branches: 70,
+          functions: 80,
+          lines: 80,
+        },
+      },
     },
   },
 });

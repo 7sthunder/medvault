@@ -34,7 +34,7 @@ export default function RegisterForm({ next }: { next: string | null }) {
     setServerError(null);
     const res = await authClient.signUp.email(values);
     if (res.error) {
-      setServerError(authErrorMessage(res.error.code));
+      setServerError(authErrorMessage(res.error.code, res.error.message));
       return;
     }
     const session = await authClient.getSession();

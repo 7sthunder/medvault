@@ -53,13 +53,24 @@ export function combineDateAndTime(dateKey: string, hhmm: string, timeZone: stri
   if (!DATE_KEY_RE.test(dateKey)) {
     throw new RangeError(`combineDateAndTime: invalid dateKey "${dateKey}"`);
   }
-  const parsed = parseHhMm(hhmm);
+  const cleanHhmm = hhmm.slice(0, 5);
+  const parsed = parseHhMm(cleanHhmm);
   if (!parsed) {
     throw new RangeError(`combineDateAndTime: invalid hh:mm "${hhmm}"`);
   }
   const [y, m, d] = dateKey.split("-").map(Number) as [number, number, number];
+  let sec = 0;
+  let ms = 0;
+  if (hhmm.length > 5) {
+    const timeParts = hhmm.split(":");
+    if (timeParts[2]) {
+      const secParts = timeParts[2].split(".");
+      sec = parseInt(secParts[0] || "0", 10) || 0;
+      ms = parseInt(secParts[1] || "0", 10) || 0;
+    }
+  }
   // TZDate rolls over month/year boundaries and applies the zone offset.
-  return new TZDate(y, m - 1, d, parsed.hour, parsed.minute, 0, 0, timeZone);
+  return new TZDate(y, m - 1, d, parsed.hour, parsed.minute, sec, ms, timeZone);
 }
 
 /** `startOfDay`-equivalent but *local to the user's timezone* (returns an instant). */

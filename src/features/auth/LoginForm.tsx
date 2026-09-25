@@ -38,7 +38,7 @@ export default function LoginForm({ next }: { next: string | null }) {
     setServerError(null);
     const res = await authClient.signIn.email({ email, password, rememberMe: remember });
     if (res.error) {
-      setServerError(authErrorMessage(res.error.code));
+      setServerError(authErrorMessage(res.error.code, res.error.message));
       return;
     }
     const session = await authClient.getSession();

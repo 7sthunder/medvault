@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
+import { TRPCProvider } from "@/lib/trpc";
 
 import "./globals.css";
 
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={jakarta.variable}>
       <body className="font-sans antialiased">
-        {children}
+        <TRPCProvider>
+          {children}
+        </TRPCProvider>
         <Toaster position="top-center" richColors />
       </body>
     </html>

@@ -70,12 +70,20 @@ export const SETTINGS_NAV: readonly SettingsNavItem[] = [
   { label: "Your data", href: "/settings/data", icon: "reports" },
 ] as const;
 
-/** Bottom navigation (mobile < md, plan §7/§16): Home, Schedule, Add, More. */
-export const BOTTOM_NAV: readonly { label: string; href: string; icon: NavIconName; add?: boolean }[] = [
-  { label: "Home", href: "/dashboard", icon: "home" },
+export interface BottomNavItem {
+  label: string;
+  href: string;
+  icon: NavIconName;
+  isMore?: boolean;
+}
+
+/** Bottom navigation (mobile < md, plan §7/§16): Schedule, Medications, Dashboard, Adherence, More. */
+export const BOTTOM_NAV: readonly BottomNavItem[] = [
   { label: "Schedule", href: "/schedule", icon: "schedule" },
-  { label: "Add", href: "/medications/new", icon: "plus", add: true },
-  { label: "More", href: "more", icon: "more" },
+  { label: "Medications", href: "/medications", icon: "medications" },
+  { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
+  { label: "Adherence", href: "/adherence", icon: "adherence" },
+  { label: "More", href: "#more", icon: "more", isMore: true },
 ] as const;
 
 /** Group order used to render the sidebar sections. */

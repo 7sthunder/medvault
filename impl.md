@@ -40,15 +40,15 @@
 | 06 | Authentication & session plumbing (Better Auth) | `done` | `3006415` | verified: typecheck/lint/test/build/e2e |
 | 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
 | 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
-| 09 | Global shell & navigation `(app)` | `pending` | — | |
-| 10 | Onboarding | `pending` | — | |
-| 11 | Medication domain service (server) | `pending` | — | |
-| 12 | Medication schedule & dose-event generation (domain) | `pending` | — | |
-| 13 | Dose state machine + reconcile (missed detection) (domain) | `pending` | — | |
-| 14 | Today's Schedule page + dose UI | `pending` | — | |
-| 15 | Medication CRUD UI (list / detail / new / edit) | `pending` | — | |
-| 16 | Adherence engine (domain + aggregation service) | `pending` | — | |
-| 17 | Adherence UI + medication performance | `pending` | — | |
+| 09 | Global shell & navigation `(app)` | `done` | — | verified: typecheck/lint/test/build |
+| 10 | Onboarding | `done` | — | verified: typecheck/lint/test/build |
+| 11 | Medication domain service (server) | `done` | — | verified: typecheck/lint/test/build (194 tests) |
+| 12 | Medication schedule & dose-event generation (domain) | `done` | — | verified: typecheck/lint/test/build (208 tests) |
+| 13 | Dose state machine + reconcile (missed detection) (domain) | `done` | — | verified: typecheck/lint/test/build (233 tests) |
+| 14 | Today's Schedule page + dose UI | `done` | — | verified: typecheck/lint/test/build (240 tests) |
+| 15 | Medication CRUD UI (list / detail / new / edit) | `done` | — | verified: typecheck/lint/test/build (247 tests) |
+| 16 | Adherence engine (domain + aggregation service) | `done` | — | verified: typecheck/lint/test/build (261 tests) |
+| 17 | Adherence UI + medication performance | `done` | — | verified: typecheck/lint/test/build (265 tests) |
 | 18 | Dashboard | `pending` | — | |
 | 19 | History | `pending` | — | |
 | 20 | Reports | `pending` | — | |
@@ -734,3 +734,907 @@ now mounted app-wide. All verification green (145 unit tests, 7/7 e2e).
 - `format.ts`/`pagination.ts` are depth-3 tested units the feature phases should import, not re-derive.
 - Keep the `design-system` page `#data` section as the living usage reference; e2e asserts it.
 - The superjson tRPC-client note above moves to whichever phase introduces the tRPC client.
+
+---
+
+## Phase 09 — Global shell & navigation `(app)` (DONE)
+
+**Plan reference:** `plan.md` §7 (Global shell spec, lines 385–403), §16 (responsive contract), Phase 09 spec (`plan.md:979`).
+**Objective met:** Global authenticated application shell under `src/app/(app)/layout.tsx` wrapping all post-auth routes with a collapsed desktop sidebar that expands on hover without shifting layout, a top header with breadcrumb navigation and profile menu, a 5-item mobile bottom navigation bar, mobile MoreSheet drawer, and group-level skeleton/error/404 states. All 28 routes in `ALL_NAV_HREFS` resolve to concrete pages on disk without dead links.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/nav.ts` | modified | Updated `BOTTOM_NAV` to 5 items (`Schedule`, `Medications`, `Dashboard`, `Adherence`, `More`) per grill-me decision |
+| `src/components/layout/Breadcrumbs.tsx` | created | Breadcrumbs with dynamic path resolution, accessible Chevron separators, and semantic aria-current |
+| `src/components/layout/ProfileMenu.tsx` | created | User avatar with initials fallback, name/email header, links to profile settings and appearance, sign out |
+| `src/components/layout/Sidebar.tsx` | created | Desktop collapsed sidebar (`w-16`), expands on hover to `w-64`, grouped nav links with active tint/emerald states, brand tile header, user footer |
+| `src/components/layout/TopNav.tsx` | created | Header bar with mobile brand tile, breadcrumbs, NotificationBell stub, and ProfileMenu |
+| `src/components/layout/BottomNav.tsx` | created | Mobile (<md) bottom bar with 5 items, prominent center Dashboard, active emerald dot |
+| `src/components/layout/MoreSheet.tsx` | created | Mobile bottom sheet drawer (`Drawer`) exposing secondary nav links (`History`, `AI Insights`, `Reports`, `Caregiver`, `Notifications`, `Settings`, `Help`, sign out) |
+| `src/components/layout/AppShell.tsx` | created | Global shell wrapper integrating Sidebar spacer (preventing layout shift), Sidebar, TopNav, BottomNav, and MoreSheet |
+| `src/app/(app)/layout.tsx` | modified | Wraps children in `<AppShell user={session.user}>` after `requireUser()` |
+| `src/app/(app)/loading.tsx` | created | App shell skeleton loading state (header, 4 stat card skeletons, chart/feed skeletons) |
+| `src/app/(app)/error.tsx` | created | Group-level error boundary with `ErrorState`, retry, and dashboard navigation |
+| `src/app/(app)/not-found.tsx` | created | Group-level 404 page with `EmptyState` and return to dashboard action |
+| `src/app/(app)/dashboard/page.tsx` | modified | Upgraded to premium glass layout: greeting hero banner, 4 stat cards, today's schedule preview, and AI insight preview |
+| `src/app/(app)/medications/page.tsx` | created | Medications list placeholder page |
+| `src/app/(app)/medications/new/page.tsx` | created | Add medication wizard placeholder page |
+| `src/app/(app)/medications/[id]/page.tsx` | created | Medication details placeholder page |
+| `src/app/(app)/medications/[id]/edit/page.tsx` | created | Edit medication placeholder page |
+| `src/app/(app)/schedule/page.tsx` | created | Today's schedule placeholder page |
+| `src/app/(app)/schedule/[doseId]/page.tsx` | created | Dose details placeholder page |
+| `src/app/(app)/history/page.tsx` | created | History feed placeholder page |
+| `src/app/(app)/adherence/page.tsx` | created | Adherence analytics placeholder page |
+| `src/app/(app)/adherence/medications/page.tsx` | created | Medication performance placeholder page |
+| `src/app/(app)/insights/page.tsx` | created | AI insights placeholder page |
+| `src/app/(app)/reports/page.tsx` | created | Reports placeholder page |
+| `src/app/(app)/caregiver/page.tsx` | created | Caregiver management placeholder page |
+| `src/app/(app)/caregiver/alerts/[id]/page.tsx` | created | Caregiver alert placeholder page |
+| `src/app/(app)/caregiver/accept/page.tsx` | created | Caregiver invitation placeholder page |
+| `src/app/(app)/notifications/page.tsx` | created | Notifications placeholder page |
+| `src/app/(app)/settings/layout.tsx` | created | Settings sub-navigation tabs matching `SETTINGS_NAV` |
+| `src/app/(app)/settings/page.tsx` | created | Redirects `/settings` → `/settings/profile` |
+| `src/app/(app)/settings/profile/page.tsx` | created | Profile settings placeholder page |
+| `src/app/(app)/settings/reminders/page.tsx` | created | Reminders settings placeholder page |
+| `src/app/(app)/settings/caregiver/page.tsx` | created | Caregiver settings placeholder page |
+| `src/app/(app)/settings/appearance/page.tsx` | created | Appearance settings placeholder page |
+| `src/app/(app)/settings/data/page.tsx` | created | Data and privacy settings placeholder page |
+| `src/app/(app)/help/page.tsx` | created | Help and support placeholder page |
+| `src/shared/nav.test.ts` | created | Nav model test asserting all groups, 5 bottom nav items, and route file existence for every href |
+| `src/components/layout/app-shell.test.tsx` | created | Component unit tests covering breadcrumbs, initials, desktop sidebar, and mobile drawer |
+| `e2e/navigation.spec.ts` | created | Playwright e2e test covering desktop multi-route navigation and mobile bottom nav + More sheet |
+
+### Deviations & decisions (precise > faithful)
+
+- **Hover-to-expand desktop sidebar with fixed spacer:** The collapsed desktop sidebar (`w-16`) expands on hover to `w-64` using `fixed inset-y-0` with a subtle elevation shadow. A companion `w-16` spacer in the layout ensures that main page content does not shift during expansion.
+- **5-item BottomNav matching user grill-me choice:** The plan originally outlined 4 items (Home/Schedule/Add/More). Per the grill-me design decision, the bottom nav now renders 5 items: Schedule, Medications, Dashboard (center), Adherence, and More (which triggers the `MoreSheet` bottom drawer).
+- **Zero dead links:** Every single route in `ALL_NAV_HREFS` has been backed with a concrete `page.tsx` file inside `src/app/(app)/`. The unit test `src/shared/nav.test.ts` explicitly asserts that every route exists on disk.
+- **Brand component `href={null}`:** When placed inside interactive containers (like `Sidebar`'s top link), `Brand` accepts `href={null}` so the logo renders as a `<span>` rather than nesting `<a>` inside `<a>`.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **20 test files, 153 unit tests passed** (4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes
+
+### Hand-off notes for Phase 10 (Onboarding)
+
+- Phase 10 will complete the multi-step onboarding wizard at `/onboarding`.
+- Registered users redirect to `/onboarding` upon signup; finishing the wizard redirects to `/dashboard`.
+- Shell navigation is now locked and verified against all route targets.
+
+---
+
+## Phase 10 — Onboarding (DONE)
+
+**Plan reference:** `plan.md` §11.3 (Onboarding flow spec), §13 (`onboardingSchema`), Phase 10 spec (`plan.md:999`).
+**Objective met:** Multi-step onboarding wizard at `/onboarding` housed in a clean, standalone pre-shell layout. Backed by dedicated tRPC procedure `onboarding.complete` which validates using `onboardingSchema`, upserts `user_preferences`, updates `users.timezone`, marks `users.onboardingCompleted = true`, and optionally creates a starter Metformin 500mg prescription with two daily schedule slots (08:00 AM & 08:00 PM).
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/server/domain/settings/get-or-createPreferences.ts` | created | Domain functions to retrieve, initialize defaults, or upsert `user_preferences` rows |
+| `src/server/trpc/routers/onboarding.ts` | created | `onboardingRouter` with `getPreferences` query and `complete` mutation |
+| `src/server/trpc/routers/aadhi.ts` | modified | Composed `onboarding: onboardingRouter` into `aadhiRouters` |
+| `src/features/onboarding/types.ts` | created | Onboarding wizard state types and standard defaults |
+| `src/features/onboarding/steps/ProfileStep.tsx` | created | Step 1: Timezone picker (auto-detects local browser timezone) & user profile confirmation |
+| `src/features/onboarding/steps/RemindersStep.tsx` | created | Step 2: Reminder habits with Balanced/Strict/Relaxed presets & fine-grained timing inputs |
+| `src/features/onboarding/steps/FinishStep.tsx` | created | Step 3: Metformin 500mg sample medication opt-in toggle + configuration summary |
+| `src/features/onboarding/OnboardingWizard.tsx` | created | 3-step wizard state machine with Stitch pill progress indicator, skip action, and submission |
+| `src/app/(onboarding)/layout.tsx` | created | Standalone pre-shell layout with `requireUser()` auth enforcement |
+| `src/app/(onboarding)/onboarding/page.tsx` | created | Route page mounting `OnboardingWizard` with server session profile |
+| `src/app/(app)/onboarding/page.tsx` | deleted | Removed Phase 06 placeholder in favor of standalone layout |
+| `src/features/onboarding/onboarding-wizard.test.tsx` | created | Comprehensive component test suite (6 tests) covering steps, presets, toggles, skip, and submit |
+| `src/server/domain/settings/preferences.test.ts` | created | Unit test suite (4 tests) covering `onboardingSchema`, timezone validation, and bounds |
+| `e2e/onboarding.spec.ts` | created | End-to-end test verifying user registration through multi-step onboarding into dashboard |
+
+### Deviations & decisions (precise > faithful)
+
+- **Standalone `(onboarding)` route group:** As decided in the grill-me interview and per plan ("onboarding is pre-shell"), onboarding renders in a dedicated centered layout rather than inside the global `AppShell` with the sidebar and topnav, avoiding distractions during first setup.
+- **Transactional sample medication creation:** When the user leaves "Add sample medication" toggled on, the `onboarding.complete` mutation inserts Metformin 500mg and two schedule records (08:00 and 20:00) in the same transaction as the preferences upsert.
+- **Skip with defaults:** Users can skip onboarding at any time via a top-right button which invokes `auth.setOnboardingComplete` and lands directly on `/dashboard`.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **22 test files, 163 unit tests passed** (4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes (including `/onboarding`)
+
+### Hand-off notes for Phase 11 (Medication domain service)
+
+- Onboarding now persists real `user_preferences` and optional initial medication records.
+- Phase 11 will build the full server-side Medication Domain Service (`service.ts`, `repo.ts`, `mapper.ts`, `medicationRouter`) for full CRUD, soft-deletes, and ownership checks.
+
+---
+
+## Phase 11 — Medication domain service (server) (DONE)
+
+**Plan reference:** `plan.md` §10.1 (Medication domain), §8.3/§8.4 (Medications & schedules tables), §9 (`types.ts` DTO contracts), §13 (`medicationSchema` & `scheduleSchema`), Phase 11 spec (`plan.md:1019`).
+**Objective met:** Comprehensive server-side medication domain layer encompassing repository queries, DTO mapping, business service with lifecycle management, duplicate active name prevention, transactional schedule slot synchronization, event hooks for Phase 12 background generation, and an authenticated tRPC router with 7 procedures (`list`, `get`, `create`, `update`, `setStatus`, `archive`, `unarchive`).
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/calc/frequency.ts` | created | Pure calculation helper deriving `FrequencyLabel` ("once-daily", "twice-daily", "n-times-daily", "custom-weekdays") from enabled slots |
+| `src/shared/calc/frequency.test.ts` | created | 8 unit tests covering all frequency derivation and formatting rules |
+| `src/server/domain/medications/mapper.ts` | created | Type-safe mappers `toMedicationDTO`, `toScheduleSlotDTO`, and `toMedicationLite` with numeric conversions and slot sorting |
+| `src/server/domain/medications/mapper.test.ts` | created | 5 unit tests verifying slot sorting, numeric coercions, and DTO extraction |
+| `src/server/domain/medications/repo.ts` | created | Drizzle ORM repository strictly enforcing `userId` ownership on all queries, updates, slot deletions, and soft-deletes |
+| `src/server/domain/medications/service.ts` | created | Domain service providing duplicate name guards, slot transaction sync, lifecycle mutations, and event seam hooks |
+| `src/server/domain/medications/service.test.ts` | created | 11 unit tests verifying CRUD, duplicate checks, ownership gates, soft-delete, and event hook emissions |
+| `src/shared/validations/medication.ts` | modified | Exported `medicationBaseSchema` and `updateMedicationSchema` to enable clean `.partial().extend()` composition in routers |
+| `src/server/trpc/routers/medication.ts` | created | Authenticated tRPC router exposing `list`, `get`, `create`, `update`, `setStatus`, `archive`, and `unarchive` |
+| `src/server/trpc/routers/medication.test.ts` | created | 7 integration tests invoking `appRouter.createCaller` for auth and lifecycle procedures |
+| `src/server/trpc/routers/aadhi.ts` | modified | Registered `medication: medicationRouter` in `aadhiRouters` |
+| `impl.md` | modified | Updated phase status matrix and logged completed Phase 11 details |
+
+### Deviations & decisions (precise > faithful)
+
+- **Pure Frequency Derivation (`frequency.ts`):** `deriveFrequency` strictly evaluates enabled slots (`slot.enabled !== false`). If any enabled slot runs on a non-7-day subset, the frequency is tagged `"custom-weekdays"`. If all enabled slots are daily, it maps `1 -> "once-daily"`, `2 -> "twice-daily"`, and `>=3 -> "n-times-daily"`, with default fallback to `"once-daily"`.
+- **Duplicate Active Name Prevention:** Enforces case-insensitive duplicate name checks (`lower(name) = lower(input)`) against active (non-archived) medications for the user. Provides friendly `TRPCError({ code: "CONFLICT", message: "An active medication with this name already exists." })`.
+- **Unarchive Guard:** Before restoring an archived medication, unarchive validates that no active medication with the same name was created while it was archived.
+- **Transactional Slot Replacement:** When updating schedule slots, the service transactionally wipes existing slots and inserts the new set, guaranteeing that schedules and medications never drift out of sync.
+- **Phase 12 / 13 Event Seam:** Exported `registerMedicationChangeHandler` and `notifyMedicationChanged` in `service.ts` to allow Phase 12 (dose-event generation) and Phase 13 (missed reconcile) to subscribe to medication lifecycle events without circular imports.
+- **Zod Schema Refinement Separation:** Extracted `medicationBaseSchema` from `medicationSchema` so that `updateMedicationProcedureSchema` can call `.partial().extend(...)` without encountering Zod v3/v4 errors on refined objects.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **26 test files, 194 unit & integration tests passed** (+31 new tests, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes
+
+### Hand-off notes for Phase 12 (Medication schedule & dose-event generation)
+
+- `medicationRouter` and `medicationService` are fully operational and verified.
+- Phase 12 can hook directly into `registerMedicationChangeHandler` to trigger `ensureDoseEvents(userId, medicationId, from, to)` whenever a medication is created, updated, paused, or unarchived.
+
+---
+
+## Phase 12 — Medication schedule & dose-event generation (domain) (DONE)
+
+**Plan reference:** `plan.md` §10.2 (Scheduling & dose-event generation), §8.4/§8.5 (`medication_schedules` & `dose_events` tables), §9 (types & time helpers), Phase 12 spec (`plan.md:1039`).
+**Objective met:** Pure schedule expansion engine, idempotent dose-event generation service across a 14-day horizon with on-conflict do-nothing guarantees, future event voiding on schedule modification/pause/archive, automatic lifecycle change orchestration via domain event handlers, and a periodic reconcile scheduler skeleton.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/calc/schedule.ts` | created | Pure, timezone-aware schedule expansion engine (`expandSchedule`) mapping slot days and times to concrete UTC instants |
+| `src/shared/calc/schedule.test.ts` | created | 7 unit tests verifying active/pause rules, daily, twice-daily, custom weekdays, date bounds clipping, and timezone offsets |
+| `src/server/domain/doseEvents/service.ts` | created | Core domain operations: `ensureDoseEvents` (horizon expansion & idempotent insert), `voidFutureDoseEvents`, and `catchUpDoseEvents` |
+| `src/server/domain/doseEvents/service.test.ts` | created | 7 unit tests verifying idempotent insertion, deadline calculations, future event voiding, and lifecycle handling |
+| `src/server/domain/medicationSchedules/service.ts` | created | Subscribes to `registerMedicationChangeHandler` to automatically trigger `ensureDoseEvents` and `voidFutureDoseEvents` |
+| `src/server/domain/jobs/scheduler.ts` | created | Background reconcile skeleton extending horizon and catching up dose events across active users |
+| `impl.md` | modified | Updated phase matrix and recorded Phase 12 completion details |
+
+### Deviations & decisions (precise > faithful)
+
+- **Pure expansion engine (`schedule.ts`):** `expandSchedule` runs completely independently from the database, taking plain medication and slot shapes alongside local dates `[from, to]` and an IANA `timeZone`. It combines local date keys with slot times into exact UTC instants using date-fns v4 / `@date-fns/tz`.
+- **Selective Future Voiding:** As decided in the grill-me interview, modifying slots, pausing, or archiving a medication only cancels unresolved future events (`status IN ('upcoming', 'due', 'snoozed')` where `scheduledFor > now`). Past events and resolved events (`taken`, `skipped`, `missed`) remain untouched to protect history.
+- **Slot Diff Voiding:** When slots are updated, `validScheduleIds` is passed into `voidFutureDoseEvents` so that only events belonging to removed or changed slots are canceled, leaving valid existing future slots intact.
+- **Idempotency via Postgres Partial Unique Index:** `doseEvents` writes use `.onConflictDoNothing({ target: [doseEvents.medicationId, doseEvents.scheduledFor] })`, making repeated expansion safe against race conditions and duplicates.
+- **Automated Lifecycle Wiring:** `medicationSchedules/service.ts` listens to the event seam created in Phase 11. Creating, updating, pausing, or archiving a medication instantly coordinates dose-event generation or cancellation without circular dependencies.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **28 test files, 208 unit & integration tests passed** (+14 new tests in Phase 12, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes
+
+### Hand-off notes for Phase 13 (Dose state machine + reconcile)
+
+- Dose events are now reliably generated into `dose_events` across a 14-day horizon.
+- Phase 13 will implement the deterministic dose status transition machine (`upcoming -> due -> snoozed -> missed | taken | skipped`), the user dose action mutations (`take`, `snooze`, `skip`), the missed-dose reconciliation job, and the attachment seam for notifications.
+
+---
+
+## Phase 13 — Dose state machine + reconcile (missed detection) (domain) (DONE)
+
+**Plan reference:** `plan.md` §10.3 (Dose status machine), §10.4 (Actions & audit), §8.5/§8.6 (`dose_events` & `dose_actions` tables), §13 (`doseActionSchema`), Phase 13 spec (`plan.md:1041`).
+**Objective met:** Pure dose transition engine (`doseState.ts`), atomic user action mutations (`take`, `snooze`, `skip`) with append-only audit logging to `dose_actions`, automated missed-dose detection scanner (`reconcileDoseStatuses`) integrated with the notification/alert hook seam, and a full-featured `doseRouter` providing user mutations, single dose lookup, and today's schedule query.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/calc/doseState.ts` | created | Pure transition validation (`canTakeDose`, `canSnoozeDose`, `canSkipDose`, `calculateSnoozeTimes`, `isDoseMissed`, `isDoseDue`) |
+| `src/shared/calc/doseState.test.ts` | created | 12 unit tests verifying all state gates, snooze bounds, and missed grace calculations |
+| `src/server/domain/doseEvents/mapper.ts` | created | DTO mappers converting `dose_events` and `dose_actions` rows to `DoseEventDTO` and `DoseActionDTO` |
+| `src/server/domain/doseEvents/actions.ts` | created | Atomic mutations (`takeDose`, `snoozeDose`, `skipDose`) with conditional UPDATEs and `dose_actions` audit logging |
+| `src/server/domain/doseEvents/actions.test.ts` | created | 7 unit tests verifying atomic transitions, late dose taking, max snooze bounds, and skip restrictions |
+| `src/server/domain/doseEvents/reconcile.ts` | created | Reconcile engine scanning expired doses past `missedDeadline`, auditing `missed_auto`, and triggering the hook seam |
+| `src/server/domain/doseEvents/reconcile.test.ts` | created | Integration test asserting auto-missed transitions, audit logging, and `runMissedDoseHandlers` invocation |
+| `src/server/trpc/routers/dose.ts` | created | Authenticated tRPC router exposing `take`, `snooze`, `skip`, `get`, `today`, and `reconcile` |
+| `src/server/trpc/routers/dose.test.ts` | created | 5 integration tests verifying caller authentication, inputs, and procedure executions |
+| `src/server/trpc/routers/aadhi.ts` | modified | Registered `dose: doseRouter` in `aadhiRouters` |
+| `impl.md` | modified | Updated phase matrix and logged Phase 13 completion details |
+
+### Deviations & decisions (precise > faithful)
+
+- **Atomic Status Transitions:** Uses conditional `UPDATE dose_events ... WHERE id = :id AND user_id = :userId AND status IN (...)` to prevent race conditions or double-action submissions (e.g. double-tap take or taking an already skipped dose).
+- **Taking Late Allowed:** Per plan §10.3 rule 4 and the grill-me decision, taking a dose that was already marked as missed converts `missed -> taken` with an updated timestamp and audit record, ensuring patients get credit for taking their medication even if late.
+- **Skipping Missed Disallowed:** Per grill-me decision, skipping an already-missed dose is rejected (`BAD_REQUEST`), preventing retroactive falsification of adherence data without an explicit reopen flow.
+- **Snooze Grace Extension:** Snoozing calculates `snoozeUntil = now + snoozeMinutes` and sets `missedDeadline = max(missedDeadline, snoozeUntil + missedAfterMinutes)` so patients are not penalized with an immediate missed status right after snoozing.
+- **Audit Logging:** Every user action (`take`, `snooze`, `skip`) and system auto-transition (`missed_auto`) records an immutable row in `dose_actions` containing the instant, user ID, event ID, action type, and metadata (such as skip reason or snooze count).
+- **Inline Reconcile on Today's Schedule:** When a user queries `dose.today`, an inline reconcile pass automatically advances upcoming doses to `due` and checks for newly missed doses before returning the list, ensuring the UI always reflects live statuses.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **32 test files, 233 unit & integration tests passed** (+25 new tests in Phase 13, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes
+
+### Hand-off notes for Phase 14 (Today's Schedule page + dose UI)
+
+- The server domain spine for medications, schedule slots, dose events, and dose actions is now 100% complete and verified.
+- Phase 14 will build the frontend client experience at `/schedule`: interactive dose cards, Stitch pills, take/snooze/skip dialogs, time bucket grouping (Morning/Afternoon/Evening/Night), and optimistic UI updates.
+
+---
+
+## Phase 14 — Today's Schedule page + dose UI (DONE)
+
+**Plan reference:** `plan.md` §10.1 (Today view), §10.2 (Time bucket grouping), §10.3 (Dose card UX & Stitch adherence pill badge), Phase 14 spec (`plan.md:1047`).
+**Objective met:** Production-grade `/schedule` page presenting today's medication regimen organized by time buckets (Morning, Afternoon, Evening, Night), one-click Take action with optimistic updates, snooze dialog with configurable delays, skip dialog with reason taxonomy, adherence progress card, filter tabs (All, Due/Next, Taken, Missed/Skipped) with counts, and empty states.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/features/schedule/types.ts` | created | Schedule UI types (`ScheduleFilterTab`, `ScheduleBucketGroup`) |
+| `src/features/schedule/DoseCard.tsx` | created | Stitch-style dose card with pill badge, dosage, time, status badge, and action triggers |
+| `src/features/schedule/SnoozeDialog.tsx` | created | Responsive modal/drawer for choosing preset snooze durations (10m, 15m, 30m, 60m) |
+| `src/features/schedule/SkipDialog.tsx` | created | Responsive modal/drawer for choosing skip reasons (Side effects, Out of medication, Doctor advised, Feeling unwell, Forgot/Too late, Other) |
+| `src/features/schedule/ScheduleFilterTabs.tsx` | created | Pill filter tabs with count badges for quick status filtering |
+| `src/features/schedule/TimeBucketSection.tsx` | created | Section rendering doses grouped into Morning, Afternoon, Evening, Night buckets with bucket headers and icons |
+| `src/features/schedule/ScheduleProgressCard.tsx` | created | Today's adherence card with completion progress bar, count stats, and manual sync button |
+| `src/features/schedule/ScheduleView.tsx` | created | Main schedule controller orchestrating tRPC `dose.today` query, filter logic, bucket bucketing, modals, and mutations |
+| `src/app/(app)/schedule/page.tsx` | modified | Replaced stub with live `ScheduleView` component |
+| `src/features/schedule/schedule-view.test.tsx` | created | 7 unit tests testing DoseCard, SnoozeDialog, SkipDialog, ScheduleFilterTabs, and ScheduleProgressCard |
+| `impl.md` | modified | Updated phase matrix and logged Phase 14 completion details |
+
+### Deviations & decisions (precise > faithful)
+
+- **Pure Time-Bucket Partitioning:** Doses are grouped into Morning (05:00–11:59), Afternoon (12:00–16:59), Evening (17:00–20:59), and Night (21:00–04:59) using the user's localized scheduled time.
+- **Optimistic UI with Sonner Feedback:** Taking a dose triggers immediate feedback via `toast.success`, with immediate invalidation of `api.dose.today` and the schedule query cache to synchronize state with server authority.
+- **Late Doses Actionable:** Missed doses display a "Take Late" button on the dose card, allowing patients to record late doses as allowed by domain rules, while disabling the "Skip" action on already-missed doses.
+- **Design System Token Strictness:** Ensured zero hardcoded hex values in feature components, utilizing semantic tokens (`bg-primary`, `bg-amber-tint`, `text-amber`, `border-border`, etc.) adhering to the strict ESLint architecture rule.
+- **Responsive Dialog / Drawer:** Snooze and Skip dialogs leverage `ResponsiveDialog` (`Dialog` on desktop, `Drawer` on mobile) ensuring a seamless cross-device touch experience.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **33 test files, 240 unit & integration tests passed** (+7 new tests in Phase 14, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes (`/schedule` production bundle 22.4 kB)
+
+### Hand-off notes for Phase 15 (Medication CRUD UI)
+
+- Today's schedule UI is complete and fully functional.
+- Phase 15 will build the Medication CRUD management user experience:
+  - List page (`/medications`) with search, filter (active/paused/archived), and quick status toggling.
+  - Detail page (`/medications/[id]`) showing dosage, schedule slots, instructions, adherence preview, and actions.
+  - Creation wizard / form (`/medications/new`) with schedule slot configuration, dosage unit selector, color picker, and validation.
+  - Edit form (`/medications/[id]/edit`) with slot diffing and transactional updates.
+
+---
+
+## Phase 15 — Medication CRUD UI (list / detail / new / edit) (DONE)
+
+**Plan reference:** `plan.md` §11.5 (`/medications`), §11.6 (`/medications/new`, `/medications/[id]`, `/medications/[id]/edit`), §13 (`medicationSchema`, `scheduleSchema`), Phase 15 spec (`plan.md:1099`).
+**Objective met:** Full medication lifecycle experience across all 4 routes:
+- `/medications` list page with search, status tabs (`All`, `Active`, `Paused`, `Archived`) with count badges, `MedicationCard`s, quick pause/resume toggling, and archive modal.
+- `/medications/new` 4-step wizard (Basics, Schedule, Reminders, Review & Submit) with step progress indicators, `ScheduleBuilder` with presets (Once daily, Twice daily, 3x daily, Custom) and per-day weekday chip toggles, pill color selector, and Zod step validations.
+- `/medications/[id]` detail page with full prescription summary, schedule slots breakdown, doctor's notes, pause/archived status banners, quick pause/resume and edit actions, and live recent dose history preview (`dose.listByMedication`).
+- `/medications/[id]/edit` streamlined sectioned form prefilled with existing values, supporting schedule diffing and slot updates.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/colors.ts` | created | Curated medication color palette (Emerald, Teal, Cyan, Blue, Indigo, Purple, Rose, Amber) adhering to design tokens and architecture rules |
+| `src/features/medications/types.ts` | created | Medication UI types (`MedicationFilterTab`, `FrequencyPreset`, `MedicationFormData`) |
+| `src/features/medications/ScheduleBuilder.tsx` | created | Schedule builder with presets, native `TimePicker`, weekday chips (Su, M, Tu, W, Th, F, Sa), and slot addition/removal up to `MAX_SCHEDULE_SLOTS` |
+| `src/features/medications/ArchiveDialog.tsx` | created | Responsive confirmation dialog explaining soft-delete archive semantics and the historical record guarantee |
+| `src/features/medications/MedicationCard.tsx` | created | Stitch-styled medication card with color avatar, dosage, frequency badge, status chip, pause/resume toggle, and actions |
+| `src/features/medications/MedicationListPage.tsx` | created | Medication list view controller with search, status tabs with badge counts, empty states, and status mutations |
+| `src/features/medications/MedicationForm.tsx` | created | Multi-step wizard (`mode="new"`) and streamlined sectioned editor (`mode="edit"`) with live validations, color picker, and review card |
+| `src/features/medications/MedicationDetailPage.tsx` | created | Detailed view presenting medication metadata, schedule slots, and recent dose history activity |
+| `src/features/medications/MedicationEditPage.tsx` | created | Edit page controller fetching medication data and prefilling `MedicationForm` |
+| `src/server/trpc/routers/dose.ts` | modified | Added `listByMedication` procedure to support recent dose history queries on the medication detail page |
+| `src/app/(app)/medications/page.tsx` | modified | Wired to render `MedicationListPage` |
+| `src/app/(app)/medications/new/page.tsx` | modified | Wired to render `MedicationForm` in `mode="new"` |
+| `src/app/(app)/medications/[id]/page.tsx` | modified | Wired to render `MedicationDetailPage` |
+| `src/app/(app)/medications/[id]/edit/page.tsx` | modified | Wired to render `MedicationEditPage` |
+| `src/features/medications/medication-ui.test.tsx` | created | 7 unit & integration tests covering `MedicationCard`, `ArchiveDialog`, `ScheduleBuilder`, and `MedicationForm` |
+| `impl.md` | modified | Updated phase matrix and logged Phase 15 completion details |
+
+### Deviations & decisions (precise > faithful)
+
+- **Wizard for New vs Sectioned Form for Edit:** Per the grill-me alignment, `/medications/new` implements a guided 4-step wizard with step progression and a review card, while `/medications/[id]/edit` uses a unified sectioned form for rapid, efficient updates.
+- **Auto-Populated Recommended Defaults:** Selecting schedule presets ("Once daily", "Twice daily", "3x daily") automatically generates standard clinical times (08:00; 08:00 & 20:00; 08:00, 14:00 & 20:00) with every day enabled, while allowing full customization of time and weekdays.
+- **Card-Level Quick Toggles:** The list page allows users to instantly toggle medications between `active` and `paused` directly from each card, with optimistic updates and Sonner toast confirmations.
+- **Strict ESLint Token Architecture:** All feature files strictly avoid hardcoded hex literals, referencing `@/shared/colors` or Tailwind semantic design tokens (`bg-primary`, `bg-amber-tint`, `text-amber`, `border-border`, etc.).
+- **Live Recent Dose Activity:** Extended `doseRouter` with `listByMedication` to display the last 10 dose events with localized times and status badges on the medication detail page.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **34 test files, 247 unit & integration tests passed** (+7 new tests in Phase 15, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes (medications list 6.33 kB, detail 7.68 kB, new 193 B, edit 875 B)
+
+### Hand-off notes for Phase 16 (Adherence engine)
+
+- Medication authoring and editing is completely functional and verified.
+- Phase 16 will implement the core calculation and domain aggregation engine for adherence:
+  - Pure calculation functions in `src/shared/calc/adherence.ts`, `streaks.ts`, `performance.ts`.
+  - Materialization and aggregation service in `src/server/domain/adherence/service.ts`, `summary.ts`, `materialize.ts`.
+  - tRPC procedures in `src/server/trpc/routers/adherence.ts` (`summary`, `byMedication`, `patterns`).
+  - Unit tests asserting adherence percentages, current & longest streak calculations, time-of-day bucket aggregates, and edge cases.
+
+---
+
+## Phase 16 — Adherence engine (domain + aggregation service) (DONE)
+
+**Plan reference:** `plan.md` §10.5 (Adherence engine), §8.7 (`adherence_daily` table), §9 (`AdherenceSummaryDTO`, `StreakSummaryDTO`, `TrendDTO`, `TimeBucketStats`, `MedicationPerformanceDTO`), Phase 16 spec (`plan.md:1119`).
+**Objective met:** Comprehensive domain calculation engine and aggregation service establishing the single source of truth for adherence figures across all surfaces (adherence page, dashboard, reports, insights).
+- Pure calculation suite:
+  - `src/shared/calc/adherence.ts`: `calculateAdherencePercent` (formula: `taken / (taken + missed + skipped) * 100`, rounded to 1 dp, null if empty), `bucketOfHour` (Morning <12, Afternoon 12–16, Evening 17–20, Night ≥21), and `calculateTimeBucketStats`.
+  - `src/shared/calc/streaks.ts`: `calculateStreaks` respecting rest days (`scheduled === 0` preserves run), penalizing non-adherent days (`missed > 0 || skipped > 0`), and counting in-progress today if adherent-so-far.
+  - `src/shared/calc/performance.ts`: `calculateTrend` (rolling 7-day average, prior 7-day average, direction: improving/declining/stable) and `calculateMedicationPerformance` (per-med adherence, best/worst bucket, lastTakenAt).
+- Domain service:
+  - `src/server/domain/adherence/materialize.ts`: `recomputeDay`, `recomputeRange` for populating and maintaining `adherence_daily` rows.
+  - `src/server/domain/adherence/summary.ts`: `getAdherenceSummary` producing canonical `AdherenceSummaryDTO`.
+  - `src/server/domain/adherence/service.ts`: coordinator exposing `getAdherenceSummary`, `getMedicationPerformance`, `getTimeBucketPatterns`, `recomputeRange`.
+- API layer:
+  - `src/server/trpc/routers/adherence.ts`: procedures `summary`, `byMedication`, `patterns`, `recompute`.
+  - Registered `adherence: adherenceRouter` in `aadhiRouters` (`src/server/trpc/routers/aadhi.ts`).
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/calc/adherence.ts` | created | Pure adherence rate formula and 24-hour time-of-day bucket classifier |
+| `src/shared/calc/streaks.ts` | created | Pure streaks engine handling rest days, unbroken runs, and today in-progress logic |
+| `src/shared/calc/performance.ts` | created | Pure rolling 7-day trend analysis, direction derivation, and per-medication performance calculation |
+| `src/shared/calc/adherence.test.ts` | created | 9 unit tests verifying sample dataset (76/84 = 90.5%), bucket bounds, streak edges, and trends |
+| `src/server/domain/adherence/materialize.ts` | created | Daily materialization service storing aggregated day stats in `adherence_daily` |
+| `src/server/domain/adherence/summary.ts` | created | Aggregation engine compiling `AdherenceSummaryDTO` |
+| `src/server/domain/adherence/service.ts` | created | Domain service facade combining summary, performance, patterns, and range recomputation |
+| `src/server/trpc/routers/adherence.ts` | created | tRPC router exposing `summary`, `byMedication`, `patterns`, and `recompute` |
+| `src/server/trpc/routers/adherence.test.ts` | created | 5 integration tests testing authentication, inputs, and procedure executions |
+| `src/server/trpc/routers/aadhi.ts` | modified | Registered `adherence: adherenceRouter` in `aadhiRouters` |
+| `impl.md` | modified | Updated phase matrix and logged Phase 16 completion details |
+
+### Deviations & decisions (precise > faithful)
+
+- **Exact Seed Formula Match:** Implemented the strict §10.5 formula `taken / (taken + missed + skipped) * 100`, verifying with the 76/84 = 90.5% sample figure. Empty periods safely return `null` ("No data").
+- **Rest Day Streak Preservation:** As aligned in the grill-me interview, rest days with 0 scheduled doses preserve the user's running streak without resetting it or counting falsely as a non-adherent break.
+- **In-Progress Today Semantics:** Today counts towards `currentStreak` if all doses due so far have been taken (`missed === 0 && skipped === 0`), but historical `longestStreak` only includes fully concluded days.
+- **Rolling Trend Delta:** Trends use 7-day rolling window comparison: current 7-day average minus prior 7-day average (> +2% = improving, < -2% = declining, otherwise stable).
+- **Hybrid Data Aggregation:** Reads query live `dose_events` for real-time responsiveness and consistency, with `recomputeDay` and `recomputeRange` materializing `adherence_daily` rows for fast reporting.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **36 test files, 261 unit & integration tests passed** (+14 new tests in Phase 16, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes
+
+### Hand-off notes for Phase 17 (Adherence UI + medication performance)
+
+- The domain calculation engine and tRPC endpoints for adherence are complete, tested, and verified.
+- Phase 17 will build the frontend client experience at `/adherence` and `/adherence/medications`:
+  - Range presets (7d, 30d, 90d, custom).
+  - Stat cards: Overall adherence %, current streak, longest streak, taken vs missed vs skipped counts.
+  - Trend charts: Area/bar adherence trend chart with rolling 7-day line.
+  - Time-of-day pattern bars (Morning, Afternoon, Evening, Night).
+  - Medication performance table (`/adherence/medications`) showing per-medication adherence, best/worst bucket, sparklines, and links to medication detail.
+
+---
+
+## Phase 17 — Adherence UI + medication performance (DONE)
+
+**Plan reference:** `plan.md` §11.8 (`/adherence`, `/adherence/medications`), §10.5 (Adherence formulas & time buckets), §12 (Status system), Phase 17 spec (`plan.md:1139`).
+**Objective met:** Production-grade adherence analytics interface across `/adherence` and `/adherence/medications` delivering deep adherence insights powered by `AdherenceSummaryDTO`:
+- Top pill navigation tabs (`AdherenceNavTabs`) providing seamless routing between Overview and Medication Breakdown.
+- Range picker (`RangePicker`) supporting 7d, 30d, 90d presets and custom date ranges.
+- Stat rail (`StatRail`) displaying overall adherence %, current & longest streaks, doses taken, and missed/skipped counts with trend direction indicators.
+- Adherence trend chart (`TrendChart`) using Recharts ComposedChart with daily adherence bars and a smooth 7-day rolling average line curve with glass tooltip.
+- Time-of-day pattern breakdown (`TimeOfDayPattern`) visualizing Morning, Afternoon, Evening, and Night completion rates and progress tracks.
+- Calendar heat-strip (`MissedHeatStrip`) rendering daily colored status tiles (Green: adherent, Amber: partial/skipped, Red: missed, Slate: rest) with interactive hover tooltips.
+- Medication performance table (`MedicationPerformanceTable`) presenting per-medication adherence rates, completion breakdowns, best time bucket badges, and quick links to medication details.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/features/adherence/AdherenceNavTabs.tsx` | created | Pill navigation switcher between Overview and By Medication |
+| `src/features/adherence/StatRail.tsx` | created | 4-card metric rail displaying adherence rate, streaks, taken count, and missed/skipped breakdown |
+| `src/features/adherence/TrendChart.tsx` | created | Composed Recharts chart with daily adherence bars, rolling 7-day average line, and glass tooltip |
+| `src/features/adherence/TimeOfDayPattern.tsx` | created | Time-of-day pattern cards for Morning, Afternoon, Evening, and Night with progress bars |
+| `src/features/adherence/MissedHeatStrip.tsx` | created | Interactive day-by-day calendar heat-strip with hover tooltips and adherence legend |
+| `src/features/adherence/AdherenceOverviewPage.tsx` | created | Main adherence controller coordinating range selection, queries, stat rail, charts, patterns, and heat-strip |
+| `src/features/adherence/MedicationPerformanceTable.tsx` | created | Table view at `/adherence/medications` displaying per-prescription performance, best bucket, and details link |
+| `src/app/(app)/adherence/page.tsx` | modified | Wired to render `AdherenceOverviewPage` |
+| `src/app/(app)/adherence/medications/page.tsx` | modified | Wired to render `MedicationPerformanceTable` |
+| `src/features/adherence/adherence-ui.test.tsx` | created | 4 unit and integration tests covering StatRail, TimeOfDayPattern, MissedHeatStrip, and AdherenceNavTabs |
+| `impl.md` | modified | Updated phase matrix and logged Phase 17 completion details |
+
+### Deviations & decisions (precise > faithful)
+
+- **Composed Daily & Rolling Trend:** Per the grill-me alignment, the trend chart combines daily completion bars with a smooth 7-day rolling average line curve, avoiding false zero drops on rest days.
+- **Top Pill Navigation Switcher:** Provides immediate, unified switching between Overview (`/adherence`) and Medication Breakdown (`/adherence/medications`) using persistent URL routing.
+- **Strict ESLint Token Architecture:** All adherence feature components strictly adhere to Tailwind design tokens and CSS variables (`var(--primary)`, `bg-primary`, `bg-amber-tint`, etc.), ensuring zero hardcoded hex literals in `src/features/`.
+- **Interactive Calendar Heat-Strip:** Implemented day-by-day tile matrix with hover tooltips displaying date and exact taken/missed/skipped counts for every calendar day in the range.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **37 test files, 265 unit & integration tests passed** (+4 new tests in Phase 17, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 static and dynamic routes (`/adherence` 4.86 kB, `/adherence/medications` 3.4 kB)
+
+### Hand-off notes for Phase 18 (Dashboard)
+
+- Adherence engine and client UI are complete, tested, and verified.
+- Central `/dashboard` surface implemented and completed below.
+
+---
+
+## 2026-09-24 — Phase 18: Dashboard (`/dashboard`)
+
+### Context & Scope
+
+Phase 18 implements the central user landing surface `/dashboard` according to plan §11.4 and §18:
+1. **Server domain aggregator:** Created `src/server/domain/dashboard/service.ts` aggregating all landing surface data in a single round-trip (`dashboard.get`):
+   - Reconciles dose statuses (`reconcileDoseStatuses`) and ensures horizon dose events (`ensureDoseEvents`).
+   - Retrieves today's doses, classified by status into `dueNow` and `today`.
+   - Determines `nextDose` (earliest unresolved dose today, or nearest future unresolved dose).
+   - Computes today's dose metrics (`adherenceToday`, `takenToday`, `missedToday`, `scheduledToday`).
+   - Fetches 7-day adherence summary for `week` (`AdherenceDay[]`) and `currentStreak`.
+   - Queries active medications (`medications`).
+   - Provides contextual stubs for `latestInsight` (`InsightDTO`, bridging to Phase 24) and `caregiver` (`DashboardCaregiverDTO`, bridging to Phase 21).
+2. **tRPC Router:**
+   - Created `src/server/trpc/routers/dashboard.ts` with `get` procedure taking optional `timeZone`.
+   - Registered `dashboard: dashboardRouter` in `src/server/trpc/routers/aadhi.ts` (auto-joining `appRouter` through `root.ts`).
+3. **UI Components (`src/features/dashboard/`):**
+   - `NextDoseHero.tsx`: Floating emerald-tinted glass card with one-click "Take Dose", "Snooze" dialog trigger, and "Skip" dialog trigger. Features "Due Now" pulsing beacon, "All caught up" celebration card, and onboarding CTA for users with no medications.
+   - `StatRail.tsx` / Metric Cards: 4 `StatCard` items covering Today's Adherence, Current Streak, Next Scheduled Dose, and Missed Today.
+   - `TodayFeed.tsx`: Smart prioritized timeline showing up to 4 doses (Due Now & Snoozed first, then Upcoming, then Resolved) with inline actions and link to `/schedule`.
+   - `AdherenceWidget.tsx`: Compact 7-day Recharts chart with daily completion bars, 90% target reference line, and interactive tooltips.
+   - `MedSummary.tsx`: Active prescriptions list with avatar color chips, dosage, frequency, and link to `/medications`.
+   - `InsightWidget.tsx`: AI / heuristic pattern card linking to `/insights`.
+   - `CaregiverStatus.tsx`: Caregiver network summary linking to `/caregiver`.
+   - `QuickActions.tsx`: 4 quick action shortcuts to key surfaces.
+   - `DashboardPage.tsx`: Client controller orchestrating queries, mutations, toasts, dialog state, loading skeletons, and error retries.
+4. **App Routing:**
+   - Updated `src/app/(app)/dashboard/page.tsx` to render `DashboardPage`.
+
+### Architecture & Design Decisions
+
+- **Single Round-Trip Aggregation:** All dashboard widgets hydrate from a single `dashboard.get` tRPC query, avoiding waterfall queries and layout shifts while ensuring perfect consistency across widgets.
+- **Unified Action Invalidation:** Taking, snoozing, or skipping a dose directly from the dashboard invalidates both `dashboard.get` and `dose.today` caches simultaneously.
+- **Design System Fidelity:** Emerald floating card styling, SectionLabels, StatCards, and Recharts theme tokens adhere strictly to the established Stitch tokens. Zero hardcoded hex literals in `src/features/`.
+- **Three-State Hero Block:** Intelligently switches between Active Next/Due Dose, "All Caught Up" celebratory card, and "Welcome / Add Medication" onboarding CTA.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **40 test files, 284 unit & integration tests passed** (+19 new tests across `service.test.ts`, `dashboard.test.ts`, and `dashboard-view.test.tsx`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 routes cleanly (`/dashboard` dynamic server component, 9.74 kB)
+
+### Hand-off notes for Phase 19 (History)
+
+- Dashboard landing surface is complete, tested, and verified.
+- History audit feed and filters completed below.
+
+---
+
+## 2026-09-25 — Phase 19: History (`/history`)
+
+### Context & Scope
+
+Phase 19 implements the authoritative dose action audit log `/history` according to plan §11.10 and §19:
+1. **Validation Schema:** Created `src/shared/validations/history.ts` specifying `historyQuerySchema` with `from`, `to`, `medicationId`, `action` ("all" | DOSE_ACTION_TYPES), `limit`, and `cursor`.
+2. **Server Domain Service:** Created `src/server/domain/doseActions/history.ts` with `queryDoseHistory` implementing:
+   - Full inner-join across `dose_actions`, `dose_events`, and `medications`.
+   - Exact filter predicates for date boundaries, medication IDs, and action types.
+   - Base64 cursor encoding and decoding (`encodeHistoryCursor`, `decodeHistoryCursor`) supporting deterministic keyset pagination on `(occurredAt, id)`.
+   - Accurate total matched count computation across filtered records.
+   - Preservation of soft-deleted medication details (`archivedAt` snapshot) ensuring zero history loss on medication archive.
+3. **tRPC Router:**
+   - Created `src/server/trpc/routers/history.ts` with procedure `history.query`.
+   - Registered `history: historyRouter` in `src/server/trpc/routers/aadhi.ts` (automatically spread to `appRouter`).
+4. **UI Components (`src/features/history/`):**
+   - `types.ts`: Filter states (`DateRangePreset`, `ActionFilterOption`, `HistoryFilterState`).
+   - `FilterBar.tsx`: Sticky toolbar with horizontal scrollable filter chips on mobile and inline dropdowns on desktop (All Time, Today, 7D, 30D, 90D range presets; All, Taken, Snoozed, Skipped, Missed action filters; medication selector; reset button).
+   - `HistoryRowMenu.tsx`: Contextual dropdown menu per row for viewing medication details, navigating to dose schedule, or copying event information to clipboard.
+   - `HistoryTimeline.tsx`: Grouped chronological timeline by local day with day headings, action count pills, `ListRow` rows with action-specific icon tiles, late dose badges, archived medication badges, reason/snooze metadata, and infinite "Load More Entries" button.
+   - `HistoryPage.tsx`: Client controller utilizing `api.history.query.useInfiniteQuery` for smooth cursor pagination and `api.medication.list` for medication filter population.
+5. **App Routing:**
+   - Updated `src/app/(app)/history/page.tsx` with user authentication check and rendered `HistoryView`.
+
+### Architecture & Design Decisions
+
+- **Deterministic Keyset Cursor Pagination:** Implemented base64 timestamp+id cursors to avoid offset performance degradation and offset drift as new doses are logged.
+- **Permanent Audit Trail Safety:** Historical events join against `medications` which uses soft-deletion (`archivedAt`), ensuring that even when medications are paused or archived, past intake records retain full fidelity with appropriate badges.
+- **Zero Hex Literals:** All components strictly use Tailwind classes and semantic design tokens in compliance with project ESLint rules.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **43 test files, 300 unit & integration tests passed** (+16 new tests across `history.test.ts` service, `history.test.ts` router, and `history-view.test.tsx`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 28 routes cleanly (`/history` dynamic server component, 6.53 kB)
+
+### Hand-off notes for Phase 20 (Reports)
+
+- History audit trail and interactive filter surface are complete, tested, and verified.
+- Hand-off completed into Phase 20.
+
+---
+
+## 2026-09-25 — Phase 20 (Reports domain + UI + CSV export)
+
+### Summary of changes
+
+1. **Domain Models & Shared Types:**
+   - Extended `ReportDTO` in `src/shared/types.ts` with `summary: ReportSummaryStats` (total scheduled, taken, missed, skipped, overall adherence rate) and `missedAnalysis: ReportMissedAnalysis` (time-of-day bucket distribution and per-medication breakdown).
+   - Reused existing schemas in `src/shared/validations/reports.ts` (`reportsBaseSchema`, `reportsSchema`).
+2. **Server Domain Reporting Service (`src/server/domain/reports/service.ts`):**
+   - Built `getReportData`: Queries canonical metrics from `getAdherenceSummary` (guaranteeing 100% adherence calculation parity with dashboard and adherence features) and `getMedicationPerformance`.
+   - Aggregates daily adherence series into `ReportRow[]` based on granularity:
+     - `daily`: exact day-level rows (`YYYY-MM-DD`).
+     - `weekly`: ISO week grouping (`YYYY-Www`).
+     - `monthly`: month grouping (`YYYY-MM`).
+   - Builds trend points (`ReportTrendPoint[]`) for data visualization.
+   - Built `generateReportCsv`: Formats report rows into RFC 4180 standard CSV (`Period,Scheduled,Taken,Missed,Skipped,Adherence Rate`) with proper escaping for delimiters and quotes.
+3. **tRPC Reports Router (`src/server/trpc/routers/reports.ts`):**
+   - Protected procedure `reports.get` with `reportsSchema` input validation.
+   - Registered in `src/server/trpc/routers/bala.ts` per the BALA track reporting designation, joining `appRouter` in `src/server/trpc/root.ts`.
+4. **CSV Export Route Handler (`src/app/api/reports/export/route.ts`):**
+   - Authenticated GET route handler verifying session with `auth.api.getSession`.
+   - Parses query parameters (`from`, `to`, `granularity`, `medicationId`) with `reportsSchema`.
+   - Streams CSV attachment with headers `Content-Type: text/csv; charset=utf-8` and `Content-Disposition: attachment; filename="medvault-report-..."`.
+5. **UI Components (`src/features/reports/`):**
+   - `types.ts`: Filter and table sorting state types.
+   - `GranularityTabs.tsx`: Accessible pill selector for Daily, Weekly, and Monthly intervals with active indicator.
+   - `DownloadButton.tsx`: Async export action triggering browser CSV download from `/api/reports/export` with toast notification on network/server errors.
+   - `SummaryTable.tsx`: Sortable period table with adherence badges, formatted period labels, and mobile horizontal scroll.
+   - `TrendChartBlock.tsx`: Area trend chart visualizing compliance percentage curve over reporting intervals.
+   - `MissedAnalysis.tsx`: Multi-dimensional analysis displaying time-of-day distribution (Morning, Afternoon, Evening, Night) with progress indicators and ranked per-medication missed dose breakdown cards.
+   - `ReportsPage.tsx`: Primary reports view integrating `RangePicker`, medication scope dropdown, granularity tabs, KPI summary cards (Adherence, Scheduled, Taken, Missed, Skipped), trend chart, missed dose analysis, and granular audit table.
+6. **App Route:**
+   - Updated `src/app/(app)/reports/page.tsx` with `requireUser()` auth guard and rendered `ReportsView`.
+
+### Architecture & Design Decisions
+
+- **Single Calculation Engine Parity:** Report figures originate directly from `getAdherenceSummary`, ensuring exact numeric parity across the dashboard, adherence views, and clinical export sheets.
+- **RFC 4180 CSV Standard Compliance:** Streamed CSV uses CRLF (`\r\n`) line terminations and standardized quote escaping for seamless consumption by external EHRs and spreadsheet software.
+- **Zero Hex Literals:** All UI elements use Tailwind utility classes and CSS theme variables (`var(--primary)`, `bg-card`, etc.) in compliance with project ESLint rules.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **47 test files, 323 unit & integration tests passed** (+23 new tests across `service.test.ts`, `reports.test.ts` router, `reports-view.test.tsx`, and `route.test.ts`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 29 routes cleanly (`/reports` dynamic server component, 6.65 kB; `/api/reports/export` dynamic route handler)
+
+### Hand-off notes for Phase 21 (Caregiver System)
+
+- Reports domain, analytics, and CSV streaming are complete and verified.
+- Phase 21 will implement the caregiver system:
+  - Domain service in `src/server/domain/caregiver/service.ts` (invitations, acceptance, permissions, revoking, alert generation).
+  - tRPC routers for patient and caregiver scopes.
+  - UI components in `src/features/caregiver/` (`InviteForm`, `AcceptInvite`, `RelationshipList`, `PermissionsEditor`, `AlertFeed`, `CaregiverOverview`).
+  - Routes `/caregiver`, `/caregiver/accept`, `/caregiver/alerts/[id]`.
+
+---
+
+## Phase 21 — Caregiver System: Domain + Flows + UI (Completed 2026-09-25)
+
+### Summary of Accomplishments
+
+1. **Domain Service (`src/server/domain/caregiver/service.ts`):**
+   - Implemented full caregiver lifecycle:
+     - `inviteCaregiver`: creates cryptographically secure invitation token, sets 7-day expiration, serializes `permissions` and `relationType` to metadata, and revokes prior pending invites to the same email.
+     - `listPatientInvitations`, `revokeInvitation`, `getInvitationByToken`: handles invitation lifecycle queries and safe revocations.
+     - `acceptInvitation`: validates and redeems invitation tokens, enforces self-invite prevention, transitions existing revoked/declined relations or inserts new active relationship records.
+     - `listPatientCaregivers`, `listMonitoredPatients`: returns active relationships with joined profile details.
+     - `updateCaregiverPermissions`: updates permission flags (`viewAdherence`, `viewMedications`, `receiveMissedDoseAlerts`, `receiveInsights`, `canAcknowledgeAlerts`) scoped to patient ownership.
+     - `revokeRelationship`: patient or caregiver self-revocation with relationship status transition to `revoked`.
+     - `listCaregiverAlerts`, `getCaregiverAlert`, `updateAlertStatus`: manages alert status progression (`new` -> `acknowledged` -> `resolved`) with permission verification (`canAcknowledgeAlerts`).
+     - `createMissedDoseAlerts`: seam consumer invoked by Phase 13 `runMissedDoseHandlers` during dose reconciliation, deduplicating alerts by `(caregiverUserId, doseEventId)` and filtering by `receiveMissedDoseAlerts`.
+     - `getMonitoredPatientOverview`: permission-gated patient summary computing adherence stats via `getAdherenceSummary`, listing today's doses (with medication redaction if `viewMedications` is false), and active alerts.
+2. **tRPC Router (`src/server/trpc/routers/caregiver.ts`):**
+   - Implemented comprehensive procedures for both patient and caregiver roles:
+     - Patient actions: `invite`, `listInvitations`, `revokeInvitation`, `listCaregivers`, `updatePermissions`, `revokeCaregiver`.
+     - Caregiver actions: `getInvitation`, `acceptInvitation`, `listPatients`, `patientOverview`, `listAlerts`, `getAlert`, `updateAlert`.
+   - Registered missed dose listener: wired `registerMissedDoseHandlers(caregiverService.createMissedDoseAlerts)` directly into `src/server/domain/doseEvents/attachments.ts`.
+   - Mounted `caregiver: caregiverRouter` on `hpRouter` in `src/server/trpc/routers/hp.ts`.
+3. **UI Suite (`src/features/caregiver/`):**
+   - `types.ts`: Tab unions (`overview`, `caregivers`, `invite`).
+   - `PermissionsEditor.tsx`: Dialog enabling patients to toggle granular caregiver permissions with live mutation updates.
+   - `InviteForm.tsx`: RHF + Zod form generating sharable invite links with one-click clipboard copying and toast notifications.
+   - `RelationshipList.tsx`: Displays active caregivers (with permissions summary, edit modal, and revocation dialog) and pending invitations (with copy link and cancellation actions).
+   - `AlertFeed.tsx`: Filterable feed (`all`, `new`, `resolved`) with instant Acknowledge/Resolve actions and deep links to alert details.
+   - `AlertDetailPage.tsx`: Dedicated detail page on `/caregiver/alerts/[id]` rendering alert timeline, metadata context, and resolution actions.
+   - `AcceptInvite.tsx`: Token redemption interface on `/caregiver/accept?token=...` displaying inviting patient metadata and one-click relationship activation.
+   - `CaregiverOverview.tsx`: Caregiver hub with multi-patient switcher dropdown, adherence KPI metrics, daily dose schedule (respecting medication privacy gating), and alert feed.
+   - `CaregiverPage.tsx`: Primary caregiver view switching seamlessly between "Monitored Patients" and "My Caregivers" tabs.
+4. **App Routes:**
+   - `src/app/(app)/caregiver/page.tsx`: auth-protected caregiver hub.
+   - `src/app/(app)/caregiver/accept/page.tsx`: auth-protected token acceptance screen with redirect handling.
+   - `src/app/(app)/caregiver/alerts/[id]/page.tsx`: auth-protected alert detail view.
+
+### Architecture & Design Decisions
+
+- **Strict Caregiver Authorization Boundary:** Caregiver access is strictly read-only for patient clinical data. Caregivers cannot mutate patient doses or medication schedules; mutations are limited to alert triage (`acknowledge`, `resolve`) and leaving relationships.
+- **Privacy Gating (View Medications):** When `permissions.viewMedications` is false, patient medication names and dosages are redacted ("Medication", dosage `0`), preserving patient privacy while still providing adherence awareness.
+- **Dose Reconciliation Alert Deduplication:** Missed dose alerts are strictly deduplicated by `(caregiverUserId, doseEventId)`, ensuring duplicate runs of dose reconciliation do not generate duplicate caregiver notifications.
+- **Zero Hex Literals & Design System Parity:** Built with Tailwind CSS tokens, Base UI primitives with `nativeButton={false}` when wrapping Next.js `<Link>`, and clean responsive layouts.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **50 test files, 342 unit & integration tests passed** (+19 new tests across `service.test.ts`, `caregiver.test.ts` router, and `caregiver-view.test.tsx`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 29 routes cleanly (`/caregiver` 14.7 kB, `/caregiver/accept` 3.78 kB, `/caregiver/alerts/[id]` 3.63 kB)
+
+### Hand-off notes for Phase 22 (Notifications)
+
+- Caregiver system complete, fully tested, and integrated with the dose reconciliation engine.
+- Phase 22 will implement the notifications system:
+  - Notifications domain service (`src/server/domain/notifications/service.ts`): in-app notifications, channel routing, read/unread states, dismiss actions, preference gating.
+  - tRPC notifications router (`notifications.list`, `notifications.markRead`, `notifications.markAllRead`, `notifications.getUnreadCount`, `notifications.preferences`).
+  - UI components in `src/features/notifications/` (NotificationBell dropdown with real-time unread badge, NotificationsPage feed, filter tabs, action links).
+  - Route `/notifications` and top header bell integration.
+
+---
+
+## Phase 22 — Notifications: Domain + Channels + Bell + Notification Center (Completed 2026-09-25)
+
+### Summary of Accomplishments
+
+1. **Validation Schemas (`src/shared/validations/notifications.ts`):**
+   - Implemented Zod schemas for notification query and mutation operations:
+     - `listNotificationsSchema`: tab filter (`all`, `dose`, `caregiver`, `ai`, `system`), `unreadOnly` boolean toggle, `limit` (1–50, default 20), and `cursor` (ISO string) for pagination.
+     - `markReadSchema`: `notificationId` validated via `uuidSchema`.
+     - `markAllReadSchema`: optional empty object for mass read reconciliation.
+2. **Channel Delivery Abstraction (`src/server/domain/notifications/channels.ts`):**
+   - Built provider-agnostic notification channel interface (`NotificationChannel`) with `name` and `deliver(db, payload)` contract.
+   - `InAppNotificationChannel`: inserts rows into `notifications` database table, resilient to both direct driver execution and unit test mock builders.
+   - `ConsoleNotificationChannel`: non-production development logger.
+   - Extensible for future email, web push, and SMS dispatchers without altering business domain logic.
+3. **Domain Service (`src/server/domain/notifications/service.ts`):**
+   - `createNotification`: single-writer pipeline enforcing:
+     - **Preference Gating:** checks `user_preferences.notificationPrefs` (`doseReminders`, `caregiverMissedAlerts`, `insights`); suppresses creation when disabled.
+     - **Strict Entity Deduplication:** ensures only 1 notification row per `(userId, entityType, entityId, type)`, returning existing instances rather than duplicating records.
+     - **Channel Dispatch:** forwards payload to all configured channels.
+   - `createMissedDoseNotification`: listener for Phase 13 missed-dose seam, formatting medication name and dosage context.
+   - `listNotifications`: filtered by category tab, unread flag, and cursor pagination ordered by `createdAt desc`.
+   - `getUnreadCount`: fast count query on unread notifications for badge rendering.
+   - `markRead`: updates individual notification `readAt` timestamp with user ownership verification.
+   - `markAllRead`: batch updates all unread notifications for a user.
+   - `deleteNotification`: dismiss action for notifications.
+4. **Integration with Hooks & Caregiver System:**
+   - Registered `createMissedDoseNotification` into `registerMissedDoseHandlers` from `src/server/domain/doseEvents/attachments.ts`.
+   - Wired caregiver alert insertion in `src/server/domain/caregiver/service.ts` to dispatch `caregiver_alert` notifications to the caregiver user.
+5. **tRPC Router (`src/server/trpc/routers/notifications.ts`):**
+   - Implemented protected procedures: `notifications.list`, `notifications.unreadCount`, `notifications.markRead`, `notifications.markAllRead`.
+   - Mounted `notifications: notificationsRouter` onto `hpRouters` in `src/server/trpc/routers/hp.ts`.
+6. **UI Suite (`src/features/notifications/`):**
+   - `types.ts`: Filter and grouping types (`NotificationFilterState`, `DayGroupedNotifications`).
+   - `NotificationItem.tsx`: Visual notification cards with category icon tints (AlertTriangle, Pill, ShieldAlert, Sparkles, Bell), relative timestamp ("Just now", "5m ago", "2h ago"), unread indicator dot, target deep-links (`/schedule`, `/caregiver/alerts/[id]`, `/insights`, `/medications/[id]`), and quick mark-read actions.
+   - `NotificationTabs.tsx`: Category selector tabs (All, Doses, Caregiver, AI Insights, System) and "Unread only" switch toggle.
+   - `NotificationsPage.tsx`: Full notification center view grouping items by day ("Today", "Yesterday", "This Week", etc.), badge count, batch "Mark all as read" button, and contextual empty states ("You're all caught up!").
+   - `NotificationBell.tsx` (`src/components/layout/NotificationBell.tsx`): Header notification bell with 30s background polling, window focus refetch, unread badge counter (`9+`), and accessible popover dropdown displaying the 5 most recent notifications with a link to `/notifications`.
+7. **App Route:**
+   - Updated `src/app/(app)/notifications/page.tsx` with `requireUser()` server auth guard and rendered `NotificationsView`.
+
+### Architecture & Design Decisions
+
+- **Strict Entity Deduplication:** Enforced at the domain service layer per `(userId, entityType, entityId, type)`, preventing duplicate notification spam when reconciliation or sync runs multiple times.
+- **Unified Delivery Contract:** Decoupled business event triggers from physical delivery mechanisms via `NotificationChannel`, allowing future push/SMS integration without refactoring callers.
+- **Zero Hex Literals:** All UI elements adhere to strict Tailwind classes and semantic theme variables.
+- **Defensive Layout Integration:** Updated `app-shell.test.tsx` with tRPC notifications mock, ensuring layout tests pass without requiring live network or DB connections.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **53 test files, 366 unit & integration tests passed** (+24 new tests across `service.test.ts`, `notifications.test.ts` router, and `notifications-view.test.tsx`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 29 routes cleanly (`/notifications` dynamic server component, 9.76 kB)
+
+### Hand-off notes for Phase 23 (AI Insights)
+
+- Notifications system complete, fully tested, and integrated with the dose reconciliation engine, caregiver alerts, and layout bell.
+- Hand-off completed in Phase 23.
+
+---
+
+## Phase 23 — AI Insights: Domain + Service + UI (Completed 2026-09-25)
+
+### Summary of Accomplishments
+
+1. **Validation Schemas (`src/shared/validations/insight.ts`):**
+   - Implemented Zod schemas for structured AI generation and listing:
+     - `singleInsightSchema`: validates category (`INSIGHT_CATEGORIES`), summary (5–300 chars), detail (optional max 1000 chars), suggestedActionType (`SUGGESTED_ACTIONS`), and confidence score (0–1).
+     - `insightResponseSchema`: structured output constraint enforcing 1–5 insights with a tone parameter (`encouraging` | `neutral`).
+     - `listInsightsSchema`: validates query limit (1–50, default 20).
+2. **Domain Service (`src/server/domain/insights/service.ts`):**
+   - `buildSnapshot`: pure read-only analytics snapshot over the user's 30-day compliance history:
+     - Overall adherence percentage, total scheduled, taken, missed, and skipped doses.
+     - Current and longest adherence streaks.
+     - Rolling 7-day adherence trend (`improving` | `declining` | `stable`).
+     - Time-of-day bucket distribution (`morning`, `afternoon`, `evening`, `night`).
+     - Per-medication adherence performance.
+     - Recent snooze count across the period.
+   - `BEHAVIORAL_SYSTEM_PROMPT`: strict safety instructions prohibiting diagnostic conclusions, treatment prescriptions, or medication changes; strictly bounds guidance to habit timing, routine pairing, and reminder adjustments.
+   - `generateFallbackInsights`: deterministic rule engine analyzing bucket timing frictions (<85%), snooze frequency (>=3), streak milestones (>=3) / decline warnings, and medication variance.
+   - `generateInsights`: server-side LLM provider execution with fallback safety to deterministic rules when keys are missing or calls fail. Persists to `ai_insights`, emits `insight` in-app notifications, and automatically prunes historical rows beyond the 20 most recent entries.
+   - `listInsights`: ordered reverse-chronological list query for user insights.
+   - `getLatestInsight`: single most recent insight query for dashboard and widget preview.
+3. **tRPC Router (`src/server/trpc/routers/insights.ts`):**
+   - Implemented protected procedures: `insights.list`, `insights.latest`, and `insights.regenerate`.
+   - Mounted on `hpRouters` in `src/server/trpc/routers/hp.ts` (respecting zero-touch rule on `root.ts`).
+4. **UI Suite (`src/features/insights/`):**
+   - `InsightCard.tsx`: Glassmorphism cards with category badges, dynamic source tags (`AI Generated` with Sparkles vs `Pattern Analysis` with Brain), confidence score, relative timestamps, sanitized plain-text summaries/details, and contextual suggested action buttons (`/schedule`, `/settings/reminders`, `/caregiver`, `/adherence`).
+   - `RegenerateButton.tsx`: Interactive trigger with loading animation spinner and cache invalidation (`insights.list`, `insights.latest`, `dashboard.get`).
+   - `InsightsPage.tsx`: Full responsive 1/2 column grid, non-diagnostic behavioral guidance disclaimer banner, animated skeleton loading state, error retry state, and empty state.
+   - `InsightWidget.tsx`: Enhanced dashboard widget with dynamic source tag reflection.
+5. **App Route:**
+   - Updated `src/app/(app)/insights/page.tsx` auth-guarded with `requireUser()` and metadata.
+
+### Architecture & Design Decisions
+
+- **Strict Behavioral Safety Boundary:** System prompt and Zod schema prevent medical diagnoses or prescription changes.
+- **Compile & Test Boundary:** Insight generator is verified to never mutate medications, schedules, or dose events.
+- **Dual-Source Architecture:** Seamless transition between AI-generated insights and deterministic pattern analysis.
+- **Automatic Pruning:** Retains the latest 20 insights per user.
+- **Zero Hex Literals:** 100% Tailwind semantic classes and CSS variables.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **56 test files, 390 unit & integration tests passed** (+24 new tests in `service.test.ts`, `insights.test.ts`, and `insights-view.test.tsx`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 29 routes cleanly (`/insights` 5.33 kB)
+
+### Hand-off notes for Phase 24 (Settings)
+
+- AI Insights complete, fully tested, bounded, and integrated with the dashboard, notification system, and `/insights` page.
+- Hand-off completed in Phase 24.
+
+---
+
+## Phase 24 — Settings: Profile / Reminders / Caregiver / Appearance / Data (Completed 2026-09-25)
+
+### Summary of Accomplishments
+
+1. **Validation Schemas (`src/shared/validations/settings.ts`):**
+   - Implemented Zod schemas for settings and governance:
+     - `profileSchema` & `updateProfileSchema`: validates name (2–100 chars), email (emailSchema), and timezone (valid IANA timezone via timezoneSchema).
+     - `reminderSettingsSchema` & `updateRemindersSchema`: validates `missedAfterMinutes` (5–120), `snoozeMinutes` (1–60), `maxSnoozes` (0–10), `reminderBeforeMinutes` (0–60), `notificationPrefs` (doseReminders, caregiverMissedAlerts, insights, sounds), `caregiverAlertPrefs`, and `perMedicationReminders` array.
+     - `caregiverAlertPrefsSchema` & `updateCaregiverPrefsSchema`: validates `missedDoseOn` (boolean), `adherenceDropThreshold` (0–100 nullable), and `dailyDigest` (boolean).
+     - `appearanceSchema` & `updateAppearanceSchema`: validates `theme` (THEMES: light, dark, system), `uiDensity` (UI_DENSITIES: comfortable, compact), and `reduceMotion` (boolean).
+     - `deleteDataSchema` & `deleteAccountSchema`: strict typed confirmation literals (`"DELETE ALL DATA"` and `"DELETE MY ACCOUNT"`).
+2. **Domain Service (`src/server/domain/settings/service.ts`):**
+   - `getProfile` & `updateProfile`: fetches user profile record and updates display name and timezone.
+   - `getReminderSettings` & `updateReminderSettings`: combines `user_preferences` thresholds with active user medications and updates global reminder windows plus individual `remindersEnabled` flags.
+   - `updateCaregiverAlertPrefs`: persists caregiver notification preferences to `user_preferences`.
+   - `updateAppearance`: updates `theme`, `uiDensity`, and `reduceMotion` on `user_preferences`.
+   - `getDataOverview`: aggregates record counts across medications, dose events, AI insights, notifications, and connected caregiver relationships.
+   - `exportData`: bundles user profile, medications, dose events, schedules, and insights into structured export payload with ISO timestamp.
+   - `deleteAllData`: transactionally clears dose events, schedules, medications, insights, notifications, caregiver links, and resets preferences back to default while keeping user account intact.
+   - `deleteAccount`: wipes all clinical records and deletes `users` row, cascading Better-Auth sessions and accounts.
+3. **tRPC Router (`src/server/trpc/routers/settings.ts`):**
+   - Implemented protected procedures: `getProfile`, `updateProfile`, `getReminders`, `updateReminders`, `getPreferences`, `updateCaregiverPrefs`, `updateAppearance`, `getDataOverview`, `exportData`, `deleteAllData`, `deleteAccount`.
+   - Mounted onto `balaRouters` in `src/server/trpc/routers/bala.ts`.
+4. **UI Suite (`src/features/settings/`):**
+   - `ProfileForm.tsx`: display name editing, verified email badge, IANA timezone dropdown, dirty-state detection, and save trigger.
+   - `ReminderSettings.tsx`: threshold inputs with quick preset pills (15m, 30m, 45m, 60m; 5m, 10m, 15m, 20m; 1x, 2x, 3x, 5x; exact, 5m, 10m, 15m), notification channel switches (doses, caregiver alerts, insights, sounds), and per-medication reminder toggles.
+   - `CaregiverSettings.tsx`: missed dose alerts toggle, daily digest toggle, and network link to `/caregiver`.
+   - `AppearancePanel.tsx`: light, dark, and system theme cards with instant DOM theme reflection (`document.documentElement.classList`), system media query listener, UI density selector, reduce motion toggle, and real-time live preview card.
+   - `DataOverview.tsx`: vault summary grid displaying record counts and client data isolation assurance.
+   - `ExportButtons.tsx`: client-side generation and downloading of `medications.csv`, `dose-events.csv`, and full `medvault-full-backup.json`.
+   - `DeleteFlow.tsx`: Danger Zone with accessible modal dialogs requiring exact typed phrases (`"DELETE ALL DATA"` and `"DELETE MY ACCOUNT"`), sign-out integration, and redirection.
+5. **App Routes (`src/app/(app)/settings/`):**
+   - Replaced phase stubs with feature implementations across `/settings/profile`, `/settings/reminders`, `/settings/caregiver`, `/settings/appearance`, and `/settings/data`.
+   - Root `/settings/page.tsx` redirects cleanly to `/settings/profile`.
+
+### Architecture & Design Decisions
+
+- **Typed Confirmation Phrase:** Follows plan §1294 requiring exact phrase typing (`"DELETE ALL DATA"` / `"DELETE MY ACCOUNT"`) before enabling destructive wipe operations.
+- **Instant Reactive Theme Reflection:** Changes to theme instantly update `<html>` class with media query fallback while optimistically persisting to database preferences.
+- **Dual-Table CSV & JSON Portability:** Exports cleanly formatted CSVs for spreadsheets and full JSON dump for complete vault backup.
+- **Zero Hex Literals:** 100% Tailwind tokens and CSS variables.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **59 test files, 412 unit & integration tests passed** (+22 new tests in `service.test.ts`, `settings.test.ts`, and `settings-view.test.tsx`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 29 routes cleanly (`/settings/profile` 3.74 kB, `/settings/reminders` 4.4 kB, `/settings/caregiver` 3.14 kB, `/settings/appearance` 3.47 kB, `/settings/data` 7.12 kB)
+
+### Hand-off notes for Phase 25 (Demo Mode)
+
+- Settings domain and all 5 sub-routes complete, verified, and integrated.
+- Hand-off completed in Phase 25.
+
+---
+
+## Phase 25 — Demo Mode: Domain + Seed Reuse + UX (Completed 2026-09-25)
+
+### Summary of Accomplishments
+
+1. **Validation Schemas (`src/shared/validations/demo.ts`):**
+   - Implemented Zod schemas for interactive simulation operations:
+     - `simulateActionSchema`: validates action (`"take" | "miss" | "skip" | "snooze"`), optional `doseId`, and optional `skipReason`.
+     - `applyScenarioSchema`: validates scenario (`"baseline" | "decline" | "improvement" | "caregiver_demo"`).
+     - `setTimeSchema`: validates `time` (ISO datetime string or null to reset to real-time).
+2. **Domain Service (`src/server/domain/demo/service.ts`):**
+   - `getDemoUser`: resolves persistent Arun Kumar demo user (`arun@medvault.local`), auto-seeding pristine dataset if absent.
+   - `getDemoState`: fetches or initializes isolated `demoStates` record for simulation overrides (`simulationNow`, `scenario`, `timeMultiplier`).
+   - `enterDemo` & `leaveDemo`: session entry and departure helpers adhering to `medvault_demo_session` cookie specification.
+   - `resetDemo`: transactionally restores the Arun Kumar §19 baseline dataset (84 doses, 76 taken, 5 missed, 3 skipped, 8 snoozed, 90.5% adherence, 7-day streak) and resets `demoStates`.
+   - `setTime`: writes `simulationNow` to `demoStates`, enabling full temporal shifting across all domain calculations.
+   - `simulateAction`: mutates target or next-due dose event with action ("take", "miss", "skip", "snooze") and writes corresponding audit record to `doseActions` with `occurredAt` and `meta`.
+   - `applyScenario`: applies scenario blocks (baseline, decline, improvement, caregiver_demo) to recent dose events.
+   - `generateCaregiverAlert`: connects Dr. Priya Patel (`dr.patel@medvault.demo`) with active doctor relationship (`relationType: "professional"`), records missed dose, creates `caregiverAlerts` row, and dispatches in-app notification.
+   - `generateDemoInsight`: executes behavioral AI insight pipeline on the demo dataset with deterministic fallback safety.
+3. **Session & Clock Indirection (`src/server/trpc/context.ts` & `src/server/auth/require-user.ts` & `src/shared/times.ts`):**
+   - Threaded `medvault_demo_session` cookie and `/demo` referer through `createContext` so unauthenticated evaluators can access all protected tRPC procedures bound to Arun Kumar's demo record without login credentials.
+   - Wired `setNowImpl` in `createContext` to reflect `demo_state.simulationNow` across all date-time calculations dynamically (`now()` in `times.ts`).
+   - Updated `requireUser` to allow seamless navigation across all app sections when demo mode is active.
+4. **tRPC Router (`src/server/trpc/routers/demo.ts`):**
+   - Implemented public procedures: `getState`, `enter`, `leave`, `reset`, `setTime`, `simulate`, `applyScenario`, `generateAlert`, `generateInsight`.
+   - Mounted onto `hpRouters` in `src/server/trpc/routers/hp.ts` (respecting zero-touch rule on `root.ts`).
+5. **UI Suite (`src/features/demo/`):**
+   - `DemoDock.tsx`: Floating live simulation dock with quick dose action buttons (Take, Miss, Skip, Snooze), collapsed/expanded drawer toggle, shortcuts to trigger caregiver alerts and AI insights, and seed reset button.
+   - `DemoClock.tsx`: Simulation clock controller with manual time-shift jumps (-1d, -4h, +4h, +1d) and instant clock reset.
+   - `ScenarioControl.tsx`: Interactive scenario tiles (Baseline 90.5%, Missed Adherence, Full Recovery, Caregiver Triage).
+   - `ResetButton.tsx`: Quick trigger to restore pristine §19 seed.
+   - `DemoShell.tsx`: Persistent top demo indicator banner with live badge, Arun Kumar profile context, quick reset, and exit button, wrapping `AppShell` with the demo user.
+6. **App Routes (`src/app/demo/`):**
+   - `src/app/demo/layout.tsx`: Force-dynamic layout wrapping child routes in `DemoShell` with `ProfileMenuUser` demo user and `DemoDock`.
+   - `src/app/demo/page.tsx`: Force-dynamic demo landing page rendering the full live `DashboardView`.
+
+### Architecture & Design Decisions
+
+- **Complete Tenant Isolation:** Dedicated demo user (`isDemo = true`) ensures all seed data, mutations, time shifts, and alerts are isolated to Arun Kumar and never touch real user accounts.
+- **Zero-touch Immutable Root:** Mounted on `hpRouters` in `src/server/trpc/routers/hp.ts`.
+- **Zero Hex Literals:** 100% Tailwind tokens and semantic styling variables.
+- **Live Reactive Dashboard:** All simulation actions immediately invalidate tRPC queries (`dashboard.get`, `dose.today`, `adherence.summary`), causing the UI to update in real time.
+
+### Verification (all green)
+
+- `pnpm typecheck` — clean (0 errors)
+- `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **62 test files, 448 unit & integration tests passed** (+36 new tests across `service.test.ts`, `demo.test.ts`, and `demo-view.test.tsx`, 0 regressions, 4 skipped DB tests without credentials, as designed)
+- `pnpm build` — successfully compiled all 29 routes cleanly (`/demo` 167 B / 314 kB)
+
+### Hand-off notes for Phase 26 (Global states, accessibility & responsive refinement)
+
+- Demo mode complete, verified, and ready for college presentation and evaluation.
+- Phase 26 will execute a global sweep across all shipped pages:
+  - Error boundaries (`error.tsx`), loading skeletons (`loading.tsx`), empty states, and not-found handling (`not-found.tsx`).
+  - Accessibility pass: focus-visible rings, ARIA landmarks and live regions, screen reader announcements, contrast verification, skip navigation links, and `prefers-reduced-motion` adherence.
+  - Responsive audit across 1280px, 1024px, 768px, and 390px viewport breakpoints.
+
+
+
+
+
+

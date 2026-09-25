@@ -32,6 +32,25 @@ import type {
   UiDensity,
 } from "./enums";
 
+export type {
+  CaregiverAlertType,
+  CaregiverRelationshipStatus,
+  DoseActionType,
+  DoseEventStatus,
+  FrequencyLabel,
+  InsightCategory,
+  InsightSource,
+  MedicationStatus,
+  NotificationType,
+  RangePreset,
+  RelationType,
+  ReportGranularity,
+  SuggestedAction,
+  Theme,
+  TimeBucket,
+  UiDensity,
+};
+
 /* ── User ────────────────────────────────────────────────────────────────── */
 
 export interface UserProfileDTO {
@@ -337,12 +356,37 @@ export interface ReportTrendPoint {
   skipped: number;
 }
 
+export interface ReportSummaryStats {
+  scheduled: number;
+  taken: number;
+  missed: number;
+  skipped: number;
+  adherencePercent: number | null;
+}
+
+export interface ReportMissedMedicationStat {
+  medicationId: string;
+  name: string;
+  color: string;
+  missed: number;
+  scheduled: number;
+  adherencePercent: number | null;
+}
+
+export interface ReportMissedAnalysis {
+  byBucket: TimeBucketStats[];
+  byMedication: ReportMissedMedicationStat[];
+}
+
 export interface ReportDTO {
   granularity: ReportGranularity;
   from: Date;
   to: Date;
+  medicationId?: string | null;
   table: ReportRow[];
   trend: ReportTrendPoint[];
+  summary: ReportSummaryStats;
+  missedAnalysis: ReportMissedAnalysis;
 }
 
 export interface ReportPeriodDTO {

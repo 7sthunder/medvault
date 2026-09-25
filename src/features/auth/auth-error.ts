@@ -3,7 +3,10 @@
  * case-insensitively because the SDK returns both snake_case and SCREAMING forms
  * across versions.
  */
-export function authErrorMessage(code: string | null | undefined): string {
+export function authErrorMessage(
+  code: string | null | undefined,
+  message?: string | null | undefined,
+): string {
   const key = (code ?? "").toLowerCase();
   switch (key) {
     case "invalid_email_or_password":
@@ -20,7 +23,17 @@ export function authErrorMessage(code: string | null | undefined): string {
       return "Enter your email and password.";
     case "invalid_email":
       return "Enter a valid email address.";
+    case "email_not_verified":
+      return "Please verify your email address before logging in.";
+    case "too_many_requests":
+    case "rate_limit_exceeded":
+      return "Too many attempts. Please wait a moment and try again.";
+    case "user_not_found":
+      return "No account found with this email. Please check or sign up.";
     default:
+      if (message && typeof message === "string" && message.trim().length > 0) {
+        return message;
+      }
       return "Something went wrong. Please try again.";
   }
 }

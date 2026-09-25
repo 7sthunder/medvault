@@ -5,4 +5,14 @@
  * tracks merge, `root.ts` spreads aadhi/bala/hp records, so routers composed here
  * auto-join the shared API surface without editing `root.ts`.
  */
-export const hpRouters: Record<string, unknown> = {};
+import { caregiverRouter } from "./caregiver";
+import { demoRouter } from "./demo";
+import { insightsRouter } from "./insights";
+import { notificationsRouter } from "./notifications";
+
+export const hpRouters = {
+  caregiver: caregiverRouter,
+  demo: demoRouter,
+  insights: insightsRouter,
+  notifications: notificationsRouter,
+};

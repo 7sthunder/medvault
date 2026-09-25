@@ -1,17 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { CheckCircle2, HeartPulse } from "lucide-react";
 
 import ScrollingServices from "@/features/landing/ScrollingServices";
-
-/* Bundle-split heavy hero visuals; framer-motion phone floats render client-only. */
-const HeroVisual = dynamic(() => import("@/features/landing/HeroVisual"), {
-  ssr: false,
-  loading: () => <div className="hero-visual-container" style={{ minHeight: 580 }} />,
-});
+import HeroBg from "@/features/landing/HeroBg";
+import HeroVisual from "@/features/landing/HeroVisual";
 
 const AVATARS = [
   { label: "A", colorVar: "var(--color-primary)" },
@@ -40,9 +35,10 @@ export default function Hero() {
     <section
       id="hero"
       className="bg-hero-gradient relative flex min-h-dvh items-center"
-      style={{ paddingTop: 68, overflow: "visible" }}
+      style={{ paddingTop: 68, overflow: "hidden" }}
     >
-      <div className="dot-grid absolute inset-0 opacity-60" aria-hidden />
+      <HeroBg />
+      <div className="dot-grid absolute inset-0 opacity-40" aria-hidden />
 
       <div className="bg-blob-primary pointer-events-none absolute hidden lg:block" style={{ top: "5%", right: "-8%", width: 520, height: 520, borderRadius: "50%" }} aria-hidden />
       <div className="bg-blob-secondary pointer-events-none absolute hidden lg:block" style={{ bottom: "5%", left: "-5%", width: 380, height: 380, borderRadius: "50%" }} aria-hidden />

@@ -9,6 +9,8 @@ import HowItWorks from "@/features/landing/HowItWorks";
 import Nav from "@/features/landing/Nav";
 import Testimonials from "@/features/landing/Testimonials";
 
+import LandingWrapper from "@/features/landing/LandingWrapper";
+
 export const metadata: Metadata = {
   title: "MedVault — AI Smart Medical Adherence & Tracker",
   description:
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <>
+    <LandingWrapper>
       <Nav />
       <main>
         <Hero />
@@ -28,6 +30,6 @@ export default function LandingPage() {
       </main>
       <Footer />
       <AiChatFab />
-    </>
+    </LandingWrapper>
   );
 }
