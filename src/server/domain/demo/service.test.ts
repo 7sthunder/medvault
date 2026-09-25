@@ -13,11 +13,11 @@ import {
   users,
 } from "@/server/db/schema";
 import { DEMO_USER_EMAIL } from "@/server/db/demo-seed";
-import { now, resetNowImpl, setNowImpl } from "@/shared/times";
+import { addLocalDays, now, resetNowImpl, setNowImpl, startOfLocalDay } from "@/shared/times";
 import { demoTimeSchema } from "@/shared/validations/settings";
 
 import { DEMO_COOKIE, issueDemoToken, verifyDemoToken } from "./token";
-import { demoService, ensureDemoUser, readState, resolveSimulationNow } from "./service";
+import { SCENARIO_DAYS, demoService, ensureDemoUser, readState, resolveSimulationNow } from "./service";
 
 /**
  * Phase 18 acceptance — §10.8 demo domain.
@@ -60,7 +60,7 @@ async function seedStranger(tx: DbTx) {
     .values({
       id: uuidv7(),
       name: "Demo Test Stranger",
-      email: `demo-stranger-${uuidv7()}@medvault.local`,
+      email: `demo-stranger-${uuidv7()}@meditrackai.local`,
       timezone: "UTC",
       onboardingCompleted: true,
     })
@@ -277,9 +277,16 @@ dbTests("demo domain — scenarios", () => {
 
       await demoService.applyScenario(tx, "baseline");
 
-      // Scoped to the rewritten window: the fixture's own day-0..2 misses sit outside a
-      // 14-day window and are intentionally left alone.
-      const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+      // Anchored to the *local* day boundary in the demo user's timezone, which is the
+      // window `applyScenario` actually rewrites. A plain `now - 14 days` measured in UTC
+      // reaches ~21h further back for a user east of Greenwich, so it also sweeps in the
+      // fixture's own early-window misses — rows the scenario deliberately left alone — and
+      // fails on doses the service never touched.
+      const since = addLocalDays(
+        startOfLocalDay(new Date(), demo.timezone),
+        -(SCENARIO_DAYS - 1),
+        demo.timezone,
+      );
       const stillUnsettled = await tx
         .select({ id: doseEvents.id })
         .from(doseEvents)
@@ -290,8 +297,8 @@ dbTests("demo domain — scenarios", () => {
             gte(doseEvents.scheduledFor, since),
           ),
         );
-      expect(stillUnsettled).toHaveLength(0);
-    });
+
+      expect(stillUnsettled).toHaveLength(0);    });
   });
 });
 
@@ -351,7 +358,7 @@ describe("demo contracts", () => {
   it("round-trips a valid demo token and rejects tampering", () => {
     const token = issueDemoToken("user-123");
     expect(verifyDemoToken(token)).toBe("user-123");
-    expect(DEMO_COOKIE).toBe("medvault_demo_session");
+    expect(DEMO_COOKIE).toBe("meditrackai_demo_session");
   });
 
   it("rejects a forged, tampered, expired or malformed token", () => {

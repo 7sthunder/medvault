@@ -50,7 +50,7 @@ async function inRollbackTransaction<T>(fn: (tx: DbTx, actors: Actors) => Promis
           .values({
             id: uuidv7(),
             name,
-            email: `care-${uuidv7()}@medvault.local`,
+            email: `care-${uuidv7()}@meditrackai.local`,
             timezone: "UTC",
             onboardingCompleted: true,
           })
@@ -137,7 +137,7 @@ dbTests("caregiver invitation lifecycle (§10.6)", () => {
   it("invite → preview → accept activates the pair with the invited permissions", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "invitee@medvault.local",
+        email: "invitee@meditrackai.local",
         message: "Please keep an eye on me",
         relationType: "family",
         permissions: permissions({ viewMedications: true }),
@@ -184,7 +184,7 @@ dbTests("caregiver invitation lifecycle (§10.6)", () => {
       ).rejects.toBeInstanceOf(InviteError);
 
       const input = {
-        email: "dupe@medvault.local",
+        email: "dupe@meditrackai.local",
         relationType: "family" as const,
         permissions: permissions(),
       };
@@ -196,7 +196,7 @@ dbTests("caregiver invitation lifecycle (§10.6)", () => {
   it("a revoked invitation can no longer be redeemed", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "revoked@medvault.local",
+        email: "revoked@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });
@@ -212,7 +212,7 @@ dbTests("caregiver authorization matrix (§10.6 — strongest boundary)", () => 
   it("patient-only management: a caregiver cannot edit or revoke someone else's relationship", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver, outsider }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "matrix@medvault.local",
+        email: "matrix@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });
@@ -244,7 +244,7 @@ dbTests("caregiver authorization matrix (§10.6 — strongest boundary)", () => 
   it("cross-patient leakage denial: a caregiver cannot read an unrelated patient's data", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver, outsider }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "leak@medvault.local",
+        email: "leak@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });
@@ -266,7 +266,7 @@ dbTests("caregiver authorization matrix (§10.6 — strongest boundary)", () => 
   it("revoking severs caregiver access immediately, including historical alerts", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "revoke@medvault.local",
+        email: "revoke@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });
@@ -311,7 +311,7 @@ dbTests("caregiver authorization matrix (§10.6 — strongest boundary)", () => 
   it("alert detail is readable by the patient it is about, and by nobody else", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver, outsider }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "detail@medvault.local",
+        email: "detail@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });
@@ -323,7 +323,15 @@ dbTests("caregiver authorization matrix (§10.6 — strongest boundary)", () => 
         { id: eventIds[0]!, medicationId, scheduledFor: new Date(), missedDeadline: new Date() },
         new Date(),
       );
-      const [alert] = await tx.select().from(caregiverAlerts).limit(1);
+      // Scoped to this patient: the suite runs against a shared database, so an unfiltered
+      // `limit(1)` can hand back an alert belonging to a different user, and the patient is
+      // then correctly denied a row that is not theirs.
+      const [alert] = await tx
+        .select()
+        .from(caregiverAlerts)
+        .where(eq(caregiverAlerts.patientUserId, patient))
+        .limit(1);
+      expect(alert).toBeDefined();
 
       expect(await caregiverService.alertDetail(tx, patient, alert!.id)).not.toBeNull();
       expect(await caregiverService.alertDetail(tx, caregiver, alert!.id)).not.toBeNull();
@@ -334,7 +342,7 @@ dbTests("caregiver authorization matrix (§10.6 — strongest boundary)", () => 
   it("permission gates: viewAdherence and canAcknowledgeAlerts are enforced server-side", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "gated@medvault.local",
+        email: "gated@meditrackai.local",
         relationType: "family",
         permissions: permissions({ viewAdherence: false }),
       });
@@ -358,7 +366,7 @@ dbTests("caregiver alerts (§10.6)", () => {
   it("dedupes missed-dose alerts once per (dose, relationship) and mirrors one notification", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "dedupe@medvault.local",
+        email: "dedupe@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });
@@ -386,7 +394,7 @@ dbTests("caregiver alerts (§10.6)", () => {
   it("no alert is raised when receiveMissedDoseAlerts is off", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "muted@medvault.local",
+        email: "muted@meditrackai.local",
         relationType: "family",
         permissions: permissions({ receiveMissedDoseAlerts: false }),
       });
@@ -406,7 +414,7 @@ dbTests("caregiver alerts (§10.6)", () => {
   it("adherence-drop alert fires below the threshold, once per relationship per day", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "drop@medvault.local",
+        email: "drop@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });
@@ -439,7 +447,7 @@ dbTests("caregiver alerts (§10.6)", () => {
   it("a healthy 7-day rate never raises an adherence-drop alert", async () => {
     await inRollbackTransaction(async (tx, { patient, caregiver }) => {
       const invite = await caregiverService.invite(tx, patient, {
-        email: "healthy@medvault.local",
+        email: "healthy@meditrackai.local",
         relationType: "family",
         permissions: permissions(),
       });

@@ -28,9 +28,9 @@ import type { DemoAction } from "@/shared/validations/settings";
  */
 
 const DEMO_TIMEZONE = "Asia/Kolkata";
-const CAREGIVER_DEMO_EMAIL = "dr.meera@medvault.local";
+const CAREGIVER_DEMO_EMAIL = "dr.meera@meditrackai.local";
 const CAREGIVER_DEMO_NAME = "Dr. Meera Iyer";
-const SCENARIO_DAYS = 14;
+export const SCENARIO_DAYS = 14;
 
 /** Statuses an interactive simulation can still transition (shared/calc/doseState). */
 const TAKEABLE = ["upcoming", "due", "snoozed", "missed"] as const;

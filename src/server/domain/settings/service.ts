@@ -153,6 +153,20 @@ async function countRows(
   return Number(row?.n ?? 0);
 }
 
+/**
+ * Canonical form for a stored email address: lower-cased with all whitespace removed.
+ *
+ * Internal whitespace has to go, not just the ends. `" Renamed@MediTrack AI.Local "` is a
+ * plausible thing to paste into a phone keyboard, and `trim()` alone would persist
+ * `renamed@meditrack ai.local` — an address no mail server accepts, and one that would
+ * then sit in the unique index where a later, correct sign-up with the same address
+ * collides. Stripping whitespace everywhere means the stored key is always the address
+ * the user actually means.
+ */
+function normalizeEmail(value: string): string {
+  return value.replace(/\s+/g, "").toLowerCase();
+}
+
 export const settingsService = {
   /* ── Profile (§11.14) ────────────────────────────────────────────────── */
 
@@ -177,7 +191,7 @@ export const settingsService = {
     userId: string,
     input: { name: string; email: string; timezone: string },
   ): Promise<ProfileDTO> {
-    const email = input.email.trim().toLowerCase();
+    const email = normalizeEmail(input.email);
     const [clash] = await db
       .select({ id: users.id })
       .from(users)
@@ -424,7 +438,7 @@ export const settingsService = {
     const suffix =
       scope === "all" ? "vault" : scope === "medications" ? "medications" : "dose-events";
     return {
-      filename: `medvault-${suffix}-${new Date().toISOString().slice(0, 10)}.csv`,
+      filename: `meditrackai-${suffix}-${new Date().toISOString().slice(0, 10)}.csv`,
       csv: parts.join("\n\n"),
     };
   },
