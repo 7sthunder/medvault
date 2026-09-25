@@ -59,8 +59,9 @@ function dayStart(dateKey: string, timeZone: string): Date {
 
 export const insightsService = {
   /**
-   * §10.10 bounded snapshot. All reads go through the canonical §10.5 aggregation
-   * services; nothing here ever writes to meds/schedules/dose events.
+   * §10.10 bounded snapshot. Every read is a strict read-only adherence aggregation
+   * (`readOnly: true`): no reconcile, no re-materialize, so generating an insight can
+   * never touch dose events, dose actions, notifications or caregiver alerts.
    */
   async snapshot(db: DbClient, userId: string, timeZone: string): Promise<InsightSnapshot> {
     const at = now();
@@ -68,10 +69,11 @@ export const insightsService = {
     const from = addLocalDays(dayStart(todayKey, timeZone), -(INSIGHT_SNAPSHOT_CAPS.dailyDays - 1), timeZone);
     const to = combineDateAndTime(todayKey, "23:59", timeZone);
     const window: AdherenceWindow = { from, to };
+    const readOnly = { readOnly: true };
 
     const [summary, perMed, snoozeActions] = await Promise.all([
-      adherenceService.summary(db, userId, timeZone, window),
-      adherenceService.byMedication(db, userId, timeZone, window),
+      adherenceService.summary(db, userId, timeZone, window, null, readOnly),
+      adherenceService.byMedication(db, userId, timeZone, window, readOnly),
       db
         .select({ id: doseActions.id })
         .from(doseActions)

@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { catchUp } from "@/server/domain/doseEvents/service";
 import { reconcileUser } from "@/server/domain/doseEvents/reconcile";
 import { pruneAdherence } from "@/server/domain/adherence/materialize";
+import { caregiverService } from "@/server/domain/caregiver/service";
 
 /**
  * Phase 13 — hourly-ish reconcile job (§10.2 + §10.3 safety net).
@@ -22,6 +23,7 @@ export interface ReconcilePassResult {
   reconciled: number;
   missed: number;
   pruned: number;
+  adherenceDropAlerts: number;
 }
 
 let active = false;
@@ -36,15 +38,17 @@ export async function runReconcilePass(db: Db): Promise<ReconcilePassResult> {
   let reconciled = 0;
   let missed = 0;
   let pruned = 0;
+  let adherenceDropAlerts = 0;
   for (const user of onboarded) {
     const res = await catchUp(db, user.id, user.timezone);
     ensured += res.ensured;
     const rec = await reconcileUser(db, user.id);
     reconciled += rec.reconciled;
     missed += rec.missed;
+    adherenceDropAlerts += await caregiverService.evaluateAdherenceDrop(db, user.id, user.timezone);
     pruned += await pruneAdherence(db, user.id);
   }
-  return { users: onboarded.length, ensured, reconciled, missed, pruned };
+  return { users: onboarded.length, ensured, reconciled, missed, pruned, adherenceDropAlerts };
 }
 
 /** Kept as the Phase 12 alias so existing callers/tests keep working. */
@@ -61,7 +65,7 @@ export function startScheduler(
   const intervalMs = options.intervalMs ?? 60 * 60 * 1000;
 
   const runOnce = async (): Promise<ReconcilePassResult> => {
-    if (active) return { users: 0, ensured: 0, reconciled: 0, missed: 0, pruned: 0 };
+    if (active) return { users: 0, ensured: 0, reconciled: 0, missed: 0, pruned: 0, adherenceDropAlerts: 0 };
     active = true;
     try {
       return await runReconcilePass(db);

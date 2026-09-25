@@ -48,7 +48,7 @@
 | 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `done` | `14f378f` | verified: typecheck/lint/test; adherence pages split to parallel worker |
 | 15 | Medication CRUD UI + Dashboard | `done` | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section |
 | 16 | History + Reports + Notifications | `done` | `(this log)` | verified: typecheck/lint/test — see Phase 16 section |
-| 17 | Caregiver system + AI insights | `pending` | — | |
+| 17 | Caregiver system + AI insights | `done` | `(this log)` | verified: typecheck/lint/test/build — see Phase 17 section |
 | 18 | Settings + Demo mode + /help | `pending` | — | |
 | 19 | Quality sweep, test completion, E2E & delivery | `pending` | — | |
 
@@ -1280,3 +1280,71 @@ Phase 11/12 service + dose-engine seam (schedules default to the §10.2 08:00/20
   (`ctx.user.timezone ?? "UTC"`); users who never ran onboarding still default to UTC.
 - `settings` (later phase) reuses `getOrCreatePreferences`/`getPreferences` — keep prefs
   reads going through `settings/` rather than duplicating the upsert.
+
+---
+
+## Phase 17 — Caregiver system + AI insights
+
+**Plan reference:** `plan.md` §21 Phase 17 bundle: §10.6 caregiver (`plan.md:548`) + §10.10 AI
+insights (`plan.md:614`) + §11.9 insights page / §11.12 caregiver pages.
+**Objective met:** the full caregiver lifecycle (invite → accept → permissions → alerts → revoke /
+leave) behind `protectedProcedure` with service-level authorization, plus the AI insights pipeline
+with a hard behavioral boundary (no diagnose / no prescribe) and a deterministic offline fallback.
+The dashboard insight + caregiver tiles are now real reads, not stubs.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/server/domain/caregiver/service.ts` | edited | lifecycle + authorization matrix hardened; new `evaluateAdherenceDrop` (§10.6 optional alert) |
+| `src/server/domain/caregiver/service.test.ts` | created | 12 DB-gated tests: invite/preview/accept, self-invite + duplicate blocking, patient-only management, cross-patient leakage denial, revoke severs access, patient-readable own alert, permission gates, missed-dose dedupe, adherence-drop rules |
+| `src/server/trpc/routers/caregiver.ts` | edited | `accept` wrapped in `ctx.db.transaction` for atomic accept + notify |
+| `src/server/domain/insights/service.ts` | edited | `snapshot()` is now strictly read-only (`readOnly: true` on both adherence reads) |
+| `src/server/domain/insights/service.test.ts` | created | 8 tests: never-mutate proof, snapshot caps, fallback-labelled generation, prerequisites empty state, prune to `INSIGHT_MAX_ROWS`, prompt/contract boundary |
+| `src/server/domain/adherence/materialize.ts` | edited | extracted pure `aggregateEventDays`/`selectEventRows`; added read-only twin `readEventRange` |
+| `src/server/domain/adherence/summary.ts` | edited | `SummaryScope.readOnly`; `reconcileThenRecompute()` helper splits the write/read branches |
+| `src/server/domain/adherence/service.ts` | edited | `AdherenceReadOptions { readOnly }` on `summary()` / `byMedication()` |
+| `src/server/domain/jobs/scheduler.ts` | edited | reconcile pass tallies `adherenceDropAlerts` and calls `evaluateAdherenceDrop` per user |
+| `src/features/dashboard/{InsightWidget,CaregiverStatus,DashboardPage}.tsx` | edited | stub fill: category/source chips, real links, empty states |
+| `src/components/layout/nav-manifest.test.ts` | edited | `/insights` now `existsNow: true` + route-file mapping |
+| `vitest.config.ts` | edited | `testTimeout`/`hookTimeout` 30s (DB suites were tripping the 5s default) |
+| `src/components/layout/AppShell.test.tsx` | edited | stale Phase 16 assertion: the top-header Notifications affordance is the `NotificationBell` button, not a link |
+
+### Deviations & decisions (precise > faithful)
+
+- **Insight snapshots read events, not `adherence_daily`.** The first implementation of the
+  read-only path only read materialized daily rows, which made insights silently empty for any user
+  who had never opened the adherence dashboard (the scheduler never materializes). `readEventRange`
+  is the read-only twin of `recomputeRange`, so the snapshot is both read-only *and* always fresh.
+- **Caregiver scoping lives in the service, not the tRPC context.** The plan's "separate routers per
+  audience" was dropped: `ctx` has no `role`/`patientUserId`, so every caregiver procedure is
+  `protectedProcedure` + a service `requireCaregiverAccess` check. One router, one enforcement point.
+- **Alert detail is readable by the alert's own subject.** Selecting only by `caregiverUserId` made
+  the patient-facing `/caregiver/alerts/[id]` link 403 for the patient it was about. It now allows
+  either the `patientUserId` (own "alerts sent" history) or the gated `caregiverUserId`.
+- **Lifecycle mutations are idempotent and status-conditional.** `revoke`/`leave`/`revokeInvitation`
+  no-op on an already-terminal row instead of throwing, and `updatePermissions` is refused outright
+  on a non-`active` relationship — a revoked relationship can never be silently re-permissioned.
+- **The adherence-drop alert is opt-in.** No `adherenceDropThreshold` in
+  `userPreferences.caregiverAlertPrefs` means the trigger never fires; when configured it is deduped
+  per relationship per local day so the nightly pass can't spam a caregiver.
+
+### Verification
+
+- `pnpm typecheck` — clean
+- `pnpm lint` — clean (fixed an unescaped-entity error + an unused `onSuccess` param)
+- `pnpm test` — **41 files, 297 tests passed** (DB-gated suites ran against the real DB; the insight
+  suites delete `AI_GEMINI_API_KEY` so no test touches the network)
+- `pnpm build` — compiled clean; `/caregiver`, `/caregiver/accept`, `/caregiver/alerts/[id]` and
+  `/insights` all present in the route manifest
+
+### Hand-off notes for later phases
+
+- Phase 18 settings should expose `caregiverAlertPrefs.adherenceDropThreshold` — the caregiver
+  service already reads it; only the UI is missing.
+- `evaluateAdherenceDrop` runs inside the reconcile pass, so the threshold only takes effect on the
+  nightly schedule (not on page load).
+- `insightResponseSchema` is the single output contract: a new provider must return
+  `{ tone, insights[] }` with `INSIGHT_CATEGORIES` / `SUGGESTED_ACTIONS` members, or it silently
+  falls back to the rule engine.
+

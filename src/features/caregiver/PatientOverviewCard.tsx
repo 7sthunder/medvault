@@ -121,7 +121,7 @@ export function PatientOverviewCard({ relationshipId, patientUserId, patientName
               </div>
             )}
             {overview.data.medications.length === 0 && (
-              <p className="text-xs text-muted-foreground">Medication access isn't enabled or there are no active medications.</p>
+              <p className="text-xs text-muted-foreground">Medication access isn&apos;t enabled or there are no active medications.</p>
             )}
 
             <div className="flex flex-col gap-2">

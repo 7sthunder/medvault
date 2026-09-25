@@ -16,7 +16,7 @@ import { adherencePercent, bucketStats, computeTrend, sumCounts } from "@/shared
 import { computeStreaks } from "@/shared/calc/streaks";
 import type { AdherenceDay, AdherenceSummaryDTO } from "@/shared/types";
 
-import { recomputeRange } from "./materialize";
+import { recomputeRange, readEventRange } from "./materialize";
 
 export interface SummaryScope {
   userId: string;
@@ -25,27 +25,26 @@ export interface SummaryScope {
   to: Date;
   /** Scope to one medication (per-med rollup) — reports reuse this read path. */
   medicationId?: string | null;
+  /**
+   * Phase 17 (§10.10) — `true` builds the same DTO by aggregating `dose_events` in memory:
+   * no reconcile, no re-materialize, zero writes. Used by the insights snapshot so
+   * generation can never mutate dose events, dose actions, notifications or caregiver
+   * alerts, while still reporting numbers identical to every other adherence surface.
+   */
+  readOnly?: boolean;
 }
 
 const RESOLVED = ["taken", "missed", "skipped"] as const;
 
 export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<AdherenceSummaryDTO> {
-  const { userId, timeZone, medicationId } = scope;
+  const { userId, timeZone, medicationId, readOnly = false } = scope;
   const at = now();
-
-  // Canonical read path: reconcile before any read so statuses are instant-correct.
-  await reconcileUser(db, userId, { now: at });
 
   const fromKey = localDateKey(scope.from, timeZone);
   const toKey = localDateKey(scope.to, timeZone);
-  const recDays = await recomputeRange(db, {
-    userId,
-    fromKey,
-    toKey,
-    timeZone,
-    now: at,
-    medicationId: medicationId ?? null,
-  });
+  const recDays = readOnly
+    ? await readEventRange(db, { userId, fromKey, toKey, timeZone, now: at, medicationId: medicationId ?? null })
+    : await reconcileThenRecompute(db, { userId, timeZone, fromKey, toKey, medicationId: medicationId ?? null, now: at });
   const byDay = new Map(recDays.map((d) => [d.date, d]));
 
   // Full contiguous calendar window — days without regimen become "no data" gaps.
@@ -88,6 +87,22 @@ export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<A
     trend,
     byBucket,
   };
+}
+
+/** Canonical write path: reconcile so statuses are instant-correct, then re-materialize. */
+async function reconcileThenRecompute(
+  db: DbClient,
+  opts: { userId: string; timeZone: string; fromKey: string; toKey: string; medicationId: string | null; now: Date },
+) {
+  await reconcileUser(db, opts.userId, { now: opts.now });
+  return recomputeRange(db, {
+    userId: opts.userId,
+    fromKey: opts.fromKey,
+    toKey: opts.toKey,
+    timeZone: opts.timeZone,
+    now: opts.now,
+    medicationId: opts.medicationId,
+  });
 }
 
 async function bucketStatsFor(

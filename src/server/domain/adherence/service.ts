@@ -22,6 +22,12 @@ export interface AdherenceWindow {
   to: Date;
 }
 
+/** Phase 17 (§10.10) — read-path switches. `readOnly` skips reconcile + re-materialize. */
+export interface AdherenceReadOptions {
+  /** Build the DTO from materialized `adherence_daily` rows only — performs no writes. */
+  readOnly?: boolean;
+}
+
 const RESOLVED = ["taken", "missed", "skipped"] as const;
 
 export const adherenceService = {
@@ -32,13 +38,29 @@ export const adherenceService = {
     timeZone: string,
     window: AdherenceWindow,
     medicationId?: string | null,
+    options: AdherenceReadOptions = {},
   ): Promise<AdherenceSummaryDTO> {
-    return buildSummary(db, { userId, timeZone, from: window.from, to: window.to, medicationId });
+    return buildSummary(db, {
+      userId,
+      timeZone,
+      from: window.from,
+      to: window.to,
+      medicationId,
+      readOnly: options.readOnly ?? false,
+    });
   },
 
   /** Per-medication performance for the period (aggregates all owned meds). */
-  async byMedication(db: DbClient, userId: string, timeZone: string, window: AdherenceWindow): Promise<MedicationPerformanceDTO[]> {
-    await reconcileUser(db, userId, { now: now() });
+  async byMedication(
+    db: DbClient,
+    userId: string,
+    timeZone: string,
+    window: AdherenceWindow,
+    options: AdherenceReadOptions = {},
+  ): Promise<MedicationPerformanceDTO[]> {
+    if (!options.readOnly) {
+      await reconcileUser(db, userId, { now: now() });
+    }
 
     const start = combineDateAndTime(localDateKey(window.from, timeZone), "00:00", timeZone);
     const end = addLocalDays(combineDateAndTime(localDateKey(window.to, timeZone), "00:00", timeZone), 1, timeZone);

@@ -52,7 +52,10 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "Medications" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Today's Schedule" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "History" })).toBeTruthy();
-    expect(screen.getAllByRole("link", { name: "Notifications" })).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Notifications" })).toBeTruthy();
+    // Phase 16 replaced the top-header /notifications link with the live `NotificationBell`
+    // popover trigger, so the second affordance is a button, not a link.
+    expect(screen.getByRole("button", { name: "Notifications" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Settings" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Help" })).toBeTruthy();
     expect(screen.getByRole("navigation", { name: "Bottom navigation" })).toBeTruthy();

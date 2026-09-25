@@ -27,9 +27,9 @@ const ROUTE_MANIFEST: Readonly<Record<string, RouteOwner>> = {
   "/schedule": { owner: "aadhi", phase: 14 },
   "/history": { owner: "bala", phase: 19, existsNow: true },
   "/adherence": { owner: "bala", phase: 16, existsNow: true },
-  "/insights": { owner: "hp", phase: 23 },
+  "/insights": { owner: "hp", phase: 23, existsNow: true },
   "/reports": { owner: "bala", phase: 20, existsNow: true },
-  "/caregiver": { owner: "hp", phase: 21 },
+  "/caregiver": { owner: "hp", phase: 17, existsNow: true },
   "/notifications": { owner: "hp", phase: 22, existsNow: true },
   "/settings/profile": { owner: "bala", phase: 24 },
   "/settings/reminders": { owner: "bala", phase: 24 },
@@ -42,8 +42,8 @@ const ROUTE_MANIFEST: Readonly<Record<string, RouteOwner>> = {
   "/medications/[id]/edit": { owner: "aadhi", phase: 15, existsNow: true },
   "/schedule/[doseId]": { owner: "aadhi", phase: 14 },
   "/adherence/medications": { owner: "bala", phase: 17, existsNow: true },
-  "/caregiver/alerts/[id]": { owner: "hp", phase: 21 },
-  "/caregiver/accept": { owner: "hp", phase: 21 },
+  "/caregiver/alerts/[id]": { owner: "hp", phase: 17, existsNow: true },
+  "/caregiver/accept": { owner: "hp", phase: 17, existsNow: true },
 };
 
 const EXPECTED_ROUTE_FILES: Readonly<Record<string, string>> = {
@@ -54,6 +54,10 @@ const EXPECTED_ROUTE_FILES: Readonly<Record<string, string>> = {
   "/medications/[id]/edit": "src/app/(app)/medications/[id]/edit/page.tsx",
   "/adherence": "src/app/(app)/adherence/page.tsx",
   "/adherence/medications": "src/app/(app)/adherence/medications/page.tsx",
+  "/insights": "src/app/(app)/insights/page.tsx",
+  "/caregiver": "src/app/(app)/caregiver/page.tsx",
+  "/caregiver/accept": "src/app/(app)/caregiver/accept/page.tsx",
+  "/caregiver/alerts/[id]": "src/app/(app)/caregiver/alerts/[id]/page.tsx",
   "/schedule": "src/app/(app)/schedule/page.tsx",
   "/schedule/[doseId]": "src/app/(app)/schedule/[doseId]/page.tsx",
   "/history": "src/app/(app)/history/page.tsx",

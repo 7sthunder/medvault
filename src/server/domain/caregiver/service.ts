@@ -8,7 +8,7 @@
 
 import { randomBytes } from "node:crypto";
 
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gte, inArray } from "drizzle-orm";
 
 import type { Db, DbTx } from "@/server/db/helpers";
 import { uuidv7 } from "@/server/db/helpers";
@@ -19,6 +19,7 @@ import {
   doseActions,
   doseEvents,
   medications,
+  userPreferences,
   users,
 } from "@/server/db/schema";
 import { INVITATION_TTL_DAYS, LIST_PAGE_SIZE } from "@/shared/constants";
@@ -333,7 +334,10 @@ export const caregiverService = {
     };
   },
 
-  /** Patient-scoped relationship update — only the patient of the pair may edit. */
+  /**
+   * §10.6 patient-scoped permission edit — only the patient of the pair may edit, and only
+   * while the relationship is `active` (a revoked row is history: its permissions are frozen).
+   */
   async updatePermissions(
     db: Db | DbTx,
     patientUserId: string,
@@ -342,24 +346,27 @@ export const caregiverService = {
   ): Promise<CaregiverRelationshipDTO> {
     const row = await ownedRelationship(db, patientUserId, relationshipId);
     if (!row) throw new AuthGateError("Relationship not found.");
+    if (row.status !== ACTIVE) throw new AuthGateError("This caregiver connection is no longer active.");
 
     const [updated] = await db
       .update(caregiverRelationships)
       .set({ permissions, updatedAt: new Date() })
-      .where(eq(caregiverRelationships.id, relationshipId))
+      .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.status, ACTIVE)))
       .returning();
+    if (!updated) throw new AuthGateError("This caregiver connection is no longer active.");
     const names = await namesOf(db, [row.patientUserId, row.caregiverUserId]);
-    return toRelationshipDTO(updated!, names.get(row.patientUserId) ?? "Patient", names.get(row.caregiverUserId) ?? "Caregiver");
+    return toRelationshipDTO(updated, names.get(row.patientUserId) ?? "Patient", names.get(row.caregiverUserId) ?? "Caregiver");
   },
 
   /** Patient revokes a relationship — stops all future alerts; row kept for history. */
   async revoke(db: Db | DbTx, patientUserId: string, relationshipId: string): Promise<void> {
     const row = await ownedRelationship(db, patientUserId, relationshipId);
     if (!row) throw new AuthGateError("Relationship not found.");
+    if (row.status === "revoked") return;
     await db
       .update(caregiverRelationships)
       .set({ status: "revoked", revokedAt: now(), updatedAt: new Date() })
-      .where(eq(caregiverRelationships.id, relationshipId));
+      .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.status, ACTIVE)));
   },
 
   /** Caregiver steps away from a patient — same soft-delete semantics, caller differs. */
@@ -370,10 +377,11 @@ export const caregiverService = {
       .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.caregiverUserId, caregiverUserId)))
       .limit(1);
     if (!row) throw new AuthGateError("Relationship not found.");
+    if (row.status === "revoked") return;
     await db
       .update(caregiverRelationships)
       .set({ status: "revoked", revokedAt: now(), updatedAt: new Date() })
-      .where(eq(caregiverRelationships.id, relationshipId));
+      .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.status, ACTIVE)));
   },
 
   /** Patient recalls a pending invitation before it is redeemed. */
@@ -384,10 +392,18 @@ export const caregiverService = {
       .where(and(eq(caregiverInvitations.id, invitationId), eq(caregiverInvitations.patientUserId, patientUserId)))
       .limit(1);
     if (!row) throw new AuthGateError("Invitation not found.");
+    if (row.status === "revoked") return;
+    if (row.status !== "pending") throw new AuthGateError("This invitation can no longer be revoked.");
     await db
       .update(caregiverInvitations)
       .set({ status: "revoked" })
-      .where(and(eq(caregiverInvitations.id, invitationId), eq(caregiverInvitations.patientUserId, patientUserId)));
+      .where(
+        and(
+          eq(caregiverInvitations.id, invitationId),
+          eq(caregiverInvitations.patientUserId, patientUserId),
+          eq(caregiverInvitations.status, "pending"),
+        ),
+      );
   },
 
   /**
@@ -477,18 +493,29 @@ export const caregiverService = {
     return enrichAlerts(db, rows);
   },
 
-  /** Alert detail for the acting caregiver, plus the underlying dose's action timeline. */
+  /**
+   * Alert detail for the acting caregiver, plus the underlying dose's action timeline.
+   *
+   * Two actors may read one alert: the patient it was sent about (their own "alerts sent"
+   * history) and the caregiver it was addressed to — the latter only while the relationship
+   * is still `active`, so revoking instantly closes historical access.
+   */
   async alertDetail(
     db: Db | DbTx,
-    caregiverUserId: string,
+    actorUserId: string,
     alertId: string,
   ): Promise<CaregiverAlertDetailDTO | null> {
-    const [row] = await db
-      .select()
-      .from(caregiverAlerts)
-      .where(and(eq(caregiverAlerts.id, alertId), eq(caregiverAlerts.caregiverUserId, caregiverUserId)))
-      .limit(1);
+    const [row] = await db.select().from(caregiverAlerts).where(eq(caregiverAlerts.id, alertId)).limit(1);
     if (!row) return null;
+
+    if (row.patientUserId === actorUserId) {
+      // Patient reading their own alert — no relationship gate needed.
+    } else if (row.caregiverUserId === actorUserId) {
+      const rel = await caregiverService.requireCaregiverAccess(db, actorUserId, row.patientUserId);
+      if (!rel) return null;
+    } else {
+      return null;
+    }
 
     const names = await namesOf(db, [row.patientUserId, row.caregiverUserId]);
     const event = row.doseEventId
@@ -542,6 +569,98 @@ export const caregiverService = {
       .returning();
     const names = await namesOf(db, [updated!.patientUserId, updated!.caregiverUserId]);
     return toAlertDTO(updated!, names, alertSnapshot(updated!));
+  },
+
+  /**
+   * §10.6 optional adherence-drop trigger: when the patient configured an
+   * `adherenceDropThreshold` and the trailing 7-day rate falls under it, raise one
+   * `adherence_drop` alert per qualifying ACTIVE relationship. Deduped per relationship per
+   * local day so a recurring job can never spam the same drop. Returns alerts created.
+   */
+  async evaluateAdherenceDrop(db: Db | DbTx, patientUserId: string, timeZone: string, at: Date = now()): Promise<number> {
+    const [prefs] = await db
+      .select({ caregiverAlertPrefs: userPreferences.caregiverAlertPrefs })
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, patientUserId))
+      .limit(1);
+    const threshold = (prefs?.caregiverAlertPrefs as { adherenceDropThreshold?: number | null } | null)
+      ?.adherenceDropThreshold;
+    if (threshold === null || threshold === undefined) return 0;
+
+    const relationships = await db
+      .select()
+      .from(caregiverRelationships)
+      .where(and(eq(caregiverRelationships.patientUserId, patientUserId), eq(caregiverRelationships.status, ACTIVE)));
+    const targets = relationships.filter((r) => permissionsOf(r.permissions).receiveMissedDoseAlerts);
+    if (targets.length === 0) return 0;
+
+    const todayKey = localDateKey(at, timeZone);
+    const dayStart = combineDateAndTime(todayKey, "00:00", timeZone);
+    const dayEnd = combineDateAndTime(todayKey, "23:59", timeZone);
+
+    const [current, previous, patientRows] = await Promise.all([
+      adherenceService.summary(db, patientUserId, timeZone, { from: addLocalDays(dayStart, -6, timeZone), to: dayEnd }),
+      adherenceService.summary(db, patientUserId, timeZone, {
+        from: addLocalDays(dayStart, -13, timeZone),
+        to: addLocalDays(dayStart, -7, timeZone),
+      }),
+      db.select({ name: users.name }).from(users).where(eq(users.id, patientUserId)).limit(1),
+    ]);
+
+    const rate = current.adherencePercent;
+    if (rate === null || rate >= threshold) return 0;
+
+    const patientName = patientRows[0]?.name ?? "Patient";
+    const title = "Adherence dropped";
+    const body = `${patientName}'s 7-day adherence fell to ${Math.round(rate)}%, below the ${Math.round(threshold)}% alert threshold.`;
+
+    let created = 0;
+    for (const rel of targets) {
+      const [existing] = await db
+        .select({ id: caregiverAlerts.id })
+        .from(caregiverAlerts)
+        .where(
+          and(
+            eq(caregiverAlerts.relationshipId, rel.id),
+            eq(caregiverAlerts.type, "adherence_drop"),
+            gte(caregiverAlerts.createdAt, dayStart),
+          ),
+        )
+        .limit(1);
+      if (existing) continue;
+
+      const alertId = uuidv7();
+      await db.insert(caregiverAlerts).values({
+        id: alertId,
+        patientUserId,
+        caregiverUserId: rel.caregiverUserId,
+        relationshipId: rel.id,
+        doseEventId: null,
+        type: "adherence_drop",
+        title,
+        body,
+        data: {
+          adherenceBefore: previous.adherencePercent,
+          adherenceAfter: rate,
+          threshold,
+          windowDays: 7,
+          patientName,
+        },
+        status: "new",
+        createdAt: at,
+      });
+      await notificationsService.create(db, {
+        userId: rel.caregiverUserId,
+        type: "caregiver_alert",
+        title,
+        body,
+        entityType: "caregiverAlert",
+        entityId: alertId,
+        createdAt: at,
+      });
+      created += 1;
+    }
+    return created;
   },
 
   /**

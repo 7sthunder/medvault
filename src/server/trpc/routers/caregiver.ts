@@ -36,7 +36,7 @@ export const caregiverRouter = router({
     .input(caregiverAcceptSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await caregiverService.accept(ctx.db, ctx.user.id, input.token);
+        return await ctx.db.transaction((tx) => caregiverService.accept(tx, ctx.user.id, input.token));
       } catch (error) {
         throw mapInviteError(error, "BAD_REQUEST");
       }

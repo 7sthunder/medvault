@@ -118,7 +118,7 @@ function RegenerateNotice({
   source,
   allFallback,
 }: {
-  fresh: GeneratedBatch | null;
+  fresh: InsightDTO[] | null;
   source: InsightSource | null;
   allFallback: boolean;
 }) {

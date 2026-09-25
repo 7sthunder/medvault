@@ -25,6 +25,10 @@ export default defineConfig({
     // DB-backed suites (seed, dose events, adherence) share the live Supabase demo user;
     // serialize files so concurrent `seedDemoWorkspace` runs can't clobber one another.
     fileParallelism: false,
+    // The default 5s budget is too tight for DB suites: the first query in a file pays the
+    // connection handshake + plan compile, and `seedDemoWorkspace` re-seeds the whole fixture.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     coverage: {
       provider: "v8",
       include: ["src/shared/calc/**"],

@@ -24,7 +24,7 @@ import { TodayFeed } from "./TodayFeed";
 /**
  * §11.4 `/dashboard` — one `dashboard.get` call renders the full priority-ordered
  * page: hero (next/current dose) → stat rail → today's schedule feed → 7-day trend →
- * meds summary → AI insight stub → caregiver stub → quick actions. Dose actions reuse
+ * meds summary → latest AI insight → caregiver status → quick actions. Dose actions reuse
  * the shared `useDoseActions` (invalidates dashboard + schedule + adherence together).
  */
 export function DashboardPage() {

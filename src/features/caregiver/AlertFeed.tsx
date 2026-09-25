@@ -20,7 +20,7 @@ export const ALERT_TYPE_LABEL: Readonly<Record<CaregiverAlertType, string>> = {
 
 export function alertTypeTone(type: CaregiverAlertType): ChipTone {
   if (type === "missed_dose") return "amber";
-  if (type === "adherence_drop") return "red";
+  if (type === "adherence_drop") return "magenta";
   if (type === "insight") return "violet";
   return "slate";
 }

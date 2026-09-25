@@ -26,7 +26,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function InviteForm({ onInvited }: { onInvited?: () => void }) {
   const utils = api.useUtils();
   const invite = api.caregiver.invite.useMutation({
-    onSuccess: (result) => {
+    onSuccess: () => {
       toast.success("Invitation sent");
       setEmail("");
       setMessage("");
