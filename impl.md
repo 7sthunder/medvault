@@ -41,7 +41,7 @@
 | 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
 | 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
 | 09 | Global shell & navigation `(app)` | `done` | `a583979` | pushed to `origin/main` |
-| 10 | Onboarding | `done` | `[commit-10]` | verified: typecheck/lint/test/build; e2e deferred |
+| 10 | Onboarding | `done` | `b3933d8` | verified: typecheck/lint/test/build; e2e deferred |
 | 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
 | 12 | Medication schedule & dose-event generation (domain) | `done` | `4f6e5b4` | verified: typecheck/lint/test/build |
 | 13 | Dose state machine + reconcile (missed detection) (domain) | `pending` | — | |
