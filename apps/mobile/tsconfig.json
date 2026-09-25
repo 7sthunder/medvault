@@ -1,0 +1,37 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "types": ["expo/types"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*", "../../src/*"],
+      "@shared/*": ["../../src/shared/*"],
+      "@server/trpc/root": ["../../src/server/trpc/root.ts"],
+      "@format": ["../../src/lib/format.ts"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "../../src/shared/**/*.ts",
+    "../../src/server/trpc/root.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".expo",
+    "dist",
+    "../../src/**/*.test.ts",
+    "../../src/**/*.spec.ts"
+  ]
+}

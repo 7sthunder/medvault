@@ -89,7 +89,9 @@ export const scheduleService = {
   async get(
     db: Db | DbTx,
     userId: string,
-    timeZone: string,
+    // Unused: every dose timestamp is stored absolute and returned as-is, so no local-time
+    // conversion happens here. Kept in the signature so the service methods stay uniform.
+    _timeZone: string,
     doseId: string,
   ): Promise<DoseDetailDTO | null> {
     const at = now();
