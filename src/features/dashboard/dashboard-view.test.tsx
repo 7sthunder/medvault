@@ -33,6 +33,20 @@ vi.mock("@/lib/trpc", () => ({
         useQuery: vi.fn(),
       },
     },
+    appointments: {
+      list: {
+        useQuery: vi.fn(() => ({ data: [], isLoading: false })),
+      },
+      update: {
+        useMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+      },
+      cancel: {
+        useMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+      },
+      create: {
+        useMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+      },
+    },
     dose: {
       take: {
         useMutation: vi.fn(() => ({

@@ -15,7 +15,7 @@ import { authClient } from "@/lib/auth-client";
 import { loginSchema, type LoginInput } from "@/shared/validations/auth";
 
 import { authErrorMessage } from "./auth-error";
-import { hasOnboarded, safeNext } from "./flow";
+import { getUserRole, hasOnboarded, safeNext } from "./flow";
 import { PasswordInput } from "./PasswordInput";
 
 export default function LoginForm({ next }: { next: string | null }) {
@@ -42,7 +42,8 @@ export default function LoginForm({ next }: { next: string | null }) {
       return;
     }
     const session = await authClient.getSession();
-    router.push(safeNext(next, { onboardingCompleted: hasOnboarded(session.data?.user) }));
+    const role = getUserRole(session.data?.user);
+    router.push(safeNext(next, { onboardingCompleted: hasOnboarded(session.data?.user), role }));
     router.refresh();
   };
 

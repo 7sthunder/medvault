@@ -15,6 +15,7 @@ export const registerSchema = z.object({
     .min(8, "Password must be at least 8 characters.")
     .regex(/[a-zA-Z]/, "Password must include a letter.")
     .regex(/[0-9]/, "Password must include a number."),
+  role: z.enum(["patient", "caregiver"]).optional(),
 });
 
 export const loginSchema = z.object({
@@ -24,4 +25,5 @@ export const loginSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type RegisterFormValues = z.input<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

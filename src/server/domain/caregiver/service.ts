@@ -973,3 +973,114 @@ export async function getMonitoredPatientOverview(
     recentAlerts,
   };
 }
+
+/**
+ * Connects a caregiver to a patient directly using the patient's unique access code.
+ */
+export async function connectWithAccessCode(
+  db: Db | DbTx,
+  caregiverUserId: string,
+  accessCode: string,
+  relationType: RelationType = "family",
+): Promise<CaregiverRelationshipDTO> {
+  const cleanCode = accessCode.trim().toUpperCase();
+
+  const [patientUser] = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+    })
+    .from(users)
+    .where(eq(users.accessCode, cleanCode))
+    .limit(1);
+
+  if (!patientUser) {
+    throw new Error("Invalid access code. Please verify the code with the patient.");
+  }
+
+  if (patientUser.id === caregiverUserId) {
+    throw new Error("You cannot use your own access code to monitor yourself.");
+  }
+
+  const currentNow = now();
+  const permissions: CaregiverPermissions = {
+    viewAdherence: true,
+    viewMedications: true,
+    receiveMissedDoseAlerts: true,
+    receiveInsights: true,
+    canAcknowledgeAlerts: true,
+    manageMedications: true,
+  };
+
+  const [existingRel] = await db
+    .select()
+    .from(caregiverRelationships)
+    .where(
+      and(
+        eq(caregiverRelationships.patientUserId, patientUser.id),
+        eq(caregiverRelationships.caregiverUserId, caregiverUserId),
+      ),
+    )
+    .limit(1);
+
+  let relationshipId: string;
+  let createdAt = currentNow;
+
+  if (existingRel) {
+    relationshipId = existingRel.id;
+    createdAt = existingRel.createdAt;
+    await db
+      .update(caregiverRelationships)
+      .set({
+        status: "active",
+        relationType,
+        permissions,
+        revokedAt: null,
+        acceptedAt: currentNow,
+        updatedAt: currentNow,
+      })
+      .where(eq(caregiverRelationships.id, existingRel.id));
+  } else {
+    relationshipId = uuidv7();
+    await db.insert(caregiverRelationships).values({
+      id: relationshipId,
+      patientUserId: patientUser.id,
+      caregiverUserId,
+      status: "active",
+      relationType,
+      permissions,
+      invitedByUserId: patientUser.id,
+      acceptedAt: currentNow,
+      createdAt: currentNow,
+      updatedAt: currentNow,
+    });
+  }
+
+  const [caregiverUser] = await db
+    .select({ name: users.name })
+    .from(users)
+    .where(eq(users.id, caregiverUserId))
+    .limit(1);
+
+  await createNotification(db, {
+    userId: patientUser.id,
+    type: "system",
+    title: "Caregiver Connected",
+    body: `${caregiverUser?.name ?? "A caregiver"} has connected to your account using your access code.`,
+  }).catch(() => {});
+
+  return {
+    id: relationshipId,
+    patientUserId: patientUser.id,
+    caregiverUserId,
+    patientName: patientUser.name || "Patient",
+    caregiverName: caregiverUser?.name || "Caregiver",
+    status: "active",
+    relationType,
+    permissions,
+    acceptedAt: currentNow,
+    createdAt,
+  };
+}
+

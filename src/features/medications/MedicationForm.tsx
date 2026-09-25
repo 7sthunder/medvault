@@ -34,9 +34,18 @@ import type { MedicationFormData } from "./types";
 export interface MedicationFormProps {
   mode: "new" | "edit";
   initialData?: MedicationDTO;
+  patientUserId?: string;
+  patientName?: string;
+  onSuccess?: (medId: string) => void;
 }
 
-export function MedicationForm({ mode, initialData }: MedicationFormProps) {
+export function MedicationForm({
+  mode,
+  initialData,
+  patientUserId,
+  patientName,
+  onSuccess,
+}: MedicationFormProps) {
   const router = useRouter();
   const utils = api.useUtils();
 
@@ -91,10 +100,20 @@ export function MedicationForm({ mode, initialData }: MedicationFormProps) {
 
   const createMutation = api.medication.create.useMutation({
     onSuccess: (med) => {
-      toast.success("Medication added to your schedule.");
+      toast.success(
+        patientName
+          ? `Medication added to ${patientName}'s schedule.`
+          : "Medication added to your schedule.",
+      );
       void utils.medication.list.invalidate();
       void utils.dose.today.invalidate();
-      router.push(`/medications/${med.id}`);
+      if (onSuccess) {
+        onSuccess(med.id);
+      } else if (patientUserId) {
+        router.push("/caregiver");
+      } else {
+        router.push(`/medications/${med.id}`);
+      }
     },
     onError: (err) => {
       toast.error(err.message || "Failed to create medication.");
@@ -171,6 +190,7 @@ export function MedicationForm({ mode, initialData }: MedicationFormProps) {
     }
 
     const payload = {
+      patientUserId,
       name: formData.name.trim(),
       dosageAmount: formData.dosageAmount,
       dosageUnit: formData.dosageUnit.trim(),
@@ -207,18 +227,24 @@ export function MedicationForm({ mode, initialData }: MedicationFormProps) {
             render={
               <Link
                 href={
-                  mode === "edit" && initialData
-                    ? `/medications/${initialData.id}`
-                    : "/medications"
+                  patientUserId
+                    ? "/caregiver"
+                    : mode === "edit" && initialData
+                      ? `/medications/${initialData.id}`
+                      : "/medications"
                 }
               />
             }
           >
             <ArrowLeft className="size-4 mr-1" />
-            {mode === "edit" ? "Cancel" : "Medications"}
+            {mode === "edit" ? "Cancel" : patientUserId ? "Back to Caregiver" : "Medications"}
           </Button>
           <h1 className="font-heading text-2xl font-bold text-ink-900 dark:text-ink-100">
-            {mode === "edit" ? "Edit Medication" : "Add Medication"}
+            {mode === "edit"
+              ? "Edit Medication"
+              : patientName
+                ? `Add Medication for ${patientName}`
+                : "Add Medication"}
           </h1>
         </div>
       </div>

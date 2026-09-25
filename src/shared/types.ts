@@ -276,6 +276,7 @@ export interface CaregiverPermissions {
   receiveMissedDoseAlerts: boolean;
   receiveInsights: boolean;
   canAcknowledgeAlerts: boolean;
+  manageMedications?: boolean;
 }
 
 export const DEFAULT_CAREGIVER_PERMISSIONS: CaregiverPermissions = {
@@ -284,7 +285,36 @@ export const DEFAULT_CAREGIVER_PERMISSIONS: CaregiverPermissions = {
   receiveMissedDoseAlerts: true,
   receiveInsights: false,
   canAcknowledgeAlerts: true,
+  manageMedications: false,
 };
+
+export const FULL_CAREGIVER_PERMISSIONS: CaregiverPermissions = {
+  viewAdherence: true,
+  viewMedications: true,
+  receiveMissedDoseAlerts: true,
+  receiveInsights: true,
+  canAcknowledgeAlerts: true,
+  manageMedications: true,
+};
+
+export type AppointmentStatus = "scheduled" | "completed" | "cancelled";
+
+export interface AppointmentDTO {
+  id: string;
+  patientUserId: string;
+  createdByUserId: string;
+  doctorName: string;
+  specialty: string | null;
+  clinicName: string | null;
+  appointmentDate: Date;
+  notes: string | null;
+  status: AppointmentStatus;
+  reminderEnabled: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  patientName?: string;
+  createdByName?: string;
+}
 
 export interface CaregiverRelationshipDTO {
   id: string;

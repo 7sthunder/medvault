@@ -11,6 +11,7 @@ import {
   userPreferences,
   users,
 } from "@/server/db/schema";
+import { ensureUserAccessCode } from "@/server/domain/caregiver/access-code";
 import { getOrCreatePreferences, upsertPreferences } from "./get-or-createPreferences";
 import type {
   UpdateAppearanceInput,
@@ -25,6 +26,8 @@ export interface UserProfileDTO {
   email: string;
   timezone: string;
   createdAt: Date;
+  role: "patient" | "caregiver";
+  accessCode: string;
 }
 
 export interface MedicationReminderItem {
@@ -81,6 +84,8 @@ export async function getProfile(db: Db | DbTx, userId: string): Promise<UserPro
       email: users.email,
       timezone: users.timezone,
       createdAt: users.createdAt,
+      role: users.role,
+      accessCode: users.accessCode,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -90,7 +95,20 @@ export async function getProfile(db: Db | DbTx, userId: string): Promise<UserPro
     throw new Error("User not found");
   }
 
-  return user;
+  let code = user.accessCode;
+  if (!code) {
+    try {
+      code = await ensureUserAccessCode(db, user.id);
+    } catch {
+      code = "MV-ACCESS";
+    }
+  }
+
+  return {
+    ...user,
+    role: user.role ?? "patient",
+    accessCode: code,
+  };
 }
 
 /**

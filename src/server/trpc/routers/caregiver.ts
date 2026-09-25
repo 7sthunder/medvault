@@ -133,4 +133,20 @@ export const caregiverRouter = router({
     .mutation(async ({ ctx, input }) => {
       return caregiverService.revokeRelationship(ctx.db, ctx.user.id, input.relationshipId);
     }),
+
+  connectWithCode: protectedProcedure
+    .input(
+      z.object({
+        accessCode: z.string().min(1, "Access code is required"),
+        relationType: z.enum(["family", "professional", "friend", "other"]).default("family"),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return caregiverService.connectWithAccessCode(
+        ctx.db,
+        ctx.user.id,
+        input.accessCode,
+        input.relationType,
+      );
+    }),
 });

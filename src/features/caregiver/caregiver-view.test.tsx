@@ -110,11 +110,31 @@ vi.mock("@/lib/trpc", () => ({
           isPending: false,
         })),
       },
+      connectWithCode: {
+        useMutation: vi.fn(() => ({
+          mutate: vi.fn(),
+          isPending: false,
+        })),
+      },
       leavePatient: {
         useMutation: vi.fn(() => ({
           mutate: vi.fn(),
           isPending: false,
         })),
+      },
+    },
+    appointments: {
+      list: {
+        useQuery: vi.fn(() => ({ data: [], isLoading: false })),
+      },
+      update: {
+        useMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+      },
+      cancel: {
+        useMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+      },
+      create: {
+        useMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
       },
     },
   },

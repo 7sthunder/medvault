@@ -11,16 +11,40 @@
  * - `unarchive`: restores archived medication to active status.
  */
 
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import type { Db } from "@/server/db/helpers";
+import { caregiverRelationships } from "@/server/db/schema";
 import * as medicationService from "@/server/domain/medications/service";
 import { MEDICATION_STATUSES } from "@/shared/enums";
 import { medicationBaseSchema } from "@/shared/validations/medication";
 import { scheduleSlotSchema } from "@/shared/validations/schedule";
 import { protectedProcedure, router } from "../trpc";
 
+async function resolvePatientId(db: Db, callerId: string, patientUserId?: string | null): Promise<string> {
+  if (!patientUserId || patientUserId === callerId) return callerId;
+  const [rel] = await db
+    .select({ status: caregiverRelationships.status })
+    .from(caregiverRelationships)
+    .where(
+      and(
+        eq(caregiverRelationships.caregiverUserId, callerId),
+        eq(caregiverRelationships.patientUserId, patientUserId),
+        eq(caregiverRelationships.status, "active"),
+      ),
+    )
+    .limit(1);
+
+  if (!rel) {
+    throw new Error("You do not have active caregiver authorization for this patient.");
+  }
+  return patientUserId;
+}
+
 const createMedicationProcedureSchema = medicationBaseSchema
   .extend({
     slots: z.array(scheduleSlotSchema).optional(),
+    patientUserId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.endDate && data.startDate > data.endDate) {
@@ -55,11 +79,13 @@ export const medicationRouter = router({
         .object({
           includeArchived: z.boolean().optional(),
           status: z.enum(MEDICATION_STATUSES).optional(),
+          patientUserId: z.string().optional(),
         })
         .optional(),
     )
     .query(async ({ ctx, input }) => {
-      return medicationService.listMedications(ctx.db, ctx.user.id, input);
+      const targetUserId = await resolvePatientId(ctx.db, ctx.user.id, input?.patientUserId);
+      return medicationService.listMedications(ctx.db, targetUserId, input);
     }),
 
   get: protectedProcedure
@@ -75,8 +101,9 @@ export const medicationRouter = router({
   create: protectedProcedure
     .input(createMedicationProcedureSchema)
     .mutation(async ({ ctx, input }) => {
-      const { slots, ...medData } = input;
-      return medicationService.createMedication(ctx.db, ctx.user.id, {
+      const { slots, patientUserId, ...medData } = input;
+      const targetUserId = await resolvePatientId(ctx.db, ctx.user.id, patientUserId);
+      return medicationService.createMedication(ctx.db, targetUserId, {
         ...medData,
         slots,
       });

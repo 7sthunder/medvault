@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   HeartHandshake,
+  KeyRound,
   UserCheck,
   UserPlus,
 } from "lucide-react";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/trpc";
 import { CaregiverOverview } from "./CaregiverOverview";
 import { InviteForm } from "./InviteForm";
+import { LinkPatientDialog } from "./LinkPatientDialog";
 import { RelationshipList } from "./RelationshipList";
 import type { CaregiverTab } from "./types";
 
@@ -21,6 +23,7 @@ export function CaregiverPage() {
 
   const [activeTab, setActiveTab] = useState<CaregiverTab>("caregivers");
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
 
   useEffect(() => {
     if (isCaregiverForOthers && !selectedPatientId && patients[0]) {
@@ -43,6 +46,16 @@ export function CaregiverPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setLinkDialogOpen(true)}
+            className="gap-2 border-primary/40 text-primary hover:bg-primary/5"
+          >
+            <KeyRound className="size-4" />
+            <span>Link with Access Code</span>
+          </Button>
+
           {activeTab !== "invite" && (
             <Button
               variant="default"
@@ -125,6 +138,15 @@ export function CaregiverPage() {
           <InviteForm onSuccess={() => setActiveTab("caregivers")} />
         </div>
       )}
+
+      <LinkPatientDialog
+        open={linkDialogOpen}
+        onOpenChange={setLinkDialogOpen}
+        onSuccess={(id) => {
+          setSelectedPatientId(id);
+          setActiveTab("overview");
+        }}
+      />
     </div>
   );
 }

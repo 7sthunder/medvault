@@ -18,6 +18,7 @@ import { SnoozeDialog } from "@/features/schedule/SnoozeDialog";
 import { api } from "@/lib/trpc";
 import type { DoseEventDTO } from "@/shared/types";
 import { motion, type Variants } from "framer-motion";
+import { AppointmentsWidget } from "@/features/appointments/AppointmentsWidget";
 import { AdherenceWidget } from "./AdherenceWidget";
 import { CaregiverStatus } from "./CaregiverStatus";
 import { InsightWidget } from "./InsightWidget";
@@ -239,6 +240,7 @@ export function DashboardPage() {
         {/* Right Column: Medications, Insights, Caregiver */}
         <div className="space-y-6">
           <MedSummary medications={medications} />
+          <AppointmentsWidget />
           <InsightWidget insight={latestInsight} />
           <CaregiverStatus caregiver={caregiver} />
         </div>

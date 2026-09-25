@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import { db } from "@/server/db/client";
 import * as schema from "@/server/db/schema";
+import { generateAccessCode } from "@/server/domain/caregiver/access-code";
 
 try {
   process.loadEnvFile();
@@ -52,6 +53,31 @@ export const auth = betterAuth({
         required: false,
         defaultValue: false,
         input: false,
+      },
+      role: {
+        type: "string",
+        required: false,
+        defaultValue: "patient",
+        input: true,
+      },
+      accessCode: {
+        type: "string",
+        required: false,
+        input: false,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          return {
+            data: {
+              ...user,
+              accessCode: generateAccessCode(),
+            },
+          };
+        },
       },
     },
   },

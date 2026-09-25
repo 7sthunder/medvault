@@ -70,6 +70,8 @@ export const users = pgTable("users", {
   timezone: text("timezone").notNull().default("UTC"),
   onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
   isDemo: boolean("is_demo").notNull().default(false),
+  role: text("role").$type<"patient" | "caregiver">().notNull().default("patient"),
+  accessCode: text("access_code").unique(),
 });
 
 export const sessions = pgTable("session", {
@@ -453,3 +455,30 @@ export const demoStates = pgTable("demo_state", {
   hasCaregiverDemoData: boolean("has_caregiver_demo_data").notNull().default(false),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/* ── §8.15 doctor_appointments ── */
+
+export const appointments = pgTable(
+  "appointments",
+  {
+    id: text("id").primaryKey(),
+    patientUserId: text("patient_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdByUserId: text("created_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    doctorName: text("doctor_name").notNull(),
+    specialty: text("specialty"),
+    clinicName: text("clinic_name"),
+    appointmentDate: timestamp("appointment_date", { withTimezone: true }).notNull(),
+    notes: text("notes"),
+    status: text("status").$type<"scheduled" | "completed" | "cancelled">().notNull().default("scheduled"),
+    reminderEnabled: boolean("reminder_enabled").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("appointments_patient_date_idx").on(t.patientUserId, desc(t.appointmentDate)),
+  ],
+);

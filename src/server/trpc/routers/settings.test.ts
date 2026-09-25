@@ -63,6 +63,8 @@ describe("Phase 24 — Settings tRPC Router", () => {
       email: user.email,
       timezone: user.timezone,
       createdAt: user.createdAt,
+      role: "patient" as const,
+      accessCode: "MV-TEST01",
     };
 
     vi.mocked(settingsService.getProfile).mockResolvedValue(mockProfile);

@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description: "Create a new prescription or supplement and set its daily schedule.",
 };
 
-export default function NewMedicationPage() {
-  return <MedicationForm mode="new" />;
+export default async function NewMedicationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ patientUserId?: string; patientName?: string }>;
+}) {
+  const { patientUserId, patientName } = await searchParams;
+  return <MedicationForm mode="new" patientUserId={patientUserId} patientName={patientName} />;
 }

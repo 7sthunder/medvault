@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Activity,
   AlertTriangle,
   CheckCircle2,
   Clock,
   Flame,
+  KeyRound,
   Loader2,
+  Pill,
+  Stethoscope,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -16,9 +20,12 @@ import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatCard } from "@/components/ui/stat-card";
+import { AppointmentDialog } from "@/features/appointments/AppointmentDialog";
+import { AppointmentsWidget } from "@/features/appointments/AppointmentsWidget";
 import { api } from "@/lib/trpc";
 import type { CaregiverRelationshipDTO } from "@/shared/types";
 import { AlertFeed } from "./AlertFeed";
+import { LinkPatientDialog } from "./LinkPatientDialog";
 
 interface CaregiverOverviewProps {
   patients: (CaregiverRelationshipDTO & { patientEmail: string })[];
@@ -32,6 +39,8 @@ export function CaregiverOverview({
   onSelectPatient,
 }: CaregiverOverviewProps) {
   const [leavingTarget, setLeavingTarget] = useState<string | null>(null);
+  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
 
   const utils = api.useUtils();
 
@@ -55,11 +64,25 @@ export function CaregiverOverview({
 
   if (patients.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center">
+      <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center space-y-4">
         <EmptyState
           icon={Users}
           title="No Monitored Patients"
-          description="You are not currently monitoring any patients. When a patient invites you, accept their invitation to view their adherence here."
+          description="You are not currently monitoring any patients. Enter a patient's access code to securely link them to your dashboard."
+        />
+        <Button
+          type="button"
+          onClick={() => setLinkDialogOpen(true)}
+          className="gap-2"
+        >
+          <KeyRound className="size-4" />
+          <span>Link Patient with Access Code</span>
+        </Button>
+
+        <LinkPatientDialog
+          open={linkDialogOpen}
+          onOpenChange={setLinkDialogOpen}
+          onSuccess={(id) => onSelectPatient(id)}
         />
       </div>
     );
@@ -119,6 +142,47 @@ export function CaregiverOverview({
         </div>
       </div>
 
+      {/* Caregiver Actions Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+        <div>
+          <h3 className="font-heading text-sm font-bold text-foreground">
+            Caregiver Actions for {selectedPatient?.patientName}
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Schedule upcoming clinic consultations or add new medications to their daily regimen.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setAppointmentDialogOpen(true)}
+            className="gap-1.5 rounded-xl border-primary/30 text-xs font-semibold"
+          >
+            <Stethoscope className="size-3.5 text-primary" />
+            <span>Schedule Doctor Visit</span>
+          </Button>
+
+          <Button
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link
+                href={`/medications/new?patientUserId=${selectedPatientId}&patientName=${encodeURIComponent(
+                  selectedPatient?.patientName || "Patient",
+                )}`}
+              />
+            }
+            className="gap-1.5 rounded-xl text-xs font-semibold"
+          >
+            <Pill className="size-3.5" />
+            <span>Add Medication</span>
+          </Button>
+        </div>
+      </div>
+
       {overviewQuery.isLoading && (
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="size-8 animate-spin text-muted-foreground" />
@@ -174,65 +238,81 @@ export function CaregiverOverview({
             </div>
           )}
 
-          {/* 2. Today's Scheduled Intake (if permitted) */}
-          {overviewQuery.data.todayDoses.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-card-sm space-y-4">
-              <div className="flex items-center gap-2 border-b border-border/80 pb-3">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary-tint text-primary-dark dark:text-primary">
-                  <Clock className="size-4" />
-                </div>
-                <div>
-                  <h3 className="font-heading text-base font-semibold text-ink-900 dark:text-ink-100">
-                    Recent Dose Schedule
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Chronological intake events logged for {selectedPatient?.patientName}
-                  </p>
-                </div>
-              </div>
+          {/* 2. Doctor Appointments & Schedule Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AppointmentsWidget
+              patientUserId={selectedPatientId}
+              patientName={selectedPatient?.patientName}
+            />
 
-              <div className="divide-y divide-border/60">
-                {overviewQuery.data.todayDoses.map((dose) => (
-                  <div
-                    key={dose.id}
-                    className="flex items-center justify-between py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        aria-hidden="true"
-                        className="size-3.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: dose.medication.color }}
-                      />
-                      <div>
-                        <p className="text-sm font-semibold text-ink-900 dark:text-ink-100">
-                          {dose.medication.name}
-                          {dose.medication.dosageAmount > 0
-                            ? ` (${dose.medication.dosageAmount} ${dose.medication.dosageUnit})`
-                            : ""}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Scheduled for {new Date(dose.scheduledFor).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Badge
-                      variant={
-                        dose.status === "taken"
-                          ? "default"
-                          : dose.status === "missed"
-                            ? "destructive"
-                            : "outline"
-                      }
-                      className="capitalize text-xs font-semibold"
-                    >
-                      {dose.status}
-                    </Badge>
+            {/* Today's Scheduled Intake (if permitted) */}
+            {overviewQuery.data.todayDoses.length > 0 ? (
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-card-sm space-y-4">
+                <div className="flex items-center gap-2 border-b border-border/80 pb-3">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-primary-tint text-primary-dark dark:text-primary">
+                    <Clock className="size-4" />
                   </div>
-                ))}
+                  <div>
+                    <h3 className="font-heading text-sm font-bold text-ink-900 dark:text-ink-100">
+                      Recent Dose Schedule
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Chronological intake logged for {selectedPatient?.patientName}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="divide-y divide-border/60">
+                  {overviewQuery.data.todayDoses.map((dose) => (
+                    <div
+                      key={dose.id}
+                      className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          aria-hidden="true"
+                          className="size-3.5 shrink-0 rounded-full"
+                          style={{ backgroundColor: dose.medication.color }}
+                        />
+                        <div>
+                          <p className="text-xs font-semibold text-ink-900 dark:text-ink-100">
+                            {dose.medication.name}
+                            {dose.medication.dosageAmount > 0
+                              ? ` (${dose.medication.dosageAmount} ${dose.medication.dosageUnit})`
+                              : ""}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            Scheduled for {new Date(dose.scheduledFor).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Badge
+                        variant={
+                          dose.status === "taken"
+                            ? "default"
+                            : dose.status === "missed"
+                              ? "destructive"
+                              : "outline"
+                        }
+                        className="capitalize text-[10px] font-semibold"
+                      >
+                        {dose.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="rounded-2xl border border-border bg-card p-5 shadow-card-sm flex flex-col items-center justify-center text-center p-6 space-y-2">
+                <Clock className="size-8 text-muted-foreground/60" />
+                <h4 className="text-xs font-semibold text-foreground">No recent doses logged</h4>
+                <p className="text-[11px] text-muted-foreground">
+                  Dose events will appear here when recorded.
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* 3. Patient Alerts Feed */}
           <AlertFeed patientUserId={selectedPatientId} />
@@ -255,6 +335,21 @@ export function CaregiverOverview({
           }}
         />
       )}
+
+      {/* Appointment Dialog */}
+      <AppointmentDialog
+        open={appointmentDialogOpen}
+        onOpenChange={setAppointmentDialogOpen}
+        patientUserId={selectedPatientId}
+        patientName={selectedPatient?.patientName}
+      />
+
+      {/* Link Patient Dialog */}
+      <LinkPatientDialog
+        open={linkDialogOpen}
+        onOpenChange={setLinkDialogOpen}
+        onSuccess={(id) => onSelectPatient(id)}
+      />
     </div>
   );
 }

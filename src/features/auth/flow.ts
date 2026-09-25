@@ -5,9 +5,14 @@
  */
 export function safeNext(
   next: string | null | undefined,
-  opts: { onboardingCompleted: boolean },
+  opts: { onboardingCompleted: boolean; role?: "patient" | "caregiver" },
 ): string {
-  const fallback = opts.onboardingCompleted ? "/dashboard" : "/onboarding";
+  const fallback =
+    opts.role === "caregiver"
+      ? "/caregiver"
+      : opts.onboardingCompleted
+        ? "/dashboard"
+        : "/onboarding";
   if (!next) return fallback;
   if (!next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) {
     return fallback;
@@ -21,6 +26,13 @@ export function safeNext(
     return fallback;
   }
   return next;
+}
+
+/**
+ * Reads the DB-owned `role` field off a session user, defaulting to 'patient'.
+ */
+export function getUserRole(user: Record<string, unknown> | null | undefined): "patient" | "caregiver" {
+  return (user?.role as "patient" | "caregiver") || "patient";
 }
 
 /**

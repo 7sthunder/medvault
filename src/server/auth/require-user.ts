@@ -37,6 +37,8 @@ export async function requireUser(next?: string | null) {
           timezone: demoUser.timezone,
           onboardingCompleted: demoUser.onboardingCompleted,
           isDemo: true,
+          role: demoUser.role ?? "patient",
+          accessCode: demoUser.accessCode ?? "MV-DEMO01",
           emailVerified: true,
           createdAt: demoUser.createdAt,
           updatedAt: demoUser.updatedAt,
