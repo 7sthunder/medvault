@@ -97,6 +97,18 @@ export const extractionPatchSchema = z.object({
     .default([]),
   /** The user is talking about something else entirely (asking a question, chit-chat). */
   offTopic: z.boolean().default(false),
+  /**
+   * The language the patient just used, by name ("Hindi", "Arabic"). Only used to pick a TTS
+   * voice, never to parse anything.
+   */
+  language: z.string().trim().max(40).nullish().default(null),
+  /**
+   * The assistant's next single line, written by the model in the language the patient just
+   * used. This is DISPLAY AND SPEECH TEXT ONLY — it is never merged into the draft and never
+   * reaches the database. An adversarial `reply` cannot fill a slot; see `mergePatch`, which
+   * only reads the typed fields above.
+   */
+  reply: z.string().trim().min(1).max(300).nullish().default(null),
 });
 export type ExtractionPatch = z.infer<typeof extractionPatchSchema>;
 

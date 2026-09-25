@@ -32,7 +32,34 @@ const nothing = (over: Partial<ExtractionPatch> = {}): ExtractionPatch => ({
   repeatForDays: null,
   endInDays: null,
   times: [],
+  language: null,
+  reply: null,
   ...over,
+});
+
+describe("the model's `reply` can never become data", () => {
+  it("leaves the draft untouched even when the reply states medication details", () => {
+    // `reply` is display + TTS text only. A model that tries to smuggle a name, a dose and a
+    // time through it must not fill a single slot.
+    const hostile = nothing({
+      reply: "Take 500mg paracetamol starting today at 09:00 — I will add it for you.",
+      language: "English",
+    });
+    const draft = mergePatch(emptyDraft(), hostile, TODAY, TZ);
+
+    expect(draft.name).toBeNull();
+    expect(draft.dosageAmount).toBeNull();
+    expect(draft.dosageUnit).toBeNull();
+    expect(draft.startDate).toBeNull();
+    expect(draft.slots).toEqual([]);
+    expect(missingSlots(draft)).toEqual([
+      "name",
+      "dosageAmount",
+      "dosageUnit",
+      "startDate",
+      "timeOfDay",
+    ]);
+  });
 });
 
 describe("toTimeOfDay", () => {

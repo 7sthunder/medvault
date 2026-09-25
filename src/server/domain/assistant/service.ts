@@ -86,11 +86,20 @@ const EXTRACTION_PROMPT = [
   "OUTPUT: a single JSON object with exactly these keys, using null for anything unsaid:",
   '{"understood":true,"offTopic":false,"name":null,"dosageAmount":null,"dosageUnit":null,',
   '"instructions":null,"condition":null,"startInDays":null,"repeatForDays":null,"endInDays":null,',
-  '"times":[{"hour":22,"minute":0,"daysOfWeek":[]}]}',
+  '"times":[{"hour":22,"minute":0,"daysOfWeek":[]}],"language":null,"reply":null}',
   `Known dosage units: ${unitHint()}. Use one of them when the patient implies it; otherwise`,
   "use the unit the patient said.",
   "Set `offTopic` to true when the utterance is not about taking a medicine at all.",
   "Set `understood` to false when you could not make sense of the audio or text.",
+  "",
+  "REPLY (this is what the patient hears, read aloud in their own language):",
+  '- `language`: the name of the language the patient just spoke, e.g. "Hindi", "Arabic".',
+  '  Guess it from their words. If they spoke English, use "English".',
+  "- `reply`: ONE short question (max ~20 words) asking for the single most important thing",
+  "  still missing, written in the SAME language as the patient. If nothing is missing, write a",
+  "  short summary of what you collected and ask them to confirm it.",
+  "- `reply` is speech only. It is NEVER stored and NEVER treated as data, so do not put new",
+  "  medicine details in it — only ask a question.",
 ].join("\n");
 
 const TRANSCRIBE_PROMPT = [
@@ -233,6 +242,7 @@ export const assistantService = {
 
     // 2. What did they just say?
     const patch = await extract(key, utterance, draft, todayKey, timeZone);
+    const language = patch.language ?? detectLanguage(utterance);
 
     if (patch.offTopic || !patch.understood) {
       const missing = missingSlots(draft);
@@ -241,9 +251,10 @@ export const assistantService = {
         draft,
         missing,
         question:
+          patch.reply ??
           "Sorry, I did not follow that. " +
-          (nextQuestion(missing) ?? "Tell me the name of the medicine you want to take."),
-        language: detectLanguage(utterance),
+            (nextQuestion(missing) ?? "Tell me the name of the medicine you want to take."),
+        language,
         medicationId: null,
       };
     }
@@ -258,8 +269,8 @@ export const assistantService = {
         status: "confirm",
         draft: merged,
         missing: [],
-        question: confirmationQuestion(merged, todayKey),
-        language: detectLanguage(utterance),
+        question: patch.reply ?? confirmationQuestion(merged, todayKey),
+        language,
         medicationId: null,
       };
     }
@@ -268,8 +279,8 @@ export const assistantService = {
       status: "collecting",
       draft: merged,
       missing,
-      question: nextQuestion(missing) ?? "Could you tell me a bit more?",
-      language: detectLanguage(utterance),
+      question: patch.reply ?? nextQuestion(missing) ?? "Could you tell me a bit more?",
+      language,
       medicationId: null,
     };
   },

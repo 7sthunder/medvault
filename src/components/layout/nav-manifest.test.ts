@@ -23,6 +23,7 @@ const ROUTE_MANIFEST: Readonly<Record<string, RouteOwner>> = {
   "/history": { owner: "bala", phase: 19, existsNow: true },
   "/adherence": { owner: "bala", phase: 16, existsNow: true },
   "/insights": { owner: "hp", phase: 23, existsNow: true },
+  "/assistant": { owner: "aadhi", phase: 24, existsNow: true },
   "/reports": { owner: "bala", phase: 20, existsNow: true },
   "/caregiver": { owner: "hp", phase: 17, existsNow: true },
   "/notifications": { owner: "hp", phase: 22, existsNow: true },
@@ -50,6 +51,7 @@ const EXPECTED_ROUTE_FILES: Readonly<Record<string, string>> = {
   "/adherence": "src/app/(app)/adherence/page.tsx",
   "/adherence/medications": "src/app/(app)/adherence/medications/page.tsx",
   "/insights": "src/app/(app)/insights/page.tsx",
+  "/assistant": "src/app/(app)/assistant/page.tsx",
   "/caregiver": "src/app/(app)/caregiver/page.tsx",
   "/caregiver/accept": "src/app/(app)/caregiver/accept/page.tsx",
   "/caregiver/alerts/[id]": "src/app/(app)/caregiver/alerts/[id]/page.tsx",
@@ -153,6 +155,7 @@ const PHASE_18_ROUTE_FILES: readonly string[] = [
     "history",
     "adherence",
     "insights",
+    "assistant",
     "reports",
     "caregiver",
     "help",
@@ -190,6 +193,7 @@ const HELP_CARD_ROUTE_FILES: Readonly<Record<string, string>> = {
   "/history": "src/app/(app)/history/page.tsx",
   "/adherence": "src/app/(app)/adherence/page.tsx",
   "/insights": "src/app/(app)/insights/page.tsx",
+  "/assistant": "src/app/(app)/assistant/page.tsx",
   "/demo": "src/app/(marketing)/demo/page.tsx",
 };
 

@@ -1,0 +1,417 @@
+"use client";
+
+/**
+ * The assistant conversation, shared by the full `/assistant` page and the floating launcher.
+ *
+ * State lives here rather than inside the panel so the two entry points are the *same*
+ * conversation: open the launcher, start describing a medicine, navigate to the page, and the
+ * draft and the thread come with you. It also keeps `sendTurn` reading live state instead of
+ * closing over a frozen `draft`, which is what made the old inline component go stale.
+ *
+ * The server still holds no conversation state — the draft is sent back on every turn, and
+ * nothing is written until the user sends `confirm: true`.
+ */
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+
+import { api } from "@/lib/trpc";
+import { emptyDraft, type MedicationDraft } from "@/shared/validations/assistant";
+
+export type Phase = "idle" | "listening" | "thinking" | "asking";
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant" | "system";
+  /** `said` = typed, `heard` = transcribed from audio, `system` = notices. */
+  kind: "said" | "heard" | "system";
+  text: string;
+  at: number;
+}
+
+/** Silence long enough counts as "I'm done talking". */
+const SILENCE_MS = 1_200;
+/** Hard cap so a forgotten open mic cannot record forever. */
+const MAX_TURN_MS = 15_000;
+/** Quota guard: a long conversation should not burn the free TTS tier unboundedly. */
+const MAX_CONSECUTIVE_SPEAKS = 12;
+
+let seq = 0;
+const nextId = () => `m${++seq}`;
+
+export interface AssistantValue {
+  messages: ChatMessage[];
+  draft: MedicationDraft;
+  phase: Phase;
+  language: string | null;
+  error: string | null;
+  needsConfirm: boolean;
+  autoSpeak: boolean;
+  continuous: boolean;
+  /** 0..1 input level, for the meter and the barge-in check. */
+  level: number;
+  /** True when a replay is available for a message the autoplay policy blocked. */
+  speak: (text: string, language?: string | null) => void;
+  replay: ChatMessage | null;
+  send: (utterance: string) => Promise<void>;
+  confirm: () => Promise<void>;
+  startRecording: () => Promise<void>;
+  stopRecording: () => void;
+  reset: () => void;
+  setAutoSpeak: (on: boolean) => void;
+  setContinuous: (on: boolean) => void;
+  dismissError: () => void;
+}
+
+const AssistantContext = createContext<AssistantValue | null>(null);
+
+export function useAssistant(): AssistantValue {
+  const value = useContext(AssistantContext);
+  if (!value) throw new Error("useAssistant must be used inside <AssistantProvider>");
+  return value;
+}
+
+export function AssistantProvider({ children }: { children: ReactNode }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [draft, setDraft] = useState<MedicationDraft>(emptyDraft);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [language, setLanguage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [needsConfirm, setNeedsConfirm] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [continuous, setContinuous] = useState(false);
+  const [level, setLevel] = useState(0);
+  const [replay, setReplay] = useState<ChatMessage | null>(null);
+
+  const recorder = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+  const audioEl = useRef<HTMLAudioElement | null>(null);
+  const speakCount = useRef(0);
+  // Read inside the audio loop and the turn handler, which must not be re-created per frame.
+  const autoSpeakRef = useRef(autoSpeak);
+  const levelRef = useRef(0);
+
+  // Mirrors into refs in an effect, not during render: reading a ref while rendering is
+  // flagged, and these feed the audio loop which must not be torn down every frame.
+  useEffect(() => {
+    autoSpeakRef.current = autoSpeak;
+  }, [autoSpeak]);
+  useEffect(() => {
+    levelRef.current = level;
+  }, [level]);
+
+  const utils = api.useUtils();
+  const turn = api.assistant.turn.useMutation();
+  const transcribe = api.assistant.transcribe.useMutation();
+  const speakMutation = api.assistant.speak.useMutation();
+
+  const push = useCallback((message: Omit<ChatMessage, "id" | "at">) => {
+    setMessages((prev) => [...prev, { ...message, id: nextId(), at: Date.now() }]);
+  }, []);
+
+  const say = useCallback(
+    (text: string, lang?: string | null) => {
+      push({ role: "assistant", kind: "said", text });
+      if (lang) setLanguage(lang);
+    },
+    [push],
+  );
+
+  /** Stop whatever clip is playing. Used by barge-in, reset and unmount. */
+  const hush = useCallback(() => {
+    const el = audioEl.current;
+    if (el) {
+      el.pause();
+      el.currentTime = 0;
+      audioEl.current = null;
+    }
+  }, []);
+
+  const speak = useCallback(
+    (text: string, lang?: string | null) => {
+      void (async () => {
+        try {
+          const audio = await speakMutation.mutateAsync({ text, language: lang ?? language });
+          const bytes = Uint8Array.from(atob(audio.audioBase64), (c) => c.charCodeAt(0));
+          const url = URL.createObjectURL(new Blob([bytes], { type: audio.mimeType }));
+          const el = new Audio(url);
+          audioEl.current = el;
+          el.onended = () => {
+            URL.revokeObjectURL(url);
+            if (audioEl.current === el) audioEl.current = null;
+          };
+          await el.play();
+          // Autoplay can be refused with no user gesture in play. The text is already on
+          // screen, so offer a replay rather than failing silently.
+          setReplay(
+            (prev) =>
+              prev ?? { id: nextId(), role: "assistant", kind: "said", text, at: Date.now() },
+          );
+        } catch {
+          setReplay({ id: nextId(), role: "assistant", kind: "said", text, at: Date.now() });
+        }
+      })();
+    },
+    [speakMutation, language],
+  );
+
+  /** One conversational turn. The draft travels with every request; the server keeps no state. */
+  const runTurn = useCallback(
+    async (input: { utterance?: string; confirm?: boolean }) => {
+      setPhase("thinking");
+      setError(null);
+      try {
+        const result = await turn.mutateAsync({ ...input, draft });
+        setDraft(result.draft);
+        setNeedsConfirm(result.status === "confirm");
+        setLanguage(result.language);
+        say(result.question, result.language);
+
+        const shouldSpeak =
+          autoSpeakRef.current &&
+          result.status !== "saved" &&
+          speakCount.current < MAX_CONSECUTIVE_SPEAKS;
+        if (shouldSpeak) speakCount.current += 1;
+        else if (result.status === "saved") speakCount.current = 0;
+        if (shouldSpeak) speak(result.question, result.language);
+
+        if (result.status === "saved") {
+          setDraft(emptyDraft());
+          setNeedsConfirm(false);
+          void utils.medication.list.invalidate();
+        }
+        setPhase("asking");
+      } catch (cause) {
+        setPhase("idle");
+        const text = cause instanceof Error ? cause.message : "Something went wrong.";
+        setError(text);
+        push({ role: "system", kind: "system", text });
+      }
+    },
+    [turn, draft, utils, say, push, speak],
+  );
+
+  const send = useCallback(
+    async (utterance: string) => {
+      const text = utterance.trim();
+      if (!text) return;
+      push({ role: "user", kind: "said", text });
+      await runTurn({ utterance: text });
+    },
+    [push, runTurn],
+  );
+
+  const confirm = useCallback(async () => {
+    await runTurn({ confirm: true });
+  }, [runTurn]);
+
+  /** Feed a recorded clip to the model, then treat the transcript as the next utterance. */
+  const handleClip = useCallback(
+    async (base64: string, mimeType: string) => {
+      setPhase("thinking");
+      try {
+        const heard = await transcribe.mutateAsync({ audioBase64: base64, mimeType });
+        push({ role: "user", kind: "heard", text: heard.text });
+        setLanguage(heard.language);
+        await runTurn({ utterance: heard.text });
+      } catch (cause) {
+        setPhase("idle");
+        const text = cause instanceof Error ? cause.message : "I could not hear that.";
+        setError(text);
+        push({ role: "system", kind: "system", text });
+      }
+    },
+    [transcribe, runTurn, push],
+  );
+
+  const stopRecording = useCallback(() => {
+    recorder.current?.stop();
+    recorder.current = null;
+  }, []);
+
+  const startRecording = useCallback(async () => {
+    setError(null);
+    hush();
+
+    // `getUserMedia` is gated on a secure context, and on plain http it fails immediately and
+    // silently with no permission prompt — so the user would be told their mic was "denied"
+    // when it was never even offered.
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      const text =
+        "The microphone needs a secure connection. Open the app on localhost, or over HTTPS, then try again.";
+      setError(text);
+      push({ role: "system", kind: "system", text });
+      return;
+    }
+    if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
+      const text = "This browser cannot record audio. Please type instead.";
+      setError(text);
+      push({ role: "system", kind: "system", text });
+      return;
+    }
+
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (cause) {
+      const name = cause instanceof DOMException ? cause.name : "";
+      const text =
+        name === "NotAllowedError" || name === "SecurityError"
+          ? "Microphone permission was denied. You can type your answer instead."
+          : name === "NotFoundError" || name === "DevicesNotFoundError"
+            ? "No microphone was found. You can type your answer instead."
+            : name === "NotReadableError"
+              ? "Your microphone is in use by another app."
+              : "The microphone could not be started. You can type your answer instead.";
+      setPhase("idle");
+      setError(text);
+      push({ role: "system", kind: "system", text });
+      return;
+    }
+
+    streamRef.current = stream;
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+    const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+    chunks.current = [];
+    rec.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.current.push(e.data);
+    };
+    rec.onstop = async () => {
+      stream.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      setLevel(0);
+      const blob = new Blob(chunks.current, { type: rec.mimeType || "audio/webm" });
+      chunks.current = [];
+      if (blob.size === 0) {
+        setPhase("idle");
+        return;
+      }
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+        reader.onerror = () => reject(new Error("Could not read the recording."));
+        reader.readAsDataURL(blob);
+      });
+      await handleClip(base64, rec.mimeType || "audio/webm");
+    };
+    rec.start();
+    recorder.current = rec;
+    setPhase("listening");
+
+    // Zero-dependency activity meter. An `AnalyserNode` RMS is enough to tell "talking" from
+    // "quiet" and to cut the bot off when the patient interrupts — no VAD model to download.
+    if (continuous) {
+      const ctx = new AudioContext();
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 1024;
+      source.connect(analyser);
+      const buf = new Uint8Array(analyser.fftSize);
+      const THRESHOLD = 0.07;
+      let quietSince = Date.now();
+      const startedAt = Date.now();
+      const tick = () => {
+        if (recorder.current !== rec) {
+          void ctx.close();
+          return;
+        }
+        analyser.getByteTimeDomainData(buf);
+        let sum = 0;
+        for (const v of buf) {
+          const centred = (v - 128) / 128;
+          sum += centred * centred;
+        }
+        const rms = Math.sqrt(sum / buf.length);
+        setLevel(Math.min(1, rms * 6));
+        const now = Date.now();
+        if (rms > THRESHOLD) {
+          quietSince = now;
+          // Barge-in: the patient started talking over the reply, so stop talking.
+          if (audioEl.current) hush();
+        } else if (now - quietSince > SILENCE_MS || now - startedAt > MAX_TURN_MS) {
+          stopRecording();
+          void ctx.close();
+          return;
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+  }, [continuous, handleClip, hush, push, stopRecording]);
+
+  const reset = useCallback(() => {
+    hush();
+    setDraft(emptyDraft());
+    setMessages([]);
+    setError(null);
+    setNeedsConfirm(false);
+    setLanguage(null);
+    setPhase("idle");
+    speakCount.current = 0;
+  }, [hush]);
+
+  const dismissError = useCallback(() => setError(null), []);
+
+  useEffect(
+    () => () => {
+      recorder.current?.stop();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      audioEl.current?.pause();
+    },
+    [],
+  );
+
+  const value = useMemo<AssistantValue>(
+    () => ({
+      messages,
+      draft,
+      phase,
+      language,
+      error,
+      needsConfirm,
+      autoSpeak,
+      continuous,
+      level,
+      replay,
+      speak,
+      send,
+      confirm,
+      startRecording,
+      stopRecording,
+      reset,
+      setAutoSpeak,
+      setContinuous,
+      dismissError,
+    }),
+    [
+      messages,
+      draft,
+      phase,
+      language,
+      error,
+      needsConfirm,
+      autoSpeak,
+      continuous,
+      level,
+      replay,
+      speak,
+      send,
+      confirm,
+      startRecording,
+      stopRecording,
+      reset,
+      dismissError,
+    ],
+  );
+
+  return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
+}

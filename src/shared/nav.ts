@@ -15,6 +15,7 @@ export type NavIconName =
   | "history"
   | "adherence"
   | "insights"
+  | "assistant"
   | "reports"
   | "caregiver"
   | "notifications"
@@ -48,6 +49,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "History", href: "/history", icon: "history", group: "management" },
   { label: "Adherence", href: "/adherence", icon: "adherence", group: "intelligence" },
   { label: "AI Insights", href: "/insights", icon: "insights", group: "intelligence" },
+  { label: "Voice assistant", href: "/assistant", icon: "assistant", group: "intelligence" },
   { label: "Reports", href: "/reports", icon: "reports", group: "intelligence" },
   { label: "Caregiver", href: "/caregiver", icon: "caregiver", group: "care" },
   { label: "Notifications", href: "/notifications", icon: "notifications", group: "bottom" },

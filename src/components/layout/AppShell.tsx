@@ -8,6 +8,8 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { ClockProvider } from "@/components/layout/clock-context";
 import { ShellContext, type ShellUser } from "@/components/layout/shell-context";
+import { AssistantLauncher } from "@/features/assistant/AssistantPanel";
+import { AssistantProvider } from "@/features/assistant/assistant-context";
 import { TRPCProvider } from "@/lib/trpc";
 
 const SIDEBAR_STORAGE_KEY = "meditrackai.sidebar-collapsed";
@@ -70,6 +72,7 @@ export function AppShell({
 
   return (
     <TRPCProvider>
+      <AssistantProvider>
       <ClockProvider enabled={isDemo} initialSimulationNow={simulationNow}>
         <ShellContext.Provider value={{ pathname, user, isDemo, basePath }}>
           {/* `data-sidebar` is what defines --sidebar-width in globals.css, shared by the fixed
@@ -103,9 +106,11 @@ export function AppShell({
             </div>
             <BottomNav />
             {overlay}
+            <AssistantLauncher />
           </div>
         </ShellContext.Provider>
       </ClockProvider>
+      </AssistantProvider>
     </TRPCProvider>
   );
 }

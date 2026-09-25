@@ -130,6 +130,45 @@ describe("assistantService.turn", () => {
     expect(turn.draft).toEqual(emptyDraft());
     expect(turn.missing).toEqual(["name", "dosageAmount", "dosageUnit", "startDate", "timeOfDay"]);
   });
+
+  it("speaks the model's own reply, in the language the model reported", async () => {
+    fetchMock.mockResolvedValue(
+      textResponse(
+        JSON.stringify({
+          understood: true,
+          offTopic: false,
+          name: "Metformin",
+          dosageAmount: 500,
+          dosageUnit: "mg",
+          startInDays: 0,
+          times: [{ hour: 9, minute: 0, daysOfWeek: [] }],
+          language: "Hindi",
+          reply: "क्या यह सही है? कृपया पुष्टि करें।",
+        }),
+      ),
+    );
+
+    const turn = await assistantService.turn(db, "user-1", TZ, {
+      utterance: "मुझे सुबह 9 बजे मेटफॉर्मिन 500 मिलीग्राम लेना है",
+    });
+
+    // The model's question wins over the deterministic English fallback...
+    expect(turn.question).toBe("क्या यह सही है? कृपया पुष्टि करें।");
+    // ...and its language tag wins over the script heuristic, so TTS picks the right voice.
+    expect(turn.language).toBe("Hindi");
+    expect(turn.status).toBe("confirm");
+  });
+
+  it("falls back to the deterministic question when the model sends no reply", async () => {
+    fetchMock.mockResolvedValue(
+      textResponse(JSON.stringify({ understood: true, offTopic: false, name: "Metformin" })),
+    );
+
+    const turn = await assistantService.turn(db, "user-1", TZ, { utterance: "Metformin" });
+
+    expect(turn.language).toBe("English");
+    expect(turn.question).toMatch(/how much/i);
+  });
 });
 
 describe("assistantService.transcribe", () => {

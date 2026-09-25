@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { ListRow } from "@/components/ui/list-row";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/ui/stat-card";
-import { VoiceIntake } from "@/features/assistant/VoiceIntake";
+import { AssistantPanel } from "@/features/assistant/AssistantPanel";
 import { api } from "@/lib/trpc";
 import { FREQUENCY_LABEL_TEXT } from "@/shared/enums";
 import type { MedicationDTO } from "@/shared/types";
@@ -136,8 +136,8 @@ export function MedicationsPage() {
       </header>
 
       {/* Voice is an alternative to the form, not a replacement — the form stays the
-          primary, typed-into contract. Renders nothing without a configured AI key. */}
-      {voiceOpen ? <VoiceIntake className="mt-4" onSaved={() => void list.refetch()} /> : null}
+          primary, typed-into contract. Shares one conversation with /assistant. */}
+      {voiceOpen ? <AssistantPanel variant="sheet" className="mt-4" /> : null}
 
       {list.isError || !list.data ? (
         <ErrorState
