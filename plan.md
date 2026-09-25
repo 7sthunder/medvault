@@ -30,7 +30,7 @@ This document is the single source of truth for building the application. A codi
 18. Testing Strategy
 19. Repository / Module Directory Layout
 20. Cross-Feature Data Propagation Matrix
-21. Implementation Phases (Phase 01 → Phase 30)
+21. Implementation Phases (Phase 01 → Phase 19)
 22. Global Definition of Done
 
 ---
@@ -946,7 +946,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **DB:** none.
 - **Routes:** none.
 - **Components:** none.
-- **Business logic:** contract shapes only (aggregation math in Phase 17).
+- **Business logic:** contract shapes only (aggregation math in Phase 13).
 - **Validation:** full catalog; test that schemas strip unknown keys and produce helpful messages.
 - **State/flow:** none.
 - **States:** none.
@@ -981,7 +981,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **Objective:** Authenticated shell per §7: sidebar, topbar, breadcrumb, bell, profile menu, bottom nav, responsive behavior, nav model.
 - **Why:** Every subsequent page shares this shell once; nav structure locked early prevents fake links.
 - **Dependencies:** Phases 06 (auth), 08 (primitives).
-- **Files:** `src/app/(app)/layout.tsx`, `src/components/layout/AppShell.tsx`, `Sidebar.tsx`, `TopNav.tsx`, `Breadcrumbs.tsx`, `NotificationBell.tsx` (uses notifications router — implemented Phase 23; for now stub with count=0 + link), `ProfileMenu.tsx`, `BottomNav.tsx`, `MoreSheet.tsx`, `src/shared/nav.ts` finalize; `loading.tsx` (shell skeleton), `error.tsx`, `not-found.tsx` at group level.
+- **Files:** `src/app/(app)/layout.tsx`, `src/components/layout/AppShell.tsx`, `Sidebar.tsx`, `TopNav.tsx`, `Breadcrumbs.tsx`, `NotificationBell.tsx` (uses notifications router — implemented Phase 16; for now stub with count=0 + link), `ProfileMenu.tsx`, `BottomNav.tsx`, `MoreSheet.tsx`, `src/shared/nav.ts` finalize; `loading.tsx` (shell skeleton), `error.tsx`, `not-found.tsx` at group level.
 - **Details:** `requireUser()` in layout; sidebar mobile drawer; `<AppShell>` uses context `{ pathname }` for active states; notification badge polls `notifications.unreadCount` (refetch on focus); bell dropdown lists recent 5.
 - **DB:** none.
 - **Routes:** shell covers `/dashboard`, `/medications…`, `/schedule…`, `/adherence…`, `/insights`, `/history`, `/reports`, `/caregiver…`, `/notifications`, `/settings…`.
@@ -1022,7 +1022,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **Why:** Backbone for list/detail/forms/adherence/history; establishes the fan-out pattern.
 - **Dependencies:** 05 (db), 07 (contracts).
 - **Files:** `src/server/domain/medications/service.ts`, `repo.ts`, `mapper.ts`, `src/server/trpc/routers/medication.ts` (list, get, create, update, setStatus, archive; each authed + owner-checked).
-- **Details:** implement create→ upsert schedule slots (Phase 12 field exists; for now store slots rows + minimal `ensureDoseEvents` stub hooking Phase 13), duplicate-name guard (partial unique), dosage numeric validation, `frequencyLabel` derivation, archived bucket query.
+- **Details:** implement create→ upsert schedule slots (Phase 12 field exists; for now store slots rows + minimal `ensureDoseEvents` stub, filled in Phase 12), duplicate-name guard (partial unique), dosage numeric validation, `frequencyLabel` derivation, archived bucket query.
 - **DB:** reads/writes medications + slots + audit? (no audit yet).
 - **Routes:** tRPC only.
 - **Components:** none.
@@ -1043,7 +1043,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **Dependencies:** 05, 07, 11.
 - **Files:** `src/shared/calc/schedule.ts` (pure), `src/server/domain/medicationSchedules/service.ts`, `src/server/domain/doseEvents/service.ts` (ensureDoseEvents, voidFuture, extendHorizon), hourly-ish reconcile job skeleton (`jobs/scheduler.ts`).
 - **Details:** idempotent upsert on `(medicationId, scheduledFor)`; timezone-converted times; horizon §10.2; void on pause/change; a `catchUp` entry point callable from schedule/dashboard reads and the job.
-- **DB:** dose_events writes; calls adherence recompute (Phase 17 when available; phase test asserts counts).
+- **DB:** dose_events writes; calls adherence recompute (Phase 13 when available; phase test asserts counts).
 - **Routes:** none (internal).
 - **Components:** none.
 - **Business logic:** §10.2 exact.
@@ -1056,365 +1056,172 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **Acceptance:** after seeding Metformin, exactly 2/day events for horizon days boundary cases.
 - **DoD:** generation/void unit-tested; reconciles known edge cases.
 
-### Phase 13 — Dose state machine + reconcile (missed detection) (domain)
+### Phase 13 — Dose engine & adherence engine (domain)
 
-- **Objective:** Implement §10.3 status machine + auto-miss transition (deterministic) + reconciliation job.
-- **Why:** Missed/due logic must be server-determined and consistent everywhere.
-- **Dependencies:** 05, 07, 12.
-- **Files:** `src/shared/calc/doseState.ts` (pure), `src/server/domain/doseEvents/reconcile.ts` (apply to DB atomically), `src/server/domain/doseActions/service.ts` (take/snooze/skip/restore + audit), `jobs/scheduler.ts` (interval + on-read catchUp).
-- **Details:** status quoting rules + conditional updates prevent double-transitions; missed auto-flow writes audit + calls notifications (Phase 23 hooked later — for now log guarded) and caregiver per §10.4 once that exists; missed events take-late conversion.
-- **DB:** dose_events updates, dose_actions inserts.
-- **Routes:** none.
+- **Objective:** Implement the entire server-side calculation/state layer in one pass: §10.3 dose status machine, §10.4 dose actions + audit, §10.5 adherence/streak/performance formulas, §10.7-conformant materialization, and the reconcile job. After this phase every UI surface reads the same authoritative domain DTOs; everything downstream is presentation.
+- **Why:** Dose state, actions and adherence are one tightly-coupled math surface (every action recomputes adherence; reconcile drives both). Building them together removes the old 16↔13 cross-phase hook-up churn and lets every UI phase consume a single `AdherenceSummaryDTO`.
+- **Dependencies:** 05 (db), 07 (contracts), 11/12 (medication + schedule-engine seams already shipped).
+- **Files:**
+  - `src/shared/calc/doseState.ts` (pure §10.3: due/snoozed/missed transitions, `missedDeadline` incl. snooze extension, transition table)
+  - `src/server/domain/doseEvents/reconcile.ts` — applies statuses atomically (conditional `WHERE status IN (...)` updates), auto-miss flag, take-late conversion
+  - `src/server/domain/doseActions/service.ts` — take/snooze/skip (+ audit rows, idempotent repeated take, take-late) that call the adherence recompute
+  - `src/shared/calc/{adherence,streaks,performance}.ts` (pure §10.5 formulas) + `src/server/domain/adherence/{service,summary,materialize}.ts` (`summary()`, `recomputeDay/range` → `adherence_daily`, prune)
+  - `src/server/domain/jobs/scheduler.ts` (extend Phase 12 skeleton → reconcile run on interval, opt-in) and extend `catchUp`
+  - `src/server/trpc/routers/adherence.ts` (`summary`, `byMedication`, `patterns`) — the server contract UI phases call
+  - Notifications/caregiver producer hooks from the reconcile missed-flow are **guarded no-ops this phase** (log-only seam); they are wired in Phase 16 (notifications domain) and Phase 17 (caregiver domain).
+- **DB:** dose_events updates, dose_actions inserts, adherence_daily writes/prunes.
+- **Routes:** tRPC only.
 - **Components:** none.
-- **Business logic:** §10.3/§10.4 rules incl. snooze deadline extension and max snooze.
-- **Validation:** `doseActionSchema`; legal-state transition table test.
-- **State/flow:** canonical: any read path may call `reconcile.run(userId, now)` (cheap due to indexed targeted updates) before returning data; scheduler as safety net.
+- **Business logic:** §10.3/§10.4/§10.5 exact — transition table, snooze deadline extension + max-snooze cap, deterministic miss at `scheduledFor + missedAfterMinutes`, take-late from missed, idempotent take, adherence `% = taken/(taken+missed+skipped)` rounded 1dp, streak semantics (in-progress today counts for current; complete days for longest; non-regimen days don't break), time buckets, med performance.
+- **Validation:** `doseActionSchema` (shared, added in 07); range clamps on the adherence router.
+- **State/flow:** canonical — any read path may call `reconcile.run(userId, now)` (cheap, indexed targeted updates) before returning data; the scheduler is the safety net; `demoNow()` respected via `shared/times`.
 - **States:** none (pure logic).
 - **Responsive:** none.
-- **Security:** all actions by owner only.
-- **Testing:** transition table (legal/illegal), snooze math, deadline edges (exactly at time vs after), take-late from missed, idempotent repeated take, audit rows recorded.
-- **Acceptance:** given a seeded day, running reconcile at simulated times yields expected statuses; missed produces one audit + one notification.
-- **DoD:** deterministic & tested.
+- **Security:** every action owner-only; conditional single-statement updates prevent double-transitions.
+- **Testing:** calc matrices: transition-table legal/illegal, snooze math, deadline edges (exactly-at vs after), take-late, idempotent repeated take, audit rows; adherence formulas incl. the exact 76/84 → 90.5% (1dp) case, 7-day streak sample, bucket counts, per-med aggregation, materialize/prune correctness. **Acceptance invariant: the §19 seed reproduces 84/76/5/3/8 → 90.5%, 7-day streak through the service — not hardcoded DTOs.**
+- **Acceptance:** given a seeded day, running reconcile at simulated times yields expected statuses; a missed dose produces one audit row and (once producers are wired) one notification / caregiver alert.
+- **DoD:** deterministic + unit-tested; §19 numbers reproduced by the service.
 
-### Phase 14 — Today's Schedule page + dose UI
+### Phase 14 — Dose & adherence UI (Today's Schedule + Adherence pages)
 
-- **Objective:** `/schedule` and `/schedule/[doseId]` wired to dose router with full §15 states.
-- **Why:** The app's core "what to take now" surface; exercises reconcile + dose actions in UI.
+- **Objective:** `/schedule`, `/schedule/[doseId]`, `/adherence`, `/adherence/medications` wired to the Phase 13 routers with full §15 states.
+- **Why:** The two product questions — "what do I take now?" and "how well am I doing?" — get their answer surfaces in one pass, both driven by the same reconciled/adherence DTOs.
 - **Dependencies:** 08 (components), 09 (shell), 13 (engine), 11/12 (data).
-- **Files:** `src/server/trpc/routers/schedule.ts` (day query, dose.get), `dose.ts` (take/snooze/skip), feature `src/features/schedule/ScheduleDayView.tsx`, `DoseCard.tsx`, `ScheduleTimeGroup.tsx`, `DoseDetailPage`, `features/dose/DoseActions.tsx`, `SkipDialog.tsx`, `SnoozeFeedback.tsx`.
-- **Details:** return reconciled day DTO; sections per §11.7; DoseCard actions optimistic (react-query) with reconcile fallback on error; skip requires dialog+reason; snooze shows countdown (client estimates from statusUpdatedAt + snoozeMinutes, server authoritative on action); demo clock respected via `demoNow()`.
+- **Files:**
+  - `src/server/trpc/routers/schedule.ts` (reconciled + catchUp day query, `dose.get`) + `dose.ts` (take/snooze/skip)
+  - `src/features/schedule/{ScheduleDayView,DoseCard,ScheduleTimeGroup}.tsx`, `src/features/dose/{DoseActions,SkipDialog,SnoozeFeedback}.tsx`, `src/app/(app)/schedule/{page,[doseId]/page}.tsx`
+  - `src/features/adherence/{AdherencePage,RangeSelector,StatRail,TimeOfDayPattern,MissedHeatStrip,MedicationPerformanceTable}.tsx`, `src/app/(app)/adherence/{page,medications/page}.tsx`
+- **Details:** §11.7 + §11.8. Reconcile (server) runs before every schedule read; DoseCard actions are optimistic (react-query) with reconcile fallback on error; skip requires a dialog + optional reason; snooze countdowns are client estimates only — the server is authoritative on action; adherence renders one `AdherenceSummaryDTO`; missing-data days render as gaps, not zeros; per-med rows link `/medications/[id]`.
 - **DB:** through services.
-- **Routes:** `/schedule`, `/schedule/[doseId]`.
-- **Components:** list-row, status-indicator, dialog, toasts, stat.
+- **Routes:** `/schedule`, `/schedule/[doseId]`, `/adherence`, `/adherence/medications`.
+- **Components:** list-row, status-indicator, chart, stat-card, range-picker, tabs, dialog, toasts, empty/error/skeleton.
 - **Business logic:** none in UI (all via procedures).
-- **Validation:** procedure inputs.
-- **State/flow:** react-query invalidation across all dose-related queries after action.
-- **States:** §11.7 (no doses today, all completed, due pulse, missed banner, loading, error).
-- **Responsive:** time groups stack; dose cards full width; detail page normalizes.
+- **Validation:** procedure inputs + range schema.
+- **State/flow:** react-query invalidation across dose/schedule/adherence queries after any action.
+- **States:** §11.7/§11.8 (no doses today, all completed, due-now pulse, missed banner, no-data "No data", loading, error).
+- **Responsive:** time groups stack; dose cards full-width; charts full-width; stat rail 2/4; performance table scrolls.
 - **Security:** owner-only; dose id validated + owned.
-- **Testing:** component: DoseCard buttons, skip dialog, idempotent disabled; e2e: take→state changes; snooze→moves group; skip→reason required.
-- **Acceptance:** schedule page fully functional and consistent after any action.
-- **DoD:** actions propagate to DB + audits; UI reflects instantly.
+- **Testing:** component: DoseCard buttons, SkipDialog, idempotent disabled state; DTO→`90.5%` text render; e2e: take→state changes, snooze→moves group, skip→reason required; adherence page numbers match the seeded demo dataset.
+- **Acceptance:** schedule + adherence are fully functional and mutually consistent after any action.
+- **DoD:** actions propagate to DB + audits; UI reflects instantly; schedule/adherence consistency verified.
 
-### Phase 15 — Medication CRUD UI (list / detail / new / edit)
+### Phase 15 — Medication CRUD UI + Dashboard
 
-- **Objective:** Full medication pages wired to Phase 11/12 services with the schedule builder and §15 states.
-- **Why:** Primary content-authoring interface; proves propagation matrix rows 1–3.
-- **Dependencies:** 08, 09, 11, 12 (+14 for invalidation patterns).
-- **Files:** `src/features/medications/MedicationCard.tsx`, `MedicationListPage`, `MedicationForm.tsx` (wizard), `ScheduleBuilder.tsx` (per-day time rows + weekday chips + presets), `MedicationDetailPage`, `EvidenceRow`, `ArchiveDialog.tsx`; tRPC router `medication.ts` extended (already Phase 11) + `dashboard.nextDose` join later.
-- **Details:** form wizard §11.6; optimistic list updates; schedule diff triggers `ensureDoseEvents`/void + adherence recompute; archive confirmation states history is preserved; paused banner on detail.
+- **Objective:** Full medication lifecycle UI (§11.5/§11.6) plus `/dashboard` (§11.4) composing the schedule/stat/adherence/med widgets; caregiver + insight widgets are stubs this phase, filled in Phase 17.
+- **Why:** Content-authoring plus the "at a glance" landing surface; proves propagation matrix rows 1–3 live in the UI.
+- **Dependencies:** 08, 09, 11/12 (services), 13 (engine), 14 (dose widgets + invalidation patterns).
+- **Files:**
+  - `src/features/medications/{MedicationCard,MedicationListPage,MedicationForm,ScheduleBuilder,MedicationDetailPage,ArchiveDialog}.tsx` + `src/app/(app)/medications/{page,new/page,[id]/page,[id]/edit/page}.tsx`
+  - `src/server/domain/dashboard/service.ts` (aggregates the §10 domains) + `src/server/trpc/routers/dashboard.ts` (single `dashboard.get` → `DashboardDTO`)
+  - `src/features/dashboard/{DashboardPage,NextDoseHero,TodayFeed,AdherenceWidget,MedSummary,InsightWidget(stub),CaregiverStatus(stub),QuickActions}.tsx`
+- **Details:** §11.6 wizard (Basics → Schedule → Reminders → Review); schedule diff triggers `ensureDoseEvents`/void + adherence recompute; archive confirmation states history is preserved; paused banner on detail. Dashboard layout/priority per §11.4; one procedure; caregiver read-only variant (no mutating actions); `demoNow()` respected.
 - **DB:** through services.
-- **Routes:** `/medications`, `/medications/new`, `/medications/[id]`, `/medications/[id]/edit`.
-- **Components:** form-field, time-picker, date-picker, chips, tabs, dialog, toasts, skeleton, empty-state.
-- **Business logic:** schedule builder purity (dedupe times per dayset) in shared calc; nothing else.
-- **Validation:** medication+schedule schemas fully mapped to RHF.
-- **State/flow:** invalidation: medication.*, schedule.*, adherence.*, dashboard.* after mutations.
-- **States:** create empty (no meds yet), save success toast+redirect, server 409 duplicate message, invalid id 404, archived read-only.
-- **Responsive:** form single col < lg; time rows wrap; weekday chips scroll.
-- **Security:** owner-only on edit/archive; server re-validates all inputs.
-- **Testing:** component form (add slot, remove slot, preset switch, validation msgs); e2e create metformin → appears on list & schedule.
-- **Acceptance:** full med lifecycle works and propagates.
-- **DoD:** propagation matrix rows 1–3 verified.
+- **Routes:** `/medications`, `/medications/new`, `/medications/[id]`, `/medications/[id]/edit`, `/dashboard`.
+- **Components:** form-field, time-picker, date-picker, chips, tabs, dialog, toasts, stat-card, section-label, list-row, glass-card.
+- **Business logic:** schedule-builder purity (dedupe times per dayset) lives in shared calc; dashboard does composition only.
+- **Validation:** medication + schedule schemas fully mapped to RHF; procedure input re-validation.
+- **State/flow:** invalidation of `medication.*`, `schedule.*`, `adherence.*`, `dashboard.*` after mutations.
+- **States:** create empty (no meds yet), save toast + redirect, server 409 duplicate, invalid id 404, archived read-only; dashboard no-meds CTA, no-doses-today, due-now pulse, missed banner, all-caught-up, skeletons, error retry.
+- **Responsive:** form single col < lg; time rows wrap; weekday chips scroll; §16 card stacking.
+- **Security:** owner-only edit/archive; server re-validates all inputs.
+- **Testing:** component form (add/remove slot, preset switch, validation messages); dashboard DTO composition (all sections present); e2e create Metformin → appears in list, schedule and dashboard next-dose.
+- **Acceptance:** full med lifecycle works and propagates; dashboard answers both product questions instantly and matches the adherence service numbers.
+- **DoD:** propagation matrix rows 1–3 verified and rows 4–6 visible on the dashboard.
 
-### Phase 16 — Adherence engine (domain + aggregation service)
+### Phase 16 — History + Reports + Notifications
 
-- **Objective:** Adherence service per §10.5: formulas, streaks, trends, buckets, med performance; materialization.
-- **Why:** The single source of consistent numbers for dashboard/adherence/reports/insights.
-- **Dependencies:** 05, 07, 13 (statuses).
-- **Files:** `src/shared/calc/adherence.ts`, `streaks.ts`, `performance.ts` (pure); `src/server/domain/adherence/service.ts`, `summary.ts`, `materialize.ts` (recomputeDay/range), `src/server/trpc/routers/adherence.ts` (summary, byMedication, patterns).
-- **Details:** exact §10.5 formulas; shared `summary()` consumed by all surfaces; materialization updated by dose services (Phase 13 hooks) & schedule changes (Phase 12); prunes beyond window.
-- **DB:** reads dose_events; writes adherence_daily.
-- **Routes:** tRPC.
-- **Components:** none.
-- **Business logic:** §10.5 (incl. in-progress today semantics for streak).
-- **Validation:** range clamps.
-- **State/flow:** single `adherence.summary` shape.
-- **States:** empty → null adherence shown as "No data".
-- **Responsive:** none.
-- **Security:** owner scope.
-- **Testing:** the sample dataset must yield exactly 84/76/5/3, 90.5%→1dp, streak 7; streak edge (today in-progress, gaps, miss=0); bucket counts; per-med aggregation; materialize/prune correctness.
-- **Acceptance:** numbers identical across any caller (assert via service-level test).
-- **DoD:** aggregation single-sourced & matches §19 sample.
+- **Objective:** The record/analytics/alert surfaces: `/history` (§11.10), `/reports` + CSV export (§10.9/§11.11), and the notifications domain with bell + `/notifications` (§10.7/§11.13).
+- **Why:** History and reports are read-only aggregates over the same domains (guaranteeing identical numbers), and notifications centralize every scattered producer — one phase completes all three.
+- **Dependencies:** 13 (audit log + engine), 15 (UI patterns), 05/08/09.
+- **Files:**
+  - `src/server/domain/doseActions/history.ts` + `src/server/trpc/routers/history.ts` + `src/features/history/{HistoryPage,FilterBar,HistoryTimeline}.tsx` + `src/app/(app)/history/page.tsx`
+  - `src/server/domain/reports/service.ts` + `src/server/trpc/routers/reports.ts` + `src/app/api/reports/export/route.ts` + `src/features/reports/{ReportsPage,GranularityTabs,SummaryTable,MissedAnalysis,TrendChartBlock,DownloadButton}.tsx` + `src/app/(app)/reports/page.tsx`
+  - `src/server/domain/notifications/service.ts` (+ `channels.ts` in-app + console) + `src/server/trpc/routers/notifications.ts` (list/unread/markRead/markAllRead) + `src/features/notifications/{NotificationsPage,NotificationList}.tsx` + `src/app/(app)/notifications/page.tsx`
+  - **Phase 13 producer hooks wired here:** missed/due/insight-ready/caregiver-alert producers call `notifications.create` honoring `user_preferences.notificationPrefs`; the Phase 09 `NotificationBell` stub is replaced with a live unread query + dropdown.
+- **Details:** history = `dose_actions` joined with the med snapshot (soft-delete keeps the row), filters (range/med/status), take-late shows both events, "was missed" badge, cursor pagination. Reports build exclusively from `adherenceService` (same DTO ⇒ identical numbers everywhere); CSV route authenticates + streams a deterministic, attachment CSV; report/server forms call `reportsSchemaFor(serverToday)` — never the loose schema — at the server boundary.
+- **DB:** notifications writes on producer paths; reads elsewhere.
+- **Routes:** `/history`, `/reports`, `/api/reports/export`, `/notifications`.
+- **Components:** list-row, filter bar, tabs, chart, data-table, range-picker, pagination, empty/error/skeleton, dropdown.
+- **Business logic:** §10.7 preference gating + once-per-entity dedupe at creation; missed-dose grouping/timeline building; §10.9 aggregation.
+- **Validation:** history query schema; `reportsSchemaFor` (server) / `reportsSchema` (client).
+- **State/flow:** `unreadCount` refetch on focus/poll; optimistic mark-read; history/report queries keyed by filters/controls.
+- **States:** empty ("No activity" / "You're all caught up" / "No data to report"), loading, error; export failure surfaced as toast + retry.
+- **Responsive:** filters → horizontal chip row on mobile; tables scroll; summary stat cards stack; export always reachable.
+- **Security:** owner only; export requires a server-side session check.
+- **Testing:** unit: notification dedupe/gating; report sums equal adherence service sums; CSV format snapshot; component bell count + filter interactions; e2e missed dose → notification appears and opens; report download row count; an archived medication still appears in history.
+- **Acceptance:** every producer path yields correct rows; history accurate and deletion-safe; reporting/export consistent with dashboard numbers.
+- **DoD:** notification logic centralized (no scattered `INSERT notifications` in features); reporting + export shipped.
 
-### Phase 17 — Adherence UI + medication performance
+### Phase 17 — Caregiver system + AI insights
 
-- **Objective:** `/adherence` and `/adherence/medications` with charts, stat rail, patterns.
-- **Why:** "How am I following my schedule?" answer surface.
-- **Dependencies:** 08, 09, 16.
-- **Files:** `src/features/adherence/AdherencePage.tsx`, `RangeSelector.tsx`, `StatRail.tsx`, `TrendChart.tsx`, `TimeOfDayPattern.tsx`, `MissedHeatStrip.tsx`, `MedicationPerformanceTable.tsx`, `PerformanceCell.tsx`; tRPC wiring.
-- **Details:** all values come from one `AdherenceSummaryDTO`; charts from shared chart component; missing-data days shown as gaps not zeros (explicit); medico perf rows link `/medications/[id]`.
-- **DB:** via service.
-- **Routes:** `/adherence`, `/adherence/medications`.
-- **Components:** chart, table, stat-card, status-indicator, range-picker, empty/error/skeleton.
-- **Business logic:** none (display only).
-- **Validation:** range schema.
-- **State/flow:** query per range refetch.
-- **States:** no-data empty state; loading skeletons preserving layout; error retry.
-- **Responsive:** charts full width, stat rail 2/4, patterns grid collapse; table scrolls.
-- **Security:** owner (or caregiver read-only authorized).
-- **Testing:** component: DTO → rendered numbers via text match `90.5%`; e2e: seeded demo adher view shows 84/76/5/3/8.
-- **Acceptance:** adherence page matches dashboard numbers (same DTO).
-- **DoD:** consistent & tested.
+- **Objective:** §10.6/§11.12 caregiver relationships, invitations, permissions, alerts and both patient- and caregiver-side views; and §10.10 AI insights with fallback-safe generation + `/insights`. Also fills the dashboard Insight/Caregiver stubs from Phase 15.
+- **Why:** Collaboration + intelligence are the riskiest server logic (authorization boundary correctness and the AI behavioral-constraint boundary) — reviewed together in one phase.
+- **Dependencies:** 13 (missed → alert source), 16 (notification producers for caregiver alerts + insights), 15 (dashboard widgets).
+- **Files:**
+  - `src/server/domain/caregiver/service.ts` (invite/accept/revoke/permissions/alerts) + `src/server/trpc/routers/caregiver.ts` (patient-scope and caregiver-scope routers; `requireCaregiverAccess(patientId)`; permission gates) + `src/features/caregiver/{InviteForm,AcceptInvite,RelationshipList,PermissionsEditor,AlertFeed,AlertDetailPage,CaregiverOverview}.tsx` + `src/app/(app)/caregiver/{page,accept/page,alerts/[id]/page}.tsx`
+  - Phase 13 reconcile missed-flow hook → `caregiver_alerts` (once per dose/relationship) for active relationships with `receiveMissedDoseAlerts`.
+  - `src/server/domain/insights/service.ts` (`buildSnapshot` → AI or fallback → validate → persist/prune) + `src/shared/validations/insight.ts` (output schema) + `src/server/trpc/routers/insights.ts` + `src/features/insights/{InsightsPage,InsightCard,RegenerateButton}.tsx` + `src/app/(app)/insights/page.tsx` + dashboard `InsightWidget`/`CaregiverStatus` filled.
+- **Details:** invite → one-time `crypto.randomBytes(24)` base64url token; caregiver registers/logs-in and redeems (`/caregiver/accept?token=`), auto-accept with the invited permissions; revoke stops alerts. Caregiver views are read-only, enforced server-side, and never expose a different patient. Insights: provider-agnostic `ai` SDK (provider via env), fixed system prompt with explicit no-diagnose/no-prescribe/no-change-medication prohibitions, zod-validated structured output (unknown keys stripped, categories constrained), deterministic rule-based fallback flagged `source:'fallback'` ("generated from data"), snapshot stored in `dataSnapshot`, never mutates medications/schedules/doses (type + unit-test boundary), AI text escaped (never raw HTML/markdown).
+- **DB:** caregiver tables reads/writes; `ai_insights` rows (prune to latest 20).
+- **Routes:** `/caregiver`, `/caregiver/accept`, `/caregiver/alerts/[id]`, `/insights`.
+- **Components:** forms, list rows, status badges, dialogs, tabs, glass insight cards, category chips, source tags.
+- **Business logic:** permission evaluation; alert creation dedupe (once per dose/relationship); snapshot shape; fallback rule engine (highest-miss bucket, declining 7d avg, streak, snooze rate); category mapping.
+- **Validation:** invite/accept/updatePermissions/revoke schemas (built in 07) + insight output schema + snapshot size caps.
+- **State/flow:** invalidations on invite/revoke/permission; alert refetch; regenerate → skeleton → success/fallback; latest insight cached for the dashboard.
+- **States:** empty (no caregivers / no alerts / insights prereq message "Add medications and take a few doses"), invite pending, revoked notice, permission-disabled states, AI-failure fallback note.
+- **Responsive:** card grid 1/2; forms single col; lists stack.
+- **Security:** STRONGEST boundary — unit tests assert a caregiver cannot query/mutate another patient and a patient only manages own relationships; caregiver routers never run under `protectedProcedure` alone (they require an active relationship); AI runs server-side only; no PII beyond the adherence snapshot.
+- **Testing:** unit: invitation lifecycle, alert dedupe, permission gates, cross-patient leakage denial; insight fallback deterministic, output schema rejects diagnostic/prescriptive categories, never-mutate test (snapshot read-only; no db-write paths); component source-tag rendering; e2e (seeded data): patient invites caregiver → caregiver redeems → real missed dose produces an alert + notification; regenerate insight.
+- **Acceptance:** full caregiver loop incl. the authorization matrix; insights generate, are bounded, fallback-safe, clearly labeled, and consistent with adherence numbers.
+- **DoD:** caregiver read-only + boundary enforced server-side; AI behavioral boundary enforced + tested.
 
-### Phase 18 — Dashboard
+### Phase 18 — Settings + Demo mode + /help
 
-- **Objective:** `/dashboard` per §11.4 composing schedule/stat/adherence/insight/caregiver widgets.
-- **Why:** The primary landing surface; must be correct and prioritize action.
-- **Dependencies:** 14 (dose UI), 16 (adherence), 17 (charts reuse), 24 (insight widget — build with stub returning latest then Phase 24 fills), 09 (shell).
-- **Files:** `src/server/domain/dashboard/service.ts` (aggregates), `src/server/trpc/routers/dashboard.ts` (single `dashboard.get`), `src/features/dashboard/DashboardPage.tsx`, `NextDoseHero.tsx`, `TodayFeed.tsx`, `AdherenceWidget.tsx`, `MedSummary.tsx`, `InsightWidget.tsx` (stub→Phase 24), `CaregiverStatus.tsx` (stub→Phase 22), `QuickActions.tsx`.
-- **Details:** §11.4 order/priority; loaded via one procedure; caregiver variant read-only; `demoNow()` respected.
-- **DB:** aggregation reads.
-- **Routes:** `/dashboard`.
-- **Components:** stat-card, section-label, list-row, dose actions, chart, insight card, glass-card recipe.
-- **Business logic:** dashboard composition only (calls domains).
-- **Validation:** none extra.
-- **State/flow:** refetch on focus/visibility + after any action.
-- **States:** §11.4 (no meds, no doses today, due now pulse, missed banner, all complete, loading skeletons, error retry).
-- **Responsive:** §16 card stacking.
-- **Security:** owner; dose actions owner-gated.
-- **Testing:** service-level composition test (all sections present in DTO flags); component renders each state; e2e seeded demo dashboard.
-- **Acceptance:** dashboard answers both product questions instantly; numbers match adherence service.
-- **DoD:** propagation rows 4–6 visible on dashboard.
+- **Objective:** All `/settings/*` pages (§11.14) wired to the settings domain (§10.11), the full demo experience (§10.8/§11.16) reusing every real surface, and the branded `/help` page (§11.15).
+- **Why:** Configuration + data governance completes the product, and the demo is the college-presentation vehicle — realistic, isolated, resettable, and driving the real application.
+- **Dependencies:** 07/08/09, 17 (caregiver management reuse), 13/14/15/16/17 (services demo drives + pages it reuses), 05 (demo seed + `demo_state`).
+- **Files:**
+  - `src/server/domain/settings/service.ts` + `src/server/trpc/routers/settings.ts` (per-area get/update; export; delete) + `src/features/settings/{ProfileForm,ReminderSettings,CaregiverSettings,AppearancePanel,DataOverview,ExportButtons,DeleteFlow}.tsx` + `src/app/(app)/settings/{layout,profile,reminders,caregiver,appearance,data}/…`
+  - `src/server/domain/demo/service.ts` (enter/leave/reset/action/scenario/time/insight/alert) + `src/server/trpc/routers/demo.ts` + `src/app/demo/layout.tsx` + `src/features/demo/{DemoDock,DemoClock,ScenarioControl,ResetButton}.tsx` + `demoNow()` threaded through `server/trpc/context.ts` (demo cookie) and `shared/times.ts`
+  - `src/features/help/help-content.ts` + `src/app/(marketing)/help/page.tsx` + `src/app/(app)/help/page.tsx` (two lightweight routes sharing one component + the marketing footer style)
+- **Details:** settings — appearance applies the theme class on `<html>` immediately (light default; system listener), density + `reduceMotion`; reminder defaults bounded by `VALUE_LIMITS` + per-medication `remindersEnabled` bulk toggle; caregiver prefs reuse Phase 17 components; data export streams CSV (meds + events); delete-all transactional (keep account); account deletion typed-confirm. Demo — scoped `medvault_demo_session` cookie (real session untouched; leaving `/demo` clears it); every simulate action routes through the real domain services with the demo user id + `demoNow()` so all surfaces react live; `setTime` writes `demo_state.simulationNow`; scenario buttons mutate recent days via seeded blocks preserving §19 totals semantics; reset reseeds transactionally; prominent "This is demo data — enter real app" banner; floating simulation dock (collapsible sheet on mobile). `/help` — how-to cards + FAQ accordions (Stitch cards/pills), links to settings/demo; the AI-chat FAB on the marketing site links here with a note that AI there is informational only.
+- **DB:** `user_preferences`, `users`, `demo_state`, demo-owned rows (all under the dedicated demo user for isolation).
+- **Routes:** `/settings/profile`, `/settings/reminders`, `/settings/caregiver`, `/settings/appearance`, `/settings/data`, `/demo`, `/help`.
+- **Components:** forms, switches, segmented radios, confirm dialogs, table, demo dock/clock/banner, accordions.
+- **Business logic:** prefs validation; wipe ordering (children first); export mapping; §10.8 scenario bricks + token issuance; demo reads use `demoNow()`.
+- **Validation:** every settings schema; demo action/input schemas (clamped).
+- **State/flow:** save → toast; appearance applies instantly; demo cookie + `demoNow` threaded through procedures; refetch all surfaces on time change.
+- **States:** loading skeletons, dirty-state leave guards, destructive typed confirmations; demo enter-loading, real-session-preserved notice, reset confirm, empty-demo → reseed CTA.
+- **Responsive:** settings menu horizontal scroll on mobile / vertical aside ≥ md; demo dock collapsible sheet on mobile.
+- **Security:** owner-scoped; delete requires a typed phrase (session, no password prompt); export authed; demo cookie short-lived and cannot read real user data; reset scoped to the demo `userId`.
+- **Testing:** unit scenario totals invariant + isolation (real user unseen by demo context and vice-versa); component forms + toggles; e2e theme change persists, export downloads, delete-all empties but keeps the account; full demo tour (each simulate button + reset + isolation check).
+- **Acceptance:** every setting persists and takes effect; a presenter can drive the whole real app live from `/demo` without any real user's data being touched.
+- **DoD:** settings complete and consistent with prefs used everywhere; demo isolated, resettable, realistic; `/help` reachable from both shells.
 
-### Phase 19 — History
+### Phase 19 — Quality sweep, test completion, E2E & delivery
 
-- **Objective:** `/history` with the authoritative audit log (§8.6) + filters + pagination.
-- **Why:** Trustworthy record requirement (spec §13/§19 in prompt §13 History).
-- **Dependencies:** 13 (audit), 08, 09.
-- **Files:** `src/server/domain/doseActions/history.ts` (query + group), `src/server/trpc/routers/history.ts`, `src/features/history/HistoryPage.tsx`, `FilterBar.tsx`, `HistoryTimeline.tsx`, `HistoryRowMenu.tsx`.
-- **Details:** DTO from dose_actions joined med snapshot incl. archived meds (name snapshot on event custom? store name at generation? No—join medications by id (soft delete keeps row); snapshot added to DTO to survive future renames); filters (range, med, status); take-late shows both events; pagination cursor.
-- **DB:** reads dose_actions/dose_events/medications.
-- **Routes:** `/history`.
-- **Components:** filters, list-row, status-indicator, pagination, empty-state.
-- **Business logic:** grouping/timeline building.
-- **Validation:** query schema.
-- **State/flow:** query keyed by filters.
-- **States:** empty "No activity", loading row skeletons, error.
-- **Responsive:** filters → horizontal scroll chip row on mobile; rows stack.
-- **Security:** owner only.
-- **Testing:** component filter interactions; e2e create→take→history row present; archived med still listed.
-- **Acceptance:** accurate, filters work, data survives med archive.
-- **DoD:** history parity + deletion-safety validated.
-
-### Phase 20 — Reports
-
-- **Objective:** `/reports` + CSV export using the adherence service (§10.9).
-- **Why:** Formal reporting requirement; reuse guarantees consistency.
-- **Dependencies:** 16 (same aggregates), 08.
-- **Files:** `src/server/domain/reports/service.ts`, `src/server/trpc/routers/reports.ts`, `src/app/api/reports/export/route.ts`, `src/features/reports/ReportsPage.tsx`, `GranularityTabs.tsx`, `SummaryTable.tsx`, `MissedAnalysis.tsx`, `TrendChartBlock.tsx`, `DownloadButton.tsx`.
-- **Details:** granularity/range/scope controls; server builds `ReportDTO`; CSV route authenticates, streams attachment; consistent with dashboard (same service).
-- **DB:** reads via adherence.
-- **Routes:** `/reports`, `/api/reports/export`.
-- **Components:** tabs, table, chart, range-picker, buttons.
-- **Business logic:** §10.9.
-- **Validation:** reportsSchema.
-- **State/flow:** refetch on control change; export link builds from current params.
-- **States:** no-data, loading, error; export failures surfaced toast + retry.
-- **Responsive:** summary cards stack; tables scroll; controls wrap.
-- **Security:** export requires session (server checks); owner scope.
-- **Testing:** unit aggregation (sums equal adherence service), CSV format snapshot; e2e download contains 84 rows.
-- **Acceptance:** daily/weekly/monthly/med-specific all work; numbers 100% consistent.
-- **DoD:** reporting + export shipped.
-
-### Phase 21 — Caregiver system (domain + flows + UI)
-
-- **Objective:** §10.6/§11.12: relationships, invitations, alerts from real dose state, caregiver views, authorization.
-- **Why:** Caregiver feature + authorization boundary correctness.
-- **Dependencies:** 13 (missed→alert source), 05 (schema), 08, 09.
-- **Files:** `src/server/domain/caregiver/service.ts` (invite/accept/revoke/permissions/alerts), `src/server/trpc/routers/caregiver.ts` (patient scope + caregiver scope as separate router `caregiverAsync` guard), `src/features/caregiver/InviteForm.tsx`, `AcceptInvite.tsx`, `RelationshipList.tsx`, `PermissionsEditor.tsx`, `AlertFeed.tsx`, `AlertDetailPage.tsx`, `CaregiverOverview.tsx` (caregiver side), `src/shared/validations/caregiver.ts` (done in 07, wire here).
-- **Details:** invite → token; accept on caregiver login via link `/caregiver/accept?token=`; revoke sets status (alerts stop); missed-dose reconcile creates alerts (Phase 13 hook) for active relationships w/ permission; `requireCaregiverAccess(patientId)` in router; alerts acknowledge/resolve.
-- **DB:** caregiver tables reads/writes.
-- **Routes:** `/caregiver`, `/caregiver/accept`, `/caregiver/alerts/[id]`.
-- **Components:** forms, list rows, status badges, dialogs, tabs.
-- **Business logic:** permission evaluation; alert creation guard (once per dose/relationship — uniqueness check).
-- **Validation:** invite/accept/permissions schemas.
-- **State/flow:** invalidations on invite/revoke/permission; alert refetch.
-- **States:** empty (no caregivers / no alerts), invite pending, revoked notice, permission disabled states.
-- **Responsive:** lists stack; forms single col.
-- **Security:** strongest boundary — unit tests assert a caregiver cannot query another patient or mutate; patient only manages own relationships.
-- **Testing:** unit invitation lifecycle + alert dedupe; e2e: patient invite caregiver → caregiver redeems → real missed dose (demo clock) → alert appears + notification; revoke stops.
-- **Acceptance:** full loop incl. authorization matrix.
-- **DoD:** caregiver read-only enforced server-side.
-
-### Phase 22 — Notifications (domain + bell + center + preferences)
-
-- **Objective:** §10.7: notification domain, producer hooks, bell, `/notifications`, preference gating.
-- **Why:** Unifies scattered notification behavior; extensible delivery.
-- **Dependencies:** 13 (producers), 10 (insights prod.), 08/09 (bell).
-- **Files:** `src/server/domain/notifications/service.ts` (+`channels.ts` interface w/ in-app + console), `src/server/trpc/routers/notifications.ts` (list/unread/markRead/markAllRead), `src/features/notifications/NotificationsPage.tsx`, `NotificationList.tsx`, `bell` wiring (Phase 9 stub replaced), preference gating in reminder settings (Phase 23).
-- **Details:** producers: missed (13), insight ready (24), caregiver alert (21), due reminder (job/optional), demo; markRead typed; bell dropdown.
-- **DB:** notifications rows.
-- **Routes:** `/notifications`.
-- **Components:** list-row, tabs, badge, dropdown.
-- **Business logic:** preference filter at creation; dedupe (once per entity per objective).
-- **Validation:** markRead id.
-- **State/flow:** unreadCount refetch on focus/poll; optimistic mark-read.
-- **States:** empty "all caught up", loading, error; grouped by day.
-- **Responsive:** list-only; bell fits header.
-- **Security:** owner only.
-- **Testing:** unit dedupe/gating; component bell count; e2e missed → notification appears and opens.
-- **Acceptance:** every producer path yields correct rows; gating honored.
-- **DoD:** notification logic centralized; no scattered `INSERT notifications` in features.
-
-### Phase 23 — AI insights (domain + service + UI)
-
-- **Objective:** §10.10: snapshot→AI→validate→persist→fallback; `/insights` + dashboard widget.
-- **Why:** The "AI" pillar must be behavioral, bounded, and failure-safe.
-- **Dependencies:** 16 (snapshot data), 08, 22 (insight notifications).
-- **Files:** `src/server/domain/insights/service.ts` (buildSnapshot, generate, fallback, validate, persist/prune), `src/shared/validations/insight.ts` (output schema), `src/server/trpc/routers/insights.ts`, `src/features/insights/InsightsPage.tsx`, `InsightCard.tsx`, `RegenerateButton.tsx`, dashboard `InsightWidget` (Phase 18 stub filled).
-- **Details:** provider-agnostic `ai` SDK; env provider selection; system prompt constant (behavioral-only boundary, explicit prohibitions); zod-validated output (unknown keys stripped, categories constrained); fallback rule engine when AI fails; never mutates meds/schedules (compile+test boundary); `source` tag shown; snapshot stored.
-- **DB:** ai_insights rows (prune 20).
-- **Routes:** `/insights`.
-- **Components:** insight card (glass), status chips, buttons.
-- **Business logic:** snapshot shape; fallback rules; category mapping.
-- **Validation:** output schema + snapshot schema; size caps.
-- **State/flow:** regenerate → loading skeleton → success/fallback; cache latest.
-- **States:** loading, empty (prereq message), error (fallback note), success.
-- **Responsive:** card grid 1/2 cols.
-- **Security:** owner; AI called server-side only; no PII beyond snapshot; content sanitization (no raw markdown render) — escape text.
-- **Testing:** unit: snapshot builder from seeded data; fallback deterministic; schema rejects diagnostic/prescriptive text categories; never-mutate test (functions receive read-only snapshot, no db write paths); component render source tags; e2e regenerate.
-- **Acceptance:** insights generate, bounded, fallback safe, consistent with adherence numbers.
-- **DoD:** AI boundary enforced and tested.
-
-### Phase 24 — Settings (profile/reminders/caregiver/appearance/data)
-
-- **Objective:** All `/settings/*` pages per §11.14 wired to settings domain (§10.11).
-- **Why:** User-control surface; completes preferences + data governance.
-- **Dependencies:** 07, 08, 09, 21 (caregiver mgmt reuse), 05.
-- **Files:** `src/server/trpc/routers/settings.ts` (get/update each area; export; delete), `src/server/domain/settings/service.ts`, `src/features/settings/` (ProfileForm, ReminderSettings, CaregiverSettings, AppearancePanel, DataOverview, ExportButtons, DeleteFlow), `src/app/(app)/settings/layout.tsx` (menu).
-- **Details:** appearance updates theme class on `<html>` (light default; system listener); reminders per §11.14; caregiver prefs; data export streams CSV (meds+events); delete-all transactional (keep account); account deletion typed.
-- **DB:** user_preferences + users + data wipes.
-- **Routes:** `/settings/profile`, `/settings/reminders`, `/settings/caregiver`, `/settings/appearance`, `/settings/data`.
-- **Components:** forms, switches, segmented radios, confirm dialogs, table.
-- **Business logic:** prefs validation, wipe ordering (children first), export mapping.
-- **Validation:** all settings schemas.
-- **State/flow:** save→toast; appearance applies immediately.
-- **States:** loading skeleton, dirty-state guards (confirm leave on dirty), destructive confirmations.
-- **Responsive:** menu horizontal scroll on mobile, vertical aside ≥ md.
-- **Security:** owner; delete requires current password? (No—session + typed phrase); export authed.
-- **Testing:** component forms + toggles; e2e change theme persists; export downloads; delete-all empties but account remains.
-- **Acceptance:** every setting persists and takes effect.
-- **DoD:** settings complete and consistent with prefs used elsewhere.
-
-### Phase 25 — Demo mode (domain + seed reuse + UX)
-
-- **Objective:** §10.8: demo session, simulation dock, Arun Kumar data, isolation; `/demo`.
-- **Why:** College-demo requirement; must be realistic and isolated.
-- **Dependencies:** 05 (demo seed), 13/16 (services it drives), 08/09 shell reuse, 21 (caregiver alert gen), 23 (insight gen), 14/17/18/19 (pages reused).
-- **Files:** `src/server/domain/demo/service.ts` (enter/leave/reset/action/scenario/time/insight/alert), `src/server/trpc/routers/demo.ts`, `src/app/demo/layout.tsx` (+banner, dock), `src/features/demo/DemoDock.tsx`, `DemoClock.tsx`, `ScenarioControl.tsx`, `ResetButton.tsx`, `demoNow()` integration in `server/trpc/context.ts` (if demo cookie) + `src/shared/times.ts`.
-- **Details:** demo cookie per §10.8; demo user seed (§19) refreshed by reset; simulation actions route through real services (using demo user id + demoNow) so all surfaces react live; `setTime` shifts `demo_state.simulationNow`; scenario buttons mutate recent days via seeded blocks (keeps totals semantics); isolation test = after demo, real account data unchanged.
-- **DB:** demo_state, demo rows (userId = demo user).
-- **Routes:** `/demo` (plus reuses all `(app)` page components inside demo shell).
-- **Components:** dock, clock, banner, controls.
-- **Business logic:** §10.8 scenario bricks; token issuance.
-- **Validation:** action/input schemas (clamped).
-- **State/flow:** demo cookie + demoNow threaded through procedures; refetch on time change.
-- **States:** enter loading; real-session preserved notice; reset confirm; empty demo (if seed cleared) → reseed CTA.
-- **Responsive:** dock compact on mobile (collapsible sheet).
-- **Security:** demo cookie short-lived, can't read real user data; real cookie untouched; reset scoped to demo userId.
-- **Testing:** unit scenario totals invariant; isolation (real user unseen by demo ctx and vice-versa); e2e full demo tour incl. each simulate button + reset.
-- **Acceptance:** a presenter can drive the whole app live from `/demo`.
-- **DoD:** demo isolated, resettable, realistic.
-
-### Phase 26 — Global states, accessibility & responsive refinement
-
-- **Objective:** Sweep §15/§16/accessibility across every shipped page; keyboard/screen-reader pass; mobile polish.
-- **Why:** Elevates quality to production bar and ensures the Stitch "premium but practical" feel.
-- **Dependencies:** all features exist.
-- **Files:** touch `src/app/**/error.tsx`, `loading.tsx`, `empty-state.tsx`, `not-found.tsx`; add skip-link, focus-visible rings, `aria-*` passes; `reduced-motion` respects `reduceMotion` pref; responsive audits per §16; `src/lib/a11y.ts` helpers; fix any hard-coded color violations.
-- **Details:** ensure all status indicators color+icon+text; dialogs trap focus & restore; tables have caption/scope; charts have textual fallback (summary numbers); toast live-region; keyboard navigable nav; contrast check on muted text vs bg (bump where needed within Stitch palette: use `#64748b` minimum on white).
-- **DB:** none.
-- **Routes:** all (verification pass).
-- **Components:** refinements in catalog.
-- **Business logic:** none.
-- **Validation:** none new.
-- **State/flow:** focus management tests.
-- **States:** verified all four (§15) present per page: spot-check registry.
-- **Responsive:** every page passes at 1280/1024/768/390 widths (viewport screenshot pass).
-- **Security:** none new.
-- **Testing:** axe-core scan on representative routes (Playwright), keyboard-only E2E (Tab through nav → activate), reduced-motion snapshot.
-- **Acceptance:** zero critical a11y violations; responsive pass documented.
-- **DoD:** audit report attached in docs/.
-
-### Phase 27 — Unit & component test completion
-
-- **Objective:** Finish the §18 unit/component suite to coverage thresholds.
-- **Why:** Guarantees the reputation of calculations and UI behavior before e2e.
-- **Dependencies:** all shipped code.
-- **Files:** new `*.test.ts`/`*.test.tsx` beside code; `vitest.config.ts` coverage thresholds (`src/shared/calc ≥ 95%`, domain services ≥ 80%, key components ≥ 70%).
-- **Details:** exhaustive calc matrices; component interaction tests incl. optimistic updates, disabling during flight, idempotent double-click.
-- **DB:** test DB hook (transactional rollback helper).
-- **Routes:** none.
-- **Components:** targeted.
-- **Business logic:** verified at unit level.
+- **Objective:** Fold the former 26–30 wrap-ups into one delivery phase: §15/§16/accessibility sweep, §18 unit/component threshold completion, the E2E suite, §20 propagation-matrix integration verification, and deployment/handoff docs.
+- **Why:** Quality gates must never block feature delivery; this final phase enforces them once against the complete, connected application — the guaranteed "whole project done" gate.
+- **Dependencies:** all phases (13–18 complete).
+- **Files:**
+  - a11y/responsive: `src/app/**/error.tsx`, `loading.tsx`, `empty-state.tsx`, `not-found.tsx`; skip-link, `focus-visible` rings, `aria-*` passes; `reduceMotion` respected; `src/lib/a11y.ts` helpers; dialog focus-trap/restore; tables caption/scope; chart textual fallbacks (summary numbers); toast live region; contrast fixes within the Stitch palette (`#64748b` floor on white).
+  - test completion: remaining `*.test.ts(x)` beside code; `vitest.config.ts` coverage thresholds (`src/shared/calc ≥ 95%`, domain services ≥ 80%, key components ≥ 70%).
+  - e2e: `e2e/{register,onboarding,medication-lifecycle,dose-actions,missed-dose,adherence-consistency,caregiver,reports,demo,auth-guard,shell}.spec.ts` + `e2e/helpers/{demo-login,seed}.ts`; deterministic time via the demo clock; seeded DB per suite.
+  - verification: `docs/consistency-verification.md` log of the §20 scripted checks.
+  - delivery: `README.md` runbook (`pnpm install → db:migrate → db:seed → dev`), env docs (AI keys optional — app runs via fallback), demo flow note, optional CI workflow, final security hygiene (no secrets, headers check).
+- **Details:** scripted audits: (a) adherence numbers identical across dashboard/adherence/reports/insights (same `adherenceService.summary`); (b) a medication created at `/medications/new` appears in list/detail/schedule/dashboard/adherence/history/reports/insight input; (c) each caregiver alert traceable to a real dose event; (d) no feature imports the raw db client; (e) no hardcoded brand hex in `src/features` (lint gate green); (f) every nav link real (`ROUTE_MANIFEST` full green); (g) brand/name single-sourced via `brand.ts`. Axe-core scan on representative routes; keyboard-only tab-through-activate pass; viewport screenshot sweep 1280/1024/768/390.
+- **DB:** ephemeral Postgres + seed for e2e; no schema changes.
+- **Routes:** full coverage set + audit all.
+- **Components:** targeted completeness/consistency pass.
+- **Business logic:** single-source audit (no duplicated logic, no frontend-only pseudo-persistence).
 - **Validation:** covered.
-- **State/flow:** covered.
-- **States:** covered.
-- **Responsive:** none.
-- **Security:** authz tests (ownership denial) included.
-- **Testing:** the suite itself.
-- **Acceptance:** thresholds met; `pnpm test` green.
-- **DoD:** coverage report committed/served in CI.
-
-### Phase 28 — End-to-end test suite
-
-- **Objective:** Playwright flows from §18/E2E incl. demo tour and caregiver loop.
-- **Why:** Proves the coherent, connected application (no disconnected mock pages).
-- **Dependencies:** everything above.
-- **Files:** `e2e/register.spec.ts`, `onboarding.spec.ts`, `medication-lifecycle.spec.ts`, `dose-actions.spec.ts`, `missed-dose.spec.ts`, `adherence-consistency.spec.ts`, `caregiver.spec.ts`, `reports.spec.ts`, `demo.spec.ts`, `auth-guard.spec.ts`, `shell.spec.ts`; `e2e/helpers/demo-login.ts`, `e2e/helpers/seed.ts`.
-- **Details:** deterministic time via demo clock; seeded DB snapshot per suite; assert consistency (dashboard × adherence × history × reports numbers match); run in CI chromium.
-- **DB:** ephemeral Postgres + seed.
-- **Routes:** full coverage set.
-- **Components:** via page.
-- **Business logic:** end-to-end proof.
-- **Validation:** covered through UI.
-- **State/flow:** covered.
-- **States:** covered (assert empty/error states on fresh account).
-- **Responsive:** one mobile-viewport spec (bottom nav).
-- **Security:** auth guard + caregiver boundary specs.
-- **Testing:** the suite itself.
-- **Acceptance:** all specs green; propagation matrix validated by `adherence-consistency.spec`.
-- **DoD:** CI runs suite with retries; report artifacts available.
-
-### Phase 29 — Integration verification & final consistency pass
-
-- **Objective:** Full application consistency audit per §20 (propagation matrix), plus polish and build.
-- **Why:** Catches the "hardcoded dashboard / duplicated logic / inconsistent adherence" anti-pattern class before shipping.
-- **Dependencies:** all phases.
-- **Files:** potentially patch violations found; add `docs/consistency-verification.md` log; run `pnpm build`, `pnpm typecheck`, `pnpm lint`, full tests.
-- **Details:** scripted checks: (a) adherence numbers identical across dashboard/adherence/reports/insights (same DTO service), (b) medication created in `/medications/new` appears in list/detail/schedule/dashboard/adherence/history/reports/insight input, (c) caregiver alert traceable to a real dose event, (d) no feature imports raw db client, (e) no hardcoded brand hex in features, (f) every nav link real, (g) brand/name consistent through single `brand.ts`.
-- **DB:** none new.
-- **Routes:** audit all.
-- **Components:** audit dedupe.
-- **Business logic:** single-source audit.
-- **Validation:** audit.
-- **State/flow:** audit invalidation coverage.
-- **States:** spot audit.
-- **Responsive:** final screenshot sweep vs Stitch style.
-- **Security:** quick security checklist (env, cookies, headers).
-- **Testing:** full suite + these audit scripts.
-- **Acceptance:** audit check-list green; production build passes; app feels coherent.
-- **DoD:** `plan.md` phase 29 checklist all checked.
-
-### Phase 30 — Deployment & handoff polish (optional but recommended)
-
-- **Objective:** Docs, runbook, environment separation, final commit hygiene.
-- **Why:** Makes the project presentable for the college demo and future agents.
-- **Dependencies:** 29.
-- **Files:** `README.md` (setup, .env, scripts, demo path, screenshots note), `docs/` final, CI workflow (optional), security/external URLs note.
-- **Details:** document `pnpm install → db:migrate → db:seed → dev`; document AI env keys optional (works without via fallback); document demo flow.
-- **DB:** none.
-- **Routes:** none.
-- **Components:** none.
-- **Business logic:** none.
-- **Validation:** none.
-- **State/flow:** none.
-- **States:** none.
-- **Responsive:** none.
-- **Security:** document env handling.
-- **Testing:** final full run in CI mode.
-- **Acceptance:** readme runbook reproducible on a clean machine.
-- **DoD:** clean repo state (no secrets), runbook verified.
+- **State/flow:** invalidation coverage audit.
+- **States:** all four §15 states present per page (spot-check registry).
+- **Responsive:** §16 pass + final screenshot sweep vs the Stitch style.
+- **Security:** env/cookies/headers checklist; caregiver boundary e2e.
+- **Testing:** full suite (unit + component + e2e) green; coverage thresholds met; `pnpm build`, `pnpm typecheck`, `pnpm lint` clean; e2e run with retries (CI).
+- **Acceptance:** every §22 DoD item checked; runbook reproducible on a clean machine; clean repo (no secrets).
+- **DoD:** propagation-matrix audit green; production build passes; docs delivered; repo presentable for the demo.
 
 ---
 

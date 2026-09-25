@@ -44,24 +44,19 @@
 | 10 | Onboarding | `done` | `b3933d8` | verified: typecheck/lint/test/build; e2e deferred |
 | 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
 | 12 | Medication schedule & dose-event generation (domain) | `done` | `4f6e5b4` | verified: typecheck/lint/test/build |
-| 13 | Dose state machine + reconcile (missed detection) (domain) | `pending` | — | |
-| 14 | Today's Schedule page + dose UI | `pending` | — | |
-| 15 | Medication CRUD UI (list / detail / new / edit) | `pending` | — | |
-| 16 | Adherence engine (domain + aggregation service) | `pending` | — | |
-| 17 | Adherence UI + medication performance | `pending` | — | |
-| 18 | Dashboard | `pending` | — | |
-| 19 | History | `pending` | — | |
-| 20 | Reports | `pending` | — | |
-| 21 | Caregiver system (domain + flows + UI) | `pending` | — | |
-| 22 | Notifications (domain + bell + center + preferences) | `pending` | — | |
-| 23 | AI insights (domain + service + UI) | `pending` | — | |
-| 24 | Settings (profile/reminders/caregiver/appearance/data) | `pending` | — | |
-| 25 | Demo mode (domain + seed reuse + UX) | `pending` | — | |
-| 26 | Global states, accessibility & responsive refinement | `pending` | — | |
-| 27 | Unit & component test completion | `pending` | — | |
-| 28 | End-to-end test suite | `pending` | — | |
-| 29 | Integration verification & final consistency pass | `pending` | — | |
-| 30 | Deployment & handoff polish (optional but recommended) | `pending` | — | |
+| 13 | Dose engine & adherence engine (domain) | `pending` | — | |
+| 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `pending` | — | |
+| 15 | Medication CRUD UI + Dashboard | `pending` | — | |
+| 16 | History + Reports + Notifications | `pending` | — | |
+| 17 | Caregiver system + AI insights | `pending` | — | |
+| 18 | Settings + Demo mode + /help | `pending` | — | |
+| 19 | Quality sweep, test completion, E2E & delivery | `pending` | — | |
+
+> **Renumbering note:** `plan.md` §21 was consolidated from 30 phases to **19** (`Phase 01 → Phase 19`)
+> on the instruction to finish faster without cutting scope. Phases 01–12 are unchanged; the remaining
+> work (formerly phases 13–30) was merged into 7 bundles, **13–19**. Every feature, domain, test
+> requirement, a11y/responsive pass and the delivery/docs work survives — just grouped. Follow the
+> consolidated definitions in `plan.md` §21; never re-add phases 20–30 to this matrix.
 
 ---
 
