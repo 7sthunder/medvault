@@ -8,9 +8,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { ClockProvider } from "@/components/layout/clock-context";
 import { ShellContext, type ShellUser } from "@/components/layout/shell-context";
-import { VoiceIntake } from "@/features/assistant/VoiceIntake";
 import { TRPCProvider } from "@/lib/trpc";
-import { cn } from "cn";
 
 const SIDEBAR_STORAGE_KEY = "meditrackai.sidebar-collapsed";
 
@@ -66,19 +64,19 @@ export function AppShell({
     <TRPCProvider>
       <ClockProvider enabled={isDemo} initialSimulationNow={simulationNow}>
         <ShellContext.Provider value={{ pathname, user, isDemo, basePath }}>
-          <div className="min-h-dvh bg-background">
+          {/* `data-sidebar` is what defines --sidebar-width in globals.css, shared by the fixed
+              rail and the content offset below so the two can never disagree. */}
+          <div
+            className="min-h-dvh bg-background"
+            data-sidebar={sidebarCollapsed ? "collapsed" : "open"}
+          >
             <SkipLink />
             <Sidebar
               open={sidebarOpen}
               onOpenChange={setSidebarOpen}
               collapsed={sidebarCollapsed}
             />
-            <div
-              className={cn(
-                "flex min-h-dvh flex-col transition-[padding] duration-200",
-                sidebarCollapsed ? "lg:pl-16" : "lg:pl-64",
-              )}
-            >
+            <div className="flex min-h-dvh flex-col transition-[padding] duration-200 lg:pl-(--sidebar-width)">
               <TopNav
                 onOpenSidebar={() => setSidebarOpen(true)}
                 sidebarCollapsed={sidebarCollapsed}
@@ -97,10 +95,6 @@ export function AppShell({
             </div>
             <BottomNav />
             {overlay}
-            {/* Conversational "add a medication" entry, available from any screen. Renders
-                nothing when no Gemini key is configured, so a self-hosted instance without
-                AI never shows a dead microphone button. */}
-            <VoiceIntake />
           </div>
         </ShellContext.Provider>
       </ClockProvider>

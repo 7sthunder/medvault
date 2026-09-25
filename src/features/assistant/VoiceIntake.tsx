@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, Mic, MicOff, RotateCcw, Check, X } from "lucide-react";
+import { Loader2, Mic, MicOff, RotateCcw, Check } from "lucide-react";
 
+import { cn } from "cn";
 import { api } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { emptyDraft, type MedicationDraft } from "@/shared/validations/assistant";
@@ -30,8 +31,7 @@ const DRAFT_LABELS: { key: keyof MedicationDraft; label: string }[] = [
   { key: "startDate", label: "Start" },
 ];
 
-export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
-  const [open, setOpen] = useState(false);
+export function VoiceIntake({ onSaved, className }: { onSaved?: () => void; className?: string }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [draft, setDraft] = useState<MedicationDraft>(emptyDraft);
   const [transcript, setTranscript] = useState("");
@@ -45,7 +45,7 @@ export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
   const chunks = useRef<Blob[]>([]);
   const audioCtx = useRef<AudioContext | null>(null);
 
-  const status = api.assistant.status.useQuery(undefined, { enabled: open });
+  const status = api.assistant.status.useQuery();
   const utils = api.useUtils();
 
   const turn = api.assistant.turn.useMutation();
@@ -113,10 +113,21 @@ export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
 
   const startRecording = useCallback(async () => {
     setError(null);
-    if (typeof MediaRecorder === "undefined") {
+
+    // `getUserMedia` is gated on a secure context, and the failure is silent + immediate
+    // (no permission prompt) on plain http, so it has to be checked explicitly or the user
+    // is told their microphone was "denied" when it was never even offered.
+    if (typeof window !== "undefined" && !window.isSecureContext) {
+      setError(
+        "The microphone needs a secure connection. Open the app on localhost, or over HTTPS, then try again.",
+      );
+      return;
+    }
+    if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       setError("This browser cannot record audio. Please type instead.");
       return;
     }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
@@ -145,8 +156,18 @@ export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
       rec.start();
       recorder.current = rec;
       setPhase("listening");
-    } catch {
-      setError("Microphone permission was denied. You can type your answer instead.");
+    } catch (cause) {
+      setPhase("idle");
+      const name = cause instanceof DOMException ? cause.name : "";
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        setError("Microphone permission was denied. You can type your answer instead.");
+      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+        setError("No microphone was found. You can type your answer instead.");
+      } else if (name === "NotReadableError") {
+        setError("Your microphone is in use by another app.");
+      } else {
+        setError("The microphone could not be started. You can type your answer instead.");
+      }
     }
   }, [runUtterance]);
 
@@ -167,26 +188,23 @@ export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
 
   useEffect(() => () => recorder.current?.stop(), []);
 
-  if (!open) {
+  if (status.data?.enabled === false) {
     return (
-      <Button
-        type="button"
-        onClick={() => setOpen(true)}
-        disabled={status.data?.enabled === false}
-        aria-haspopup="dialog"
-        className="fixed bottom-24 right-4 z-40 gap-2 rounded-full shadow-lg md:bottom-6 md:right-6"
+      <p
+        className={cn(
+          "rounded-xl border border-border bg-surface p-3 text-sm text-ink-600",
+          className,
+        )}
       >
-        <Mic className="size-4" aria-hidden />
-        Add by voice
-      </Button>
+        Voice entry needs a Gemini API key. Add a medication with the form instead.
+      </p>
     );
   }
 
   return (
-    <div
-      role="dialog"
+    <section
       aria-label="Add a medication by voice"
-      className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-md rounded-t-2xl border border-border bg-surface p-4 shadow-xl md:inset-auto md:right-6 md:bottom-6 md:rounded-2xl"
+      className={cn("rounded-xl border border-border bg-surface p-4 shadow-sm", className)}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -195,10 +213,11 @@ export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
             Speak in any language. I will ask for anything I miss.
           </p>
         </div>
-        <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
-          <X className="size-4" aria-hidden />
-          <span className="sr-only">Close</span>
-        </Button>
+        {language ? (
+          <span className="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 text-xs text-ink-600">
+            {language}
+          </span>
+        ) : null}
       </div>
 
       {/* Collected so far — the same fields the manual form would show. */}
@@ -254,7 +273,7 @@ export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
             <Button
               type="button"
               onClick={() => void startRecording()}
-              disabled={phase === "thinking" || status.data?.enabled === false}
+              disabled={phase === "thinking"}
               className="gap-2"
             >
               {phase === "thinking" ? (
@@ -306,6 +325,6 @@ export function VoiceIntake({ onSaved }: { onSaved?: () => void }) {
           Send
         </Button>
       </form>
-    </div>
+    </section>
   );
 }

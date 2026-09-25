@@ -2,7 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Archive, CheckCircle2, ChevronRight, PauseCircle, Pill, Plus, Search } from "lucide-react";
+import {
+  Archive,
+  CheckCircle2,
+  ChevronRight,
+  Mic,
+  PauseCircle,
+  Pill,
+  Plus,
+  Search,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { useAppHref } from "@/components/layout/shell-context";
@@ -15,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { ListRow } from "@/components/ui/list-row";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/ui/stat-card";
+import { VoiceIntake } from "@/features/assistant/VoiceIntake";
 import { api } from "@/lib/trpc";
 import { FREQUENCY_LABEL_TEXT } from "@/shared/enums";
 import type { MedicationDTO } from "@/shared/types";
@@ -46,6 +56,7 @@ export function MedicationsPage() {
   const list = api.medication.list.useQuery(undefined, { staleTime: 60_000 });
   const setStatus = api.medication.setStatus.useMutation();
   const utils = api.useUtils();
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   // Memoised on `list.data` rather than on the `?? []` fallbacks: a fresh array literal is a new
   // identity every render, which would defeat the `filtered` memo below and re-run the search on
@@ -112,11 +123,21 @@ export function MedicationsPage() {
             Your medication list — active doses and anything you’ve archived.
           </p>
         </div>
-        <Button onClick={() => router.push(href("/medications/new"))}>
-          <Plus data-icon="inline-start" aria-hidden="true" />
-          Add medication
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setVoiceOpen((open) => !open)}>
+            <Mic data-icon="inline-start" aria-hidden="true" />
+            {voiceOpen ? "Close voice entry" : "Add by voice"}
+          </Button>
+          <Button onClick={() => router.push(href("/medications/new"))}>
+            <Plus data-icon="inline-start" aria-hidden="true" />
+            Add medication
+          </Button>
+        </div>
       </header>
+
+      {/* Voice is an alternative to the form, not a replacement — the form stays the
+          primary, typed-into contract. Renders nothing without a configured AI key. */}
+      {voiceOpen ? <VoiceIntake className="mt-4" onSaved={() => void list.refetch()} /> : null}
 
       {list.isError || !list.data ? (
         <ErrorState
