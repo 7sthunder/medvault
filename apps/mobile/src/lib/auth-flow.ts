@@ -44,7 +44,12 @@ export function safeNext(
   const fallback = opts.onboardingCompleted ? "/(tabs)" : "/onboarding";
   if (!next) return fallback;
   if (!next.startsWith("/")) return fallback;
-  if (next === "/login" || next.startsWith("/login?") || next === "/register" || next.startsWith("/register?")) {
+  if (
+    next === "/login" ||
+    next.startsWith("/login?") ||
+    next === "/register" ||
+    next.startsWith("/register?")
+  ) {
     return fallback;
   }
   return next;

@@ -26,6 +26,36 @@ vi.mock("@/lib/auth-client", () => ({
 
 import { AppShell } from "@/components/layout/AppShell";
 
+/**
+ * The sidebar primitive decides "desktop" with `useIsDesktop()` (a matchMedia query at the `lg`
+ * breakpoint) and routes the trigger accordingly: collapse the rail on desktop, open the drawer
+ * below it. jsdom's matchMedia never matches, which would make every trigger click open the
+ * (invisible) drawer, so the breakpoint is stubbed and the collapse cases opt into desktop.
+ */
+let isDesktop = true;
+
+const matchMediaStub = (query: string) => ({
+  matches: query.includes("1024px") ? isDesktop : false,
+  media: query,
+  onchange: null,
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  dispatchEvent: () => false,
+});
+
+// Assigned on `window` rather than through `vi.stubGlobal`: under vitest's jsdom environment
+// `globalThis` and the jsdom `window` are distinct objects, and `useMediaQuery` reads
+// `window.matchMedia`.
+vi.stubGlobal("matchMedia", matchMediaStub);
+window.matchMedia = matchMediaStub as unknown as typeof window.matchMedia;
+
+function resetSidebarCookie() {
+  document.cookie = "sidebar_state=; path=/; max-age=0";
+}
+
+/** The persistent desktop rail, as opposed to the below-`lg` drawer. */
+const rail = () => document.querySelector("[data-slot='sidebar-desktop']");
+
 const user = {
   id: "u-1",
   name: "Ada Lovelace",
@@ -44,6 +74,11 @@ function renderShell() {
 }
 
 describe("AppShell", () => {
+  beforeEach(() => {
+    isDesktop = true;
+    resetSidebarCookie();
+  });
+
   it("renders the sidebar, top header and page content", () => {
     renderShell();
 
@@ -131,55 +166,129 @@ describe("AppShell", () => {
   });
 
   describe("desktop sidebar collapse", () => {
-    // The choice is persisted, so each case has to start from a clean slate.
+    // The rail only exists at/above `lg`, and the choice is persisted in a cookie, so each case
+    // starts from a known viewport and a clean cookie.
     beforeEach(() => {
-      localStorage.clear();
+      pathname.current = "/dashboard";
+      resetSidebarCookie();
     });
 
-    it("starts expanded and toggles to a collapsed icon rail", async () => {
+    it("starts expanded, with no collapsed-rail styling applied", () => {
       renderShell();
-      const aside = document.getElementById("sidebar");
-      expect(aside?.getAttribute("data-collapsed")).toBe("false");
 
-      const toggle = screen.getByRole("button", { name: "Collapse sidebar" });
-      expect(toggle.getAttribute("aria-expanded")).toBe("true");
-      expect(toggle.getAttribute("aria-controls")).toBe("sidebar");
+      expect(rail()?.getAttribute("data-state")).toBe("expanded");
+      // The `data-collapsible` bit is what every descendant keys its collapsed styling off, so it
+      // must be absent (not "icon") while the rail is open.
+      expect(rail()?.getAttribute("data-collapsible")).toBe("");
 
-      fireEvent.click(toggle);
+      const trigger = screen.getByRole("button", { name: "Toggle Sidebar" });
+      expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    });
 
-      await waitFor(() =>
-        expect(document.getElementById("sidebar")?.getAttribute("data-collapsed")).toBe("true"),
-      );
+    it("flips data-collapsible to icon when the trigger collapses it", async () => {
+      renderShell();
+
+      fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
+
+      await waitFor(() => expect(rail()?.getAttribute("data-state")).toBe("collapsed"));
+      expect(rail()?.getAttribute("data-collapsible")).toBe("icon");
       expect(
-        screen.getByRole("button", { name: "Expand sidebar" }).getAttribute("aria-expanded"),
+        screen.getByRole("button", { name: "Toggle Sidebar" }).getAttribute("aria-expanded"),
       ).toBe("false");
+    });
+
+    it("toggles with Ctrl+B", async () => {
+      renderShell();
+
+      fireEvent.keyDown(window, { key: "b", ctrlKey: true });
+
+      await waitFor(() => expect(rail()?.getAttribute("data-state")).toBe("collapsed"));
+
+      fireEvent.keyDown(window, { key: "b", metaKey: true });
+      await waitFor(() => expect(rail()?.getAttribute("data-state")).toBe("expanded"));
     });
 
     it("keeps nav links reachable by accessible name when collapsed", async () => {
       renderShell();
-      fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
-      await waitFor(() =>
-        expect(document.getElementById("sidebar")?.getAttribute("data-collapsed")).toBe("true"),
-      );
+      fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
+      await waitFor(() => expect(rail()?.getAttribute("data-state")).toBe("collapsed"));
 
-      // The label is visually hidden but must stay in the a11y tree, otherwise the icon-only
-      // links become unlabelled and unusable with a screen reader.
+      // The label is visually hidden but must stay in the a11y tree, otherwise the icon-only links
+      // become unlabelled and unusable with a screen reader. This is the deliberate deviation from
+      // the reference, which uses `hidden` and drops the name entirely.
       const link = screen.getByRole("link", { name: "Dashboard" });
       expect(link.getAttribute("href")).toBe("/dashboard");
-      expect(link.getAttribute("title")).toBe("Dashboard");
-      expect(link.querySelector("span")?.className).toContain("sr-only");
+      expect(link.querySelector("span")?.className).toContain(
+        "group-data-[collapsible=icon]:sr-only",
+      );
     });
 
-    it("persists the collapsed choice", async () => {
+    it("turns collapsed links into tooltip triggers, since the label is no longer visible", async () => {
       renderShell();
-      fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
-      await waitFor(() =>
-        expect(localStorage.getItem("meditrackai.sidebar-collapsed")).toBe("true"),
-      );
 
-      fireEvent.click(screen.getByRole("button", { name: "Expand sidebar" }));
+      // base-ui marks tooltip triggers with its own attribute; `data-slot` is not usable here
+      // because `useRender` sets it from the button's own state.
+      expect(
+        screen
+          .getByRole("link", { name: "Dashboard" })
+          .hasAttribute("data-base-ui-tooltip-trigger"),
+      ).toBe(false);
+
+      fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
+      await waitFor(() => expect(rail()?.getAttribute("data-state")).toBe("collapsed"));
+
+      expect(
+        screen
+          .getByRole("link", { name: "Dashboard" })
+          .hasAttribute("data-base-ui-tooltip-trigger"),
+      ).toBe(true);
+    });
+
+    it("persists the collapsed choice in a cookie and restores it on mount", async () => {
+      const { unmount } = renderShell();
+
+      fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
+      await waitFor(() => expect(document.cookie).toContain("sidebar_state=false"));
+
+      unmount();
+
+      // Re-mounting picks the stored choice back up, so the rail does not silently reset.
+      renderShell();
+      await waitFor(() => expect(rail()?.getAttribute("data-state")).toBe("collapsed"));
+    });
+  });
+
+  describe("below the lg breakpoint", () => {
+    beforeEach(() => {
+      isDesktop = false;
+      pathname.current = "/dashboard";
+      resetSidebarCookie();
+    });
+
+    it("mounts no rail and opens the drawer from the same trigger", async () => {
+      renderShell();
+
+      // Only one navigation tree may exist at a time, so the rail is absent rather than merely
+      // hidden — a second copy of every nav link in the a11y tree is a screen-reader bug.
+      await waitFor(() => expect(rail()).toBeNull());
+
+      fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
+
+      await waitFor(() => expect(screen.getByRole("link", { name: "Dashboard" })).toBeTruthy());
+      expect(document.querySelector("[data-slot='sidebar-mobile']")).toBeTruthy();
+    });
+
+    it("closes the drawer when a nav link is followed", async () => {
+      renderShell();
+
+      fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
+      const link = await screen.findByRole("link", { name: "Dashboard" });
+
+      fireEvent.click(link);
+
+      // Otherwise the drawer would sit on top of the page it just navigated to.
       await waitFor(() =>
-        expect(localStorage.getItem("meditrackai.sidebar-collapsed")).toBe("false"),
+        expect(document.querySelector("[data-slot='sidebar-mobile']")).toBeNull(),
       );
     });
   });

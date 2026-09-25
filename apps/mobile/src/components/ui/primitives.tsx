@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { PressableProps, StyleProp, TextProps, TextStyle, ViewProps, ViewStyle } from "react-native";
+import type {
+  PressableProps,
+  StyleProp,
+  TextProps,
+  TextStyle,
+  ViewProps,
+  ViewStyle,
+} from "react-native";
 
 import { Ionicons } from "@/lib/icons";
 import type { IoniconName } from "@/lib/icons";
@@ -9,14 +16,7 @@ import type { TypographyVariant } from "@/theme/tokens";
 
 /* ── Text ───────────────────────────────────────────────────────────────────── */
 
-export type TxtTone =
-  | "default"
-  | "muted"
-  | "subtle"
-  | "primary"
-  | "danger"
-  | "inverse"
-  | "ink";
+export type TxtTone = "default" | "muted" | "subtle" | "primary" | "danger" | "inverse" | "ink";
 
 export interface TxtProps extends TextProps {
   variant?: TypographyVariant;
@@ -29,13 +29,7 @@ export interface TxtProps extends TextProps {
  * consistent. `variant` maps 1:1 onto the `typography` token; `tone` maps onto palette
  * roles so a component never hardcodes a hex.
  */
-export function Txt({
-  variant = "body",
-  tone = "default",
-  center,
-  style,
-  ...rest
-}: TxtProps) {
+export function Txt({ variant = "body", tone = "default", center, style, ...rest }: TxtProps) {
   const { colors, typography } = useTheme();
   const toneColor: Record<TxtTone, string> = {
     default: colors.foreground,
@@ -62,12 +56,7 @@ export function Txt({
 
 /* ── Layout ─────────────────────────────────────────────────────────────────── */
 
-export function Stack({
-  gap = 0,
-  style,
-  children,
-  ...rest
-}: ViewProps & { gap?: number }) {
+export function Stack({ gap = 0, style, children, ...rest }: ViewProps & { gap?: number }) {
   return (
     <View {...rest} style={[gap > 0 && { gap }, style]}>
       {children}
@@ -350,11 +339,7 @@ export function IconButton({
       accessibilityLabel={label}
       hitSlop={10}
       {...rest}
-      style={({ pressed }) => [
-        styles.iconButton,
-        { opacity: pressed ? 0.6 : 1 },
-        style,
-      ]}
+      style={({ pressed }) => [styles.iconButton, { opacity: pressed ? 0.6 : 1 }, style]}
     >
       <Ionicons name={name} size={size} color={color ?? colors.foreground} />
       {dot ? <View style={[styles.pip, { backgroundColor: colors.red }]} /> : null}
@@ -428,7 +413,9 @@ export function ProgressBar({
   return (
     <View
       accessibilityRole="progressbar"
-      accessibilityValue={value === null ? undefined : { now: Math.round(clamped * 100), min: 0, max: 100 }}
+      accessibilityValue={
+        value === null ? undefined : { now: Math.round(clamped * 100), min: 0, max: 100 }
+      }
       style={[
         {
           height,
@@ -460,19 +447,37 @@ interface ButtonColors {
   borderColor: string;
 }
 
-function dimensions(variant: ButtonVariant, colors: ReturnType<typeof useTheme>["colors"]): ButtonColors {
+function dimensions(
+  variant: ButtonVariant,
+  colors: ReturnType<typeof useTheme>["colors"],
+): ButtonColors {
   switch (variant) {
     case "primary":
-      return { bg: colors.primary, fg: colors.primaryForeground, border: 0, borderColor: "transparent" };
+      return {
+        bg: colors.primary,
+        fg: colors.primaryForeground,
+        border: 0,
+        borderColor: "transparent",
+      };
     case "secondary":
-      return { bg: colors.primaryTint, fg: colors.primaryDark, border: 0, borderColor: "transparent" };
+      return {
+        bg: colors.primaryTint,
+        fg: colors.primaryDark,
+        border: 0,
+        borderColor: "transparent",
+      };
     case "outline":
       return { bg: "transparent", fg: colors.foreground, border: 1, borderColor: colors.border };
     case "danger":
       return { bg: colors.redTint, fg: colors.red, border: 0, borderColor: "transparent" };
     case "ghost":
     default:
-      return { bg: "transparent", fg: colors.mutedForeground, border: 0, borderColor: "transparent" };
+      return {
+        bg: "transparent",
+        fg: colors.mutedForeground,
+        border: 0,
+        borderColor: "transparent",
+      };
   }
 }
 

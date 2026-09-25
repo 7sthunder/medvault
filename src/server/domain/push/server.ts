@@ -25,8 +25,12 @@ let cached: WebPushClient | null = null;
 function getWebPush(): WebPushClient | null {
   if (cached) return cached;
   try {
-    // Built lazily, inside the call: webpack has a parser hook for `createRequire` and warns
-    // "failed parsing argument" when it is invoked with a non-literal at module scope.
+    // Built lazily, inside the call. The argument must stay non-literal: webpack's `createRequire`
+    // hook only tolerates a literal, and with one it tries to statically resolve and bundle
+    // `web-push` (and its `agent-base` -> `http` chain) into the server chunk, which stalls
+    // compilation of `/instrumentation` indefinitely. With a template it declines to parse, logs a
+    // non-fatal "failed parsing argument", and `getWebPush` simply returns null — push delivery
+    // degrades, the server still boots.
     const requireRuntime = createRequire(`${process.cwd()}/package.json`);
     cached = requireRuntime("web-push") as WebPushClient;
   } catch (error) {

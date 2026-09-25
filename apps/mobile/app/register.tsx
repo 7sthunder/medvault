@@ -36,7 +36,9 @@ export default function RegisterScreen() {
     const session = await authClient.getSession();
     router.replace(
       safeNext(null, {
-        onboardingCompleted: hasOnboarded(session.data?.user as Record<string, unknown> | undefined),
+        onboardingCompleted: hasOnboarded(
+          session.data?.user as Record<string, unknown> | undefined,
+        ),
       }),
     );
   };

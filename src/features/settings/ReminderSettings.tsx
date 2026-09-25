@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Bell, Pill } from "lucide-react";
 import { toast } from "sonner";
 
@@ -126,12 +126,17 @@ export function ReminderSettings() {
   const [rows, setRows] = useState<RowSnapshot | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (query.data) {
-      setDraft(query.data);
-      setRows(Object.fromEntries(query.data.medications.map((m) => [m.id, m.remindersEnabled])));
-    }
-  }, [query.data]);
+  // Adopt each server payload as the new editing baseline during render, not from an effect: an
+  // effect would leave the previous draft on screen for a frame after a refetch, and the lint rule
+  // is right that this is derived state rather than synchronisation. The `query.data` guard matches
+  // the previous behaviour — a momentarily empty payload (mid-refetch, or after an error) leaves the
+  // draft the user is editing alone instead of blanking the form under them.
+  const [adoptedFrom, setAdoptedFrom] = useState(query.data);
+  if (query.data && query.data !== adoptedFrom) {
+    setAdoptedFrom(query.data);
+    setDraft(query.data);
+    setRows(Object.fromEntries(query.data.medications.map((m) => [m.id, m.remindersEnabled])));
+  }
 
   const dirty = useMemo(() => {
     if (!draft || !query.data) return false;

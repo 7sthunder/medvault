@@ -5,22 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Sidebar rail width.
- *
- * A single variable drives both the fixed rail (`w-(--sidebar-width)`) and the content offset
- * that keeps page content clear of it (`lg:pl-(--sidebar-width)`). Declaring it once here is what
- * stops the two from drifting apart when a width is tweaked.
- *
- * Collapsed is 4.5rem rather than 4rem so an 18px nav icon still lands on a ~40px pointer target.
- * Set by the `data-sidebar` attribute on the shell root, see AppShell.tsx.
+ * The sidebar's two width tokens (`--sidebar-width`, `--sidebar-width-icon`) are set by
+ * `SidebarProvider` in src/components/ui/sidebar.tsx, alongside the collapse state that changes
+ * between them. The page's left offset comes from the sidebar's in-flow gap element rather than
+ * from padding here, so there is nothing width-related to declare in this file.
  */
-[data-sidebar="open"] {
-  --sidebar-width: 17rem;
-}
-
-[data-sidebar="collapsed"] {
-  --sidebar-width: 4.5rem;
-}
 
 /*
  * MediTrack AI design system — Stitch export turned into Tailwind v4 tokens.

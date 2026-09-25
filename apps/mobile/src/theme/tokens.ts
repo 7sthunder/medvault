@@ -182,11 +182,41 @@ export type TypographyVariant = keyof typeof typography;
 
 /** §5.4 shadow recipes, expressed for both platforms. */
 export const shadows = {
-  cardSm: { shadowColor: "#000000", shadowOpacity: 0.05, shadowRadius: 12, shadowOffset: { width: 0, height: 2 }, elevation: 1 },
-  card: { shadowColor: "#000000", shadowOpacity: 0.04, shadowRadius: 24, shadowOffset: { width: 0, height: 6 }, elevation: 2 },
-  primaryBtn: { shadowColor: ACCENTS.primary, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
-  fab: { shadowColor: ACCENTS.primary, shadowOpacity: 0.6, shadowRadius: 14, shadowOffset: { width: 0, height: 4 }, elevation: 8 },
-  logo: { shadowColor: ACCENTS.primary, shadowOpacity: 0.25, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
+  cardSm: {
+    shadowColor: "#000000",
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  card: {
+    shadowColor: "#000000",
+    shadowOpacity: 0.04,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
+  },
+  primaryBtn: {
+    shadowColor: ACCENTS.primary,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  fab: {
+    shadowColor: ACCENTS.primary,
+    shadowOpacity: 0.6,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  logo: {
+    shadowColor: ACCENTS.primary,
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
 } as const;
 
 export const fonts = {
@@ -195,10 +225,7 @@ export const fonts = {
 } as const;
 
 /** A medication's picked accent, resolved to a tint/foreground pair for chips. */
-export const MED_ACCENTS: Record<
-  string,
-  { fg: string; bg: string; solid: string }
-> = {
+export const MED_ACCENTS: Record<string, { fg: string; bg: string; solid: string }> = {
   primary: { fg: ACCENTS.primaryDark, bg: ACCENTS.primaryTint, solid: ACCENTS.primary },
   red: { fg: ACCENTS.red, bg: ACCENTS.redTint, solid: ACCENTS.red },
   blue: { fg: ACCENTS.blue, bg: ACCENTS.blueTint, solid: ACCENTS.blue },

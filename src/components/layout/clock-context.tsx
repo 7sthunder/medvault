@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 
 import { api } from "@/lib/trpc";
 import { now as sharedNow, resetNowImpl, setNowImpl } from "@/shared/times";
@@ -51,14 +51,15 @@ export function ClockProvider({
         ? new Date(query.data.simulationNow).getTime()
         : null;
 
-  const [simulatedMs, setSimulatedMs] = useState<number | null>(
-    initialSimulationNow ? new Date(initialSimulationNow).getTime() : null,
-  );
-
-  useEffect(() => {
-    if (remoteMs === undefined) return;
-    setSimulatedMs(remoteMs);
-  }, [remoteMs]);
+  // Fully derived. `remoteMs` already distinguishes "the server has not answered" (`undefined`)
+  // from a real answer, and nothing else writes this value, so mirroring it into state and copying
+  // it across in an effect was pure overhead — and a cascading render on every refetch.
+  const simulatedMs =
+    remoteMs === undefined
+      ? initialSimulationNow
+        ? new Date(initialSimulationNow).getTime()
+        : null
+      : remoteMs;
 
   // Keep the shared indirection in step so non-React client code (formatters, event handlers
   // outside the tree) sees the same instant the components render.

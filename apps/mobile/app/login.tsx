@@ -38,7 +38,9 @@ export default function LoginScreen() {
     const session = await authClient.getSession();
     router.replace(
       safeNext(null, {
-        onboardingCompleted: hasOnboarded(session.data?.user as Record<string, unknown> | undefined),
+        onboardingCompleted: hasOnboarded(
+          session.data?.user as Record<string, unknown> | undefined,
+        ),
       }),
     );
   };
@@ -47,7 +49,9 @@ export default function LoginScreen() {
     <AuthShell
       title="Welcome back"
       subtitle="Sign in to see what you need to take and how you are doing."
-      footer={<AuthFooterLink prompt="New to MediTrack AI?" href="/register" action="Create an account" />}
+      footer={
+        <AuthFooterLink prompt="New to MediTrack AI?" href="/register" action="Create an account" />
+      }
     >
       {IS_LOCAL_API ? (
         <AlertNote tone="warning" title="Development server" message={`Connected to ${API_URL}`} />

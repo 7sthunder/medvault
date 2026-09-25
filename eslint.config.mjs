@@ -58,6 +58,15 @@ const eslintConfig = [
       "@typescript-eslint/triple-slash-reference": "off",
     },
   },
+  {
+    // Metro reads `metro.config.js` itself as CommonJS, so `require()` and `module.exports` are
+    // the only working syntax there — the package is not `"type": "module"`, and rewriting it to ESM
+    // imports makes Metro fail to load the config at all.
+    files: ["apps/mobile/metro.config.js", "apps/mobile/babel.config.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

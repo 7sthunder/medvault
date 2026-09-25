@@ -119,7 +119,13 @@ export function ConfirmDialog({
       subtitle={message}
       footer={
         <Row gap={10}>
-          <Button label={cancelLabel} variant="outline" onPress={onCancel} style={{ flex: 1 }} disabled={loading} />
+          <Button
+            label={cancelLabel}
+            variant="outline"
+            onPress={onCancel}
+            style={{ flex: 1 }}
+            disabled={loading}
+          />
           <Button
             label={confirmLabel}
             variant={destructive ? "danger" : "primary"}
@@ -253,7 +259,12 @@ export function Toast({
 
   const accent =
     tone === "success" ? colors.primary : tone === "danger" ? colors.red : colors.ink700;
-  const icon = tone === "success" ? "checkmark-circle" : tone === "danger" ? "alert-circle" : "information-circle";
+  const icon =
+    tone === "success"
+      ? "checkmark-circle"
+      : tone === "danger"
+        ? "alert-circle"
+        : "information-circle";
 
   return (
     <View style={styles.toastWrap} pointerEvents="box-none">

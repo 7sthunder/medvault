@@ -98,7 +98,9 @@ export function Input({
         wrapperStyle,
       ]}
     >
-      {icon ? <Ionicons name={icon} size={18} color={focused ? colors.primary : colors.mutedForeground} /> : null}
+      {icon ? (
+        <Ionicons name={icon} size={18} color={focused ? colors.primary : colors.mutedForeground} />
+      ) : null}
       <TextInput
         {...rest}
         secureTextEntry={hidden}
@@ -140,7 +142,11 @@ export function TextArea({
   rows = 4,
   style,
   ...rest
-}: Omit<TextInputProps, "style"> & { invalid?: boolean; rows?: number; style?: StyleProp<TextStyle> }) {
+}: Omit<TextInputProps, "style"> & {
+  invalid?: boolean;
+  rows?: number;
+  style?: StyleProp<TextStyle>;
+}) {
   const { colors, radius, typography } = useTheme();
   return (
     <TextInput
@@ -186,7 +192,9 @@ export function SwitchRow({
   const { colors } = useTheme();
   return (
     <Row gap={12} align="flex-start" style={{ paddingVertical: 8, opacity: disabled ? 0.5 : 1 }}>
-      {icon ? <Ionicons name={icon} size={19} color={colors.mutedForeground} style={{ marginTop: 2 }} /> : null}
+      {icon ? (
+        <Ionicons name={icon} size={19} color={colors.mutedForeground} style={{ marginTop: 2 }} />
+      ) : null}
       <View style={styles.flex}>
         <Txt variant="bodyStrong">{label}</Txt>
         {description ? (
@@ -229,11 +237,7 @@ export function Segmented<T extends string>({
   const { colors, radius } = useTheme();
   return (
     <View
-      style={[
-        styles.segmented,
-        { backgroundColor: colors.muted, borderRadius: radius.lg },
-        style,
-      ]}
+      style={[styles.segmented, { backgroundColor: colors.muted, borderRadius: radius.lg }, style]}
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -256,12 +260,7 @@ export function Segmented<T extends string>({
               },
             ]}
           >
-            <Txt
-              variant="smallStrong"
-              tone={active ? "default" : "muted"}
-              center
-              numberOfLines={1}
-            >
+            <Txt variant="smallStrong" tone={active ? "default" : "muted"} center numberOfLines={1}>
               {option.label}
             </Txt>
           </Pressable>
@@ -319,15 +318,26 @@ export function SelectField<T extends string>({
           },
         ]}
       >
-        <Txt variant="body" tone={selected ? "default" : "subtle"} style={styles.flex} numberOfLines={1}>
+        <Txt
+          variant="body"
+          tone={selected ? "default" : "subtle"}
+          style={styles.flex}
+          numberOfLines={1}
+        >
           {selected?.label ?? placeholder}
         </Txt>
         <Ionicons name="chevron-down" size={18} color={colors.mutedForeground} />
       </Pressable>
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)} accessibilityLabel="Close" />
-        <View style={[styles.sheet, { backgroundColor: colors.popover, borderColor: colors.border }]}>
+        <Pressable
+          style={styles.backdrop}
+          onPress={() => setOpen(false)}
+          accessibilityLabel="Close"
+        />
+        <View
+          style={[styles.sheet, { backgroundColor: colors.popover, borderColor: colors.border }]}
+        >
           <View style={[styles.grabber, { backgroundColor: colors.border }]} />
           <Txt variant="heading" style={{ marginBottom: 4 }}>
             {label}

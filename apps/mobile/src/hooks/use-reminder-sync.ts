@@ -47,8 +47,12 @@ export function useReminderSync(): {
   }, [isAuthenticated, medications.data?.medications, timezone]);
 
   // Sign-in, and any change to the medication/schedule set, re-syncs.
+  // Reading the permission prompt and the OS scheduler is a genuine external-system sync, which is
+  // what effects are for. The rule fires because `sync` eventually sets state, but those calls all
+  // sit behind an `await`, so none can run during this commit or cascade a render.
   useEffect(() => {
     if (!isAuthenticated || !medications.data) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void sync();
     // `lastSyncedDay` is intentionally excluded: this effect is about data changes, the
     // foreground pass below is about time passing.

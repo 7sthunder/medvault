@@ -53,11 +53,18 @@ export function PushOptIn() {
     setStatus(existing ? "subscribed" : "granted");
   }, []);
 
+  // Reading the Notification API is a genuine external-system sync, which is what effects are for.
+  // The rule fires because `sync` eventually calls `setStatus`, but every one of those calls sits
+  // behind an `await`, so none of them can run during this commit or cascade a render.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void sync();
   }, [sync]);
 
-  const enable = useCallback(async () => {
+  // No `useCallback` here: both handlers are only ever invoked from a fresh inline `onClick`
+  // arrow, so memoising them changed nothing while preventing the React Compiler from compiling
+  // this component at all.
+  const enable = async () => {
     if (!publicKey.data?.publicKey) {
       toast.error("Push is not configured on this server.");
       return;
@@ -93,16 +100,16 @@ export function PushOptIn() {
         description: (error as Error).message,
       });
     }
-  }, [publicKey.data?.publicKey, subscribe]);
+  };
 
-  const disable = useCallback(async () => {
+  const disable = async () => {
     setStatus("default");
     await unsubscribeAll.mutateAsync().catch(() => void 0);
     const registration = await navigator.serviceWorker.getRegistration();
     const subscription = await registration?.pushManager.getSubscription();
     await subscription?.unsubscribe().catch(() => void 0);
     toast.success("Push notifications turned off.");
-  }, [unsubscribeAll]);
+  };
 
   if (status === "unsupported" || publicKey.data?.enabled === false) return null;
 

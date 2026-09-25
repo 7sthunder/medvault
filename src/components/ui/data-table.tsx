@@ -87,9 +87,15 @@ export function DataTable<T>({
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
   const [page, setPage] = React.useState(1);
 
-  React.useEffect(() => {
+  // Re-sorting or resizing the page invalidates the current page number. Adjusting it during
+  // render (the documented "reset state when an input changes" pattern) rather than in an effect
+  // avoids painting the stale page first and then correcting it.
+  const [resetKey, setResetKey] = React.useState(`${sortKey}|${sortDir}|${pageSize}`);
+  const nextResetKey = `${sortKey}|${sortDir}|${pageSize}`;
+  if (resetKey !== nextResetKey) {
+    setResetKey(nextResetKey);
     setPage(1);
-  }, [sortKey, sortDir, pageSize]);
+  }
 
   const sortedRows = React.useMemo(() => {
     if (!sortKey) return rows;

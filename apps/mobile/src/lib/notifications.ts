@@ -125,7 +125,12 @@ export function planReminders(
     if (med.status !== "active") continue;
 
     const doses = expandSchedule(
-      { id: med.id, dosageAmount: med.dosageAmount, startDate: med.startDate, endDate: med.endDate },
+      {
+        id: med.id,
+        dosageAmount: med.dosageAmount,
+        startDate: med.startDate,
+        endDate: med.endDate,
+      },
       med.slots,
       fromKey,
       toKey,

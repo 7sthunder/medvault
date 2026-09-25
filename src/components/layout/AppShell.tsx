@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -8,35 +8,8 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { ClockProvider } from "@/components/layout/clock-context";
 import { ShellContext, type ShellUser } from "@/components/layout/shell-context";
-import { AssistantLauncher } from "@/features/assistant/AssistantPanel";
-import { AssistantProvider } from "@/features/assistant/assistant-context";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TRPCProvider } from "@/lib/trpc";
-
-const SIDEBAR_STORAGE_KEY = "meditrackai.sidebar-collapsed";
-const SIDEBAR_EVENT = "meditrackai:sidebar-collapsed";
-
-function readCollapsed(): boolean {
-  try {
-    return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-/**
- * The collapsed choice lives in localStorage so it survives a reload, but reading it during render
- * would make the first client render disagree with the server HTML. `useSyncExternalStore` keeps
- * the server snapshot at `false` and adopts the stored value immediately after hydration, so the
- * rail starts expanded and then settles without a mismatch or a cascading re-render.
- */
-function subscribeToCollapsed(onStoreChange: () => void) {
-  window.addEventListener(SIDEBAR_EVENT, onStoreChange);
-  window.addEventListener("storage", onStoreChange);
-  return () => {
-    window.removeEventListener(SIDEBAR_EVENT, onStoreChange);
-    window.removeEventListener("storage", onStoreChange);
-  };
-}
 
 export function AppShell({
   children,
@@ -58,41 +31,18 @@ export function AppShell({
   simulationNow?: Date | null;
 }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarCollapsed = useSyncExternalStore(subscribeToCollapsed, readCollapsed, () => false);
-
-  const toggleSidebar = useCallback(() => {
-    try {
-      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(!readCollapsed()));
-    } catch {
-      // Storage can be unavailable (private mode); the toggle still works for this session.
-    }
-    window.dispatchEvent(new Event(SIDEBAR_EVENT));
-  }, []);
 
   return (
     <TRPCProvider>
-      <AssistantProvider>
       <ClockProvider enabled={isDemo} initialSimulationNow={simulationNow}>
         <ShellContext.Provider value={{ pathname, user, isDemo, basePath }}>
-          {/* `data-sidebar` is what defines --sidebar-width in globals.css, shared by the fixed
-              rail and the content offset below so the two can never disagree. */}
-          <div
-            className="min-h-dvh bg-background"
-            data-sidebar={sidebarCollapsed ? "collapsed" : "open"}
-          >
+          {/* The provider owns the collapse state and the two width tokens; `SidebarInset` picks up
+              the content offset from the sidebar's in-flow gap, so nothing here hardcodes a width. */}
+          <SidebarProvider>
             <SkipLink />
-            <Sidebar
-              open={sidebarOpen}
-              onOpenChange={setSidebarOpen}
-              collapsed={sidebarCollapsed}
-            />
-            <div className="flex min-h-dvh flex-col transition-[padding] duration-200 lg:pl-(--sidebar-width)">
-              <TopNav
-                onOpenSidebar={() => setSidebarOpen(true)}
-                sidebarCollapsed={sidebarCollapsed}
-                onToggleSidebar={toggleSidebar}
-              />
+            <Sidebar />
+            <SidebarInset>
+              <TopNav />
               {/* Skip-link target. Deliberately a plain focusable div, not a second <main>: every
                 feature page already renders its own <main> landmark, and nesting or duplicating
                 them is invalid and trips axe's `landmark-no-duplicate-main`. */}
@@ -103,14 +53,12 @@ export function AppShell({
               >
                 <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
               </div>
-            </div>
+            </SidebarInset>
             <BottomNav />
             {overlay}
-            <AssistantLauncher />
-          </div>
+          </SidebarProvider>
         </ShellContext.Provider>
       </ClockProvider>
-      </AssistantProvider>
     </TRPCProvider>
   );
 }

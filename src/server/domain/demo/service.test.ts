@@ -17,7 +17,13 @@ import { addLocalDays, now, resetNowImpl, setNowImpl, startOfLocalDay } from "@/
 import { demoTimeSchema } from "@/shared/validations/settings";
 
 import { DEMO_COOKIE, issueDemoToken, verifyDemoToken } from "./token";
-import { SCENARIO_DAYS, demoService, ensureDemoUser, readState, resolveSimulationNow } from "./service";
+import {
+  SCENARIO_DAYS,
+  demoService,
+  ensureDemoUser,
+  readState,
+  resolveSimulationNow,
+} from "./service";
 
 /**
  * Phase 18 acceptance — §10.8 demo domain.
@@ -298,7 +304,8 @@ dbTests("demo domain — scenarios", () => {
           ),
         );
 
-      expect(stillUnsettled).toHaveLength(0);    });
+      expect(stillUnsettled).toHaveLength(0);
+    });
   });
 });
 

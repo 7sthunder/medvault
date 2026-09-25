@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SKIP_REASON_MAX } from "@shared/constants";
 
 import { TextArea } from "@/components/ui/form";
@@ -32,10 +32,14 @@ export function SkipSheet({
   loading?: boolean;
 }) {
   const [reason, setReason] = useState("");
-
-  useEffect(() => {
+  // Clear the reason when the sheet closes, so reopening starts blank. Done during render rather
+  // than in an effect, matching the web `SkipDialog`: the parent may close the sheet however it
+  // likes, and this avoids a frame where the previous reason is still shown.
+  const [wasVisible, setWasVisible] = useState(visible);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
     if (!visible) setReason("");
-  }, [visible]);
+  }
 
   return (
     <ConfirmDialog

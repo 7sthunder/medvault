@@ -48,7 +48,9 @@ export const TRPC_URL = `${API_URL}/api/trpc`;
 export const AUTH_URL = API_URL;
 
 /** True when pointing at a local machine rather than a deployed environment. */
-export const IS_LOCAL_API = /^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2)(:|\/|$)/.test(API_URL);
+export const IS_LOCAL_API = /^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2)(:|\/|$)/.test(
+  API_URL,
+);
 
 /**
  * Android emulators cannot see the host's `localhost`. Callers that build a URL from a

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { SKIP_REASON_MAX } from "@/shared/constants";
@@ -27,10 +27,14 @@ export function SkipDialog({
   onConfirm?: (reason?: string) => void;
 }) {
   const [reason, setReason] = useState("");
-
-  useEffect(() => {
+  // Clear the reason when the dialog closes, so reopening starts from a blank field. Done during
+  // render rather than in an effect: the parent can close the dialog however it likes, and this
+  // way the field is never briefly visible carrying the previous answer.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (!open) setReason("");
-  }, [open]);
+  }
 
   return (
     <ConfirmationDialog

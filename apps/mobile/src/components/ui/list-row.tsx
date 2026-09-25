@@ -94,13 +94,7 @@ export function ListRow({
 }
 
 /** Rows joined by hairlines, matching the web `data-table`'s grouped look. */
-export function RowGroup({
-  children,
-  style,
-}: {
-  children: ReactNode;
-  style?: StyleProp;
-}) {
+export function RowGroup({ children, style }: { children: ReactNode; style?: StyleProp }) {
   const { colors, radius } = useTheme();
   const items = Children.toArray(children).filter(Boolean);
 
@@ -195,10 +189,7 @@ export function ErrorState({
   return (
     <View style={styles.center}>
       <View
-        style={[
-          styles.stateIcon,
-          { backgroundColor: colors.redTint, borderRadius: radius.pill },
-        ]}
+        style={[styles.stateIcon, { backgroundColor: colors.redTint, borderRadius: radius.pill }]}
       >
         <Ionicons name="cloud-offline-outline" size={26} color={colors.red} />
       </View>
