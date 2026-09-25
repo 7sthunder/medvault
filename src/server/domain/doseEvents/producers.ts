@@ -3,13 +3,13 @@
  *
  * The reconcile missed-flow calls `onMissed` exactly once per event that actually flips
  * to `missed` (guarded by the conditional single-statement update, so producers never
- * double-fire). Wired in Phase 16: `onMissed` opens a `missed_dose` notification through
- * the notifications domain (preference-gated + once-per-entity deduped). Phase 17 adds
- * the caregiver alert on top.
+ * double-fire). Phase 16 wired the in-app `missed_dose` notification; Phase 17 adds the
+ * caregiver alerts (deduped per dose/relationship, permission-gated).
  */
 
 import type { DbClient } from "@/server/db/helpers";
 import { notificationsService } from "@/server/domain/notifications/service";
+import { caregiverService } from "@/server/domain/caregiver/service";
 
 /** Stable identity handed to producers — enough to open notifications/alerts later. */
 export interface MissedDoseRef {
@@ -23,7 +23,7 @@ export interface MissedFlowProducers {
   onMissed: (db: DbClient, userId: string, event: MissedDoseRef, at: Date) => Promise<void> | void;
 }
 
-/** Phase 16: missed dose → `missed_dose` notification (gated + deduped). */
+/** Phase 16 + 17: `missed_dose` notification for the patient, caregiver alerts fan-out. */
 export const missedFlowProducers: MissedFlowProducers = {
   onMissed: async (db, userId, event, at) => {
     await notificationsService.create(db, {
@@ -35,5 +35,6 @@ export const missedFlowProducers: MissedFlowProducers = {
       entityId: event.id,
       createdAt: at,
     });
+    await caregiverService.createMissedDoseAlert(db, userId, event, at);
   },
 };

@@ -334,6 +334,12 @@ export const caregiverInvitations = pgTable(
     email: text("email").notNull(),
     token: text("token").notNull().unique(),
     message: text("message"),
+    /**
+     * Phase 17 — the invited permission set (§10.6: "selected permissions" travel with the
+     * invite so auto-accept on redemption applies the patient's choices before the pair is
+     * created). `caregiver_relationships.permissions` mirrors it once accepted.
+     */
+    permissions: jsonb("permissions"),
     status: text("status").$type<InvitationStatus>().notNull().default("pending"),
     expiresAt: timestamp("expires_at", { withTimezone: true })
       .notNull()

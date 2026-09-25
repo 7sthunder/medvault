@@ -1,0 +1,1 @@
+ALTER TABLE "caregiver_invitations" ADD COLUMN "permissions" jsonb;

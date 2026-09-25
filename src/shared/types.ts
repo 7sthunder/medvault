@@ -313,6 +313,23 @@ export interface CaregiverInvitationDTO {
   createdAt: Date;
 }
 
+/**
+ * Fresh invite response — the ONLY place the one-time token travels (returned to the
+ * creator to hand off the `/caregiver/accept?token=…` link). Overview lists never include it.
+ */
+export interface CaregiverInviteResultDTO extends CaregiverInvitationDTO {
+  token: string;
+  href: string;
+}
+
+/** Non-sensitive invitation preview before the caregiver redeems the token (§11.12 accept). */
+export interface CaregiverInvitationPreviewDTO {
+  patientName: string;
+  message: string | null;
+  permissions: CaregiverPermissions;
+  expiresAt: Date;
+}
+
 export interface CaregiverAlertDTO {
   id: string;
   type: CaregiverAlertType;
@@ -323,9 +340,49 @@ export interface CaregiverAlertDTO {
   resolvedAt: Date | null;
   /** Flattened snapshot for the UI (from `data`). */
   patientName: string;
+  caregiverName: string | null;
   medicationName: string | null;
   scheduledFor: Date | null;
   doseEventId: string | null;
+}
+
+/** A patient I care for (caregiver-side relationship flame). */
+export interface CaregiverPatientDTO {
+  relationshipId: string;
+  patientUserId: string;
+  patientName: string;
+  relationType: RelationType;
+  permissions: CaregiverPermissions;
+  acceptedAt: Date | null;
+}
+
+/** `/caregiver` patient view — relationships (both sides) + invitations + alerts sent. */
+export interface CaregiverOverviewDTO {
+  asPatient: CaregiverRelationshipDTO[];
+  asCaregiver: CaregiverPatientDTO[];
+  invitations: CaregiverInvitationDTO[];
+  sentAlerts: CaregiverAlertDTO[];
+}
+
+/** Permission-updated relationship returns the fresh DTO for cache invalidation. */
+export interface CaregiverRelationshipResultDTO {
+  relationship: CaregiverRelationshipDTO;
+}
+
+/** Caregiver-scope view of one patient (§11.12 caregiver mode). */
+export interface PatientOverviewDTO {
+  patient: CaregiverPatientDTO;
+  today: { scheduled: number; taken: number; missed: number };
+  summary7: AdherenceSummaryDTO;
+  summary30: AdherenceSummaryDTO;
+  medications: MedicationLite[];
+  alerts: CaregiverAlertDTO[];
+}
+
+/** Alert detail — the flattened snapshot plus the dose's action timeline. */
+export interface CaregiverAlertDetailDTO extends CaregiverAlertDTO {
+  patientUserId: string;
+  history: DoseActionDTO[];
 }
 
 /* ── AI insights (§8.12, §10.10) ──────────────────────────────────────────── */
