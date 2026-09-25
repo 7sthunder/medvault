@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { SignOutButton } from "@/features/auth/SignOutButton";
 import { requireUser } from "@/server/auth/require-user";
@@ -22,11 +21,6 @@ export default async function DashboardPage() {
       <p className="mt-8 text-muted-foreground">
         Your session is live — the full dashboard (medications, schedules, adherence) lands in a
         later phase.
-      </p>
-      <p className="mt-4">
-        <Link href="/onboarding" className="font-semibold text-primary hover:underline">
-          Continue onboarding →
-        </Link>
       </p>
     </main>
   );

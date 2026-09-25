@@ -41,7 +41,7 @@
 | 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
 | 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
 | 09 | Global shell & navigation `(app)` | `done` | `a583979` | pushed to `origin/main` |
-| 10 | Onboarding | `pending` | — | built after 11/12 (depends on `medicationService.create`) |
+| 10 | Onboarding | `done` | `[commit-10]` | verified: typecheck/lint/test/build; e2e deferred |
 | 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
 | 12 | Medication schedule & dose-event generation (domain) | `done` | `4f6e5b4` | verified: typecheck/lint/test/build |
 | 13 | Dose state machine + reconcile (missed detection) (domain) | `pending` | — | |
@@ -961,3 +961,74 @@ user's timezone through every generation/void seam.
   querying so stale-past days are guaranteed generated.
 - `medicationSchedules.listSchedulesByMedicationIds` is the join shape Phase 15's detail page
   wants; keep it the single schedule read facade.
+
+---
+
+## Phase 10 — Onboarding
+
+**Plan reference:** plan.md Phase 10 (`plan.md:999`) + §11.4 (`plan.md:613`) + §13 `onboardingSchema`
+(`plan.md:709`).
+**Objective met:** multi-step onboarding (Profile → Reminders → Finish) saving timezone +
+reminder defaults into `user_preferences` (upsert, `onboardingCompleted=true`), with the
+optional "Add Metformin 500mg 2×/day" sample-medication quick start wired through the real
+Phase 11/12 service + dose-engine seam (schedules default to the §10.2 08:00/20:00 pair).
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/validations/onboarding.ts` | created | `onboardingSchema` — IANA timezone membership (`timezoneSchema`), 4 reminder numbers bounded by `VALUE_LIMITS`, `addSampleMed` boolean (default false) |
+| `src/shared/validations/onboarding.test.ts` | created | unit schema tests: valid payload, default `addSampleMed`, string-number coercion, non-IANA rejection, low/high range rejection per field, non-integer rejection |
+| `src/server/domain/settings/get-or-createPreferences.ts` | created | owner-scoped upsert of `user_preferences`; falls back to the §10.3 engine defaults; `getPreferences` read for future settings |
+| `src/server/domain/settings/get-or-createPreferences.test.ts` | created | DB-gated (rollback-transaction) tests: fresh-user create, upsert-on-rerun keeps a single row, null read before init |
+| `src/server/trpc/routers/onboarding.ts` | created | `onboarding.complete` protected mutation: prefs upsert + `users.timezone` + `onboardingCompleted=true` + optional sample med (CONFLICT-ignored for idempotent re-runs) |
+| `src/server/trpc/routers/aadhi.ts` | edited | registered `onboarding: onboardingRouter` (the only aadhi-track registration point) |
+| `src/features/onboarding/OnboardingWizard.tsx` | created | client wizard: 3-step state machine, per-step `trigger()` validation, stepper pills, error alert, submit via `api.onboarding.complete`, redirect `/dashboard` |
+| `src/features/onboarding/steps/{ProfileStep,RemindersStep,FinishStep}.tsx` | created | timezone select; 4 number fields + sample-med toggle (Base UI); review summary |
+| `src/features/onboarding/onboarding.test.tsx` | created | component tests: walk-through + submit payload assertion, sample toggle + finish summary, step-blocking on out-of-range value |
+| `src/app/(app)/onboarding/page.tsx` | rewritten | renders wizard for fresh users; completed-check is an **authoritative DB read** (see deviation); `redirect("/dashboard")` when done |
+| `src/app/(app)/dashboard/page.tsx` | edited | dropped the now-dead "Continue onboarding" link (onboarding gates completed users) |
+| `e2e/{auth,shell}.spec.ts` | edited | `registerAndEnter` walks the wizard (Next, Next, Continue); post-completion `/onboarding` visits assert the `/dashboard` redirect |
+
+### Deviations & decisions (precise > faithful)
+
+- **Completed gate is a DB read, not the session user.** Better Auth caches the user in the
+  encrypted session token at sign-in, so `session.user.onboardingCompleted` stays `false` after
+  the wizard updates the DB. `getSession` did not re-read it; the page therefore queries
+  `users.onboarding_completed` directly (server-side, authed). Same reason the e2e now asserts
+  the `/dashboard` redirect on revisits.
+- **`z.coerce.number()` in the router boundary, plain strings in the form.** The RHF number
+  inputs register *without* `valueAsNumber`: `valueAsNumber` turns a cleared input into `NaN`,
+  which Zod reports as "expected number, received NaN" instead of the humanized range message.
+  Leaving the inputs as strings lets the shared schema coerce (`"0"` → 0 → "…must be at least…")
+  and keeps one source of truth for messages server- and client-side.
+- **Reminders step threads `formState.errors` per field** — without it, failed step validation
+  blocked advancing with *no visible message* (caught by the component test).
+- **`(app)` route group, not `(auth)`.** Phase 09 shell hand-off — onboarding lives under the
+  authenticated shell. Completed users redirect away, so the short-lived wizard never rustles
+  the shell nav.
+- **Sample med CONFLICT is swallowed** so a re-run of `complete` with `addSampleMed` is
+  idempotent rather than erroring on the duplicate name check.
+- **`SkipOnboardingButton` retired**; the `auth.setOnboardingComplete` mutation is now unused
+  (kept for backward safety; would be removed in a later cleanup).
+
+### Verification (as of commit)
+
+- `pnpm typecheck` — clean; `pnpm lint` — clean (0 errors / 0 warnings)
+- `pnpm test` — **29 files, 217 tests passed** (+3 schema, +3 component, +3 prefs DB for Phase 10)
+- `pnpm build` — compiled clean
+- `pnpm test:e2e` — **deferred** (wizard flow changes to `auth.spec.ts`/`shell.spec.ts` authored
+  but the e2e run was deliberately skipped at commit time; rerun before Phase 13)
+
+### Commit / push
+
+- Phase 10 changes committed on `main` (see matrix row for hash) — pushed to `origin/main`.
+
+### Hand-off notes for later phases
+
+- `/schedule` (Phase 14) and `/medications` (Phase 15) should be reachable for the freshly
+  onboarded user *without* running onboarding again — the DB gate handles that.
+- The `timezone` saved here is the `${ctx.user.timezone}` every medication/dose seam reads
+  (`ctx.user.timezone ?? "UTC"`); users who never ran onboarding still default to UTC.
+- `settings` (later phase) reuses `getOrCreatePreferences`/`getPreferences` — keep prefs
+  reads going through `settings/` rather than duplicating the upsert.

@@ -19,6 +19,8 @@ test("register -> onboarding -> dashboard -> logout -> login round trip", async 
   await page.getByRole("button", { name: /Create Vault/i }).click();
 
   await expect(page).toHaveURL(/\/onboarding/, { timeout: 60_000 });
+  await page.getByRole("button", { name: /Next/i }).click();
+  await page.getByRole("button", { name: /Next/i }).click();
   await page.getByRole("button", { name: /Continue to dashboard/i }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
 

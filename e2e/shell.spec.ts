@@ -10,6 +10,8 @@ async function registerAndEnter(page: Page): Promise<string> {
   await page.getByPlaceholder("At least 8 chars, letter + number").fill(PASSWORD);
   await page.getByRole("button", { name: /Create Vault/i }).click();
   await expect(page).toHaveURL(/\/onboarding/, { timeout: 60_000 });
+  await page.getByRole("button", { name: /Next/i }).click();
+  await page.getByRole("button", { name: /Next/i }).click();
   await page.getByRole("button", { name: /Continue to dashboard/i }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
   return email;
@@ -25,11 +27,8 @@ test("desktop shell: sidebar nav, shell persistence and profile menu", async ({ 
   await expect(sidebar.getByRole("link", { name: "Today's Schedule" })).toBeVisible();
 
   await page.goto("/onboarding");
-  await expect(page).toHaveURL(/\/onboarding/);
-  await expect(page.getByRole("heading", { name: /Welcome/i })).toBeVisible();
-  await expect(sidebar).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Breadcrumbs" })).toContainText("Onboarding");
-  await expect(sidebar.getByRole("link", { name: "Dashboard" })).not.toHaveAttribute("aria-current", "page");
+  await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
+  await expect(sidebar.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
 
   await page.goto("/dashboard");
   await expect(sidebar.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
