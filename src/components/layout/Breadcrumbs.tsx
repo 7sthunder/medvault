@@ -12,14 +12,20 @@ export function Breadcrumbs({ className }: { className?: string }) {
   const { crumbs } = getPageContext(pathname, basePath);
 
   return (
-    <nav aria-label="Breadcrumbs" className={cn("min-w-0 flex-1 items-center gap-1.5 text-sm", className)}>
+    <nav
+      aria-label="Breadcrumbs"
+      className={cn("min-w-0 flex-1 items-center gap-1.5 text-sm", className)}
+    >
       <ol className="flex min-w-0 items-center gap-1.5">
         {crumbs.map((crumb, index) => {
           const last = index === crumbs.length - 1;
           return (
             <li key={`${crumb.label}-${index}`} className="flex min-w-0 items-center gap-1.5">
               {index > 0 && (
-                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <ChevronRight
+                  className="size-3.5 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
               )}
               {crumb.href && !last ? (
                 <Link
@@ -29,7 +35,10 @@ export function Breadcrumbs({ className }: { className?: string }) {
                   {crumb.label}
                 </Link>
               ) : (
-                <span aria-current={last ? "page" : undefined} className="truncate font-medium text-ink-900">
+                <span
+                  aria-current={last ? "page" : undefined}
+                  className="truncate font-medium text-ink-900"
+                >
                   {crumb.label}
                 </span>
               )}

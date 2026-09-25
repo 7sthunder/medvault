@@ -3,7 +3,13 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 
 import { DEMO_COOKIE, issueDemoToken } from "@/server/domain/demo/token";
-import { DemoError, demoService, ensureDemoUser, readState, resolveSimulationNow } from "@/server/domain/demo/service";
+import {
+  DemoError,
+  demoService,
+  ensureDemoUser,
+  readState,
+  resolveSimulationNow,
+} from "@/server/domain/demo/service";
 import {
   demoActionSchema,
   demoScenarioSchema,
@@ -108,7 +114,7 @@ export const demoRouter = router({
   setTime: publicProcedure
     .input(z.union([demoTimeSchema, z.object({ simulationNow: z.null() })]))
     .mutation(async ({ ctx, input }) => {
-        try {
+      try {
         return await demoService.setTime(ctx.db, input.simulationNow);
       } catch (error) {
         throw mapDemoError(error);
@@ -119,7 +125,7 @@ export const demoRouter = router({
   advanceDays: publicProcedure
     .input(z.object({ days: z.coerce.number().int().min(-365).max(365) }))
     .mutation(async ({ ctx, input }) => {
-        try {
+      try {
         return await demoService.advanceDays(ctx.db, input.days);
       } catch (error) {
         throw mapDemoError(error);

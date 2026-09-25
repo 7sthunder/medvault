@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pill } from "lucide-react";
 
+import { useNow } from "@/components/layout/clock-context";
 import { useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
 import { Chip } from "@/components/ui/chip";
@@ -27,7 +28,7 @@ import { medTintClasses } from "../medications/medication-utils";
 export function MedicationAdherencePage() {
   const { user } = useShell();
   const timeZone = user.timezone;
-  const now = new Date();
+  const now = useNow();
   const defaultRange = presetDateRange("30d", timeZone, now);
   const [range, setRange] = useState<DateRange>(defaultRange);
 
@@ -49,7 +50,13 @@ export function MedicationAdherencePage() {
             Per-medication performance over the selected window.
           </p>
         </div>
-        <RangePicker value={range} onChange={setRange} timeZone={timeZone} now={now} ariaLabel="Medication adherence date range" />
+        <RangePicker
+          value={range}
+          onChange={setRange}
+          timeZone={timeZone}
+          now={now}
+          ariaLabel="Medication adherence date range"
+        />
       </header>
 
       {byMed.isLoading ? (
@@ -106,7 +113,15 @@ export function MedicationAdherencePage() {
                   row.adherencePercent == null ? (
                     <span className="text-muted-foreground">—</span>
                   ) : (
-                    <Chip tone={row.adherencePercent >= 75 ? "emerald" : row.adherencePercent >= 50 ? "amber" : "magenta"}>
+                    <Chip
+                      tone={
+                        row.adherencePercent >= 75
+                          ? "emerald"
+                          : row.adherencePercent >= 50
+                            ? "amber"
+                            : "magenta"
+                      }
+                    >
                       {row.adherencePercent}%
                     </Chip>
                   ),
@@ -122,7 +137,9 @@ export function MedicationAdherencePage() {
                 key: "taken",
                 header: "Taken",
                 value: (row) => row.taken,
-                render: (row) => <span className="text-primary-dark">{formatCount(row.taken)}</span>,
+                render: (row) => (
+                  <span className="text-primary-dark">{formatCount(row.taken)}</span>
+                ),
                 align: "right",
               },
               {

@@ -9,6 +9,8 @@
  * insights are informational and not medical advice, and `/help` is where that belongs.
  */
 
+import { BRAND } from "@/shared/brand";
+
 export interface HelpCard {
   id: string;
   /** Explicit owning section — the ids do not share a derivable prefix, so it is stated, not guessed. */
@@ -34,10 +36,9 @@ export interface HelpSection {
 
 export const HELP_INTRO = {
   title: "Help & how it works",
-  lede: "Everything you need to get the most out of MedVault — setting up, staying on track, and what the numbers actually mean.",
+  lede: `Everything you need to get the most out of ${BRAND.name} — setting up, staying on track, and what the numbers actually mean.`,
   /** Rendered in a highlighted panel because it is the one thing users most often misread. */
-  aiNote:
-    "MedVault AI reads your own adherence history and describes patterns. It does not diagnose, prescribe, or suggest changing a medication or dose. Talk to your clinician before changing anything.",
+  aiNote: `${BRAND.ai.name} reads your own adherence history and describes patterns. It does not diagnose, prescribe, or suggest changing a medication or dose. Talk to your clinician before changing anything.`,
 } as const;
 
 export const HELP_SECTIONS: readonly HelpSection[] = [
@@ -121,7 +122,8 @@ export const HELP_CARDS: readonly HelpCard[] = [
     id: "insights-page",
     sectionId: "understanding",
     title: "Generate an insight",
-    body: "Ask MedVault AI to summarise your recent history and describe the patterns it finds, such as which time of day you most often miss.",
+    body: `Ask ${BRAND.ai.name} to summarise your recent history and describe the patterns it finds, such as which time of day you most often miss.`,
+
     href: "/insights",
     linkLabel: "Open AI insights",
   },
@@ -184,7 +186,8 @@ export const HELP_FAQS: readonly HelpFaq[] = [
   },
   {
     id: "ai-insights",
-    question: "What does MedVault AI do with my data?",
+    question: `What does ${BRAND.ai.name} do with my data?`,
+
     answer:
       "It builds a summary of your recent history — daily totals, per-medication rates, time-of-day patterns and streaks — and describes what it sees in plain language. It never diagnoses a condition, never recommends a medication or dose change, and never sends your data anywhere except to the configured AI provider for that one summary. If no provider is configured, a built-in rules engine produces the same observations offline.",
   },

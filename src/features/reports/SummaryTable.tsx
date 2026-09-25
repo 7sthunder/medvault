@@ -13,13 +13,21 @@ import type { ReportRow } from "@/shared/types";
  * §11.11 breakdown table — one row per period (day/week/month), totals + adherence%.
  * Reuses the shared `DataTable` (sort + pagination inline).
  */
-export function SummaryTable({ granularity, rows }: { granularity: ReportGranularity; rows: ReportRow[] }) {
+export function SummaryTable({
+  granularity,
+  rows,
+}: {
+  granularity: ReportGranularity;
+  rows: ReportRow[];
+}) {
   const columns: readonly DataTableColumn<ReportRow>[] = [
     {
       key: "period",
       header: granularity === "daily" ? "Day" : granularity === "weekly" ? "Week" : "Month",
       value: (row) => periodLabel(row.period, granularity),
-      render: (row) => <span className="font-medium text-ink-900">{periodLabel(row.period, granularity)}</span>,
+      render: (row) => (
+        <span className="font-medium text-ink-900">{periodLabel(row.period, granularity)}</span>
+      ),
     },
     { key: "scheduled", header: "Scheduled", value: (row) => row.scheduled, align: "right" },
     { key: "taken", header: "Taken", value: (row) => row.taken, align: "right" },
@@ -46,7 +54,15 @@ export function SummaryTable({ granularity, rows }: { granularity: ReportGranula
         row.adherencePercent == null ? (
           <span className="text-muted-foreground">No data</span>
         ) : (
-          <Chip tone={row.adherencePercent >= 80 ? "emerald" : row.adherencePercent >= 60 ? "amber" : "magenta"}>
+          <Chip
+            tone={
+              row.adherencePercent >= 80
+                ? "emerald"
+                : row.adherencePercent >= 60
+                  ? "amber"
+                  : "magenta"
+            }
+          >
             {formatPercent(row.adherencePercent)}
           </Chip>
         ),

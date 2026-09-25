@@ -1,5 +1,5 @@
 import { HeartPulse } from "lucide-react";
-import { LOGO } from "@/shared/brand";
+import { BRAND, BRAND_HREF, LOGO } from "@/shared/brand";
 import { cn } from "@/lib/utils";
 
 export interface LogoProps {
@@ -16,7 +16,7 @@ export interface LogoProps {
  * §5.1 brand tile — emerald→cyan gradient, white HeartPulse, leaf shadow.
  * Sized via inline styles (gradient/size/radius are brand constants, not tokens).
  */
-export function Logo({ size = 40, className, href = "/", label = "MedVault" }: LogoProps) {
+export function Logo({ size = 40, className, href = BRAND_HREF, label = BRAND.name }: LogoProps) {
   const tile = (
     <span
       role="img"

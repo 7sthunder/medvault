@@ -4,14 +4,24 @@ import { useEffect } from "react";
 import { Bell, BellRing, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { useAppHref } from "@/components/layout/shell-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ListRow } from "@/components/ui/list-row";
-import { Popover, PopoverContent, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/trpc";
 
-import { NOTIFICATION_TYPE_UI, notificationHref } from "@/features/notifications/notification-utils";
+import {
+  NOTIFICATION_TYPE_UI,
+  notificationHref,
+} from "@/features/notifications/notification-utils";
 
 /**
  * §11.13 live notification bell (Phase 16 replacement of the Phase 09 stub): unread
@@ -21,6 +31,7 @@ import { NOTIFICATION_TYPE_UI, notificationHref } from "@/features/notifications
  */
 export function NotificationBell() {
   const router = useRouter();
+  const href = useAppHref();
   const utils = api.useUtils();
   const unread = api.notifications.unreadCount.useQuery(undefined, { staleTime: 10_000 });
   const recent = api.notifications.list.useQuery({ limit: 5 }, { staleTime: 10_000 });
@@ -46,9 +57,16 @@ export function NotificationBell() {
         aria-label={`Notifications${count ? `, ${count} unread` : ""}`}
         className="relative inline-flex size-9 items-center justify-center rounded-lg text-ink-500 outline-none hover:bg-muted hover:text-ink-700 focus-visible:ring-4 focus-visible:ring-primary-ring"
       >
-        {count > 0 ? <BellRing className="size-5" aria-hidden="true" /> : <Bell className="size-5" aria-hidden="true" />}
+        {count > 0 ? (
+          <BellRing className="size-5" aria-hidden="true" />
+        ) : (
+          <Bell className="size-5" aria-hidden="true" />
+        )}
         {count > 0 && (
-          <Badge className="absolute -top-0.5 -right-1 h-4 min-w-4 px-1 text-[10px] tabular-nums" aria-hidden="true">
+          <Badge
+            className="absolute -top-0.5 -right-1 h-4 min-w-4 px-1 text-[10px] tabular-nums"
+            aria-hidden="true"
+          >
             {count > 99 ? "99+" : count}
           </Badge>
         )}
@@ -84,7 +102,7 @@ export function NotificationBell() {
                   subtitle={notif.body}
                   onClick={() => {
                     if (!read) markRead.mutate({ notificationId: notif.id });
-                    router.push(notificationHref(notif.entityType, notif.entityId));
+                    router.push(href(notificationHref(notif.entityType, notif.entityId)));
                   }}
                 />
               );
@@ -92,7 +110,12 @@ export function NotificationBell() {
           )}
         </div>
 
-        <Button variant="ghost" size="sm" className="mt-1 w-full" onClick={() => router.push("/notifications")}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-1 w-full"
+          onClick={() => router.push(href("/notifications"))}
+        >
           View all
           <ChevronRight data-icon="inline-end" aria-hidden="true" />
         </Button>

@@ -18,11 +18,19 @@ const MIN = 60 * 1000;
 const t = (ms: number) => new Date(1_700_000_000_000 + ms);
 const scheduled = t(0);
 
-function pending(over: Partial<{ status: "upcoming" | "due" | "snoozed"; scheduledFor: Date; missedDeadline: Date | null; snoozeUntil: Date | null }> = {}) {
+function pending(
+  over: Partial<{
+    status: "upcoming" | "due" | "snoozed";
+    scheduledFor: Date;
+    missedDeadline: Date | null;
+    snoozeUntil: Date | null;
+  }> = {},
+) {
   return {
     status: over.status ?? "upcoming",
     scheduledFor: over.scheduledFor ?? scheduled,
-    missedDeadline: over.missedDeadline ?? computeOriginalDeadline(over.scheduledFor ?? scheduled, 30),
+    missedDeadline:
+      over.missedDeadline ?? computeOriginalDeadline(over.scheduledFor ?? scheduled, 30),
     snoozeUntil: over.snoozeUntil ?? null,
   };
 }
@@ -81,7 +89,9 @@ describe("deriveNextStatus (§10.3)", () => {
     const evt = pending({ status: "snoozed", snoozeUntil, missedDeadline: deadline });
 
     // Before snoozeUntil expires → still snoozed.
-    expect(deriveNextStatus(evt, new Date(snoozedAt.getTime() + 9 * MIN), 30).status).toBe("snoozed");
+    expect(deriveNextStatus(evt, new Date(snoozedAt.getTime() + 9 * MIN), 30).status).toBe(
+      "snoozed",
+    );
     // Snooze expired but grace not past → due.
     expect(deriveNextStatus(evt, snoozeUntil, 30)).toEqual({
       status: "due",
@@ -104,7 +114,12 @@ describe("snooze math (rule 3)", () => {
     const base = computeOriginalDeadline(scheduled, 30);
     const fields = applySnooze(
       { scheduledFor: scheduled, missedDeadline: base, snoozeCount: 0 },
-      { now: t(5 * MIN), snoozeMinutes: 10, missedAfterMinutes: 30, horizonEnd: new Date(t(48 * HOUR)) },
+      {
+        now: t(5 * MIN),
+        snoozeMinutes: 10,
+        missedAfterMinutes: 30,
+        horizonEnd: new Date(t(48 * HOUR)),
+      },
     );
     expect(fields.snoozeCount).toBe(1);
     expect(fields.snoozeUntil.getTime()).toBe(t(5 * MIN + 10 * MIN).getTime());
@@ -115,7 +130,12 @@ describe("snooze math (rule 3)", () => {
     const horizonEnd = new Date(t(48 * HOUR).getTime());
     const fields = applySnooze(
       { scheduledFor: scheduled, missedDeadline: null, snoozeCount: 2 },
-      { now: new Date(horizonEnd.getTime() - 5 * MIN), snoozeMinutes: 10, missedAfterMinutes: 30, horizonEnd },
+      {
+        now: new Date(horizonEnd.getTime() - 5 * MIN),
+        snoozeMinutes: 10,
+        missedAfterMinutes: 30,
+        horizonEnd,
+      },
     );
     expect(fields.snoozeUntil.getTime()).toBe(horizonEnd.getTime());
   });
@@ -124,7 +144,12 @@ describe("snooze math (rule 3)", () => {
     const wide = computeOriginalDeadline(scheduled, 90);
     const fields = applySnooze(
       { scheduledFor: scheduled, missedDeadline: wide, snoozeCount: 1 },
-      { now: t(1 * MIN), snoozeMinutes: 10, missedAfterMinutes: 30, horizonEnd: new Date(t(48 * HOUR)) },
+      {
+        now: t(1 * MIN),
+        snoozeMinutes: 10,
+        missedAfterMinutes: 30,
+        horizonEnd: new Date(t(48 * HOUR)),
+      },
     );
     expect(fields.missedDeadline.getTime()).toBe(wide.getTime()); // max semantics
   });
@@ -132,8 +157,10 @@ describe("snooze math (rule 3)", () => {
 
 describe("action validity (§10.3/§10.4)", () => {
   it("take: allowed from due|snoozed|upcoming|missed; blocked from taken|skipped|canceled", () => {
-    for (const s of ["due", "snoozed", "upcoming", "missed"] as const) expect(canTakeDoseStatus(s)).toBe(true);
-    for (const s of ["taken", "skipped", "canceled"] as const) expect(canTakeDoseStatus(s)).toBe(false);
+    for (const s of ["due", "snoozed", "upcoming", "missed"] as const)
+      expect(canTakeDoseStatus(s)).toBe(true);
+    for (const s of ["taken", "skipped", "canceled"] as const)
+      expect(canTakeDoseStatus(s)).toBe(false);
   });
 
   it("take-late: an upcoming dose is only takable inside the reminder window", () => {

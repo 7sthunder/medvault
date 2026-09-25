@@ -60,7 +60,10 @@ export function OnboardingWizard({
 
   const goNext = async () => {
     setServerError(null);
-    const fields = step === 0 ? (["timezone"] as const) : (["missedAfterMinutes", "snoozeMinutes", "maxSnoozes", "reminderBeforeMinutes"] as const);
+    const fields =
+      step === 0
+        ? (["timezone"] as const)
+        : (["missedAfterMinutes", "snoozeMinutes", "maxSnoozes", "reminderBeforeMinutes"] as const);
     const ok = await trigger(fields);
     if (ok) setStep((s) => s + 1);
   };
@@ -74,7 +77,8 @@ export function OnboardingWizard({
         router.push("/dashboard");
         router.refresh();
       },
-      onError: () => setServerError("Couldn't finish setting up your vault right now. Please try again."),
+      onError: () =>
+        setServerError("Couldn't finish setting up your vault right now. Please try again."),
     });
   };
 
@@ -83,7 +87,9 @@ export function OnboardingWizard({
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <header>
-        <h1 className="font-heading text-2xl font-extrabold text-ink-900">Welcome, {userName.split(" ")[0]}</h1>
+        <h1 className="font-heading text-2xl font-extrabold text-ink-900">
+          Welcome, {userName.split(" ")[0]}
+        </h1>
         <p className="mt-2 text-muted-foreground">A few quick choices and your vault is ready.</p>
       </header>
 
@@ -134,7 +140,12 @@ export function OnboardingWizard({
       </div>
 
       <footer className="mt-10 flex items-center justify-between gap-3">
-        <Button type="button" variant="outline" onClick={goBack} disabled={step === 0 || complete.isPending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={goBack}
+          disabled={step === 0 || complete.isPending}
+        >
           Back
         </Button>
         {canNext ? (

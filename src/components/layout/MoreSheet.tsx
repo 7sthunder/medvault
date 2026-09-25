@@ -24,7 +24,13 @@ const GROUP_LABELS: Readonly<Partial<Record<NavGroup, string>>> = {
   care: "Care",
 };
 
-export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function MoreSheet({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { pathname, basePath } = useShell();
 
   return (
@@ -59,7 +65,7 @@ export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                         "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
                         active
                           ? "bg-primary-tint text-primary-dark"
-                          : "text-ink-600 hover:bg-muted hover:text-ink-900"
+                          : "text-ink-600 hover:bg-muted hover:text-ink-900",
                       )}
                     >
                       <NavIcon name={item.icon} className="size-4.5" />

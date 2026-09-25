@@ -31,7 +31,11 @@ export const DEFAULT_REMINDER_DEFAULTS: ReminderDefaultsInput = {
   reminderBeforeMinutes: REMINDER_BEFORE_DEFAULT,
 };
 
-export async function getOrCreatePreferences(db: Db | DbTx, userId: string, defaults: ReminderDefaultsInput) {
+export async function getOrCreatePreferences(
+  db: Db | DbTx,
+  userId: string,
+  defaults: ReminderDefaultsInput,
+) {
   const [row] = await db
     .insert(userPreferences)
     .values({ userId, ...defaults })
@@ -44,6 +48,10 @@ export async function getOrCreatePreferences(db: Db | DbTx, userId: string, defa
 }
 
 export async function getPreferences(db: Db | DbTx, userId: string) {
-  const [row] = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1);
+  const [row] = await db
+    .select()
+    .from(userPreferences)
+    .where(eq(userPreferences.userId, userId))
+    .limit(1);
   return row ?? null;
 }

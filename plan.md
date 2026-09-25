@@ -38,7 +38,7 @@ This document is the single source of truth for building the application. A codi
 ## 1. READING ORDER & CONVENTIONS
 
 - If you are implementing: read §5 (design system) first, then §7–§20 (contracts), then the phase you are executing. Every phase lists its exact accepting/depending files.
-- The folders named in the plan are the target layout. The existing `Landingpage/` folder is the **design reference** and is never to be deleted or "cleaned up"; it contains the Stitch export we must not depend on at runtime, but from which source code is *ported* into the Next.js app.
+- The folders named in the plan are the target layout. The existing `Landingpage/` folder is the **design reference** and is never to be deleted or "cleaned up"; it contains the Stitch export we must not depend on at runtime, but from which source code is _ported_ into the Next.js app.
 - All shared strings/types (statuses, route paths, enums, dashboard quick actions) must be imported from `src/shared/`, never re-typed inline.
 - All business rules live in `src/server/domain/**`. UI never computes adherence/status/streak itself; it calls tRPC procedures or imports pure shared helpers (`src/shared/calc/*`) that are also used by the domain services (the two must stay in sync — the domain service is the authority; the shared helpers are the same code paths, exported as pure functions).
 - Language in the UI is English. Brand text uses the MedVault wordmark exactly as in the Stitch export.
@@ -52,6 +52,7 @@ This document is the single source of truth for building the application. A codi
 > `docs/stitch-analysis.md` — the authoritative Phase 01 deliverable.
 
 The repository has two commits on `main`:
+
 - `621377a "Add MedVault landing page"` (all of `Landingpage/`)
 - `7d8e76e "Add MediTrack AI implementation plan (plan.md)"`
 
@@ -62,26 +63,27 @@ Tracked tree: root `plan.md` + `Landingpage/` (33 tracked files). On disk but **
 and NOT the product app; it is the marketing/landing page plus standalone design compositions
 that define the visual language. Key files:
 
-| File | Role for this build |
-|---|---|
-| `src/App.jsx` (1304 lines, verified) | Full landing page: setup styles + mascots (49–268), dashboard-mockup components (270–538), Nav (694–747), Hero (749–876), How It Works (878–955), Features ×3 (957–1070), Trust (1072–1083), Final CTA (1085–1148), Footer (1150–1219), floating AI chat (1221–1297). **Primary design token source.** |
-| `src/components/HeroVisual.jsx` | Hero phone + 4 floating notification chips. Defines the "notification card" glass-chip motif. Imports `../mobile`. |
-| `src/components/FloatingCard.jsx` | Glass-card recipe (dashboard/insight card motif). **Not imported at runtime** — recipe-only reference. |
-| `src/mobile.jsx` | Phone mockup part 1: CSS recipes, feed rows + section labels + bottom nav (PhoneScreen 129–234), parallax scene. Defines the **mobile app UI visual** (list rows, bottom tab with active dot). |
-| `MedVaultAuthIllustration.jsx` **(root, not `src/`)** | Login/Sign-up split screen. **Direct design reference for `/login` and `/register`.** |
-| `MedVaultPhoneSection.jsx` **(root, not `src/`)** | Phone mockup part 2: floating glass-card composition (AI Insight, Report Upload, Medicine reminder, Snooze pill, `8:00 PM` badge). **Not imported anywhere** — composition reference; defines the dashboard insight-card + DoseCard snooze motifs. |
-| `src/index.css`, `src/App.css` | Left-over Vite template CSS (`@import "tailwindcss"` + a `:root`/dark-mode var block). The var block is **not** part of the design — ignore `--accent:#aa3bff`. |
-| `public/favicon.svg` | Purple Vite bolt (`#863bff`), linked only by `index.html`. Leftover — the MedVault favicon is the **emerald→cyan gradient square + white HeartPulse** (`App.jsx:709–720`). |
-| `public/icons.svg` | Leftover Vite social sprite; unreferenced. Ignore. |
-| `public/how-it-works/{ai-doctor,prescription,reminders-mobile}.png` | **Referenced** at runtime (`App.jsx:192,172,219`). Port. |
-| `public/imagessss/login_page.jpeg` | **Referenced** (auth left panel, `MedVaultAuthIllustration.jsx:187`). Port (rename dir — "imagessss" is a Stitch typo). |
-| `public/hero/hero-art.png`, `public/hero/hero-phone-mockup.png`, `public/images/mascots-team.png` | Present but **referenced by no runtime code** (mascots are inline SVG). Do not port unless needed later. |
-| `public/images/hero-final.png` | **MD5-identical** to root `Gemini_Generated_Image_jr77vyjr77vyjr77.png` (duplicate, unreferenced). |
-| root `imagessss/{login_page.jpeg, login ku.png}` | **Duplicates/strays** of the public/auth assets; unreferenced. Ignore. |
-| `src/assets/hero.png`, `react.svg`, `vite.svg`, `src/Untitled` | Vite template leftovers / scratch text (`"AI Analyzes Your Data"`). Ignore. |
-| `dist/` | Stale build output. Ignore (never reference at runtime). |
+| File                                                                                              | Role for this build                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/App.jsx` (1304 lines, verified)                                                              | Full landing page: setup styles + mascots (49–268), dashboard-mockup components (270–538), Nav (694–747), Hero (749–876), How It Works (878–955), Features ×3 (957–1070), Trust (1072–1083), Final CTA (1085–1148), Footer (1150–1219), floating AI chat (1221–1297). **Primary design token source.** |
+| `src/components/HeroVisual.jsx`                                                                   | Hero phone + 4 floating notification chips. Defines the "notification card" glass-chip motif. Imports `../mobile`.                                                                                                                                                                                     |
+| `src/components/FloatingCard.jsx`                                                                 | Glass-card recipe (dashboard/insight card motif). **Not imported at runtime** — recipe-only reference.                                                                                                                                                                                                 |
+| `src/mobile.jsx`                                                                                  | Phone mockup part 1: CSS recipes, feed rows + section labels + bottom nav (PhoneScreen 129–234), parallax scene. Defines the **mobile app UI visual** (list rows, bottom tab with active dot).                                                                                                         |
+| `MedVaultAuthIllustration.jsx` **(root, not `src/`)**                                             | Login/Sign-up split screen. **Direct design reference for `/login` and `/register`.**                                                                                                                                                                                                                  |
+| `MedVaultPhoneSection.jsx` **(root, not `src/`)**                                                 | Phone mockup part 2: floating glass-card composition (AI Insight, Report Upload, Medicine reminder, Snooze pill, `8:00 PM` badge). **Not imported anywhere** — composition reference; defines the dashboard insight-card + DoseCard snooze motifs.                                                     |
+| `src/index.css`, `src/App.css`                                                                    | Left-over Vite template CSS (`@import "tailwindcss"` + a `:root`/dark-mode var block). The var block is **not** part of the design — ignore `--accent:#aa3bff`.                                                                                                                                        |
+| `public/favicon.svg`                                                                              | Purple Vite bolt (`#863bff`), linked only by `index.html`. Leftover — the MedVault favicon is the **emerald→cyan gradient square + white HeartPulse** (`App.jsx:709–720`).                                                                                                                             |
+| `public/icons.svg`                                                                                | Leftover Vite social sprite; unreferenced. Ignore.                                                                                                                                                                                                                                                     |
+| `public/how-it-works/{ai-doctor,prescription,reminders-mobile}.png`                               | **Referenced** at runtime (`App.jsx:192,172,219`). Port.                                                                                                                                                                                                                                               |
+| `public/imagessss/login_page.jpeg`                                                                | **Referenced** (auth left panel, `MedVaultAuthIllustration.jsx:187`). Port (rename dir — "imagessss" is a Stitch typo).                                                                                                                                                                                |
+| `public/hero/hero-art.png`, `public/hero/hero-phone-mockup.png`, `public/images/mascots-team.png` | Present but **referenced by no runtime code** (mascots are inline SVG). Do not port unless needed later.                                                                                                                                                                                               |
+| `public/images/hero-final.png`                                                                    | **MD5-identical** to root `Gemini_Generated_Image_jr77vyjr77vyjr77.png` (duplicate, unreferenced).                                                                                                                                                                                                     |
+| root `imagessss/{login_page.jpeg, login ku.png}`                                                  | **Duplicates/strays** of the public/auth assets; unreferenced. Ignore.                                                                                                                                                                                                                                 |
+| `src/assets/hero.png`, `react.svg`, `vite.svg`, `src/Untitled`                                    | Vite template leftovers / scratch text (`"AI Analyzes Your Data"`). Ignore.                                                                                                                                                                                                                            |
+| `dist/`                                                                                           | Stale build output. Ignore (never reference at runtime).                                                                                                                                                                                                                                               |
 
 Screens designed by Stitch that MUST be honored:
+
 1. **Landing page** (hero, how-it-works, features x3, trust, CTA, footer, AI chat FAB).
 2. **Auth split screen** (image left ≥900px, form right max-w 460, logo, big headline, inputs with emerald focus ring + `0 0 0 4px rgba(16,185,129,0.12)`, emerald primary button + arrow, Google button, back button).
 3. **Mobile phone app UI** (feed/list rows with tinted icon chips, section labels with green `›`, bottom tab bar with active-dot, floating "AI Insight"/"Report Upload"/"Medicine reminder" glass cards, green snooze pill, `8:00 PM` status badge).
@@ -95,14 +97,15 @@ are logged in `docs/stitch-analysis.md` §8.
 
 ## 3. PRODUCT PURPOSE & SCOPE
 
-MedVault is a **medication adherence and tracking** app. It answers two questions immediately: *"What medicine do I need to take now?"* and *"How well am I following my medication schedule?"*
+MedVault is a **medication adherence and tracking** app. It answers two questions immediately: _"What medicine do I need to take now?"_ and _"How well am I following my medication schedule?"_
 
 **AI is strictly behavioral/adherence intelligence.** It may surface patterns in missed doses, timing, trends, reminder/snooze behavior, and medication-by-medication adherence. AI **must never** diagnose disease, recommend treatment, recommend changing a medication or dosage, prescribe, or make clinical decisions. This boundary is enforced by (a) the system prompt, (b) the input data schema (adherence-only), (c) the validated output schema, and (d) the fact that AI output is **read-only** — it can never mutate medications, schedules, or dose events.
 
 **Deliberate non-goals:** medical diagnosis; treatment recommendations; appointment scheduling; document OCR/upload (the landing page mentions records/upload/OCR — out of scope for this product; the design language is retained, the features are not built).
 
 ### 3.1 Brand naming decision (documented, do not revisit)
-- The Stitch export brands everything **MedVault** (logo: `linear-gradient(135deg,#10b981,#06b6d4)` rounded square + white `HeartPulse` icon; wordmark **MedVault** with *Vault* in `#10b981`; AI assistant named **MedVault AI**).
+
+- The Stitch export brands everything **MedVault** (logo: `linear-gradient(135deg,#10b981,#06b6d4)` rounded square + white `HeartPulse` icon; wordmark **MedVault** with _Vault_ in `#10b981`; AI assistant named **MedVault AI**).
 - **Decision:** the in-app UI, logo, favicon, wordmark, AI assistant name, and marketing copy all use the **MedVault** brand verbatim from the Stitch export.
 - "MediTrack AI" is the product/project full name used in page metadata, `<title>`, SEO/OG, package name, and documentation (e.g., title tag `MediTrack AI · MedVault`).
 - All brand usage goes through exactly one source: `src/shared/brand.ts` (name, tagline, colors, logo recipe) and one `Brand` component. Changing the product name later is a one-file change.
@@ -112,6 +115,7 @@ MedVault is a **medication adherence and tracking** app. It answers two question
 ## 4. TECHNOLOGY STACK & ARCHITECTURE
 
 Stack (exact):
+
 - **Next.js 15+** App Router, React 19, TypeScript (strict).
 - **Tailwind CSS v4** (CSS-first config via `@theme` in `globals.css`).
 - **shadcn/ui** (non-visualized primitives: behavior/accessibility only, restyled to Stitch tokens) + **Radix UI** primitives it pulls in.
@@ -145,6 +149,7 @@ Drizzle ORM → PostgreSQL
 ```
 
 Rules:
+
 - Presentation never touches SQL.
 - Domain never imports React/Next.
 - Domain services depend only on Drizzle types, `shared/`, and each other.
@@ -243,11 +248,13 @@ D:\My ShYts\MedVault\
 **The Stitch export is the visual source of truth.** shadcn/ui supplies behavior/accessibility; every color, radius, shadow, font weight, spacing value below is implemented as design tokens, and every component recipe below is reproduced. Do **not** restyle with generic shadcn defaults.
 
 ### 5.1 Brand
+
 - **Logo tile:** 36–44px, `border-radius: 10–12px`, `background: linear-gradient(135deg, #10b981, #06b6d4)`, white `HeartPulse` (lucide) icon centered, shadow `0 4px 12px rgba(16,185,129,0.25)`.
 - **Wordmark:** `Plus Jakarta Sans`, weight 900, ~20px, `#0f172a`, `letter-spacing: -0.02em`. Text = `Med` + `<span color:#10b981>Vault</span>`.
 - **AI assistant brand:** "MedVault AI" with a `Bot` icon; header gradient `linear-gradient(135deg,#10b981,#059669)`; status text `rgba(255,255,255,0.8)`.
 
 ### 5.2 Typography
+
 - Font family: **Plus Jakarta Sans** (400–900). Load via `next/font/google`. Fallback `system-ui, 'Segoe UI', Roboto, sans-serif`. Phone-mockup motif may use DM Sans but the app uses PJ Sans.
 - Display/hero H1: `clamp(42px,5.5vw,72px)`, weight 900, `line-height 1.08`, `letter-spacing -0.03em`, color `#0f172a`.
 - Section H2: weight 900, `letter-spacing -0.025em`, `color #0f172a`. **Verified two scale tiers in the Stitch source** (`docs/stitch-analysis.md` §7.3): How-It-Works `clamp(26px,4vw,48px)`, Features `clamp(32px,4vw,52px)`; white variant for Final CTA `clamp(28px,4.5vw,56px)` → implement as one `h2-section` token plus a `h2-section-lg` modifier.
@@ -262,44 +269,46 @@ D:\My ShYts\MedVault\
 - Scale letters: weight 800 for chips, weight 600 for secondary buttons.
 
 ### 5.3 Color palette (canonical tokens → `@theme`)
-| Token | Value | Usage |
-|---|---|---|
-| `--color-primary` | `#10b981` | Primary actions, active states, links, checks |
-| `--color-primary-dark` | `#059669` | Hover/gradient end |
-| `--color-primary-tint` | `#d1fae5` | Emerald chip backgrounds |
-| `--color-primary-tint-2` | `#a7f3d0` | Chip gradient end |
-| `--color-primary-soft` | `#f0fdf4` | Soft backgrounds, chat bubbles, hero start |
-| `--color-primary-ring` | `rgba(16,185,129,0.12)` | Focus ring (4px) |
-| `--color-secondary` | `#06b6d4` | Second gradient color, cyan accents |
-| `--color-secondary-tint` | `#cffafe` | Cyan chips |
-| `--color-secondary-soft` | `#f0f9ff` | Hero end |
-| `--color-magenta` | `#f472b6` / tint `#fce7f3` | Reminders feature accent |
-| `--color-violet` | `#8b5cf6` | Discover feature accent, "AI" accents |
-| `--color-blue` | `#3b82f6` / tint `#dbeafe` | Upcoming dose, appointments |
-| `--color-red` | `#ef4444` | Missed dose, destructive |
-| `--color-red-tint` | `#fee2e2` | Missed chip bg |
-| `--color-amber` | `#f59e0b` / tint `#fef3c7` | Snoozed, ratings stars |
-| `--color-teal` | `#14b8a6` | Alternate accent |
-| `--ink-900` | `#0f172a` | Headings, primary text (footer bg) |
-| `--ink-800` | `#1e293b` | Labels, strong body |
-| `--ink-700` | `#334155` | Strong list text |
-| `--ink-600` | `#475569` | Body secondary |
-| `--ink-500` | `#64748b` | Body tertiary, placeholders |
-| `--ink-400` | `#94a3b8` | Muted |
-| `--phone-muted` | `#9ab5ad` | Phone-mockup muted text |
-| `--phone-ink` | `#0d1f1a` | Phone-mockup headings |
-| `--border` | `#e2e8f0` | Cards, inputs, nav bottom edge |
-| `--border-strong` | `#cbd5e1` | Hover borders |
-| `--bg` | `#f8fafc` | Page background |
-| `--bg-card` | `#ffffff` | Cards, inputs (focus) |
-| `--bg-input` | `#f8fafc` | Input resting bg |
-| `--bg-soft` | `#f1f5f9` | Scrollbar track, dividers |
-| `--hero-gradient` | `linear-gradient(150deg,#f0fdf4 0%,#f8fafc 50%,#f0f9ff 100%)` | Marketing hero; app auth hero band |
-| `--footer-bg` | `#0f172a` | Dark footer / dark surfaces |
+
+| Token                    | Value                                                         | Usage                                         |
+| ------------------------ | ------------------------------------------------------------- | --------------------------------------------- |
+| `--color-primary`        | `#10b981`                                                     | Primary actions, active states, links, checks |
+| `--color-primary-dark`   | `#059669`                                                     | Hover/gradient end                            |
+| `--color-primary-tint`   | `#d1fae5`                                                     | Emerald chip backgrounds                      |
+| `--color-primary-tint-2` | `#a7f3d0`                                                     | Chip gradient end                             |
+| `--color-primary-soft`   | `#f0fdf4`                                                     | Soft backgrounds, chat bubbles, hero start    |
+| `--color-primary-ring`   | `rgba(16,185,129,0.12)`                                       | Focus ring (4px)                              |
+| `--color-secondary`      | `#06b6d4`                                                     | Second gradient color, cyan accents           |
+| `--color-secondary-tint` | `#cffafe`                                                     | Cyan chips                                    |
+| `--color-secondary-soft` | `#f0f9ff`                                                     | Hero end                                      |
+| `--color-magenta`        | `#f472b6` / tint `#fce7f3`                                    | Reminders feature accent                      |
+| `--color-violet`         | `#8b5cf6`                                                     | Discover feature accent, "AI" accents         |
+| `--color-blue`           | `#3b82f6` / tint `#dbeafe`                                    | Upcoming dose, appointments                   |
+| `--color-red`            | `#ef4444`                                                     | Missed dose, destructive                      |
+| `--color-red-tint`       | `#fee2e2`                                                     | Missed chip bg                                |
+| `--color-amber`          | `#f59e0b` / tint `#fef3c7`                                    | Snoozed, ratings stars                        |
+| `--color-teal`           | `#14b8a6`                                                     | Alternate accent                              |
+| `--ink-900`              | `#0f172a`                                                     | Headings, primary text (footer bg)            |
+| `--ink-800`              | `#1e293b`                                                     | Labels, strong body                           |
+| `--ink-700`              | `#334155`                                                     | Strong list text                              |
+| `--ink-600`              | `#475569`                                                     | Body secondary                                |
+| `--ink-500`              | `#64748b`                                                     | Body tertiary, placeholders                   |
+| `--ink-400`              | `#94a3b8`                                                     | Muted                                         |
+| `--phone-muted`          | `#9ab5ad`                                                     | Phone-mockup muted text                       |
+| `--phone-ink`            | `#0d1f1a`                                                     | Phone-mockup headings                         |
+| `--border`               | `#e2e8f0`                                                     | Cards, inputs, nav bottom edge                |
+| `--border-strong`        | `#cbd5e1`                                                     | Hover borders                                 |
+| `--bg`                   | `#f8fafc`                                                     | Page background                               |
+| `--bg-card`              | `#ffffff`                                                     | Cards, inputs (focus)                         |
+| `--bg-input`             | `#f8fafc`                                                     | Input resting bg                              |
+| `--bg-soft`              | `#f1f5f9`                                                     | Scrollbar track, dividers                     |
+| `--hero-gradient`        | `linear-gradient(150deg,#f0fdf4 0%,#f8fafc 50%,#f0f9ff 100%)` | Marketing hero; app auth hero band            |
+| `--footer-bg`            | `#0f172a`                                                     | Dark footer / dark surfaces                   |
 
 **Status color system** (spec §12) maps: taken `#10b981`, upcoming `#3b82f6`, due `#10b981` (primary, pulsing), missed `#ef4444`, skipped `#94a3b8`, snoozed `#f59e0b`, paused `#64748b`.
 
 ### 5.4 Borders / Radius / Shadows
+
 - **Pill buttons:** `border-radius: 100px` (marketing CTAs + "ghost" variant: `border:2px solid #e2e8f0`, `color:#475569`; hover border/color → `#10b981`).
 - **Auth/primary form buttons:** `border-radius: 14px`, height ~48px, full-width, `bg #10b981` (hover `#059669`, translateY(-2px), shadow `0 12px 24px rgba(16,185,129,0.25)`), weight 700, arrow icon.
 - **Inputs:** `padding:16px 18px`, `border-radius:14px`, `border:1.5px solid #e2e8f0` (→ `#10b981` on focus), `bg #f8fafc` (→ white on focus), `font-size:15px`, weight 500, `color:#0f172a`, focus shadow `0 0 0 4px rgba(16,185,129,0.12)`, transition all 0.25s.
@@ -311,6 +320,7 @@ D:\My ShYts\MedVault\
 - **Leaf-shadow used in app focus states:** soft `0 4px 12px rgba(16,185,129,0.10)`.
 
 ### 5.5 Component recipes (reproduce in components/ui)
+
 - **PrimaryButton:** `bg:#10b981` → gradient `linear-gradient(135deg,#10b981,#059669)`, white, pill (100px) or 14px radius, shadow `0 8px 32px rgba(16,185,129,0.27)`; hover translateY(-2px) + `0 12px 40px rgba(16,185,129,0.6)`.
 - **GhostButton:** transparent, `2px solid #e2e8f0`, `#475569`, pill.
 - **TextButton ("Log In"):** no bg/border, `#475569`, weight 600, hover `#10b981`.
@@ -331,15 +341,18 @@ D:\My ShYts\MedVault\
 - **EmptyState body:** muted text `#64748b`, weight 400–500, CTA primary pill.
 
 ### 5.6 Spacing & layout scale
+
 - Base 4px. Section paddings: 80–140px vertical (marketing); app content `padding: 24–40px`.
 - Card padding: 20–36px (app cards ~ `p-5`/`p-6`), radius 20–24.
 - Gaps: 8/12/16/20/24. Nav `padding:0 4%`. Content max-width 1400px.
 - App shell (desktop): sidebar ~ `w-64` persistent; topbar `h-16/h-[68px]` matching nav height; content max-width 1280–1400 with `p-6 md:p-8`.
 
 ### 5.7 Dark mode
+
 Default = the Stitch light theme. `settings/appearance` offers light/dark/system. Dark variant maps tokens tastefully (page `#0f172a`, cards `#1e293b`, borders `#2e303a`-style, headings white, primary stays `#10b981` with brighter tints), matching the footer/dark surfaces of the Stitch export. No neon/cyberpunk.
 
 ### 5.8 Source verification (Phase 01 — do not regress)
+
 Every §5.1–§5.6 token/recipe was spot-checked against `Landingpage/` source bytes. Full tables with
 file:line anchors live in `docs/stitch-analysis.md` §7. Summary of the non-obvious findings:
 
@@ -365,18 +378,18 @@ Verified against the actual compositions during Phase 01 — the source location
 `docs/stitch-analysis.md` §9. Non-goal motifs (Report Upload/OCR, Vitals, appointments) keep their
 visual language but map to **no route** (§3 non-goals).
 
-| Stitch screen | Source composition | Product screen | Route(s) |
-|---|---|---|---|
-| Landing page | `App.jsx` (whole) | Marketing home | `/` (app `(marketing)` group) |
-| Auth split screen | `MedVaultAuthIllustration.jsx` | Login / Register | `/login`, `/register` |
-| Phone feed (Recent Reports / Upcoming) | `mobile.jsx` PhoneScreen | Today's Schedule / History feeds (same list-row motifs) | `/schedule`, `/history`, `/notifications` |
-| Floating "AI Insight" glass card | `MedVaultPhoneSection.jsx` c1 | AI Insight cards on Dashboard & `/insights` | `/dashboard`, `/insights` |
-| "Medicine reminder … Snooze" card | `MedVaultPhoneSection.jsx` c3/c4 | DoseCard with Snooze/Take/Skip | `/schedule`, `/schedule/[doseId]`, `/dashboard` |
-| Snooze pill + time badge | `MedVaultPhoneSection.jsx` c4 (`.mvp-snooze`, `8:00 PM` badge) | Dose action controls + Due time badge | all dose surfaces |
-| Bottom nav (home active w/ dot) | `mobile.jsx:186–230` | Mobile bottom navigation | `(app)` shell on mobile |
-| "AI chat" FAB | `App.jsx:1221–1297` (decorative MedVault AI panel) | Help/insight chat entry (decorative→links to /help) | shell, `/help` |
-| Footer / trust sections | `App.jsx:1072–1219` | /help and marketing footer (port) | `/`, `/help` |
-| "Report Upload"/"Vitals Tracked"/"Upcoming Visit" chips | `MedVaultPhoneSection.jsx` c2/c4, `HeroVisual.jsx:104–130` | design language only — **no route** (OCR/upload, vitals, appointments are non-goals) | — |
+| Stitch screen                                           | Source composition                                             | Product screen                                                                       | Route(s)                                        |
+| ------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Landing page                                            | `App.jsx` (whole)                                              | Marketing home                                                                       | `/` (app `(marketing)` group)                   |
+| Auth split screen                                       | `MedVaultAuthIllustration.jsx`                                 | Login / Register                                                                     | `/login`, `/register`                           |
+| Phone feed (Recent Reports / Upcoming)                  | `mobile.jsx` PhoneScreen                                       | Today's Schedule / History feeds (same list-row motifs)                              | `/schedule`, `/history`, `/notifications`       |
+| Floating "AI Insight" glass card                        | `MedVaultPhoneSection.jsx` c1                                  | AI Insight cards on Dashboard & `/insights`                                          | `/dashboard`, `/insights`                       |
+| "Medicine reminder … Snooze" card                       | `MedVaultPhoneSection.jsx` c3/c4                               | DoseCard with Snooze/Take/Skip                                                       | `/schedule`, `/schedule/[doseId]`, `/dashboard` |
+| Snooze pill + time badge                                | `MedVaultPhoneSection.jsx` c4 (`.mvp-snooze`, `8:00 PM` badge) | Dose action controls + Due time badge                                                | all dose surfaces                               |
+| Bottom nav (home active w/ dot)                         | `mobile.jsx:186–230`                                           | Mobile bottom navigation                                                             | `(app)` shell on mobile                         |
+| "AI chat" FAB                                           | `App.jsx:1221–1297` (decorative MedVault AI panel)             | Help/insight chat entry (decorative→links to /help)                                  | shell, `/help`                                  |
+| Footer / trust sections                                 | `App.jsx:1072–1219`                                            | /help and marketing footer (port)                                                    | `/`, `/help`                                    |
+| "Report Upload"/"Vitals Tracked"/"Upcoming Visit" chips | `MedVaultPhoneSection.jsx` c2/c4, `HeroVisual.jsx:104–130`     | design language only — **no route** (OCR/upload, vitals, appointments are non-goals) | —                                               |
 
 Routes with no Stitch equivalent (dashboard grid, medication forms, tables, charts, caregiver, reports, settings, history filters, demo) inherit the design system from §5 (cards, tokens, inputs, status chips, charts use the palette).
 
@@ -385,11 +398,13 @@ Routes with no Stitch equivalent (dashboard grid, medication forms, tables, char
 ## 7. GLOBAL APPLICATION SHELL (`(app)` route group)
 
 Shared layout under `src/app/(app)/layout.tsx`, used by every authenticated page (dashboard…settings). Provides:
+
 - **Desktop (≥1024px):** persistent left sidebar (w-64), top header, breadcrumb + page title, notification bell (unread badge), profile avatar dropdown, main scroll area.
 - **Tablet (768–1023px):** same shell; sidebar collapsible (hamburger), overlay drawer when open, auto-collapse default.
 - **Mobile (<768px):** compact top header (brand + bell + avatar), no sidebar; **bottom navigation bar** styled after the phone-mockup bottom nav (white, `border-top:0.5px solid #e8f0ee`, 4 items + active dot in `#10b981`): Home (Dashboard), Schedule, Add (medication), More (opens sheet with full nav). Settings/help live under the More sheet. Floating "Add medication" FAB on mobile where relevant.
 
 Sidebar sections & links (must map to real routes):
+
 - Overview: **Dashboard** `/dashboard`
 - Management: **Medications** `/medications`, **Today's Schedule** `/schedule`, **History** `/history`
 - Intelligence: **Adherence** `/adherence`, **AI Insights** `/insights`, **Reports** `/reports`
@@ -408,65 +423,85 @@ All navigation data lives in `src/shared/nav.ts` (single map: label, href, icon,
 Conventions: `id text primary key` (generate `uuidv7`/crypto.randomUUID); `timestamptz` for instants; `date` for calendar days; `createdAt/updatedAt` defaults `now()`. All user-owned tables have `userId` FK → `users.id` with `onDelete: 'cascade'` and are indexed by `(userId, …)`.
 
 ### 8.1 `users` (Better Auth required shape + profile)
+
 - `id` text PK · `name` text · `email` text unique · `emailVerified` boolean default false · `image` text null · `createdAt`/`updatedAt` timestamptz
 - Profile: `timezone` text default `'UTC'` · `onboardingCompleted` boolean default false · `isDemo` boolean default false (marks the demo user)
 
 ### 8.2 Better Auth support tables
+
 `session` (id, token unique, userId FK, expiresAt, ipAddress, userAgent, createdAt), `account` (id, accountId, providerId, userId FK, accessToken/refreshToken, scope, createdAt, updatedAt, passwordHash null), `verification` (id, identifier, value, expiresAt, createdAt). Columns match the `better-auth/drizzle` adapter exactly.
 
 ### 8.3 `medications`
+
 Purpose: the medication master record. Soft-deleted to preserve history.
+
 - `id` PK · `userId` FK · `name` text (255) · `dosageAmount` numeric(10,2) · `dosageUnit` text(50) (e.g., `mg`, `mcg`, `IU`, `tablet`) · `instructions` text null · `notes` text null · `status` text `'active'|'paused'` default `'active'` · `startDate` date · `endDate` date null · `color` text (assigned UI accent for avatar/chip) · `remindersEnabled` bool default true · `archivedAt` timestamptz null (soft delete) · `createdAt`/`updatedAt` timestamptz
 - Index: `(userId, archivedAt)`, `(userId, status)` · partial unique `(userId, name, archivedAt)` to avoid duplicate active names.
 - Lifecycle: delete → sets `archivedAt`, keeps dose events; historical views join regardless of archive. Hard-delete only for demo-reset/account deletion (cascade wipes history intentionally).
 
 ### 8.4 `medication_schedules` (schedule slots)
+
 Purpose: one row per daily dosing time for a medication (the schedule).
+
 - `id` PK · `medicationId` FK → medications.id `onDelete: cascade` · `timeOfDay` text `'HH:mm'` (local to user timezone) · `daysOfWeek` smallint[] default `[0,1,2,3,4,5,6]` (0=Sunday) · `dosageAmount` numeric(10,2) null (per-slot override) · `instructionOverride` text null · `enabled` bool default true · `createdAt`/`updatedAt`
 - Index: `(medicationId)`. Unique: `(medicationId, timeOfDay)` (per consistent day set).
 - Frequency label derived: 1 enabled slot → "Once daily"; 2 → "Twice daily"; N → "N times daily"; non-full week → "Mon/Wed/Fri" style label.
 
 ### 8.5 `dose_events`
+
 Purpose: materialized scheduled doses — the canonical object for all dose state, adherence, history, notifications.
+
 - `id` PK · `userId` FK · `medicationId` FK (cascade) · `scheduleId` FK null (`onDelete: set null`) · `scheduledFor` timestamptz (day+time in user timezone) · `status` text (§12: `upcoming|due|snoozed|taken|missed|skipped|canceled`) default `upcoming` · `missedDeadline` timestamptz null (deterministic miss moment; set at creation = scheduledFor+missedAfter; updated on snooze) · `takenAt` timestamptz null · `skippedAt` timestamptz null · `skippedReason` text null · `snoozeCount` int default 0 · `snoozeUntil` timestamptz null · `statusUpdatedAt` timestamptz · `isDemo` boolean default false · `source` text `'generated'|'demo'`
 - **Unique:** `(medicationId, scheduledFor)` (prevents duplicate generation) · Indexes: `(userId, scheduledFor)`, `(userId, status)`, `(userId, scheduledFor, status)`, `(isDemo)`.
 
 ### 8.6 `dose_actions` (audit / history / snooze history)
+
 Purpose: an immutable append-only log of every state-changing action. Powers History and undo.
+
 - `id` PK · `userId` FK · `doseEventId` FK → dose_events.id (`onDelete: cascade`) · `action` text `take|skip|snooze|unsnooze|missed_auto|restored|voided|demo` · `occurredAt` timestamptz · `meta` jsonb null (e.g., `{snoozeUntil, snoozeMin, skipReason, source, prevStatus}`)
 - Indexes: `(userId, occurredAt)`, `(doseEventId)`.
 
 ### 8.7 `adherence_daily` (materialized daily summary)
+
 Purpose: fast charts/reports/dashboard; **never trusted over raw computation** — always recomputed by the same service used for on-the-fly math.
+
 - `id` PK · `userId` FK · `date` date · `medicationId` FK null (null = user-wide row) · `scheduled` int 0 · `taken` int · `missed` int · `skipped` int · `snoozed` int · `adherencePercent` numeric(5,2) null · `streakDay` bool · `updatedAt`
 - Unique: `(userId, date, medicationId)`.
 - Recompute triggers: after any dose action, after reconcile, after schedule changes (service recalculates affected range).
 
 ### 8.8 `caregiver_relationships`
+
 - `id` PK · `patientUserId` FK → users · `caregiverUserId` FK → users · `status` text `'pending'|'active'|'declined'|'revoked'` · `relationType` text `'family'|'friend'|'professional'|'other'` · `permissions` jsonb (see §10.6) · `invitedByUserId` FK · `revokedAt`/`acceptedAt` timestamptz null · `createdAt`/`updatedAt`
 - Index: `(patientUserId)`, `(caregiverUserId)` · Unique: `(patientUserId, caregiverUserId)`.
 
 ### 8.9 `caregiver_invitations`
+
 - `id` PK · `patientUserId` FK · `email` text · `token` text unique · `message` text null · `status` text `'pending'|'accepted'|'expired'|'revoked'` · `expiresAt` timestamptz (default +7d) · `createdAt`
 - Token = `crypto.randomBytes(24).toString('base64url')`; consumed once.
 
 ### 8.10 `caregiver_alerts`
+
 Purpose: missed-dose / adherence-drop alerts a caregiver receives, originating from **actual dose state**.
+
 - `id` PK · `patientUserId` FK · `caregiverUserId` FK · `relationshipId` FK null · `doseEventId` FK null · `type` text `'missed_dose'|'adherence_drop'|'insight'|'demo'` · `title` text · `body` text · `data` jsonb null (snapshots: patientName, medicationName, scheduledFor, adherenceBefore/After) · `status` text `'new'|'acknowledged'|'resolved'` · `createdAt`/`resolvedAt` null
 - Index: `(caregiverUserId, status)`, `(patientUserId)`.
 
 ### 8.11 `notifications`
+
 - `id` PK · `userId` FK · `type` text `'upcoming_dose'|'due_dose'|'missed_dose'|'caregiver_alert'|'system'|'insight'|'demo'` · `title` text · `body` text · `entityType` text null (`medication|doseEvent|insight|caregiverAlert`) · `entityId` text null · `readAt` timestamptz null · `createdAt`
 - Index: `(userId, readAt)`, `(userId, createdAt desc)`.
 
 ### 8.12 `ai_insights`
+
 - `id` PK · `userId` FK · `category` text `'timing_pattern'|'adherence_decline'|'adherence_improvement'|'snooze_pattern'|'medication_difference'|'missed_analysis'|'general'` · `summary` text · `detail` text null · `suggestedActionType` text null (`'review_schedule'|'review_reminders'|'encourage'|'review_caregiver'|null`) · `dataSnapshot` jsonb (input used) · `source` text `'ai'|'fallback'|'demo'` · `confidence` numeric(5,2) null · `createdAt`
 - Index: `(userId, createdAt desc)`; keep last 20/user (prune).
 
 ### 8.13 `user_preferences` (1:1 users)
+
 - `userId` PK/FK · `theme` text `'light'|'dark'|'system'` default `'light'` · `missedAfterMinutes` int default 30 · `snoozeMinutes` int default 10 · `maxSnoozes` int default 3 · `reminderBeforeMinutes` int default 5 · `notificationPrefs` jsonb `{doseReminders:true, caregiverMissedAlerts:true, insights:true, sounds:true}` · `caregiverAlertPrefs` jsonb `{missedDoseOn:true, adherenceDropThreshold:null, dailyDigest:false}` · `reduceMotion` bool false · `uiDensity` text `'comfortable'|'compact'` default `'comfortable'` · `updatedAt`
 
 ### 8.14 `demo_state` (1:1 demo workspace)
+
 - `id` PK · `userId` FK (the demo user) · `simulationNow` timestamptz null (override of "now"; defaults to real now) · `timeMultiplier` int default 1 · `scenario` text `'baseline'|'decline'|'improvement'|'caregiver_demo'` default `'baseline'` · `hasCaregiverDemoData` bool · `updatedAt`
 - Non-demo users: no row; demo isolation handled by the dedicated demo user (§10.8).
 
@@ -492,6 +527,7 @@ Purpose: missed-dose / adherence-drop alerts a caregiver receives, originating f
 ## 10. DOMAIN LOGIC SPECIFICATIONS
 
 ### 10.1 Medication domain (`server/domain/medications`)
+
 - `listMedications(userId)` → include archived? default returns non-archived + a separate archived bucket for history.
 - `getMedication(userId, id)` → medication + slots + derived `frequencyLabel` + `adherenceByMedication` (uses adherence service).
 - `createMedication(ctx, input)` → validate → if `daysOfWeek` or times empty, default 1 slot `08:00` daily (per spec: initializing schedule + reminder config). Creates med, its schedule slots, and calls `ensureBackgroundDoseEvents(userId, medId, from=startDate, to=+HORIZON_DAYS)`.
@@ -501,6 +537,7 @@ Purpose: missed-dose / adherence-drop alerts a caregiver receives, originating f
 - Ownership enforced on every operation (`medication.userId === ctx.userId`).
 
 ### 10.2 Scheduling & dose-event generation (`server/domain/medicationSchedules`, `shared/calc/schedule.ts`)
+
 - Model: a medication has 1..N `medication_schedules.slots`; each slot `(timeOfDay, daysOfWeek, enabled)`.
 - `expandSchedule(med, slots, from, to, tz)` (pure): for each day `d ∈ [from, to]` where `med.startDate ≤ d ≤ (endDate ?? ∞)` and `slots.enabled` and `d.getDay() ∈ slot.daysOfWeek`, emit `{scheduledFor = combine(d, slot.timeOfDay, tz), scheduleId, dosageAmount: slot.dosageAmount ?? med.dosageAmount}`.
 - `ensureDoseEvents(ctx, {medicationIds?, from?, to?})`: upsert generated events; unique `(medicationId, scheduledFor)` makes it idempotent. Called on: medication create/update, schedule change, resume, an on-demand "catch-up" inside `reconcile` job, and a periodic server-side job (`src/server/domain/jobs/scheduler.ts` — cron via `setInterval`/Next `unstable_after` hook; NOT a client timer).
@@ -508,19 +545,24 @@ Purpose: missed-dose / adherence-drop alerts a caregiver receives, originating f
 - Paused/expired meds: skip generation; any previously generated future event is voided (`canceled`) by reconcile.
 
 ### 10.3 Dose status machine (`shared/calc/doseState.ts` — pure; `server/domain/doseEvents/reconcile.ts` — applies)
+
 Statuses: `upcoming → due → snoozed ⇄ due → missed | taken | skipped`; any unresolved → `canceled` (schedule changes/pause).
 
 Rules (deterministic, timezone-aware, single set used everywhere):
+
 1. `due` iff `status ∈ {upcoming}` and `now ≥ scheduledFor` (once reached it never goes back to upcoming).
 2. `missedDeadline` initial = `scheduledFor + missedAfterMinutes`. A dose becomes **missed** when `now > missedDeadline` and `status ∈ {upcoming, due, snoozed}`; `missedAt = missedDeadline` (recorded retroactively for accuracy).
 3. `snoozed`: user action only; sets `snoozeUntil = now + snoozeMinutes` (capped so that `snoozeUntil ≤ shared horizon`), `snoozeCount += 1`; updates `missedDeadline = min(missedDeadline, originalMissedDeadline)`? No — **missedDeadline = max(missedDeadline, snoozeUntil + missedAfterMinutes)** (snoozing extends grace). When `now ≥ snoozeUntil` and still not taken → back to `due` (and if `now > missedDeadline` → missed).
 4. `take`: allowed from `due|snoozed|upcoming(within window)|missed`? — missed doses **can still be taken** ("taken late") which converts `missed` → `taken` with correct timestamps (audit trails the change); adherence counts the final state. Skipped is disallowed for already-`missed` rows without explicit re-open (kept simple: skip only from due/snoozed).
 5. `skip`: allowed from `due|snoozed`; records `skippedAt`, reason optional; terminal.
 6. `canceled`: only via pause/schedule-change/void; never counted in adherence; historical `dose_actions` keep a `voided` audit row.
+
 - State transition engine rejects illegal transitions atomically (DB advisory lock or `WHERE status IN (...)` conditional update to prevent double-take): `UPDATE ... SET status='taken' WHERE id=? AND status IN ('due','snoozed','upcoming','missed')`; if 0 rows → idempotent no-op / notify "already taken".
 
 ### 10.4 Dose actions (`server/domain/doseActions`)
+
 Each action = one transaction:
+
 - **take**: conditional update (+ takenAt=now) + `dose_actions` row `{action:'take', meta:{fromStatus}}` + notification suppressed (it IS the completion) + `adherence.recomputeDay(userId, localDay)` + dashboard invalidations.
 - **snooze**: validate `snoozeCount < maxSnoozes`, set snooze fields, audit row `{action:'snooze', meta:{snoozeUntil, snoozeMin}}`; if `snoozeUntil < now` (already passed) then immediately return to due (loop guard).
 - **skip**: confirm in UI; audit `{action:'skip', meta:{reason}}`.
@@ -529,13 +571,15 @@ Each action = one transaction:
 - All writes are user-scoped; actions apply to owned dose events only (or dose events of an authorized patient for caregivers? no — caregivers only read).
 
 ### 10.5 Adherence engine (`shared/calc/adherence.ts` + `streaks.ts` + `performance.ts`; `server/domain/adherence`)
+
 **Formulas (single source of truth, consistent across dashboard/adherence/reports/insights):**
+
 - Period `[from, to]`, scope `user-wide` or `per-medication`:
   - `scheduled = #events in period with status IN (taken, missed, skipped)`
   - `taken/missed/skipped/snoozed(count)` = counts by status (snoozed = events currently snoozed within period window OR total snooze actions? **Definition:** snoozed count = number of resolved/unresolved events that were snoozed at least once in the period, tracked via `snoozeCount>0` events whose current/terminal occurrence fell in period — plus we surface "number of snooze actions" separately where needed).
   - `adherence% = taken / (taken + missed + skipped) × 100` (round to 1 dp). Skipped reduces adherence (matches sample: 76/84 = 90.5% → displayed 90.4/90.5% depending on 1dp rounding; use `Math.round(x*10)/10`).
   - Guard: empty period → `adherence% = null`, UI shows "No data".
-- **Streaks:** a calendar day is in-regimen if `scheduled>0`. A day is an *adherent day* if `in-regimen && missed==0 && skipped==0` (not taken doesn't break it while still within grace; future doses pending today don't break it — today counts only once all its doses resolved OR at day end wherever `scheduledFor < now`, else it's "in progress", treated as adherent-so-far for the *current* streak and as full day for *longest* streak only if complete).
+- **Streaks:** a calendar day is in-regimen if `scheduled>0`. A day is an _adherent day_ if `in-regimen && missed==0 && skipped==0` (not taken doesn't break it while still within grace; future doses pending today don't break it — today counts only once all its doses resolved OR at day end wherever `scheduledFor < now`, else it's "in progress", treated as adherent-so-far for the _current_ streak and as full day for _longest_ streak only if complete).
   - `currentStreak`: maximum consecutive run of adherent days ending on today **or the most recent in-regimen day ≤ today** (a day with no regimen doesn't break the streak). In-progress today counts toward current streak if adherent-so-far.
   - `longestStreak`: max consecutive adherent-day run in data (complete days only).
   - Sample: 7-day current streak, 90.4% adherence, 84 scheduled / 76 taken / 5 missed / 3 skipped / 8 snoozed — these exact figures drive the demo seed.
@@ -546,6 +590,7 @@ Each action = one transaction:
 - `AdherenceSummaryDTO` = everything above in one shape; dashboard/adherence/reports/insights all build from `adherenceService.summary(...)` to guarantee identical numbers.
 
 ### 10.6 Caregiver domain (`server/domain/caregiver`)
+
 - Who invites: the **patient** (patientUserId) invites a caregiver by email/code, or a caregiver requests a code. Simplest robust flow for the demo: patient creates `caregiver_invitations` (email + token + message + selected permissions); caregiver registers/logs-in and redeems the token → `caregiver_relationships` status `active` (auto-accept on redemption) with the invited permissions; patient can revoke (`revoked`) or the caregiver can leave.
 - Permissions (jsonb): `{viewAdherence:true, viewMedications:false(future), receiveMissedDoseAlerts:true, receiveInsights:false, canAcknowledgeAlerts:true}`. Patient can edit per relationship. (Leave door open for viewMedications but ship viewAdherence+alerts UI, medications view only if permission true.)
 - `requireCaregiverAccess(ctx, patientUserId)`: relationship must be `active`, permission gates as needed. Caregiver tRPC routers are **separate** routers (`caregiver.*`) operating with `ctx.role = 'caregiver'` + `ctx.patientUserId`.
@@ -553,13 +598,15 @@ Each action = one transaction:
 - Caregiver UI: overview (patient's adherence today/7d/30d, current streak, alerts feed), alert detail, preferences, and link to manage/cancel. Never exposes other patients' data.
 
 ### 10.7 Notifications domain (`server/domain/notifications`)
+
 - `create(userId, {type,title,body,entityType,entityId})` — single writer.
 - Producer interface `NotificationChannel` (extension point: `{ email?, webPush? }`) — currently in-app rows (+ `console` in dev). Designed so a future push/email channel plugs in without touching business logic.
-- Consumers: reconcile (due/missed), caregiver (alert), insights (insight-ready), system (demo/settings). 
+- Consumers: reconcile (due/missed), caregiver (alert), insights (insight-ready), system (demo/settings).
 - List: unread first, paginated (cursor), `markRead(id)`, `markAllRead`, `unreadCount`.
 - Preferences from `user_preferences.notificationPrefs` gate creation (e.g., dose reminders off → no due notifications).
 
 ### 10.8 Demo domain (`server/domain/demo`)
+
 - A dedicated seeded **demo user** (`isDemo=true`, email `demo@medvault.demo`, password random) owns all demo data → **isolation by userId is automatic**; real users' data is never mixed.
 - `/demo` entry (from marketing or logged-out banner): `demo.enter` tRPC → issues a scoped cookie `medvault_demo_session` (random token stored server-side or a short-lived JWT) that the `(demo)` layout uses to present the demo user's data. Real session is untouched. Leaving `/demo` clears the cookie. If an authenticated user enters, they keep their own session; demo data still isolated under the demo user.
 - Seed (`server/db/demo-seed.ts`) reproduces the sample dataset exactly (§19): Arun Kumar profile, 4 medications with the given schedules, and dose events spanning ~12 weeks such that totals = 84 scheduled / 76 taken / 5 missed / 3 skipped / 8 snoozed, 7-day streak, 90.4–90.5% adherence, including afternoon-miss pattern for the AI insight and a snoozed-every-morning pattern.
@@ -573,15 +620,17 @@ Each action = one transaction:
 - UI: `/demo` shows the demo shell (same `(app)` components) with a floating "Simulate" dock + demo clock, and a prominent "This is demo data — enter real app" banner.
 
 ### 10.9 Reports domain (`server/domain/reports`)
-- Builds exclusively from `adherenceService` (same formulas). 
+
+- Builds exclusively from `adherenceService` (same formulas).
 - Support: daily summary (per date), weekly summary (ISO week), monthly summary, medication-specific, missed-dose analysis (per med/day/bucket counts), taken/skipped/missed breakdown, adherence trend series.
 - Output DTO `ReportDTO { granularity, from, to, table: rows[], trend: [{label, adherence, taken, missed, skipped}] }`.
 - CSV export: server route `GET /api/reports/export?from&to&granularity` (authenticated): generates CSV from the same service, streams as attachment. Deterministic column order.
 
 ### 10.10 AI insights domain (`server/domain/insights`)
+
 - **Input snapshot** (`InsightInput`, jsonb-able): last 30 days: per-day `{date, scheduled, taken, missed, skipped, snoozed, adherencePercent}`, per-medication `{name, adherencePercent, taken, missed, skipped}`, time-bucket rates, current/longest streak, rolling trends, recent snooze action counts.
 - **Service:** `buildSnapshot(userId)` (from adherence service) → `generateInsights(ctx)`:
-  1. Try AI: system prompt (fixed, in code): role = adherence coach; explicitly "Do not diagnose, do not prescribe, do not recommend changing medication/dose; only behavioral observations and encouragement; if lacking data, say so." Input = JSON snapshot. Call provider-agnostic `ai.generateText`/`streamText` with structured output (tool/JSON schema). 
+  1. Try AI: system prompt (fixed, in code): role = adherence coach; explicitly "Do not diagnose, do not prescribe, do not recommend changing medication/dose; only behavioral observations and encouragement; if lacking data, say so." Input = JSON snapshot. Call provider-agnostic `ai.generateText`/`streamText` with structured output (tool/JSON schema).
   2. Parse + validate with `InsightResponseSchema` (zod): `{ insights: [{ category, summary, detail?, suggestedActionType? }], tone: 'neutral'|'encouraging' }`.
   3. On parse/LLM failure → deterministic **fallback generator** (rule engine over the snapshot: highest-miss bucket, declining 7d avg, streak, snooze rate) → `source:'fallback'` so the UI can note "generated from data".
   4. Persist top 3–5 rows to `ai_insights`; prune to latest 20. Never writes to medications/schedules/dose_events — verified by type boundaries + a unit test.
@@ -589,6 +638,7 @@ Each action = one transaction:
 - UI surfaces: `/insights` (list + regenerate), dashboard widget (latest 1–2), notifications type `insight`.
 
 ### 10.11 Settings domain (`server/domain/settings`)
+
 - `getProfile/updateProfile` (name, email (validated unique), timezone).
 - `getReminderSettings/updateReminderSettings` → writes `user_preferences` + per-medication `remindersEnabled` bulk toggle.
 - Caregiver settings: list relationships, revoke, change permissions.
@@ -602,21 +652,25 @@ Each action = one transaction:
 Legend: **Auth**: anon / user / caregiver (own patient scope) / demo. **States** follow §15. All authenticated routes live in the `(app)` shell (§7) unless noted.
 
 ### 11.1 Marketing `/`
+
 - Purpose: Stitch landing page ported to Next (nav, hero, how-it-works, features, trust, CTA, footer, AI chat FAB decorative). Not on the auth checklist, but shipped so the product has the exact entry the design demands and to prove the design system.
 - Data: static + public assets (ported images). Actions: `Log In` → `/login`, `Create Vault` → `/register`, `Watch Demo` → `/demo`. Anonymous. Loading: none (static SSR). Empty/error: image fallbacks.
 
 ### 11.2 `/login` · `/register` (auth group, no app shell)
+
 - Purpose: email/password auth using the Stitch auth composition (left image panel ≥900px, right form; logo; headlines "Welcome back."/"Initialize your vault."; inputs §5.4; emerald primary button w/ arrow; Google button shown but **disabled with "coming soon"** tooltip unless provider configured; "Remember me" checkbox; toggle link between modes; back button → `/`).
 - Data: session redirect. Actions: sign-in/sign-up → redirect `/onboarding` (if not completed) else `/dashboard`. States: busy button, error alert (invalid credentials, email exists, invalid email/password per schema), preserved input on failure. Responsive: left panel hidden <900px; form centers. Auth: anonymous only (redirect authed users away).
 
 ### 11.3 `/onboarding` (auth group)
+
 - Purpose: collect/confirm profile + defaults: timezone, reminder defaults (missedAfterMinutes, snoozeMinutes, maxSnoozes), toggle sample-data quick start ("Add a sample medication" using Metformin 500mg twice daily), finish.
 - Data: `user_preferences` default create. Actions: save → `onboardingCompleted=true` → `/dashboard`.
 - States: step indicator (Stitch ghost/pill style), per-step validation, loading, error alert. Auth: user, `!onboardingCompleted`.
 
 ### 11.4 `/dashboard`
+
 - Purpose: immediate "what do I take now?" + "how am I doing?".
-- Layout (priority order): 
+- Layout (priority order):
   1. **Hero action block** (emerald-tinted glass card, floating motif): next/current dose card (DoseCard) with Take/Snooze/Skip → links `/schedule/[doseId]`; when none: "All caught up" empty state.
   2. **Stat rail** (StatCards): today's adherence, current streak, next dose time, missed today.
   3. **Today's schedule feed** (SectionLabel "Today's Schedule ›" + ListRows), link `/schedule`.
@@ -628,10 +682,12 @@ Legend: **Auth**: anon / user / caregiver (own patient scope) / demo. **States**
 - Data: `dashboard.get` (one tRPC call returning DashboardDTO; composed via dashboardService aggregating §10 services). Actions: dose actions (via dose router), nav. Auth: user or caregiver (caregiver scope = patient's dashboard minus mutating actions → "caregiver read-only" variant). States: skeletons matching layout; empty = no meds → onboarding-style CTA "Add your first medication" (`/medications/new`); no doses today → "No doses scheduled today" + link; due dose → pulsing primary ring; missed → red banner; all completed → green "All caught up"; error → ErrorState with retry. Responsive: hero to full-width, stat rail wraps to 2-col, chart full-width.
 
 ### 11.5 `/medications` (list)
+
 - Purpose: all active medications (cards/list). Each MedicationCard: colored avatar chip (assigned `color`), name, dosage (e.g., "500 mg"), frequency label, status chip, next dose time, per-med adherence%, count/actions.
 - Data: `medication.list` (+ next dose + perf joined). Actions: open detail, add (`/medications/new`), pause/resume quick toggle, search/filter (active/archived). Empty: friendly empty state + CTA. Loading: card skeletons. Error: ErrorState. Auth: user.
 
 ### 11.6 `/medications/new` · `/medications/[id]` · `/medications/[id]/edit`
+
 - New (step form, Stitch-styled): Step 1 Basics — name, dosage amount + unit (select w/ common units mg/mcg/g/IU/tablet/ml/units + custom), instructions, notes. Step 2 Schedule — frequency builder: presets (Once daily / Twice daily / Custom weekdays) + per-day time pickers (TimePicker, local HH:mm), days-of-week chips, start date (date default today), end date optional. Step 3 Reminders — remindersEnabled, reminderBeforeMinutes. Step 4 Review + Submit.
 - Detail: header card (name/dosage/status/avatar), status toggle (active/paused), stats (overall + this med adherence%, streak, scheduled), schedule slots list, dose history preview (last 10 via history service), actions: Edit, Pause/Resume, Archive (destructive dialog: "Historical records will be preserved"), Delete-archive note.
 - Edit: same form, prefilled; schedule diff rules (§10.1).
@@ -639,36 +695,45 @@ Legend: **Auth**: anon / user / caregiver (own patient scope) / demo. **States**
 - Auth: user (owner only).
 
 ### 11.7 `/schedule` (Today's Schedule) · `/schedule/[doseId]`
-- Purpose: the day's dose timeline answering "now". 
+
+- Purpose: the day's dose timeline answering "now".
 - Content: date selector (today / tomorrow), grouped by status: **Due Now** (pulsing primary section), **Upcoming**, **Snoozed** (amber, countdown to snoozeUntil), **Completed** (collapsed green), **Missed** (red, incl. "missed — take late" affordance). Each DoseCard: name, dosage, time, med color chip, status chip+icon, actions Take/Snooze/Skip.
 - `/schedule/[doseId]`: detail modal page — full event info (med, scheduled time, status, takenAt/skippedAt/reason, snooze history from dose_actions, miss deadline), Take/Snooze/Skip buttons (contextually), link to medication.
 - Data: `schedule.day(date)` (reconciled + ensured), `dose.get`. Actions: dose router. States: loading row skeletons; empty day ("No doses today" + link); errors; invalid id → notFound; stale/demo time indicator. Auth: user.
 - Never relies on client timers: reconcile runs server-side; client only refetches on focus/visibility + after actions.
 
 ### 11.8 `/adherence` · `/adherence/medications`
+
 - `/adherence`: range selector (7/30/90d + custom), stat rail (adherence%, taken/missed/skipped/snoozed/scheduled, current + longest streak), trend chart (area/bar), time-of-day pattern bars (Morning/Afternoon/Evening/Night), missed-dose calendar heat strip. Uses shared `AdherenceSummaryDTO`.
 - `/adherence/medications`: per-medication table: med, frequency, scheduled/taken/missed/skipped, adherence%, best bucket, trend mini-sparkline; row → detail.
 - Auth: user; caregiver (read-only view of their patient via caregiver scope).
 
 ### 11.9 `/insights`
+
 - Purpose: AI behavioral insights list + regenerate. Cards = glass/insight motif, category chip, source tag ("AI" vs "From your data" fallback), suggested action link buttons (e.g., "Review reminder times") that navigate (settings/demo) — AI never mutates. Show data-window note ("Based on last 30 days"). Loading skeleton, empty state with prerequisites, error with retry + fallback indicator.
 
 ### 11.10 `/history`
+
 - Purpose: trustworthy record of dose activity. Filters: date range, medication, status (taken/missed/skipped/snoozed/skippedReason). Entry = DoseActionDTO row (ListRow motif): "Took 500 mg Metformin — 8:02 AM" + meta (reason, snooze history, "was missed" badge for take-late). Grouped by day; archived meds render with "archived" tag and stable name snapshot. Pagination (cursor). Preserved even if medication later paused/archived (soft-delete guarantee). Data: `history.query`. States: filter skeleton/empty ("No activity in this range"), error.
 
 ### 11.11 `/reports`
+
 - Purpose: adherence reports from real data. Controls: granularity (daily/weekly/monthly), range (7/30/90/custom), scope (all / per medication). Output: summary stat cards, breakdown table, trend chart, missed-dose analysis table, "Download CSV" button → `/api/reports/export?...`. Same `ReportDTO` pipeline as dashboard data.
 
 ### 11.12 `/caregiver` (patient view) · caregiver-mode views
+
 - Patient view: relationship list (caregiver avatar, relation, status, permissions toggle), invite form (email + message + permission checkboxes + expiry), pending invitations (copy token? use email+code display), alert preferences, revoked history. Actions: invite (→ creates invitation), revoke, update permissions, acknowledge/resolve alert feed (caregiver alerts received from me? no — the alerts list here is what caregivers saw? Keep separate: patient sees "Alerts sent" history).
 - Caregiver mode (session has active relationship): `/caregiver` becomes patient overview — adherence today/7/30d, streak, alerts feed (missed/alerts), alert detail `/caregiver/alerts/[id]` (acknowledge/resolve), manage/cancel link. Authorization: `requireCaregiverAccess` on every query.
 - `/caregiver/alerts/[id]`: alert detail — patient snapshot, medication, scheduled time, status timeline, acknowledge/resolve actions.
 
 ### 11.13 `/notifications`
+
 - Purpose: notification center. List grouped by day, unread dots, mark all read, per-row link by entityType. Bell shows unread count; clicking bell toggles dropdown (recent 5) linking here. Tabs: All/Dose/Caregiver/AI/System. Empty state "You're all caught up". Auth: user (caregiver sees their own notifications incl. caregiver_alert type).
 
 ### 11.14 Settings (`/settings/*`)
+
 Shared settings layout: left vertical menu (Stitch ghost/nav-link style) + content area.
+
 - `/settings/profile`: name, email, timezone; save (RHF+Zod, email uniqueness server-side); danger zone: logout-all-sessions? (skip), account deletion (typed confirm).
 - `/settings/reminders`: global missedAfterMinutes, snoozeMinutes, maxSnoozes, reminderBeforeMinutes (number inputs w/ steppers + presets), notificationPrefs toggles, per-medication reminders table (toggle remindersEnabled), sound toggle.
 - `/settings/caregiver`: same patient-side caregiver management as §11.12 (reused component), plus caregiver-alert prefs (equally on patient: who is notified + frequency).
@@ -676,26 +741,28 @@ Shared settings layout: left vertical menu (Stitch ghost/nav-link style) + conte
 - `/settings/data`: data overview counts, export CSV (all meds+events), "Delete all data" (danger, typed confirm, transactional), privacy notes; cannot delete demo-owned data from real account (demo isolated).
 
 ### 11.15 `/help` (no auth shell — or public under shell? Make it authenticated + marketing both)
+
 - Purpose: how-to cards, FAQ accordions (Stitch cards + pills), links to settings/demo; and the "MedVault AI" FAB becomes a link to this page with a note that AI here is informational. Reuse the marketing footer style.
 - Data: static content in `src/features/help/help-content.ts`. Auth: accessible to all (public page under `(marketing)` or standalone); keep under `(app)` when logged in via shell too — implement as two lightweight routes sharing a component.
 
 ### 11.16 `/demo`
+
 - Purpose: one-click live demonstration (§10.8). Loads demo shell with banner + simulation dock (floating, bottom-right): buttons (Simulate taken, missed, skipped, snoozed; Apply scenario; Generate caregiver alert; Generate AI insight; Reset demo; Time slider) + demo clock. Runs the real app pages (dashboard/schedule/etc. reused) bound to demo context.
 
 ---
 
 ## 12. STATUS SYSTEM (single source: `shared/enums.ts` + `components/ui/status-*`)
 
-| Status | Color | Tint badge | Icon | Label pattern |
-|---|---|---|---|---|
-| Taken | `#10b981` | `#d1fae5` | `CheckCircle2` | "Taken · 8:02 AM" |
-| Upcoming | `#3b82f6` | `#dbeafe` | `Clock` | "Upcoming · 8:00 AM" |
-| Due Now | `#10b981` (pulse ring `rgba(16,185,129,0.4)`) | `#d1fae5` | `BellRing` | "Due now" |
-| Missed | `#ef4444` | `#fee2e2` | `AlertCircle` | "Missed" |
-| Skipped | `#94a3b8` | `#f1f5f9` | `XCircle`/`MinusCircle` | "Skipped · reason" |
-| Snoozed | `#f59e0b` | `#fef3c7` | `AlarmClock` | "Snoozed · 10 min" |
-| Paused (med) | `#64748b` | `#e2e8f0` | `PauseCircle` | "Paused" |
-| Canceled/void | `#94a3b8` | `#f8fafc` | `Ban` | "Canceled" |
+| Status        | Color                                         | Tint badge | Icon                    | Label pattern        |
+| ------------- | --------------------------------------------- | ---------- | ----------------------- | -------------------- |
+| Taken         | `#10b981`                                     | `#d1fae5`  | `CheckCircle2`          | "Taken · 8:02 AM"    |
+| Upcoming      | `#3b82f6`                                     | `#dbeafe`  | `Clock`                 | "Upcoming · 8:00 AM" |
+| Due Now       | `#10b981` (pulse ring `rgba(16,185,129,0.4)`) | `#d1fae5`  | `BellRing`              | "Due now"            |
+| Missed        | `#ef4444`                                     | `#fee2e2`  | `AlertCircle`           | "Missed"             |
+| Skipped       | `#94a3b8`                                     | `#f1f5f9`  | `XCircle`/`MinusCircle` | "Skipped · reason"   |
+| Snoozed       | `#f59e0b`                                     | `#fef3c7`  | `AlarmClock`            | "Snoozed · 10 min"   |
+| Paused (med)  | `#64748b`                                     | `#e2e8f0`  | `PauseCircle`           | "Paused"             |
+| Canceled/void | `#94a3b8`                                     | `#f8fafc`  | `Ban`                   | "Canceled"           |
 
 - Never color-only: each badge includes icon + text + `aria-label` ("Status: Missed, scheduled 8:00 AM"). `StatusIndicator` component renders all; a test asserts icon+text+label are always present.
 
@@ -742,6 +809,7 @@ UI form contract: labels §5.2, error text `12–13px` `#ef4444` with alert role
 ## 16. RESPONSIVE BEHAVIOR CONTRACT
 
 Breakpoints: `sm 640 · md 768 · lg 1024 · xl 1280` (Tailwind default). Behavior per surface:
+
 - **Sidebar** (shell): `≥lg` persistent; `md–lg` collapsible w/ drawer overlay + backdrop; `<md` hidden → bottom nav.
 - **Top header**: full at ≥md; compact (logo + bell + avatar only) < md.
 - **Bottom nav** (<md): 4 items (Home/Schedule/Add/More) — home active w/ Stitch dot; Add opens `/medications/new` via center prominent icon; More = sheet w/ full nav list.
@@ -781,12 +849,14 @@ Breakpoints: `sm 640 · md 768 · lg 1024 · xl 1280` (Tailwind default). Behavi
 ## 19. SAMPLE DATA (Arun Kumar — used verbatim in all demo/dev seeding)
 
 Patient: **Arun Kumar**. Medications:
+
 1. **Metformin 500 mg** — twice daily (08:00, 20:00, daily)
 2. **Vitamin D 1000 IU** — once daily (10:00)
 3. **Aspirin 75 mg** — once daily (08:00)
 4. **Vitamin B12 500 mcg** — once daily (09:00)
 
 Adherence target (constructed exactly in the seed):
+
 - 84 scheduled · 76 taken · 5 missed · 3 skipped · 8 snoozed
 - Adherence 90.5% → displayed 90.4–90.5% (1dp); 7-day current streak
 - Patterns: misses concentrated in the afternoon bucket (Metformin 20:00 mostly missed → fuels "repeated missed evening doses" AI insight); Vitamin D frequently snoozed (morning snooze pattern); recent 7 days perfect (streak).
@@ -796,15 +866,15 @@ Adherence target (constructed exactly in the seed):
 
 ## 20. CROSS-FEATURE DATA PROPAGATION MATRIX (must be true in all phases)
 
-| Originating action | Must update |
-|---|---|
-| Medication created | list, detail, schedule (dose events generated), dashboard, adherence (now scheduled), reports, insight input, notifications horizon |
-| Medication paused/archived | list badge, detail banner, future dose events voided, dashboard/schedule clean, history preserved w/ "archived" tag, adherence/reports unchanged (historical kept) |
-| Schedule slot added/removed | dose events regenerated (void removed, add new), schedule page, dashboard next-dose, adherence recompute for affected days |
-| Dose Taken | dose status, schedule page, dashboard (next dose, stats, streak), adherence day, history (audit), medication perf, reports, insights snapshot using fresh data |
-| Dose Missed (auto) | status, notifications, caregiver alert (if enabled), dashboard banner, adherence, history |
-| Dose Snoozed | status, snooze history (audit), dashboard countdown, notifications suppressed |
-| Caregiver alert | originates from missed dose; appears in caregiver alerts + caregiver notification + patient "sent" view |
+| Originating action          | Must update                                                                                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Medication created          | list, detail, schedule (dose events generated), dashboard, adherence (now scheduled), reports, insight input, notifications horizon                                |
+| Medication paused/archived  | list badge, detail banner, future dose events voided, dashboard/schedule clean, history preserved w/ "archived" tag, adherence/reports unchanged (historical kept) |
+| Schedule slot added/removed | dose events regenerated (void removed, add new), schedule page, dashboard next-dose, adherence recompute for affected days                                         |
+| Dose Taken                  | dose status, schedule page, dashboard (next dose, stats, streak), adherence day, history (audit), medication perf, reports, insights snapshot using fresh data     |
+| Dose Missed (auto)          | status, notifications, caregiver alert (if enabled), dashboard banner, adherence, history                                                                          |
+| Dose Snoozed                | status, snooze history (audit), dashboard countdown, notifications suppressed                                                                                      |
+| Caregiver alert             | originates from missed dose; appears in caregiver alerts + caregiver notification + patient "sent" view                                                            |
 
 The contract: every mutation happens through the domain service that owns the cross-cutting fan-out (§10), never hand-rolled in a page.
 
@@ -1228,6 +1298,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 ## 22. GLOBAL DEFINITION OF DONE
 
 The application is done when ALL of the following hold:
+
 1. `pnpm dev`/`build` succeed; `typecheck`, `lint`, `test`, `test:e2e` green; coverage thresholds met.
 2. All §11 routes exist, are real (nav test), authed-appropriate, and reachable; no dead buttons.
 3. The UI matches the Stitch export design system (§5): tokens, typography, colors, radii, shadows, cards, statuses; brand via single `brand.ts`.

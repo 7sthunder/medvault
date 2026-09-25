@@ -38,14 +38,21 @@ export default function Nav() {
       aria-label="Primary"
       className={cn(
         "fixed inset-x-0 top-0 z-[200] flex h-[68px] items-center justify-between border-b border-border px-[4%] transition-all duration-300",
-        scrolled ? "bg-white/95 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-[16px]" : "bg-white",
+        scrolled
+          ? "bg-white/95 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-[16px]"
+          : "bg-white",
       )}
     >
       <Brand size={36} wordmarkSize={20} />
 
       <div className="hidden items-center gap-2 md:flex">
         {SECTION_LINKS.map((l) => (
-          <button key={l.id} type="button" className="nav-link" onClick={() => scrollToSection(l.id)}>
+          <button
+            key={l.id}
+            type="button"
+            className="nav-link"
+            onClick={() => scrollToSection(l.id)}
+          >
             {l.label}
           </button>
         ))}
@@ -55,7 +62,11 @@ export default function Nav() {
         <Link href="/login" className="nav-login">
           Log In
         </Link>
-        <Link href="/register" className="cta-primary" style={{ padding: "10px 22px", fontSize: 13.5 }}>
+        <Link
+          href="/register"
+          className="cta-primary"
+          style={{ padding: "10px 22px", fontSize: 13.5 }}
+        >
           Create Vault
         </Link>
       </div>

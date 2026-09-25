@@ -32,7 +32,13 @@ function instantIs(d: Date, dateKey: string, hhmm: string, tz = TZ): void {
 
 describe("shared/calc/schedule — expandSchedule (§10.2)", () => {
   it("emits one dose per enabled full-week slot for every in-window day", () => {
-    const doses = expandSchedule(med(), [slot(), slot({ id: "slot-2", timeOfDay: "20:00" })], "2026-01-05", "2026-01-06", TZ);
+    const doses = expandSchedule(
+      med(),
+      [slot(), slot({ id: "slot-2", timeOfDay: "20:00" })],
+      "2026-01-05",
+      "2026-01-06",
+      TZ,
+    );
     expect(doses).toHaveLength(4);
     instantIs(doses[0]!.scheduledFor, "2026-01-05", "08:00");
     instantIs(doses[1]!.scheduledFor, "2026-01-05", "20:00");
@@ -42,12 +48,24 @@ describe("shared/calc/schedule — expandSchedule (§10.2)", () => {
   });
 
   it("per-slot dosageAmount overrides the medication dosage", () => {
-    const [dose] = expandSchedule(med({ dosageAmount: 500 }), [slot({ dosageAmount: 250 })], "2026-01-05", "2026-01-05", TZ);
+    const [dose] = expandSchedule(
+      med({ dosageAmount: 500 }),
+      [slot({ dosageAmount: 250 })],
+      "2026-01-05",
+      "2026-01-05",
+      TZ,
+    );
     expect(dose?.dosageAmount).toBe(250);
   });
 
   it("falls back to the medication dosage when the slot has none", () => {
-    const [dose] = expandSchedule(med({ dosageAmount: 500 }), [slot({ dosageAmount: null })], "2026-01-05", "2026-01-05", TZ);
+    const [dose] = expandSchedule(
+      med({ dosageAmount: 500 }),
+      [slot({ dosageAmount: null })],
+      "2026-01-05",
+      "2026-01-05",
+      TZ,
+    );
     expect(dose?.dosageAmount).toBe(500);
   });
 
@@ -71,8 +89,17 @@ describe("shared/calc/schedule — expandSchedule (§10.2)", () => {
   });
 
   it("honours the weekdays-of-week filter", () => {
-    const monFri = expandSchedule(med(), [slot({ daysOfWeek: [1, 5] })], "2026-01-05", "2026-01-11", TZ);
-    expect(monFri.map((d) => localDateKey(d.scheduledFor, TZ))).toEqual(["2026-01-05", "2026-01-09"]);
+    const monFri = expandSchedule(
+      med(),
+      [slot({ daysOfWeek: [1, 5] })],
+      "2026-01-05",
+      "2026-01-11",
+      TZ,
+    );
+    expect(monFri.map((d) => localDateKey(d.scheduledFor, TZ))).toEqual([
+      "2026-01-05",
+      "2026-01-09",
+    ]);
   });
 
   it("is idempotent and deterministic — same inputs give identical output", () => {
@@ -89,7 +116,13 @@ describe("shared/calc/schedule — expandSchedule (§10.2)", () => {
   });
 
   it("is timezone-correct: pushed instants reflect the user zone", () => {
-    const [dose] = expandSchedule(med(), [slot({ timeOfDay: "08:00" })], "2026-01-05", "2026-01-05", TZ);
+    const [dose] = expandSchedule(
+      med(),
+      [slot({ timeOfDay: "08:00" })],
+      "2026-01-05",
+      "2026-01-05",
+      TZ,
+    );
     // Kolkata is UTC+5:30 → local 08:00 on Jan 5 = 02:30Z (epoch-normalised).
     expect(dose!.scheduledFor.getTime()).toBe(new Date("2026-01-05T02:30:00.000Z").getTime());
   });

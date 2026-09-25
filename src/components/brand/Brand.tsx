@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import { Logo, type LogoProps } from "@/components/brand/Logo";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { cn } from "@/lib/utils";
+import { BRAND, BRAND_HREF } from "@/shared/brand";
 
 export interface BrandProps extends LogoProps {
   /** Show the wordmark next to the tile (default true) */
@@ -21,8 +22,8 @@ export function Brand({
   size = 36,
   showWordmark = true,
   wordmarkSize,
-  href = "/",
-  label = "MedVault",
+  href = BRAND_HREF,
+  label = BRAND.name,
   weight = "strong",
   className,
 }: BrandProps) {
@@ -42,7 +43,7 @@ export function Brand({
 /** Optional trailing chip for the AI assistant brand (§5.1 MedVault AI). */
 export function AiBrandLockup({
   Icon,
-  title = "MedVault AI",
+  title = BRAND.ai.name,
   href,
   className,
 }: {
@@ -53,11 +54,8 @@ export function AiBrandLockup({
 }) {
   const content = (
     <span
-      className={cn(
-        "inline-flex items-center gap-2 rounded-full text-white shadow-lg",
-        className,
-      )}
-      style={{ background: "linear-gradient(135deg,#10b981,#059669)" }}
+      className={cn("inline-flex items-center gap-2 rounded-full text-white shadow-lg", className)}
+      style={{ background: BRAND.ai.gradient }}
     >
       <Icon className="size-4" aria-hidden="true" strokeWidth={2.4} />
       <span className="text-sm font-medium tracking-tight">{title}</span>

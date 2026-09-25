@@ -6,6 +6,7 @@ import Link from "next/link";
 import { CheckCircle2, HeartPulse } from "lucide-react";
 
 import ScrollingServices from "@/features/landing/ScrollingServices";
+import { BRAND } from "@/shared/brand";
 
 /* Bundle-split heavy hero visuals; framer-motion phone floats render client-only. */
 const HeroVisual = dynamic(() => import("@/features/landing/HeroVisual"), {
@@ -44,8 +45,16 @@ export default function Hero() {
     >
       <div className="dot-grid absolute inset-0 opacity-60" aria-hidden />
 
-      <div className="bg-blob-primary pointer-events-none absolute hidden lg:block" style={{ top: "5%", right: "-8%", width: 520, height: 520, borderRadius: "50%" }} aria-hidden />
-      <div className="bg-blob-secondary pointer-events-none absolute hidden lg:block" style={{ bottom: "5%", left: "-5%", width: 380, height: 380, borderRadius: "50%" }} aria-hidden />
+      <div
+        className="bg-blob-primary pointer-events-none absolute hidden lg:block"
+        style={{ top: "5%", right: "-8%", width: 520, height: 520, borderRadius: "50%" }}
+        aria-hidden
+      />
+      <div
+        className="bg-blob-secondary pointer-events-none absolute hidden lg:block"
+        style={{ bottom: "5%", left: "-5%", width: 380, height: 380, borderRadius: "50%" }}
+        aria-hidden
+      />
 
       <div
         className="relative z-[2] flex w-full flex-wrap items-center"
@@ -80,17 +89,34 @@ export default function Hero() {
               ...reveal("all", "0.2s", "16px"),
             }}
           >
-            MedVault brings your medical records, medicine schedules, appointments, and AI-powered
-            health guidance into one beautifully simple, secure platform.
+            {BRAND.name} brings your medical records, medicine schedules, appointments, and
+            AI-powered health guidance into one beautifully simple, secure platform.
           </p>
 
-          <div style={{ marginBottom: 36, ...reveal("all", "0.25s", "16px"), display: "flex", alignItems: "center", gap: 0, flexWrap: "wrap" }}>
-            <div className="font-heading text-ink-500 text-base font-bold">All in one vault, for your</div>
+          <div
+            style={{
+              marginBottom: 36,
+              ...reveal("all", "0.25s", "16px"),
+              display: "flex",
+              alignItems: "center",
+              gap: 0,
+              flexWrap: "wrap",
+            }}
+          >
+            <div className="font-heading text-ink-500 text-base font-bold">
+              All in one vault, for your
+            </div>
             <ScrollingServices />
           </div>
 
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", ...reveal("all", "0.3s", "16px") }}>
-            <Link href="/register" className="cta-primary" style={{ padding: "17px 42px", fontSize: 17, gap: 10 }}>
+          <div
+            style={{ display: "flex", gap: 14, flexWrap: "wrap", ...reveal("all", "0.3s", "16px") }}
+          >
+            <Link
+              href="/register"
+              className="cta-primary"
+              style={{ padding: "17px 42px", fontSize: 17, gap: 10 }}
+            >
               <HeartPulse size={22} aria-hidden />
               Create Your Health Vault
             </Link>
@@ -99,7 +125,15 @@ export default function Hero() {
             </Link>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 36, ...reveal("all", "0.45s") }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              marginTop: 36,
+              ...reveal("all", "0.45s"),
+            }}
+          >
             <div className="flex">
               {AVATARS.map((a, i) => (
                 <div
@@ -127,10 +161,17 @@ export default function Hero() {
             <div>
               <div className="flex gap-[2px]">
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <CheckCircle2 key={s} size={12} className="fill-amber/[0.19] text-amber" aria-hidden />
+                  <CheckCircle2
+                    key={s}
+                    size={12}
+                    className="fill-amber/[0.19] text-amber"
+                    aria-hidden
+                  />
                 ))}
               </div>
-              <div className="text-ink-500 mt-[2px] text-xs">Trusted by millions · Free forever</div>
+              <div className="text-ink-500 mt-[2px] text-xs">
+                Trusted by millions · Free forever
+              </div>
             </div>
           </div>
         </div>

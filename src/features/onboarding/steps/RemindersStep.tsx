@@ -11,10 +11,22 @@ import type { OnboardingInput } from "@/shared/validations/onboarding";
 type ReminderNumberKey = keyof typeof VALUE_LIMITS;
 
 const NUMBER_FIELDS: { name: ReminderNumberKey; label: string; hint: string }[] = [
-  { name: "missedAfterMinutes", label: "Missed-after", hint: "Minutes after a dose time before it counts as missed." },
+  {
+    name: "missedAfterMinutes",
+    label: "Missed-after",
+    hint: "Minutes after a dose time before it counts as missed.",
+  },
   { name: "snoozeMinutes", label: "Snooze", hint: "How long a snooze delays a due dose." },
-  { name: "maxSnoozes", label: "Max snoozes", hint: "Times a dose can be snoozed before it must resolve." },
-  { name: "reminderBeforeMinutes", label: "Remind me before", hint: "Minutes before a dose time to nudge you." },
+  {
+    name: "maxSnoozes",
+    label: "Max snoozes",
+    hint: "Times a dose can be snoozed before it must resolve.",
+  },
+  {
+    name: "reminderBeforeMinutes",
+    label: "Remind me before",
+    hint: "Minutes before a dose time to nudge you.",
+  },
 ];
 
 /**
@@ -55,7 +67,9 @@ export function RemindersStep({
       <div className="flex items-center justify-between gap-4 rounded-lg border border-border-strong bg-muted/30 px-4 py-3">
         <div>
           <p className="text-sm font-semibold text-ink-900">Add a sample medication</p>
-          <p className="text-xs text-muted-foreground">Metformin 500mg · twice a day (08:00 & 20:00).</p>
+          <p className="text-xs text-muted-foreground">
+            Metformin 500mg · twice a day (08:00 & 20:00).
+          </p>
         </div>
         <Switch
           id="onboarding-add-sample"

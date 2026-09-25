@@ -45,11 +45,7 @@ export default function FloatingCard({
   return (
     <motion.div
       initial={{ opacity: 0, y: 36 }}
-      animate={
-        isVisible
-          ? { opacity: 1, y: 0 }
-          : { opacity: 0, y: 36 }
-      }
+      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 36 }}
       transition={{
         duration: 0.65,
         delay: 0.06 + delay * 0.12,
@@ -63,11 +59,7 @@ export default function FloatingCard({
         <motion.div
           className={emphasis ? glassLg : glass}
           style={{ rotate: rotateDeg }}
-          animate={
-            isVisible
-              ? { y: [0, -8, 0] }
-              : { y: 0 }
-          }
+          animate={isVisible ? { y: [0, -8, 0] } : { y: 0 }}
           transition={{
             repeat: isVisible ? Infinity : 0,
             duration: 5 + delay * 0.12,

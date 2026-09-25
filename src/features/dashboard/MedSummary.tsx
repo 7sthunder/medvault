@@ -16,7 +16,13 @@ import { medTintClasses } from "../medications/medication-utils";
  * frequency, next-dose time + per-med adherence chip → `/medications`. Sourced from
  * the same `medication.list` the medications page renders (filled extras).
  */
-export function MedSummary({ medications, timeZone }: { medications: MedicationDTO[]; timeZone: string }) {
+export function MedSummary({
+  medications,
+  timeZone,
+}: {
+  medications: MedicationDTO[];
+  timeZone: string;
+}) {
   const active = medications.filter((m) => m.status === "active");
 
   if (active.length === 0) return null;
@@ -28,7 +34,12 @@ export function MedSummary({ medications, timeZone }: { medications: MedicationD
       </SectionLabel>
       <div className="mt-2 rounded-xl border border-border bg-card shadow-card-sm">
         {active.map((med) => (
-          <a key={med.id} href={`/medications/${med.id}`} className="block no-underline" aria-label={med.name}>
+          <a
+            key={med.id}
+            href={`/medications/${med.id}`}
+            className="block no-underline"
+            aria-label={med.name}
+          >
             <ListRow
               icon={Pill}
               iconClass={medTintClasses(med.color)}

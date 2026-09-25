@@ -34,7 +34,9 @@ export function medicationPerformance(
 ): MedicationPerformanceDTO[] {
   return meds
     .map((med) => {
-      const resolved = med.events.filter((e) => (RESOLVED as readonly DoseEventStatus[]).includes(e.status));
+      const resolved = med.events.filter((e) =>
+        (RESOLVED as readonly DoseEventStatus[]).includes(e.status),
+      );
       const taken = resolved.filter((e) => e.status === "taken");
 
       const counts = {

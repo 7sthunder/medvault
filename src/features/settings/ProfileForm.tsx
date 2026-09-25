@@ -10,7 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ErrorState } from "@/components/ui/error-state";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/trpc";
 import { TIMEZONE_LIST } from "@/shared/validations/common";
@@ -88,7 +94,8 @@ export function ProfileForm() {
       <CardHeader>
         <CardTitle className="text-ink-900">Your details</CardTitle>
         <CardDescription>
-          Your timezone decides which calendar day each dose belongs to — changing it re-buckets your history.
+          Your timezone decides which calendar day each dose belongs to — changing it re-buckets
+          your history.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,7 +105,12 @@ export function ProfileForm() {
           </FormField>
 
           <FormField label="Email" error={form.formState.errors.email?.message} required>
-            <Input id="profile-email" type="email" autoComplete="email" {...form.register("email")} />
+            <Input
+              id="profile-email"
+              type="email"
+              autoComplete="email"
+              {...form.register("email")}
+            />
           </FormField>
 
           <FormField
@@ -109,7 +121,9 @@ export function ProfileForm() {
           >
             <Select
               value={form.watch("timezone")}
-              onValueChange={(value) => form.setValue("timezone", value ?? "UTC", { shouldDirty: true })}
+              onValueChange={(value) =>
+                form.setValue("timezone", value ?? "UTC", { shouldDirty: true })
+              }
             >
               <SelectTrigger id="profile-timezone" className="w-full" aria-label="Timezone">
                 <SelectValue placeholder="Choose a timezone" />
@@ -125,7 +139,10 @@ export function ProfileForm() {
           </FormField>
 
           {serverError && (
-            <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <p
+              role="alert"
+              className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            >
               {serverError}
             </p>
           )}

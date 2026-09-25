@@ -12,9 +12,9 @@ import { and, eq, gte, isNull, lt, lte } from "drizzle-orm";
 
 import type { DbClient } from "@/server/db/helpers";
 import { uuidv7 } from "@/server/db/helpers";
-import { adherenceDaily, doseEvents } from "@/server/db/schema";
-import { ADHERENCE_PRUNE_DAYS } from "@/shared/constants";
-import { isPendingStatus } from "@/shared/calc/doseState";
+import { adherenceDaily, doseEvents, userPreferences } from "@/server/db/schema";
+import { ADHERENCE_PRUNE_DAYS, MISSED_AFTER_DEFAULT } from "@/shared/constants";
+import { deriveNextStatus, isPendingStatus } from "@/shared/calc/doseState";
 import type { DoseEventStatus } from "@/shared/enums";
 import { adherencePercent } from "@/shared/calc/adherence";
 import { addLocalDays, combineDateAndTime, localDateKey, now as sharedNow } from "@/shared/times";
@@ -45,13 +45,23 @@ export interface RecomputeRangeOptions {
 const RESOLVED = new Set(["taken", "missed", "skipped"]);
 
 /** Recompute + persist `adherence_daily` for a contiguous day window. Returns the rows. */
-export async function recomputeRange(db: DbClient, opts: RecomputeRangeOptions): Promise<RecalculatedDay[]> {
+export async function recomputeRange(
+  db: DbClient,
+  opts: RecomputeRangeOptions,
+): Promise<RecalculatedDay[]> {
   const days = aggregateEventDays(await selectEventRows(db, opts), {
     timeZone: opts.timeZone,
     now: opts.now,
   });
+  await persistCalculatedDays(db, opts, days);
+  return days;
+}
 
-  // Idempotent write: replace this exact scope (user-wide or per-med) for the window.
+async function persistCalculatedDays(
+  db: DbClient,
+  opts: RecomputeRangeOptions,
+  days: RecalculatedDay[],
+): Promise<void> {
   await db
     .delete(adherenceDaily)
     .where(
@@ -65,42 +75,50 @@ export async function recomputeRange(db: DbClient, opts: RecomputeRangeOptions):
       ),
     );
 
-  if (days.length > 0) {
-    await db.insert(adherenceDaily).values(
-      days.map((d) => ({
-        id: uuidv7(),
-        userId: opts.userId,
-        date: d.date,
-        medicationId: opts.medicationId ?? null,
-        scheduled: d.scheduled,
-        taken: d.taken,
-        missed: d.missed,
-        skipped: d.skipped,
-        snoozed: d.snoozed,
-        adherencePercent: d.adherencePercent === null ? null : d.adherencePercent.toFixed(2),
-        streakDay: d.streakDay,
-      })),
-    );
-  }
-
-  return days;
+  if (days.length === 0) return;
+  await db.insert(adherenceDaily).values(
+    days.map((d) => ({
+      id: uuidv7(),
+      userId: opts.userId,
+      date: d.date,
+      medicationId: opts.medicationId ?? null,
+      scheduled: d.scheduled,
+      taken: d.taken,
+      missed: d.missed,
+      skipped: d.skipped,
+      snoozed: d.snoozed,
+      adherencePercent: d.adherencePercent === null ? null : d.adherencePercent.toFixed(2),
+      streakDay: d.streakDay,
+    })),
+  );
 }
 
 type EventRollupRow = {
   scheduledFor: Date;
   status: string;
+  missedDeadline: Date | null;
+  snoozeUntil: Date | null;
   snoozeCount: number | null;
   medicationId: string;
 };
 
 /** Raw event slice feeding the pure aggregation (shared by the write and read-only paths). */
-async function selectEventRows(db: DbClient, opts: RecomputeRangeOptions): Promise<EventRollupRow[]> {
+async function selectEventRows(
+  db: DbClient,
+  opts: RecomputeRangeOptions,
+): Promise<EventRollupRow[]> {
   const start = combineDateAndTime(opts.fromKey, "00:00", opts.timeZone);
-  const end = addLocalDays(combineDateAndTime(opts.toKey, "00:00", opts.timeZone), 1, opts.timeZone);
+  const end = addLocalDays(
+    combineDateAndTime(opts.toKey, "00:00", opts.timeZone),
+    1,
+    opts.timeZone,
+  );
   return db
     .select({
       scheduledFor: doseEvents.scheduledFor,
       status: doseEvents.status,
+      missedDeadline: doseEvents.missedDeadline,
+      snoozeUntil: doseEvents.snoozeUntil,
       snoozeCount: doseEvents.snoozeCount,
       medicationId: doseEvents.medicationId,
     })
@@ -120,11 +138,46 @@ async function selectEventRows(db: DbClient, opts: RecomputeRangeOptions): Promi
  * aggregation, zero writes. The insights snapshot uses it so generating an insight can
  * never touch dose events, dose actions, notifications or caregiver alerts.
  */
-export async function readEventRange(db: DbClient, opts: RecomputeRangeOptions): Promise<RecalculatedDay[]> {
-  return aggregateEventDays(await selectEventRows(db, opts), {
-    timeZone: opts.timeZone,
-    now: opts.now,
+export async function readEventRange(
+  db: DbClient,
+  opts: RecomputeRangeOptions,
+): Promise<RecalculatedDay[]> {
+  const [prefs] = await db
+    .select({ missedAfterMinutes: userPreferences.missedAfterMinutes })
+    .from(userPreferences)
+    .where(eq(userPreferences.userId, opts.userId))
+    .limit(1);
+  const at = opts.now ?? sharedNow();
+  const missedAfterMinutes = prefs?.missedAfterMinutes ?? MISSED_AFTER_DEFAULT;
+  const rows = (await selectEventRows(db, opts)).map((row) => {
+    if (!isPendingStatus(row.status as DoseEventStatus)) return row;
+    const derived = deriveNextStatus(
+      { ...row, status: row.status as DoseEventStatus },
+      at,
+      missedAfterMinutes,
+    );
+    return derived.changed ? { ...row, status: derived.status } : row;
   });
+  return aggregateEventDays(rows, {
+    timeZone: opts.timeZone,
+    now: at,
+  });
+}
+
+/**
+ * Phase 19 — immediate propagation without side effects: roll up the window from the
+ * read-time normalized event state and persist it. The status-writing reconcile pass is
+ * deliberately skipped, so a schedule change never creates dose actions, notifications or
+ * caregiver alerts; canonical transitions still land on the next reconcile, and the
+ * persisted rows already match what the read path would report.
+ */
+export async function materializeEffectiveRange(
+  db: DbClient,
+  opts: RecomputeRangeOptions,
+): Promise<RecalculatedDay[]> {
+  const days = await readEventRange(db, opts);
+  await persistCalculatedDays(db, opts, days);
+  return days;
 }
 
 /** Pure day rollup: `dose_events` rows → one `RecalculatedDay` per local calendar day. */
@@ -148,14 +201,14 @@ function aggregateEventDays(
 
   for (const row of rows) {
     const key = localDateKey(row.scheduledFor, timeZone);
-    const acc = (byDay.get(key) ?? {
+    const acc = byDay.get(key) ?? {
       scheduled: 0,
       taken: 0,
       missed: 0,
       skipped: 0,
       snoozed: 0,
       pendingPast: false,
-    });
+    };
     byDay.set(key, acc);
 
     if (RESOLVED.has(row.status)) {
@@ -165,7 +218,8 @@ function aggregateEventDays(
       else acc.skipped += 1;
     }
     if (row.snoozeCount !== null && row.snoozeCount > 0) acc.snoozed += 1;
-    if (isPendingStatus(row.status as DoseEventStatus) && row.scheduledFor.getTime() < atMs) acc.pendingPast = true;
+    if (isPendingStatus(row.status as DoseEventStatus) && row.scheduledFor.getTime() < atMs)
+      acc.pendingPast = true;
   }
 
   const days: RecalculatedDay[] = [];
@@ -195,7 +249,8 @@ function aggregateEventDays(
   // "any clean day" marker.
   const todayKey = localDateKey(at, timeZone);
   let anchor = days.length - 1;
-  while (anchor >= 0 && !(days[anchor]!.scheduled > 0 && days[anchor]!.date <= todayKey)) anchor -= 1;
+  while (anchor >= 0 && !(days[anchor]!.scheduled > 0 && days[anchor]!.date <= todayKey))
+    anchor -= 1;
   if (anchor >= 0) {
     const flagged = new Set<number>();
     for (let i = anchor; i >= 0; i -= 1) {
@@ -215,14 +270,27 @@ function aggregateEventDays(
 /** Single-day convenience wrapper (every user action recomputes its day(s)). */
 export function recomputeDay(
   db: DbClient,
-  opts: { userId: string; dateKey: string; timeZone: string; medicationId?: string | null; now?: Date },
+  opts: {
+    userId: string;
+    dateKey: string;
+    timeZone: string;
+    medicationId?: string | null;
+    now?: Date;
+  },
 ): Promise<RecalculatedDay[]> {
   return recomputeRange(db, { ...opts, fromKey: opts.dateKey, toKey: opts.dateKey });
 }
 
 /** Trim `adherence_daily` rows older than the history window. Returns rows removed. */
-export async function pruneAdherence(db: DbClient, userId: string, options: { now?: Date } = {}): Promise<number> {
-  const cutoffKey = localDateKey(addLocalDays(options.now ?? sharedNow(), -ADHERENCE_PRUNE_DAYS, "UTC"), "UTC");
+export async function pruneAdherence(
+  db: DbClient,
+  userId: string,
+  options: { now?: Date } = {},
+): Promise<number> {
+  const cutoffKey = localDateKey(
+    addLocalDays(options.now ?? sharedNow(), -ADHERENCE_PRUNE_DAYS, "UTC"),
+    "UTC",
+  );
   const removed = await db
     .delete(adherenceDaily)
     .where(and(eq(adherenceDaily.userId, userId), lt(adherenceDaily.date, cutoffKey)))

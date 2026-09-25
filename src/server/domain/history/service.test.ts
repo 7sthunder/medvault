@@ -10,7 +10,11 @@ import { historyService } from "./service";
 
 const dbTests = describe.skipIf(!process.env.DATABASE_URL);
 
-async function inRollbackTransaction<T>(name: string, email: string, fn: (tx: DbTx, userId: string) => Promise<T>): Promise<T> {
+async function inRollbackTransaction<T>(
+  name: string,
+  email: string,
+  fn: (tx: DbTx, userId: string) => Promise<T>,
+): Promise<T> {
   let caught: Error | null = null;
   let result: T | undefined;
   try {
@@ -35,7 +39,12 @@ class RollbackSignal extends Error {
   }
 }
 
-async function seedMedication(tx: DbTx, userId: string, name: string, archivedAt: Date | null = null) {
+async function seedMedication(
+  tx: DbTx,
+  userId: string,
+  name: string,
+  archivedAt: Date | null = null,
+) {
   const [med] = await tx
     .insert(medications)
     .values({
@@ -56,11 +65,23 @@ async function seedDose(
   tx: DbTx,
   userId: string,
   medicationId: string,
-  opts: { scheduledFor: Date; status: DoseEventStatus; action?: DoseActionType; occurredAt?: Date; meta?: Record<string, unknown> },
+  opts: {
+    scheduledFor: Date;
+    status: DoseEventStatus;
+    action?: DoseActionType;
+    occurredAt?: Date;
+    meta?: Record<string, unknown>;
+  },
 ) {
   const [event] = await tx
     .insert(doseEvents)
-    .values({ id: uuidv7(), userId, medicationId, scheduledFor: opts.scheduledFor, status: opts.status })
+    .values({
+      id: uuidv7(),
+      userId,
+      medicationId,
+      scheduledFor: opts.scheduledFor,
+      status: opts.status,
+    })
     .returning({ id: doseEvents.id });
   if (opts.action) {
     await tx.insert(doseActions).values({
@@ -98,7 +119,9 @@ dbTests("historyService (§11.10)", () => {
 
       const page = await historyService.query(tx, userId, "UTC", { limit: 10 });
       expect(page.items).toHaveLength(2);
-      expect(page.items[0]!.occurredAt.getTime()).toBeGreaterThan(page.items[1]!.occurredAt.getTime());
+      expect(page.items[0]!.occurredAt.getTime()).toBeGreaterThan(
+        page.items[1]!.occurredAt.getTime(),
+      );
       expect(page.items[0]!.medication.name).toBe("Metformin");
       expect(page.nextCursor).toBeNull();
     });
@@ -148,7 +171,10 @@ dbTests("historyService (§11.10)", () => {
         occurredAt: new Date("2026-05-02T09:01:00Z"),
       });
 
-      const snoozed = await historyService.query(tx, userId, "UTC", { status: "snoozed", limit: 10 });
+      const snoozed = await historyService.query(tx, userId, "UTC", {
+        status: "snoozed",
+        limit: 10,
+      });
       expect(snoozed.items).toHaveLength(1);
       expect(snoozed.items[0]!.action).toBe("snooze");
     });
@@ -193,7 +219,10 @@ dbTests("historyService (§11.10)", () => {
       expect(first.items).toHaveLength(2);
       expect(first.nextCursor).not.toBeNull();
 
-      const second = await historyService.query(tx, userId, "UTC", { limit: 2, cursor: first.nextCursor! });
+      const second = await historyService.query(tx, userId, "UTC", {
+        limit: 2,
+        cursor: first.nextCursor!,
+      });
       expect(second.items).toHaveLength(1);
       expect(second.nextCursor).toBeNull();
       expect(second.items[0]!.id).not.toBe(first.items[0]!.id);

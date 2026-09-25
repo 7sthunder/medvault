@@ -61,7 +61,11 @@ export function RelationshipList({ relationships }: { relationships: CaregiverRe
               icon={HeartHandshake}
               iconClass={active ? "bg-primary-tint text-primary-dark" : "bg-bg-soft text-ink-500"}
               title={rel.caregiverName}
-              subtitle={STATUS_LABEL[rel.status] === "Revoked" ? "Revoked" : RELATION_LABEL[rel.relationType]}
+              subtitle={
+                STATUS_LABEL[rel.status] === "Revoked"
+                  ? "Revoked"
+                  : RELATION_LABEL[rel.relationType]
+              }
               right={
                 <>
                   <Chip tone={relationshipTone(rel.status)}>{STATUS_LABEL[rel.status]}</Chip>

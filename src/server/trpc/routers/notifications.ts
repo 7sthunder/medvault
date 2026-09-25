@@ -29,7 +29,9 @@ export const notificationsRouter = router({
     ),
 
   /** Live badge count for the bell (§11.13). */
-  unreadCount: protectedProcedure.query(async ({ ctx }) => notificationsService.unreadCount(ctx.db, ctx.user.id)),
+  unreadCount: protectedProcedure.query(async ({ ctx }) =>
+    notificationsService.unreadCount(ctx.db, ctx.user.id),
+  ),
 
   markRead: protectedProcedure
     .input(z.object({ notificationId: z.string().min(1) }))

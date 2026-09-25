@@ -2,11 +2,7 @@ import { formatHhmm } from "@/lib/format";
 import { DEFAULT_SLOT_TIMES, REMINDER_BEFORE_DEFAULT } from "@/shared/constants";
 import { medColorPrefix } from "@/shared/medColor";
 import type { MedicationDTO, ScheduleSlotDTO } from "@/shared/types";
-import {
-  scheduleSchema,
-  WEEKDAY_INDEXES,
-  type ScheduleInput,
-} from "@/shared/validations/schedule";
+import { scheduleSchema, WEEKDAY_INDEXES, type ScheduleInput } from "@/shared/validations/schedule";
 import { DEFAULT_MED_COLOR, type MedicationInput } from "@/shared/validations/medication";
 
 /* ── Shared medication UI vocabulary (plan §11.6) ─────────────────────────── */
@@ -63,6 +59,74 @@ export function daysLabel(days: readonly number[]): string {
   const sorted = [...days].sort((a, b) => a - b);
   const text = sorted.map((day) => DAY_LABELS[day] ?? "?").join(" · ");
   return text || "No days";
+}
+
+/* ── List search + status filter (§11.6) ───────────────────────────────────── */
+
+export type MedicationStatusFilter = "all" | "active" | "paused" | "archived";
+
+export interface MedicationFilter {
+  query: string;
+  status: MedicationStatusFilter;
+}
+
+export interface MedicationFilterResult {
+  /** Non-archived meds matching the filter, sorted by name. */
+  active: MedicationDTO[];
+  paused: MedicationDTO[];
+  archived: MedicationDTO[];
+  /** True when the list has rows but the filter hid all of them. */
+  filteredOut: boolean;
+}
+
+/**
+ * Phase 19 — client-side search + status filter for the medication list.
+ *
+ * Pure so it can be unit tested without rendering, and deliberately forgiving about the query:
+ * it matches the name, the dose, the dose unit and the schedule times, so "500", "mg" and "08:00"
+ * all find the medication a user is actually looking for. Archived rows are matched by the same
+ * text but are only ever *included* under the `archived` (or `all`) filter, which keeps the
+ * separate archived section from filling with rows the active table no longer shows.
+ */
+export function filterMedications(
+  medications: readonly MedicationDTO[],
+  archived: readonly MedicationDTO[],
+  filter: MedicationFilter,
+): MedicationFilterResult {
+  const needle = filter.query.trim().toLowerCase();
+  const matches = (med: MedicationDTO): boolean => {
+    if (needle === "") return true;
+    return (
+      med.name.toLowerCase().includes(needle) ||
+      String(med.dosageAmount).toLowerCase().includes(needle) ||
+      med.dosageUnit.toLowerCase().includes(needle) ||
+      med.slots.some((slot) => slot.timeOfDay.includes(needle))
+    );
+  };
+
+  const live = medications.filter(matches);
+  const archivedMatches = archived.filter(matches);
+
+  const wantsActive = filter.status === "all" || filter.status === "active";
+  const wantsPaused = filter.status === "all" || filter.status === "paused";
+  const wantsArchived = filter.status === "all" || filter.status === "archived";
+
+  const active = wantsActive ? live.filter((med) => med.status === "active") : [];
+  const paused = wantsPaused ? live.filter((med) => med.status === "paused") : [];
+  const archivedBucket = wantsArchived ? archivedMatches : [];
+
+  return {
+    active,
+    paused,
+    archived: archivedBucket,
+    // "There was something to show and the search/filter hid all of it" — scoped to the live
+    // buckets, so picking `archived` (which empties them by design) is not reported as a miss.
+    filteredOut:
+      (wantsActive || wantsPaused) &&
+      active.length === 0 &&
+      paused.length === 0 &&
+      medications.length > 0,
+  };
 }
 
 /* ── Wizard schedule-slot draft (§11.6 schedule builder) ───────────────────── */
@@ -162,7 +226,13 @@ export type MedicationFormValues = Omit<MedicationInput, "dosageAmount"> & {
   dosageAmount: string;
 };
 
-/** Blank create defaults; `reminderBeforeMinutes` is part of the §13 contract. */
+/**
+ * Blank create defaults.
+ *
+ * `reminderBeforeMinutes` is a *user* preference rather than a per-medication column, so it is only
+ * carried here to satisfy `medicationSchema` and is discarded server-side. The editable control
+ * lives in Settings → Reminders.
+ */
 export function medicationDefaultValues(startDate: string): MedicationFormValues {
   return {
     name: "",

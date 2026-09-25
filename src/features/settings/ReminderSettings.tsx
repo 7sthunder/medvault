@@ -129,9 +129,7 @@ export function ReminderSettings() {
   useEffect(() => {
     if (query.data) {
       setDraft(query.data);
-      setRows(
-        Object.fromEntries(query.data.medications.map((m) => [m.id, m.remindersEnabled])),
-      );
+      setRows(Object.fromEntries(query.data.medications.map((m) => [m.id, m.remindersEnabled])));
     }
   }, [query.data]);
 
@@ -283,7 +281,9 @@ export function ReminderSettings() {
             hint="Push or banner alerts before a scheduled dose."
             checked={draft?.notificationPrefs.doseReminders ?? false}
             onChange={(next) =>
-              patchDraft({ notificationPrefs: { ...draft!.notificationPrefs, doseReminders: next } })
+              patchDraft({
+                notificationPrefs: { ...draft!.notificationPrefs, doseReminders: next },
+              })
             }
           />
           <ToggleRow

@@ -40,10 +40,13 @@ export function InviteForm({ onInvited }: { onInvited?: () => void }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [relation, setRelation] = useState<RelationType>("family");
-  const [permissions, setPermissions] = useState<CaregiverPermissions>({ ...DEFAULT_CAREGIVER_PERMISSIONS });
+  const [permissions, setPermissions] = useState<CaregiverPermissions>({
+    ...DEFAULT_CAREGIVER_PERMISSIONS,
+  });
   const [touched, setTouched] = useState(false);
 
-  const emailError = touched && email.length > 0 && !EMAIL_RE.test(email) ? "Enter a valid email address." : null;
+  const emailError =
+    touched && email.length > 0 && !EMAIL_RE.test(email) ? "Enter a valid email address." : null;
   const canSubmit = email.length > 0 && !emailError && !invite.isPending;
 
   const submit = () => {
@@ -106,9 +109,7 @@ export function InviteForm({ onInvited }: { onInvited?: () => void }) {
         <Button type="submit" disabled={!canSubmit || invite.isPending}>
           {invite.isPending ? "Sending…" : "Send invite"}
         </Button>
-        {invite.data && (
-          <InviteLink href={invite.data.href} />
-        )}
+        {invite.data && <InviteLink href={invite.data.href} />}
       </div>
     </form>
   );

@@ -17,7 +17,9 @@ describe("adherencePercent (§10.5)", () => {
   });
 
   it("skipped doses reduce adherence (match the shared denominator)", () => {
-    expect(adherencePercent({ taken: 76, missed: 5, skipped: 3 })).toBe(adherencePercent({ taken: 76, missed: 8, skipped: 0 }));
+    expect(adherencePercent({ taken: 76, missed: 5, skipped: 3 })).toBe(
+      adherencePercent({ taken: 76, missed: 8, skipped: 0 }),
+    );
   });
 
   it("returns null for an empty period (no required doses)", () => {
@@ -51,7 +53,11 @@ describe("computeStreaks (§10.5)", () => {
       perfect(10),
       perfect(11),
     ];
-    expect(computeStreaks(days, "2026-01-11")).toEqual({ current: 7, longest: 7, currentEndsToday: false });
+    expect(computeStreaks(days, "2026-01-11")).toEqual({
+      current: 7,
+      longest: 7,
+      currentEndsToday: false,
+    });
   });
 
   it("in-progress today counts toward current but not longest", () => {
@@ -60,7 +66,11 @@ describe("computeStreaks (§10.5)", () => {
       { date: "2026-01-10", scheduled: 2, missed: 0, skipped: 0 },
       { date: "2026-01-11", scheduled: 2, missed: 0, skipped: 0, inProgress: true },
     ];
-    expect(computeStreaks(days, "2026-01-11")).toEqual({ current: 3, longest: 2, currentEndsToday: true });
+    expect(computeStreaks(days, "2026-01-11")).toEqual({
+      current: 3,
+      longest: 2,
+      currentEndsToday: true,
+    });
   });
 
   it("non-regimen days do not break the streak", () => {
@@ -70,7 +80,11 @@ describe("computeStreaks (§10.5)", () => {
       { date: "2026-01-10", scheduled: 2, missed: 0, skipped: 0 },
       { date: "2026-01-11", scheduled: 2, missed: 0, skipped: 0 },
     ];
-    expect(computeStreaks(days, "2026-01-11")).toEqual({ current: 3, longest: 3, currentEndsToday: false });
+    expect(computeStreaks(days, "2026-01-11")).toEqual({
+      current: 3,
+      longest: 3,
+      currentEndsToday: false,
+    });
   });
 
   it("a missed day ends the current streak", () => {
@@ -78,7 +92,11 @@ describe("computeStreaks (§10.5)", () => {
       { date: "2026-01-10", scheduled: 2, missed: 0, skipped: 0 },
       { date: "2026-01-11", scheduled: 2, missed: 1, skipped: 0 },
     ];
-    expect(computeStreaks(days, "2026-01-11")).toEqual({ current: 0, longest: 1, currentEndsToday: false });
+    expect(computeStreaks(days, "2026-01-11")).toEqual({
+      current: 0,
+      longest: 1,
+      currentEndsToday: false,
+    });
   });
 });
 
@@ -121,7 +139,10 @@ describe("computeTrend (§10.5)", () => {
       { date: "2026-01-02", adherencePercent: 100 },
       { date: "2026-01-03", adherencePercent: 50 },
     ];
-    expect(computeTrend(days, "2026-01-02").rolling7[1]).toEqual({ date: "2026-01-02", value: 100 });
+    expect(computeTrend(days, "2026-01-02").rolling7[1]).toEqual({
+      date: "2026-01-02",
+      value: 100,
+    });
   });
 });
 
@@ -135,9 +156,24 @@ describe("medicationPerformance (§10.5)", () => {
           color: "#10b981",
           frequencyLabel: "twice-daily",
           events: [
-            { status: "taken", scheduledFor: iso("2026-01-08", "08:00"), takenAt: iso("2026-01-08", "08:05"), snoozeCount: 0 },
-            { status: "taken", scheduledFor: iso("2026-01-08", "20:00"), takenAt: iso("2026-01-08", "20:10"), snoozeCount: 1 },
-            { status: "missed", scheduledFor: iso("2026-01-09", "20:00"), takenAt: null, snoozeCount: 0 },
+            {
+              status: "taken",
+              scheduledFor: iso("2026-01-08", "08:00"),
+              takenAt: iso("2026-01-08", "08:05"),
+              snoozeCount: 0,
+            },
+            {
+              status: "taken",
+              scheduledFor: iso("2026-01-08", "20:00"),
+              takenAt: iso("2026-01-08", "20:10"),
+              snoozeCount: 1,
+            },
+            {
+              status: "missed",
+              scheduledFor: iso("2026-01-09", "20:00"),
+              takenAt: null,
+              snoozeCount: 0,
+            },
           ],
         },
       ],

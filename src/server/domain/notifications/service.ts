@@ -33,7 +33,13 @@ const TAB_TYPES: Record<NotificationTab, NotificationType[] | null> = {
 };
 
 export function isNotifTab(value: string): value is NotificationTab {
-  return value === "all" || value === "dose" || value === "caregiver" || value === "ai" || value === "system";
+  return (
+    value === "all" ||
+    value === "dose" ||
+    value === "caregiver" ||
+    value === "ai" ||
+    value === "system"
+  );
 }
 
 export interface NotificationsList {
@@ -77,7 +83,10 @@ export const notificationsService = {
 
     if (
       input.entityId &&
-      (input.type === "missed_dose" || input.type === "due_dose" || input.type === "caregiver_alert")
+      (input.type === "upcoming_dose" ||
+        input.type === "missed_dose" ||
+        input.type === "due_dose" ||
+        input.type === "caregiver_alert")
     ) {
       const [existing] = await db
         .select({ id: notifications.id })
@@ -119,7 +128,8 @@ export const notificationsService = {
       .limit(limit + 1);
 
     const items = rows.slice(0, limit).map(toDTO);
-    const nextCursor = rows.length > limit ? new Date(items[items.length - 1]!.createdAt).toISOString() : null;
+    const nextCursor =
+      rows.length > limit ? new Date(items[items.length - 1]!.createdAt).toISOString() : null;
     return { items, nextCursor };
   },
 
@@ -136,7 +146,13 @@ export const notificationsService = {
     await db
       .update(notifications)
       .set({ readAt: new Date() })
-      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId), isNull(notifications.readAt)));
+      .where(
+        and(
+          eq(notifications.id, notificationId),
+          eq(notifications.userId, userId),
+          isNull(notifications.readAt),
+        ),
+      );
   },
 
   async markAllRead(db: DbClient, userId: string): Promise<void> {

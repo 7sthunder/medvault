@@ -63,8 +63,12 @@ describe("AppShell", () => {
 
   it("marks the current page as active in the sidebar", () => {
     renderShell();
-    expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("link", { name: "Medications" }).getAttribute("aria-current")).toBeNull();
+    expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBe(
+      "page",
+    );
+    expect(
+      screen.getByRole("link", { name: "Medications" }).getAttribute("aria-current"),
+    ).toBeNull();
   });
 
   it("re-activates the nav when the pathname changes", () => {
@@ -75,7 +79,9 @@ describe("AppShell", () => {
         <p>Page body</p>
       </AppShell>,
     );
-    expect(screen.getByRole("link", { name: "Today's Schedule" }).getAttribute("aria-current")).toBe("page");
+    expect(
+      screen.getByRole("link", { name: "Today's Schedule" }).getAttribute("aria-current"),
+    ).toBe("page");
     expect(screen.getByRole("link", { name: "Dashboard" }).getAttribute("aria-current")).toBeNull();
   });
 
@@ -103,5 +109,24 @@ describe("AppShell", () => {
     expect(screen.getByRole("menuitem", { name: /Settings/ })).toBeTruthy();
     fireEvent.click(screen.getByRole("menuitem", { name: /Sign out/ }));
     await waitFor(() => expect(router.push).toHaveBeenCalledWith("/"));
+  });
+
+  it("exposes a skip link pointing at a focusable main-content target (WCAG 2.4.1)", () => {
+    renderShell();
+
+    // The shell must not add its own <main>: each feature page owns that landmark, and a second
+    // one (or a nested one) is invalid and fails axe's duplicate-main rule.
+    expect(document.querySelectorAll("main")).toHaveLength(0);
+
+    const target = document.getElementById("main-content");
+    expect(target).toBeTruthy();
+    // Focusable so the fragment navigation moves focus, not just the scroll position.
+    expect(target?.getAttribute("tabindex")).toBe("-1");
+
+    const skip = screen.getByRole("link", { name: /skip to main content/i });
+    expect(skip.getAttribute("href")).toBe("#main-content");
+    // Hidden until focused, but still in the a11y tree so it stays discoverable.
+    expect(skip.className).toContain("sr-only");
+    expect(skip.className).toContain("focus:not-sr-only");
   });
 });

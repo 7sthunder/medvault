@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/trpc";
 import { formatCount, formatInstant } from "@/lib/format";
@@ -51,6 +52,7 @@ function report(result: DemoActionResultDTO): void {
 
 export function DemoDock() {
   const [open, setOpen] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
   const utils = api.useUtils();
   const state = api.demo.state.useQuery(undefined, { refetchInterval: 30_000 });
 
@@ -105,6 +107,7 @@ export function DemoDock() {
 
   const reset = api.demo.reset.useMutation({
     onSuccess: () => {
+      setConfirmReset(false);
       toast.success("Demo workspace reset to the sample dataset");
       refresh();
     },
@@ -187,8 +190,7 @@ export function DemoDock() {
                       disabled={busy}
                       onClick={() => advance.mutate({ days: -1 })}
                     >
-                      <Minus className="size-4" aria-hidden />
-                      1 day
+                      <Minus className="size-4" aria-hidden />1 day
                     </Button>
                     <Button
                       type="button"
@@ -267,7 +269,7 @@ export function DemoDock() {
                     size="sm"
                     variant="destructive"
                     disabled={busy}
-                    onClick={() => reset.mutate()}
+                    onClick={() => setConfirmReset(true)}
                   >
                     <RotateCcw className="size-4" aria-hidden />
                     Reset demo data
@@ -277,8 +279,8 @@ export function DemoDock() {
                 {data && (
                   <p className="text-xs text-muted-foreground">
                     {formatCount(data.totals.scheduled)} scheduled ·{" "}
-                    {formatCount(data.totals.taken)} taken · {formatCount(data.totals.missed)} missed ·{" "}
-                    {formatCount(data.totals.skipped)} skipped
+                    {formatCount(data.totals.taken)} taken · {formatCount(data.totals.missed)}{" "}
+                    missed · {formatCount(data.totals.skipped)} skipped
                   </p>
                 )}
               </>
@@ -286,6 +288,16 @@ export function DemoDock() {
           </div>
         )}
       </div>
+      <ConfirmationDialog
+        open={confirmReset}
+        onOpenChange={setConfirmReset}
+        title="Reset the demo workspace?"
+        description="Every simulated change is discarded and the sample dataset is seeded again — doses, adherence, the AI insight, the caregiver alert and the demo clock all go back to their starting state. This cannot be undone."
+        confirmLabel="Reset demo data"
+        cancelLabel="Keep exploring"
+        confirmDisabled={reset.isPending}
+        onConfirm={() => reset.mutate()}
+      />
     </div>
   );
 }

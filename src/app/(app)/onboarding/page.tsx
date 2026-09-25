@@ -28,5 +28,10 @@ export default async function OnboardingPage() {
     redirect("/dashboard");
   }
 
-  return <OnboardingWizard userName={session.user.name} initialTimezone={session.user.timezone ?? "UTC"} />;
+  return (
+    <OnboardingWizard
+      userName={session.user.name}
+      initialTimezone={session.user.timezone ?? "UTC"}
+    />
+  );
 }

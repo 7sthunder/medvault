@@ -5,11 +5,7 @@ import { requireUser } from "@/server/auth/require-user";
 
 export const metadata: Metadata = { title: "Edit Medication" };
 
-export default async function EditMedicationRoute({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EditMedicationRoute({ params }: { params: Promise<{ id: string }> }) {
   await requireUser();
   const { id } = await params;
 

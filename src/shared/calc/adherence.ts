@@ -23,7 +23,13 @@ export interface DayCounts {
   snoozed: number;
 }
 
-export const EMPTY_DAY_COUNTS: DayCounts = { scheduled: 0, taken: 0, missed: 0, skipped: 0, snoozed: 0 };
+export const EMPTY_DAY_COUNTS: DayCounts = {
+  scheduled: 0,
+  taken: 0,
+  missed: 0,
+  skipped: 0,
+  snoozed: 0,
+};
 
 /** §10.5 — round to 1 dp (`Math.round(x*10)/10`). */
 export function round1dp(value: number): number {
@@ -34,7 +40,9 @@ export function round1dp(value: number): number {
  * §10.5 — adherence% = taken / (taken + missed + skipped) × 100, 1 dp.
  * `null` when the period has no required doses (UI shows "No data").
  */
-export function adherencePercent(counts: Pick<DayCounts, "taken" | "missed" | "skipped">): number | null {
+export function adherencePercent(
+  counts: Pick<DayCounts, "taken" | "missed" | "skipped">,
+): number | null {
   const attended = counts.taken + counts.missed + counts.skipped;
   if (attended <= 0) return null;
   return round1dp((counts.taken / attended) * 100);
@@ -98,7 +106,10 @@ function average(values: (number | null)[]): number | null {
  * day end, last-7 vs prior-7 direction. Defensive: missing data days never distort.
  */
 export function computeTrend(days: readonly TrendDay[], todayKey: string): TrendDTO {
-  const daily: TrendDay[] = days.map((d) => ({ date: d.date, adherencePercent: d.adherencePercent }));
+  const daily: TrendDay[] = days.map((d) => ({
+    date: d.date,
+    adherencePercent: d.adherencePercent,
+  }));
 
   const rolling7: TrendDTO["rolling7"] = days.map((d, i) => {
     const window = days.slice(Math.max(0, i - 6), i + 1).map((w) => w.adherencePercent);
@@ -110,7 +121,8 @@ export function computeTrend(days: readonly TrendDay[], todayKey: string): Trend
   const spanAvg = (endIdx: number): number | null => {
     if (endIdx < 0) return null;
     const window: (number | null)[] = [];
-    for (let i = endIdx; i >= 0 && endIdx - i < 7; i -= 1) window.unshift(days[i]!.adherencePercent);
+    for (let i = endIdx; i >= 0 && endIdx - i < 7; i -= 1)
+      window.unshift(days[i]!.adherencePercent);
     return average(window);
   };
 

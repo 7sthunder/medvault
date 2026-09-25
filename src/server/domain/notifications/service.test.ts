@@ -10,7 +10,11 @@ import { notificationsService } from "./service";
 
 const dbTests = describe.skipIf(!process.env.DATABASE_URL);
 
-async function inRollbackTransaction<T>(name: string, email: string, fn: (tx: DbTx, userId: string) => Promise<T>): Promise<T> {
+async function inRollbackTransaction<T>(
+  name: string,
+  email: string,
+  fn: (tx: DbTx, userId: string) => Promise<T>,
+): Promise<T> {
   let caught: Error | null = null;
   let result: T | undefined;
   try {
@@ -90,7 +94,14 @@ dbTests("notificationsService (§10.7)", () => {
 
   it("does not dedupe system notifications", async () => {
     await inRollbackTransaction("Notif Three", "notif-three@medvault.local", async (tx, userId) => {
-      const make = () => input(userId, { type: "system", title: "System", body: "info", entityType: null, entityId: null });
+      const make = () =>
+        input(userId, {
+          type: "system",
+          title: "System",
+          body: "info",
+          entityType: null,
+          entityId: null,
+        });
       expect(await notificationsService.create(tx, make())).toBe(true);
       expect(await notificationsService.create(tx, make())).toBe(true);
 
@@ -102,7 +113,12 @@ dbTests("notificationsService (§10.7)", () => {
   it("gates by notificationPrefs (doseReminders off suppresses missed_dose)", async () => {
     await inRollbackTransaction("Notif Four", "notif-four@medvault.local", async (tx, userId) => {
       const { channels, delivered } = recordingChannels();
-      const prefs = { doseReminders: false, caregiverMissedAlerts: true, insights: true, sounds: true };
+      const prefs = {
+        doseReminders: false,
+        caregiverMissedAlerts: true,
+        insights: true,
+        sounds: true,
+      };
       expect(await notificationsService.create(tx, input(userId), channels, prefs)).toBe(false);
 
       const prefsOn = { ...prefs, doseReminders: true };
@@ -113,8 +129,22 @@ dbTests("notificationsService (§10.7)", () => {
 
   it("unread-first ordering and mark-read/mark-all-read work", async () => {
     await inRollbackTransaction("Notif Five", "notif-five@medvault.local", async (tx, userId) => {
-      const a = input(userId, { type: "system", title: "A", body: "a", entityType: null, entityId: null, createdAt: new Date("2026-05-01T00:00:00Z") });
-      const b = input(userId, { type: "system", title: "B", body: "b", entityType: null, entityId: null, createdAt: new Date("2026-05-02T00:00:00Z") });
+      const a = input(userId, {
+        type: "system",
+        title: "A",
+        body: "a",
+        entityType: null,
+        entityId: null,
+        createdAt: new Date("2026-05-01T00:00:00Z"),
+      });
+      const b = input(userId, {
+        type: "system",
+        title: "B",
+        body: "b",
+        entityType: null,
+        entityId: null,
+        createdAt: new Date("2026-05-02T00:00:00Z"),
+      });
       await notificationsService.create(tx, a);
       await notificationsService.create(tx, b);
 
@@ -134,7 +164,16 @@ dbTests("notificationsService (§10.7)", () => {
   it("tab filter returns only that type's notifications", async () => {
     await inRollbackTransaction("Notif Six", "notif-six@medvault.local", async (tx, userId) => {
       await notificationsService.create(tx, input(userId));
-      await notificationsService.create(tx, input(userId, { type: "system", title: "Sys", body: "s", entityType: null, entityId: null }));
+      await notificationsService.create(
+        tx,
+        input(userId, {
+          type: "system",
+          title: "Sys",
+          body: "s",
+          entityType: null,
+          entityId: null,
+        }),
+      );
 
       const dose = await notificationsService.list(tx, userId, { limit: 10, tab: "dose" });
       expect(dose.items.map((i) => i.type)).toEqual(["missed_dose"]);

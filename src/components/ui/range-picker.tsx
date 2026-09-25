@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { CalendarRange } from "lucide-react"
-import { cn } from "cn"
+import { useState } from "react";
+import { CalendarRange } from "lucide-react";
+import { cn } from "cn";
 
-import { Button } from "@/components/ui/button"
-import { DatePicker } from "@/components/ui/date-picker"
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Drawer,
   DrawerContent,
@@ -14,45 +14,41 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"
-import { useIsMobile } from "@/lib/use-media-query"
-import { formatDateRange } from "@/lib/format"
-import { RANGE_PRESET_TEXT } from "@shared/enums"
-import { localDateKey, rangeByPreset } from "@shared/times"
+} from "@/components/ui/drawer";
+import { useIsMobile } from "@/lib/use-media-query";
+import { formatDateRange } from "@/lib/format";
+import { RANGE_PRESET_TEXT } from "@shared/enums";
+import { localDateKey, rangeByPreset } from "@shared/times";
 
 export interface DateRange {
-  from: string
-  to: string
+  from: string;
+  to: string;
 }
 
-const PRESET_KEYS = ["7d", "30d", "90d", "custom"] as const
+const PRESET_KEYS = ["7d", "30d", "90d", "custom"] as const;
 
-function presetRange(
-  preset: "7d" | "30d" | "90d",
-  timeZone: string,
-  now: Date,
-): DateRange {
-  const { from, to } = rangeByPreset(preset, { now, timeZone })
-  return { from: localDateKey(from, timeZone), to: localDateKey(to, timeZone) }
+function presetRange(preset: "7d" | "30d" | "90d", timeZone: string, now: Date): DateRange {
+  const { from, to } = rangeByPreset(preset, { now, timeZone });
+  return { from: localDateKey(from, timeZone), to: localDateKey(to, timeZone) };
 }
 
 function detectMode(value: DateRange, timeZone: string, now: Date): (typeof PRESET_KEYS)[number] {
   for (const preset of ["7d", "30d", "90d"] as const) {
-    const expected = presetRange(preset, timeZone, now)
-    if (expected.from === value.from && expected.to === value.to) return preset
+    const expected = presetRange(preset, timeZone, now);
+    if (expected.from === value.from && expected.to === value.to) return preset;
   }
-  return "custom"
+  return "custom";
 }
 
 export interface RangePickerProps {
-  value: DateRange
-  onChange: (range: DateRange) => void
+  value: DateRange;
+  onChange: (range: DateRange) => void;
   /** User timezone for preset math (defaults to UTC). */
-  timeZone?: string
+  timeZone?: string;
   /** Clock anchor for preset math (defaults to `new Date()`). */
-  now?: Date
-  className?: string
-  ariaLabel?: string
+  now?: Date;
+  className?: string;
+  ariaLabel?: string;
 }
 
 /**
@@ -68,25 +64,25 @@ export function RangePicker({
   className,
   ariaLabel = "Date range",
 }: RangePickerProps) {
-  const anchor = now ?? new Date()
+  const anchor = now ?? new Date();
   const [mode, setMode] = useState<(typeof PRESET_KEYS)[number]>(() =>
     detectMode(value, timeZone, anchor),
-  )
+  );
 
   const pick = (preset: (typeof PRESET_KEYS)[number]) => {
-    setMode(preset)
+    setMode(preset);
     if (preset !== "custom") {
-      const range = presetRange(preset, timeZone, anchor)
-      if (range.from !== value.from || range.to !== value.to) onChange(range)
+      const range = presetRange(preset, timeZone, anchor);
+      if (range.from !== value.from || range.to !== value.to) onChange(range);
     }
-  }
+  };
 
   const changeCustom = (from: string, to: string) => {
-    setMode("custom")
-    if (from !== value.from || to !== value.to) onChange({ from, to })
-  }
+    setMode("custom");
+    if (from !== value.from || to !== value.to) onChange({ from, to });
+  };
 
-  const summary = formatDateRange(value.from, value.to)
+  const summary = formatDateRange(value.from, value.to);
 
   const controls = (
     <div data-slot="range-picker-controls" className="flex flex-wrap items-center gap-3">
@@ -132,9 +128,9 @@ export function RangePicker({
         </span>
       )}
     </div>
-  )
+  );
 
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
   if (isMobile) {
     return (
       <Drawer data-slot="range-picker-drawer">
@@ -155,8 +151,8 @@ export function RangePicker({
           <div className="px-1">{controls}</div>
         </DrawerContent>
       </Drawer>
-    )
+    );
   }
 
-  return <div className={cn("w-full", className)}>{controls}</div>
+  return <div className={cn("w-full", className)}>{controls}</div>;
 }

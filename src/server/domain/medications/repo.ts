@@ -29,7 +29,10 @@ export async function listArchivedMedications(db: Db | DbTx, userId: string): Pr
 }
 
 /** All schedule slots for the given medication ids (bulk join). */
-export async function listSlotsByMedicationIds(db: Db | DbTx, medicationIds: string[]): Promise<SlotRow[]> {
+export async function listSlotsByMedicationIds(
+  db: Db | DbTx,
+  medicationIds: string[],
+): Promise<SlotRow[]> {
   if (medicationIds.length === 0) return [];
   return db
     .select()
@@ -67,12 +70,19 @@ export async function findActiveByName(
     isNull(medications.archivedAt),
   ];
   if (excludeId) conditions.push(not(eq(medications.id, excludeId)));
-  const [row] = await db.select().from(medications).where(and(...conditions)).limit(1);
+  const [row] = await db
+    .select()
+    .from(medications)
+    .where(and(...conditions))
+    .limit(1);
   return row;
 }
 
 /** Insert a medication master row; returns its id. */
-export async function insertMedication(db: Db | DbTx, values: Omit<MedInsert, "id"> & { id?: string }): Promise<string> {
+export async function insertMedication(
+  db: Db | DbTx,
+  values: Omit<MedInsert, "id"> & { id?: string },
+): Promise<string> {
   const id = values.id ?? uuidv7();
   const [row] = await db
     .insert(medications)
@@ -82,7 +92,11 @@ export async function insertMedication(db: Db | DbTx, values: Omit<MedInsert, "i
 }
 
 /** Replace a medication's schedule (delete + insert, single-owner scope). */
-export async function replaceSlots(db: Db | DbTx, medicationId: string, slots: SlotInsert[]): Promise<void> {
+export async function replaceSlots(
+  db: Db | DbTx,
+  medicationId: string,
+  slots: SlotInsert[],
+): Promise<void> {
   await db.delete(medicationSchedules).where(eq(medicationSchedules.medicationId, medicationId));
   if (slots.length > 0) {
     await db.insert(medicationSchedules).values(slots);
@@ -94,7 +108,20 @@ export async function updateMedication(
   db: Db | DbTx,
   userId: string,
   medicationId: string,
-  values: Partial<Pick<MedInsert, "name" | "dosageAmount" | "dosageUnit" | "instructions" | "notes" | "startDate" | "endDate" | "color" | "remindersEnabled">>,
+  values: Partial<
+    Pick<
+      MedInsert,
+      | "name"
+      | "dosageAmount"
+      | "dosageUnit"
+      | "instructions"
+      | "notes"
+      | "startDate"
+      | "endDate"
+      | "color"
+      | "remindersEnabled"
+    >
+  >,
 ): Promise<MedRow | undefined> {
   const [row] = await db
     .update(medications)
@@ -132,4 +159,3 @@ export async function archiveMedication(
     .returning();
   return row;
 }
-

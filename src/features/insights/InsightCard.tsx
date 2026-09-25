@@ -21,9 +21,7 @@ export function InsightCard({ insight }: { insight: InsightDTO }) {
       className="rounded-xl border border-border bg-card p-4 shadow-card-sm"
     >
       <header className="flex flex-wrap items-start justify-between gap-2">
-        <Chip tone={categoryTone(insight.category)}>
-          {insight.category.replace(/_/g, " ")}
-        </Chip>
+        <Chip tone={categoryTone(insight.category)}>{insight.category.replace(/_/g, " ")}</Chip>
         {insight.suggestedActionType && (
           <Chip tone="neutral" leading={<FileText className="size-3" aria-hidden="true" />}>
             {suggestedActionLabel(insight.suggestedActionType)}

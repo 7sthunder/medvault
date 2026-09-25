@@ -41,7 +41,9 @@ describe("shared/enums — single source of truth", () => {
       "canceled",
     ]);
     // Display = model − {due} + the two derived/display-only members (due-now, paused).
-    expect([...DOSE_STATUSES, "due"].sort()).toEqual([...DOSE_EVENT_STATUSES, "due-now", "paused"].sort());
+    expect([...DOSE_STATUSES, "due"].sort()).toEqual(
+      [...DOSE_EVENT_STATUSES, "due-now", "paused"].sort(),
+    );
   });
 
   it("keeps every list unique and non-empty", () => {

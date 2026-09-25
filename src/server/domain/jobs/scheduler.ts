@@ -6,6 +6,7 @@ import { catchUp } from "@/server/domain/doseEvents/service";
 import { reconcileUser } from "@/server/domain/doseEvents/reconcile";
 import { pruneAdherence } from "@/server/domain/adherence/materialize";
 import { caregiverService } from "@/server/domain/caregiver/service";
+import { log } from "@/lib/log";
 
 /**
  * Phase 13 — hourly-ish reconcile job (§10.2 + §10.3 safety net).
@@ -33,7 +34,10 @@ let active = false;
  * Returns the tally for logging/test assertions.
  */
 export async function runReconcilePass(db: Db): Promise<ReconcilePassResult> {
-  const onboarded = await db.select({ id: users.id, timezone: users.timezone }).from(users).where(eq(users.onboardingCompleted, true));
+  const onboarded = await db
+    .select({ id: users.id, timezone: users.timezone })
+    .from(users)
+    .where(eq(users.onboardingCompleted, true));
   let ensured = 0;
   let reconciled = 0;
   let missed = 0;
@@ -65,7 +69,8 @@ export function startScheduler(
   const intervalMs = options.intervalMs ?? 60 * 60 * 1000;
 
   const runOnce = async (): Promise<ReconcilePassResult> => {
-    if (active) return { users: 0, ensured: 0, reconciled: 0, missed: 0, pruned: 0, adherenceDropAlerts: 0 };
+    if (active)
+      return { users: 0, ensured: 0, reconciled: 0, missed: 0, pruned: 0, adherenceDropAlerts: 0 };
     active = true;
     try {
       return await runReconcilePass(db);
@@ -75,9 +80,8 @@ export function startScheduler(
   };
 
   const timer = setInterval(() => {
-    void runOnce().catch((err) => {
-      // Phase 22 logs/reports these; never throw from the interval.
-      console.error("[scheduler] reconcile pass failed:", err);
+    void runOnce().catch((error) => {
+      log.error("Scheduler reconcile pass failed", { error });
     });
   }, intervalMs);
 

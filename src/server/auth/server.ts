@@ -3,6 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import { db } from "@/server/db/client";
 import * as schema from "@/server/db/schema";
+import { BRAND } from "@/shared/brand";
 
 try {
   process.loadEnvFile();
@@ -17,7 +18,7 @@ try {
  * on the session user (read-only from the client side).
  */
 export const auth = betterAuth({
-  appName: "MedVault",
+  appName: BRAND.name,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {

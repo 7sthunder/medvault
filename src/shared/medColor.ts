@@ -7,7 +7,11 @@
 const hexChannels = (hex: string): { r: number; g: number; b: number } | null => {
   const m = /^#([0-9a-f]{6})$/i.exec(hex.trim());
   if (!m) return null;
-  return { r: parseInt(m[1]!.slice(0, 2), 16), g: parseInt(m[1]!.slice(2, 4), 16), b: parseInt(m[1]!.slice(4, 6), 16) };
+  return {
+    r: parseInt(m[1]!.slice(0, 2), 16),
+    g: parseInt(m[1]!.slice(2, 4), 16),
+    b: parseInt(m[1]!.slice(4, 6), 16),
+  };
 };
 
 const heat = (hex: string) => {

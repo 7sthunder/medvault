@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionLabel } from "@/components/ui/section-label";
+import { useNow } from "@/components/layout/clock-context";
 import { useShell } from "@/components/layout/shell-context";
 import { formatDayHeading, shiftDateKey } from "@/lib/format";
 import { api } from "@/lib/trpc";
@@ -26,8 +27,9 @@ import type { MedStatusMap } from "./useMedicationStatuses";
 export function SchedulePage() {
   const { user } = useShell();
   const timeZone = user.timezone;
-  const [date, setDate] = useState(() => localDateKey(new Date(), timeZone));
-  const today = localDateKey(new Date(), timeZone);
+  const now = useNow();
+  const [date, setDate] = useState(() => localDateKey(now, timeZone));
+  const today = localDateKey(now, timeZone);
   const { data, isLoading, isError, error, refetch } = api.schedule.day.useQuery({ date });
   const { take, snooze, skip, isPending } = useDoseActions();
   const medications = useMedicationStatuses();
@@ -41,17 +43,21 @@ export function SchedulePage() {
     "due-now": events.filter((e) => e.status === "due-now"),
     snoozed: events.filter((e) => e.status === "snoozed"),
     upcoming: events.filter((e) => e.status === "upcoming"),
-    done: events.filter((e) => e.status !== "due-now" && e.status !== "snoozed" && e.status !== "upcoming"),
+    done: events.filter(
+      (e) => e.status !== "due-now" && e.status !== "snoozed" && e.status !== "upcoming",
+    ),
   } as const;
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-extrabold text-ink-900">{formatDayHeading(date)}</h1>
+          <h1 className="font-heading text-2xl font-extrabold text-ink-900">
+            {formatDayHeading(date)}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {date === today ? "Today" : date < today ? "An earlier day" : "A later day"} · your active-medication
-            schedule
+            {date === today ? "Today" : date < today ? "An earlier day" : "A later day"} · your
+            active-medication schedule
           </p>
         </div>
         <div className="flex items-center gap-1">
@@ -80,10 +86,17 @@ export function SchedulePage() {
       </header>
 
       {isError ? (
-        <ErrorState message={error?.message ?? "Couldn't load your schedule."} onRetry={() => void refetch()} />
+        <ErrorState
+          message={error?.message ?? "Couldn't load your schedule."}
+          onRetry={() => void refetch()}
+        />
       ) : isLoading ? (
         <SectionSkeleton />
-      ) : grouped["due-now"].length + grouped.snoozed.length + grouped.upcoming.length + grouped.done.length === 0 ? (
+      ) : grouped["due-now"].length +
+          grouped.snoozed.length +
+          grouped.upcoming.length +
+          grouped.done.length ===
+        0 ? (
         <EmptySchedule onBrowse={() => setDate(today)} />
       ) : (
         <div className="mt-6 space-y-6">
@@ -95,7 +108,7 @@ export function SchedulePage() {
                   dose={d}
                   medStatus={medStatusOf(d, medications)}
                   timeZone={timeZone}
-                  now={new Date()}
+                  now={now}
                   busy={isPending}
                   onTake={(dose) => void take(dose.id)}
                   onSnooze={(dose) => void snooze(dose.id)}
@@ -112,7 +125,7 @@ export function SchedulePage() {
                   dose={d}
                   medStatus={medStatusOf(d, medications)}
                   timeZone={timeZone}
-                  now={new Date()}
+                  now={now}
                   busy={isPending}
                   onTake={(dose) => void take(dose.id)}
                   onSnooze={(dose) => void snooze(dose.id)}
@@ -129,7 +142,7 @@ export function SchedulePage() {
                   dose={d}
                   medStatus={medStatusOf(d, medications)}
                   timeZone={timeZone}
-                  now={new Date()}
+                  now={now}
                   busy={isPending}
                   onTake={(dose) => void take(dose.id)}
                   onSnooze={(dose) => void snooze(dose.id)}
@@ -146,7 +159,7 @@ export function SchedulePage() {
                   dose={d}
                   medStatus={medStatusOf(d, medications)}
                   timeZone={timeZone}
-                  now={new Date()}
+                  now={now}
                   busy={isPending}
                   onTake={(dose) => void take(dose.id)}
                   onSnooze={(dose) => void snooze(dose.id)}
@@ -173,7 +186,17 @@ export function SchedulePage() {
   );
 }
 
-function DoseSection({ label, count, accent, children }: { label: string; count: number; accent: string; children: React.ReactNode }) {
+function DoseSection({
+  label,
+  count,
+  accent,
+  children,
+}: {
+  label: string;
+  count: number;
+  accent: string;
+  children: React.ReactNode;
+}) {
   return (
     <section aria-label={label}>
       <SectionLabel className={accent}>

@@ -11,6 +11,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { useAppHref } from "@/components/layout/shell-context";
 import { api } from "@/lib/trpc";
 import type { CaregiverAlertPrefs } from "@/shared/types";
 
@@ -28,6 +29,7 @@ const THRESHOLD_MAX = 100;
 
 export function CaregiverSettings() {
   const utils = api.useUtils();
+  const href = useAppHref();
   const query = api.settings.caregiverPrefs.useQuery();
   const save = api.settings.updateCaregiverPrefs.useMutation({
     onSuccess: (saved) => {
@@ -69,9 +71,9 @@ export function CaregiverSettings() {
   const alertsOff = draft ? draft.adherenceDropThreshold === null : false;
   const dirty = Boolean(
     draft &&
-      (draft.missedDoseOn !== query.data.missedDoseOn ||
-        draft.dailyDigest !== query.data.dailyDigest ||
-        draft.adherenceDropThreshold !== query.data.adherenceDropThreshold),
+    (draft.missedDoseOn !== query.data.missedDoseOn ||
+      draft.dailyDigest !== query.data.dailyDigest ||
+      draft.adherenceDropThreshold !== query.data.adherenceDropThreshold),
   );
 
   const commit = () => {
@@ -112,7 +114,9 @@ export function CaregiverSettings() {
               id="caregiver-missed"
               checked={draft?.missedDoseOn ?? false}
               onCheckedChange={(next) =>
-                setDraft((current) => (current ? { ...current, missedDoseOn: next === true } : current))
+                setDraft((current) =>
+                  current ? { ...current, missedDoseOn: next === true } : current,
+                )
               }
             />
           </div>
@@ -130,7 +134,9 @@ export function CaregiverSettings() {
               id="caregiver-digest"
               checked={draft?.dailyDigest ?? false}
               onCheckedChange={(next) =>
-                setDraft((current) => (current ? { ...current, dailyDigest: next === true } : current))
+                setDraft((current) =>
+                  current ? { ...current, dailyDigest: next === true } : current,
+                )
               }
             />
           </div>
@@ -182,9 +188,7 @@ export function CaregiverSettings() {
                 }}
                 className="w-28"
               />
-              <span className="text-sm text-muted-foreground">
-                % over the last 7 days
-              </span>
+              <span className="text-sm text-muted-foreground">% over the last 7 days</span>
             </div>
           </div>
         </CardContent>
@@ -202,7 +206,7 @@ export function CaregiverSettings() {
             Invitations and per-caregiver permissions are managed on the caregiver screen, so you
             always confirm who gains access before they see anything.
           </p>
-          <Link href="/caregiver" className="mt-3 inline-block">
+          <Link href={href("/caregiver")} className="mt-3 inline-block">
             <Button type="button" variant="outline">
               <Users className="size-4" aria-hidden />
               Manage caregivers

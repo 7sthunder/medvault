@@ -30,27 +30,27 @@
 
 ## Phase status matrix
 
-| Phase | Title | Status | Commit | Notes |
-|---|---|---|---|---|
-| 01 | Repository & Stitch analysis | `done` | `5dfeb44` | pushed to `origin/main` |
-| 02 | Project foundation (Next.js + TS + Tailwind + tooling) | `done` | `6eabea5` | verified: typecheck/lint/test/build/e2e |
-| 03 | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done` | `1721431` | verified: typecheck/lint/test/build/e2e |
-| 04 | Landing page migration (`/` from Stitch) | `done` | `1340f05` | verified: typecheck/lint/test/build/e2e |
-| 05 | Database foundation (Drizzle schema + client + migrate + seed) | `done` | `016f1be` | verified: typecheck/lint/test/build |
-| 06 | Authentication & session plumbing (Better Auth) | `done` | `3006415` | verified: typecheck/lint/test/build/e2e |
-| 07 | Shared contracts & validation layer | `done` | `2794983` | pushed to `origin/main` |
-| 08 | Reusable component system completion | `done` | `e23dc9b` | pushed to `origin/main` |
-| 09 | Global shell & navigation `(app)` | `done` | `a583979` | pushed to `origin/main` |
-| 10 | Onboarding | `done` | `b3933d8` | verified: typecheck/lint/test/build; e2e deferred |
-| 11 | Medication domain service (server) | `done` | `f91530b` | verified: typecheck/lint/test/build |
-| 12 | Medication schedule & dose-event generation (domain) | `done` | `4f6e5b4` | verified: typecheck/lint/test/build |
-| 13 | Dose engine & adherence engine (domain) | `done` | `9a72716` | verified: typecheck/lint/test |
-| 14 | Dose & adherence UI (Today's Schedule + Adherence pages) | `done` | `14f378f` | verified: typecheck/lint/test; adherence pages split to parallel worker |
-| 15 | Medication CRUD UI + Dashboard | `done` | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section |
-| 16 | History + Reports + Notifications | `done` | `(this log)` | verified: typecheck/lint/test — see Phase 16 section |
-| 17 | Caregiver system + AI insights | `done` | `(this log)` | verified: typecheck/lint/test/build — see Phase 17 section |
-| 18 | Settings + Demo mode + /help | `done` | `(this log)` | verified: typecheck/lint/test/build - see Phase 18 section |
-| 19 | Quality sweep, test completion, E2E & delivery | `pending` | — | |
+| Phase | Title                                                                      | Status    | Commit       | Notes                                                                                                                                       |
+| ----- | -------------------------------------------------------------------------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 01    | Repository & Stitch analysis                                               | `done`    | `5dfeb44`    | pushed to `origin/main`                                                                                                                     |
+| 02    | Project foundation (Next.js + TS + Tailwind + tooling)                     | `done`    | `6eabea5`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
+| 03    | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done`    | `1721431`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
+| 04    | Landing page migration (`/` from Stitch)                                   | `done`    | `1340f05`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
+| 05    | Database foundation (Drizzle schema + client + migrate + seed)             | `done`    | `016f1be`    | verified: typecheck/lint/test/build                                                                                                         |
+| 06    | Authentication & session plumbing (Better Auth)                            | `done`    | `3006415`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
+| 07    | Shared contracts & validation layer                                        | `done`    | `2794983`    | pushed to `origin/main`                                                                                                                     |
+| 08    | Reusable component system completion                                       | `done`    | `e23dc9b`    | pushed to `origin/main`                                                                                                                     |
+| 09    | Global shell & navigation `(app)`                                          | `done`    | `a583979`    | pushed to `origin/main`                                                                                                                     |
+| 10    | Onboarding                                                                 | `done`    | `b3933d8`    | verified: typecheck/lint/test/build; e2e deferred                                                                                           |
+| 11    | Medication domain service (server)                                         | `done`    | `f91530b`    | verified: typecheck/lint/test/build                                                                                                         |
+| 12    | Medication schedule & dose-event generation (domain)                       | `done`    | `4f6e5b4`    | verified: typecheck/lint/test/build                                                                                                         |
+| 13    | Dose engine & adherence engine (domain)                                    | `done`    | `9a72716`    | verified: typecheck/lint/test                                                                                                               |
+| 14    | Dose & adherence UI (Today's Schedule + Adherence pages)                   | `done`    | `14f378f`    | verified: typecheck/lint/test; adherence pages split to parallel worker                                                                     |
+| 15    | Medication CRUD UI + Dashboard                                             | `done`    | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section |
+| 16    | History + Reports + Notifications                                          | `done`    | `(this log)` | verified: typecheck/lint/test — see Phase 16 section                                                                                        |
+| 17    | Caregiver system + AI insights                                             | `done`    | `(this log)` | verified: typecheck/lint/test/build — see Phase 17 section                                                                                  |
+| 18    | Settings + Demo mode + /help                                               | `done`    | `(this log)` | verified: typecheck/lint/test/build - see Phase 18 section                                                                                  |
+| 19    | Quality sweep, test completion, E2E & delivery                             | `in progress` | —         | Code complete: typecheck/lint/format clean, 49 files / 366 tests + coverage thresholds green. Pending: production build, full E2E run, server suite — see Phase 19 section |
 
 > **Renumbering note:** `plan.md` §21 was consolidated from 30 phases to **19** (`Phase 01 → Phase 19`)
 > on the instruction to finish faster without cutting scope. Phases 01–12 are unchanged; the remaining
@@ -68,14 +68,14 @@ screen→route map confirmed (§6). No `Landingpage/` changes (per Phase 01 cons
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `docs/stitch-analysis.md` | created | Phase 01 deliverable — 12 sections (method → open decisions) |
-| `docs/` | created | new analysis directory |
-| `plan.md` §2 | rewritten | two commits, corrected root paths, verified file roles, duplicate/unreferenced assets, ignored dirs, `App.jsx` section line-map |
-| `plan.md` §5.2 | edited | H2 now documents the two verified size tiers instead of one clamp value |
-| `plan.md` §5.8 | added | "Source verification" — findings that don't fit the token tables |
-| `plan.md` §6 | rewritten | route table now carries source-anchor column; non-goal motifs mapped to no route |
+| Path                      | Action    | Purpose                                                                                                                         |
+| ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/stitch-analysis.md` | created   | Phase 01 deliverable — 12 sections (method → open decisions)                                                                    |
+| `docs/`                   | created   | new analysis directory                                                                                                          |
+| `plan.md` §2              | rewritten | two commits, corrected root paths, verified file roles, duplicate/unreferenced assets, ignored dirs, `App.jsx` section line-map |
+| `plan.md` §5.2            | edited    | H2 now documents the two verified size tiers instead of one clamp value                                                         |
+| `plan.md` §5.8            | added     | "Source verification" — findings that don't fit the token tables                                                                |
+| `plan.md` §6              | rewritten | route table now carries source-anchor column; non-goal motifs mapped to no route                                                |
 
 ### Key verified facts that shaped the plan text
 
@@ -125,48 +125,48 @@ shadcn/ui scaffold, ESLint/Prettier, Vitest, Playwright, drizzle config, env sca
 
 ### Files created
 
-| Path | Purpose |
-|---|---|
-| `package.json` (`meditrack-ai`) | scripts: `dev/build/start/typecheck/lint/lint:fix/format/format:check/test/test:watch/test:coverage/test:e2e/db:generate/db:migrate/db:push/db:seed` |
-| `pnpm-lock.yaml` | lockfile |
-| `pnpm-workspace.yaml` | `allowBuilds` (esbuild, unrs-resolver) |
-| `next.config.ts` | `reactStrictMode: true` |
-| `tsconfig.json` | strict + `noUncheckedIndexedAccess`, bundler resolution, path maps `@/* @shared/* @server/* @features/* @components/* @lib/* @db/*` |
-| `next-env.d.ts` | Next generated-types reference |
-| `eslint.config.mjs` | FlatCompat → `next/core-web-vitals` + `next/typescript`, ignores `Landingpage/**` |
-| `postcss.config.mjs` | `@tailwindcss/postcss` |
-| `drizzle.config.ts` | postgresql dialect, schema `src/server/db/schema.ts`, out `./drizzle` |
-| `vitest.config.ts` | jsdom per-file via pragma, aliases, oxc JSX runtime, coverage on `src/shared/calc` |
-| `vitest.setup.ts` | `@testing-library/jest-dom/vitest` |
-| `playwright.config.ts` | chromium project, `testDir ./e2e`, `webServer pnpm dev :3000` |
-| `.env.example` | `DATABASE_URL`, `BETTER_AUTH_SECRET`, `AI_GEMINI_API_KEY`, `DEMO_CLOCK_OFFSET_MINUTES` |
-| `.gitignore` | `node_modules .next out build .env* e2e-report playwright-report test-results coverage` |
-| `.prettierrc.json` | 100-print-width, semicolons, double quotes |
-| `components.json` | shadcn v4 "base-nova" style, RSC, `css: src/app/globals.css`, lucide icons |
-| `src/app/layout.tsx` | **Plus Jakarta Sans** via `next/font/google` (`--font-jakarta`), metadata (MedVault · MediTrack AI) |
-| `src/app/globals.css` | Tailwind v4 + shadcn neutral theme tokens + `@import "shadcn/tailwind.css"` + `tw-animate-css` + font mapping + `.dark` block |
-| `src/app/page.tsx` | placeholder `/` (brand tile §5.1 + Button); replaced by landing in Phase 04 |
-| `src/lib/utils.ts` | `export { cn } from "cn"` (shadcn v4) |
-| `src/shared/breakpoints.ts` | breakpoint constants doc (plan §16) incl. Stitch-specific 900/820/580 |
-| `src/components/ui/button.tsx` | shadcn scaffold (Base UI Button, cva variants default/outline/secondary/ghost/destructive/link, sizes) |
-| `src/components/ui/input.tsx` | shadcn scaffold |
-| `src/components/ui/button.test.tsx` | example component test (jsdom) |
-| `e2e/home.spec.ts` | example e2e hitting `/` (heading MedVault + "Get started" button) |
+| Path                                | Purpose                                                                                                                                              |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package.json` (`meditrack-ai`)     | scripts: `dev/build/start/typecheck/lint/lint:fix/format/format:check/test/test:watch/test:coverage/test:e2e/db:generate/db:migrate/db:push/db:seed` |
+| `pnpm-lock.yaml`                    | lockfile                                                                                                                                             |
+| `pnpm-workspace.yaml`               | `allowBuilds` (esbuild, unrs-resolver)                                                                                                               |
+| `next.config.ts`                    | `reactStrictMode: true`                                                                                                                              |
+| `tsconfig.json`                     | strict + `noUncheckedIndexedAccess`, bundler resolution, path maps `@/* @shared/* @server/* @features/* @components/* @lib/* @db/*`                  |
+| `next-env.d.ts`                     | Next generated-types reference                                                                                                                       |
+| `eslint.config.mjs`                 | FlatCompat → `next/core-web-vitals` + `next/typescript`, ignores `Landingpage/**`                                                                    |
+| `postcss.config.mjs`                | `@tailwindcss/postcss`                                                                                                                               |
+| `drizzle.config.ts`                 | postgresql dialect, schema `src/server/db/schema.ts`, out `./drizzle`                                                                                |
+| `vitest.config.ts`                  | jsdom per-file via pragma, aliases, oxc JSX runtime, coverage on `src/shared/calc`                                                                   |
+| `vitest.setup.ts`                   | `@testing-library/jest-dom/vitest`                                                                                                                   |
+| `playwright.config.ts`              | chromium project, `testDir ./e2e`, `webServer pnpm dev :3000`                                                                                        |
+| `.env.example`                      | `DATABASE_URL`, `BETTER_AUTH_SECRET`, `AI_GEMINI_API_KEY`, `DEMO_CLOCK_OFFSET_MINUTES`                                                               |
+| `.gitignore`                        | `node_modules .next out build .env* e2e-report playwright-report test-results coverage`                                                              |
+| `.prettierrc.json`                  | 100-print-width, semicolons, double quotes                                                                                                           |
+| `components.json`                   | shadcn v4 "base-nova" style, RSC, `css: src/app/globals.css`, lucide icons                                                                           |
+| `src/app/layout.tsx`                | **Plus Jakarta Sans** via `next/font/google` (`--font-jakarta`), metadata (MedVault · MediTrack AI)                                                  |
+| `src/app/globals.css`               | Tailwind v4 + shadcn neutral theme tokens + `@import "shadcn/tailwind.css"` + `tw-animate-css` + font mapping + `.dark` block                        |
+| `src/app/page.tsx`                  | placeholder `/` (brand tile §5.1 + Button); replaced by landing in Phase 04                                                                          |
+| `src/lib/utils.ts`                  | `export { cn } from "cn"` (shadcn v4)                                                                                                                |
+| `src/shared/breakpoints.ts`         | breakpoint constants doc (plan §16) incl. Stitch-specific 900/820/580                                                                                |
+| `src/components/ui/button.tsx`      | shadcn scaffold (Base UI Button, cva variants default/outline/secondary/ghost/destructive/link, sizes)                                               |
+| `src/components/ui/input.tsx`       | shadcn scaffold                                                                                                                                      |
+| `src/components/ui/button.test.tsx` | example component test (jsdom)                                                                                                                       |
+| `e2e/home.spec.ts`                  | example e2e hitting `/` (heading MedVault + "Get started" button)                                                                                    |
 
 ### Pinned versions (deliberate, deviations from plan wording)
 
-| Package | Version | Why |
-|---|---|---|
-| `next` | 15.5.26 | plan: Next 15; latest 15.x |
-| `react` / `react-dom` | 19.2.0 | plan: React 19; 19.3.0 not supported by Next 15 peer range |
-| `lucide-react` | 0.453.0 | plan + Stitch export parity (latest is 1.x — incompatible icon API) |
-| `typescript` | 5.9.3 | 7.x (native tsgo) not supported by eslint-config-next Next 15 |
-| `eslint` | 9.39.5 | 10.x outside eslint-config-next 15 peer range |
-| `tailwindcss` / `@tailwindcss/postcss` | 4.3.3 | Tailwind v4 (Stack §4) |
-| `vitest` | 5.0.1 | — |
-| `@playwright/test` | 1.63.0 | — |
-| `drizzle-kit` | 0.31.11 | — |
-| shadcn stack (via CLI) | `shadcn@4.21.0`, `@base-ui/react`, `cva`, `cn`, `tw-animate-css` | new shadcn v4 |
+| Package                                | Version                                                          | Why                                                                 |
+| -------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `next`                                 | 15.5.26                                                          | plan: Next 15; latest 15.x                                          |
+| `react` / `react-dom`                  | 19.2.0                                                           | plan: React 19; 19.3.0 not supported by Next 15 peer range          |
+| `lucide-react`                         | 0.453.0                                                          | plan + Stitch export parity (latest is 1.x — incompatible icon API) |
+| `typescript`                           | 5.9.3                                                            | 7.x (native tsgo) not supported by eslint-config-next Next 15       |
+| `eslint`                               | 9.39.5                                                           | 10.x outside eslint-config-next 15 peer range                       |
+| `tailwindcss` / `@tailwindcss/postcss` | 4.3.3                                                            | Tailwind v4 (Stack §4)                                              |
+| `vitest`                               | 5.0.1                                                            | —                                                                   |
+| `@playwright/test`                     | 1.63.0                                                           | —                                                                   |
+| `drizzle-kit`                          | 0.31.11                                                          | —                                                                   |
+| shadcn stack (via CLI)                 | `shadcn@4.21.0`, `@base-ui/react`, `cva`, `cn`, `tw-animate-css` | new shadcn v4                                                       |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -227,25 +227,25 @@ hardcoding brand hex.
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/app/globals.css` | rewritten | static `@theme` (Stitch palette §5.3 + shadows §5.4 + radius 0.875rem), `@theme inline` semantic surfaces flipping in `.dark` (§5.7), glass utilities, hero-gradient var, scrollbar/selection/focus-visible base |
-| `src/lib/token-doc.ts` | created | machine-readable §5 map (colour + shadow tokens, `provenance: stitch/extended`, radius/gradient constants) |
-| `src/lib/token-doc.test.ts` | created | asserts globals.css carries exactly the token `cssVar:value` pairs (§3/§5 drift check), extended-token caveat, light+dark surface overrides, label uniqueness |
-| `src/shared/status.ts` | created | §12 DoseStatus union + `DOSE_STATUS_META` (label/tone/aria/icon/tint-classes/raw hex) |
-| `src/shared/brand.ts` | created | §5.1 brand constants (`BRAND`, `LOGO`, AI brand) |
-| `src/components/brand/{Logo,Wordmark,Brand}.tsx` | created | §5.1 tile (36–44px radius 10–12 gradient + leaf shadow), wordmark (Med+Vault), lockup + `AiBrandLockup` |
-| `src/components/ui/status-{indicator,badge}.tsx` | created | §12 compact + pill chips, never colour-only (icon + text + aria-label, ping ring for due-now) |
-| `src/components/ui/{chip,section-label,stat-card,list-row,empty-state,error-state,form-field,time-picker,date-picker}.tsx` | created | §5.5/§2 custom primitives |
-| `src/components/ui/{drawer,confirmation-dialog}.tsx` | created | bottom-sheet (Base UI Drawer) + confirm dialog wrappers |
-| `src/components/ui/button.tsx` | modified | §5.5 restyle: default adds `shadow-primary-btn` + `hover:bg-primary-dark`; **secondary variant now neutral white+border** (see deviation) |
-| `src/components/ui/input.tsx` | modified | §5.5 restyle: h-9, stronger border `border-strong`, 4px `primary-ring` focus, white bg |
-| `src/app/page.tsx` | modified | placeholder now uses `Brand` lockup + tokens (per Phase 03 spec) |
-| `src/app/(marketing)/design-system/page.tsx` | created | dev-only catalogue: tokens, type §5.2, buttons, forms, §12 status grid, med-card/list-row stories, overlays, feedback |
-| `eslint.config.mjs` | modified | `src/features/**` hex/rgba literal ban + `next-env.d.ts` triple-slash exemption |
-| `vitest.setup.ts` | modified | added RTL `cleanup()` `afterEach` (tests share a jsdom document otherwise) |
-| `src/components/ui/primitives.test.tsx`, `status-indicator.test.tsx` | created | primitive smoke + §12 a11y tests (36 total) |
-| `e2e/design-system.spec.ts` | created | dev-server checks: Stitch stories + 8 status chips + token swatch presence |
+| Path                                                                                                                       | Action    | Purpose                                                                                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/app/globals.css`                                                                                                      | rewritten | static `@theme` (Stitch palette §5.3 + shadows §5.4 + radius 0.875rem), `@theme inline` semantic surfaces flipping in `.dark` (§5.7), glass utilities, hero-gradient var, scrollbar/selection/focus-visible base |
+| `src/lib/token-doc.ts`                                                                                                     | created   | machine-readable §5 map (colour + shadow tokens, `provenance: stitch/extended`, radius/gradient constants)                                                                                                       |
+| `src/lib/token-doc.test.ts`                                                                                                | created   | asserts globals.css carries exactly the token `cssVar:value` pairs (§3/§5 drift check), extended-token caveat, light+dark surface overrides, label uniqueness                                                    |
+| `src/shared/status.ts`                                                                                                     | created   | §12 DoseStatus union + `DOSE_STATUS_META` (label/tone/aria/icon/tint-classes/raw hex)                                                                                                                            |
+| `src/shared/brand.ts`                                                                                                      | created   | §5.1 brand constants (`BRAND`, `LOGO`, AI brand)                                                                                                                                                                 |
+| `src/components/brand/{Logo,Wordmark,Brand}.tsx`                                                                           | created   | §5.1 tile (36–44px radius 10–12 gradient + leaf shadow), wordmark (Med+Vault), lockup + `AiBrandLockup`                                                                                                          |
+| `src/components/ui/status-{indicator,badge}.tsx`                                                                           | created   | §12 compact + pill chips, never colour-only (icon + text + aria-label, ping ring for due-now)                                                                                                                    |
+| `src/components/ui/{chip,section-label,stat-card,list-row,empty-state,error-state,form-field,time-picker,date-picker}.tsx` | created   | §5.5/§2 custom primitives                                                                                                                                                                                        |
+| `src/components/ui/{drawer,confirmation-dialog}.tsx`                                                                       | created   | bottom-sheet (Base UI Drawer) + confirm dialog wrappers                                                                                                                                                          |
+| `src/components/ui/button.tsx`                                                                                             | modified  | §5.5 restyle: default adds `shadow-primary-btn` + `hover:bg-primary-dark`; **secondary variant now neutral white+border** (see deviation)                                                                        |
+| `src/components/ui/input.tsx`                                                                                              | modified  | §5.5 restyle: h-9, stronger border `border-strong`, 4px `primary-ring` focus, white bg                                                                                                                           |
+| `src/app/page.tsx`                                                                                                         | modified  | placeholder now uses `Brand` lockup + tokens (per Phase 03 spec)                                                                                                                                                 |
+| `src/app/(marketing)/design-system/page.tsx`                                                                               | created   | dev-only catalogue: tokens, type §5.2, buttons, forms, §12 status grid, med-card/list-row stories, overlays, feedback                                                                                            |
+| `eslint.config.mjs`                                                                                                        | modified  | `src/features/**` hex/rgba literal ban + `next-env.d.ts` triple-slash exemption                                                                                                                                  |
+| `vitest.setup.ts`                                                                                                          | modified  | added RTL `cleanup()` `afterEach` (tests share a jsdom document otherwise)                                                                                                                                       |
+| `src/components/ui/primitives.test.tsx`, `status-indicator.test.tsx`                                                       | created   | primitive smoke + §12 a11y tests (36 total)                                                                                                                                                                      |
+| `e2e/design-system.spec.ts`                                                                                                | created   | dev-server checks: Stitch stories + 8 status chips + token swatch presence                                                                                                                                       |
 
 20-registry-primitive batch (textarea/select/checkbox/radio-group/switch/label/badge/card/separator/
 avatar/tooltip/dialog/dropdown-menu/popover/tabs/sonner/alert/skeleton/pagination) came from
@@ -254,14 +254,14 @@ avatar/tooltip/dialog/dropdown-menu/popover/tabs/sonner/alert/skeleton/paginatio
 ### Deviations & decisions (precise > faithful)
 
 - **`--color-secondary` name collision (plan decides):** the Stitch token is `#06b6d4` and keeps the
-  `secondary` name (Stitch's "secondary" *is* cyan). shadcn's *semantic* secondary (grey) is
+  `secondary` name (Stitch's "secondary" _is_ cyan). shadcn's _semantic_ secondary (grey) is
   repurposed: Button's `secondary` variant now renders white bg + border + ink text (§5.5
   "secondary/neutral" button). Cyan surfaces stay reachable via `bg-secondary`.
 - **Status chips:** `paused` uses `bg-border` (#e2e8f0) and `canceled` an outline chip
   (`bg-background` + border + ink-400) instead of solid `#f8fafc` — solid near-white on a white card
   reads as "no chip". `due-now` keeps Stitch's pulsing primary ring.
 - **Violet has no tint in Stitch** (§7.1 verified). Violet chips use default-palette
-  `violet-100`/`violet-600`; chip *text* uses contrast-adjusted default shades
+  `violet-100`/`violet-600`; chip _text_ uses contrast-adjusted default shades
   (cyan-800/pink-600/blue-600/amber-600) because the §12 tint+full-colour pairing fails AA on small
   text — Stitch's own chips used the darker shades.
 - **Semantic surfaces:** dark-aware tokens (background/foreground/card/popover/muted/accent/border/
@@ -277,7 +277,7 @@ avatar/tooltip/dialog/dropdown-menu/popover/tabs/sonner/alert/skeleton/paginatio
 - **ESLint hex ban** targets `src/features/**` (not created yet) — documented now so Phase 07+
   features are token-clean from day one (DoD Phase 03 #4).
 - `next-env.d.ts` triple-slash path reference (typed routes) trips `@typescript-eslint/
-  triple-slash-reference`; Next regenerates the file — exempted via override.
+triple-slash-reference`; Next regenerates the file — exempted via override.
 
 ### Verification (all green)
 
@@ -314,23 +314,23 @@ consuming Phase 03 tokens only — runtime DOM is byte-visibly the same Stitch h
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/features/landing/use-in-view.ts` | created | Stitch `useInView` port (threshold 0.12, once) |
-| `src/features/landing/mascots.tsx` | created | Doctor/Robot/Nurse mascot SVGs + 3 `<img>` how-it-works mascots (eslint-disable no-img-element) |
-| `src/features/landing/PhoneMockup.tsx` | created | mobile.jsx phone screen + CSS port (756×729, sparks/dots, `.mvp-*`) |
-| `src/features/landing/HeroVisual.tsx` | created | floating-notification stack over phone (tone→`var(--color-*)`) |
-| `src/features/landing/FloatingCard.tsx` | created | glass recipe (Stitch markup never mounts it; kept for auth/hero compositions) |
-| `src/features/landing/{Nav,Hero,HowItWorks,Features,Testimonials,FinalCta,Footer,AiChatFab,ScrollingServices}.tsx` | created | §10 ported sections |
-| `src/app/(marketing)/layout.tsx` | created | children-only wrapper (design-system unaffected) |
-| `src/app/(marketing)/page.tsx` | created | landing composition + metadata; replaces `/` |
-| `src/app/page.tsx` | deleted | Phase 02 placeholder `/` (superseded) |
-| `src/app/icon.svg` | created | brand-tile favicon (32×32 rounded gradient + HeartPulse path) |
-| `src/app/globals.css` | modified | `--mascot-*` vars; body `overflow-x: hidden`; landing keyframes (`float`/`shadowPulse`/`softPulse`/`gradShift`/`fadeUp`/`spin`/`slideIn`/`mvp-*`); `@layer components` (`.cta-primary/.cta-ghost/.nav-login/.nav-link/.dot-grid/.cta-white/.cta-ghost-light/.hero-visual-container/.mvp-*`); `@layer utilities` (`.bg-blob-*/.bg-dot-grid-light/.map-grid/.footer-link`) |
-| `public/landing/how-it-works/*.png`, `public/auth/login-page.jpeg` | created | copied from `Landingpage/public/...` (Phase 04 asset move, verified source sizes) |
-| `src/features/landing/landing.test.tsx` | created | jsdom smoke: Nav routes + Hero heading/CTAs (`next/link` + `next/dynamic` mocked, IO stub) |
-| `e2e/home.spec.ts` | rewritten | landing headline visible + nav "Create Vault" → `toHaveURL(/\/register\/?$/)` (URL-only: route 404s until Phase 06) |
-| `package.json` | modified | `framer-motion@^12.38.0` → resolved **12.43.0** |
+| Path                                                                                                               | Action    | Purpose                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/features/landing/use-in-view.ts`                                                                              | created   | Stitch `useInView` port (threshold 0.12, once)                                                                                                                                                                                                                                                                                                                           |
+| `src/features/landing/mascots.tsx`                                                                                 | created   | Doctor/Robot/Nurse mascot SVGs + 3 `<img>` how-it-works mascots (eslint-disable no-img-element)                                                                                                                                                                                                                                                                          |
+| `src/features/landing/PhoneMockup.tsx`                                                                             | created   | mobile.jsx phone screen + CSS port (756×729, sparks/dots, `.mvp-*`)                                                                                                                                                                                                                                                                                                      |
+| `src/features/landing/HeroVisual.tsx`                                                                              | created   | floating-notification stack over phone (tone→`var(--color-*)`)                                                                                                                                                                                                                                                                                                           |
+| `src/features/landing/FloatingCard.tsx`                                                                            | created   | glass recipe (Stitch markup never mounts it; kept for auth/hero compositions)                                                                                                                                                                                                                                                                                            |
+| `src/features/landing/{Nav,Hero,HowItWorks,Features,Testimonials,FinalCta,Footer,AiChatFab,ScrollingServices}.tsx` | created   | §10 ported sections                                                                                                                                                                                                                                                                                                                                                      |
+| `src/app/(marketing)/layout.tsx`                                                                                   | created   | children-only wrapper (design-system unaffected)                                                                                                                                                                                                                                                                                                                         |
+| `src/app/(marketing)/page.tsx`                                                                                     | created   | landing composition + metadata; replaces `/`                                                                                                                                                                                                                                                                                                                             |
+| `src/app/page.tsx`                                                                                                 | deleted   | Phase 02 placeholder `/` (superseded)                                                                                                                                                                                                                                                                                                                                    |
+| `src/app/icon.svg`                                                                                                 | created   | brand-tile favicon (32×32 rounded gradient + HeartPulse path)                                                                                                                                                                                                                                                                                                            |
+| `src/app/globals.css`                                                                                              | modified  | `--mascot-*` vars; body `overflow-x: hidden`; landing keyframes (`float`/`shadowPulse`/`softPulse`/`gradShift`/`fadeUp`/`spin`/`slideIn`/`mvp-*`); `@layer components` (`.cta-primary/.cta-ghost/.nav-login/.nav-link/.dot-grid/.cta-white/.cta-ghost-light/.hero-visual-container/.mvp-*`); `@layer utilities` (`.bg-blob-*/.bg-dot-grid-light/.map-grid/.footer-link`) |
+| `public/landing/how-it-works/*.png`, `public/auth/login-page.jpeg`                                                 | created   | copied from `Landingpage/public/...` (Phase 04 asset move, verified source sizes)                                                                                                                                                                                                                                                                                        |
+| `src/features/landing/landing.test.tsx`                                                                            | created   | jsdom smoke: Nav routes + Hero heading/CTAs (`next/link` + `next/dynamic` mocked, IO stub)                                                                                                                                                                                                                                                                               |
+| `e2e/home.spec.ts`                                                                                                 | rewritten | landing headline visible + nav "Create Vault" → `toHaveURL(/\/register\/?$/)` (URL-only: route 404s until Phase 06)                                                                                                                                                                                                                                                      |
+| `package.json`                                                                                                     | modified  | `framer-motion@^12.38.0` → resolved **12.43.0**                                                                                                                                                                                                                                                                                                                          |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -343,10 +343,10 @@ consuming Phase 03 tokens only — runtime DOM is byte-visibly the same Stitch h
   but the source CSS never defines it (Stitch renders the dot invisible). Added as 4px
   `var(--color-primary)` circle — precision fix, documented so later phases don't "fix" it back.
 - **Glass cards** keep Stitch's literal composite shadows (`0 24px 48px rgba(...)`) — the lint rule
-  only bans literals *starting* with `#`/`rgba(`, composites are exempt; token-var substitution used
+  only bans literals _starting_ with `#`/`rgba(`, composites are exempt; token-var substitution used
   wherever a §5 token maps. `bg-white/90 backdrop-blur-*` carry the glass body.
 - **FloatingNotification chip tint** `${color}18` (≈9.4%) renders as `color-mix(in srgb, var(--color-*)
-  9.4%, transparent)`; icon colour via the tone var.
+9.4%, transparent)`; icon colour via the tone var.
 - **FinalCta "Get Started"** ports Stitch's inline submit-form as **`<a href="/register">`** (Styled form
   submit would navigate/q reload; `<a>` is the correct semantic for a link to registration and stays
   lint-clean). Input kept as decorative email field.
@@ -400,20 +400,20 @@ insert demo row".
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/server/db/schema.ts` | created | 16 §8 tables (users, session, account, verification, medications, medication_schedules, dose_events, dose_actions, adherence_daily, caregiver_relationships, caregiver_invitations, caregiver_alerts, notifications, ai_insights, user_preferences, demo_state). `time.BigInt`-free: `id text pk` + uuidv7, snake_case, `timestamptz`/`date`, enums as `text`+`$type` TS unions, all §8 indexes/uniques (incl. partial `medications_user_name_active_uq where archived_at is null` and `adherence_daily` UNIQUE NULLS NOT DISTINCT via `unique()`) |
-| `src/server/db/helpers.ts` | created | `uuidv7()` (RFC 9562, time-ordered), `utcDateKey`/`addDays`/`atTime`/`hhmm`, `upsertUser(db, input)` (stable id via `users.email` onConflictUpdate), `Db`/`DbTx` types |
-| `src/server/db/client.ts` | created | singleton `Pool`+`drizzle({schema})` on `globalThis` (HMR-safe), `ssl: { rejectUnauthorized: false }`, `max: 3`, guarded `process.loadEnvFile()` at module scope |
-| `src/server/db/insert-schemas.ts` | created | zod mirrors of all 16 insert types + `InsertSchemaEntry` demo rows (`satisfies typeof X.$inferInsert`) |
-| `src/server/db/demo-seed.ts` | created | §19 Arun Kumar workspace builder (transactional identity rebuild: delete-in-FK-order → 4 medications → 5 schedules → 84 dose_events + dose_actions → 17 adherence_daily → 3 ai_insights → demo_state) + `demoTotals(db)` |
-| `src/server/db/seed.ts` | created | idempotent: 2 dev users (alice/bob) + preferences, then `seedDemoWorkspace`; CLI main-guard via `argv[1]` |
-| `src/server/db/migrate.ts` | created | applies `./drizzle` journal through the verified client pool (replaces drizzle-kit migrate) |
-| `src/server/db/seed.test.ts` | created | skipIf-gated DB suite: seed idempotency (two runs → identical counts), §19 exact totals, Arun Kumar meds, zod per-table (16 rows parse; `{}` rejected) |
-| `drizzle/0000_new_red_hulk.sql` | created | generated migration (committed) |
-| `drizzle.config.ts` | modified | loads `.env`, requires `DATABASE_URL`-derived connection string, appends `sslmode=require` (kept dataset param-free) |
-| `package.json` | modified | deps `drizzle-orm@0.45.3`, `pg@8.23.0`, `zod@4.6.5`; dev `@types/pg@8.23.1`; `db:migrate` → `tsx src/server/db/migrate.ts` |
-| `.env.example` | modified | Supabase session-pooler `DATABASE_URL` + SUPABASE_* key template w/ where-to-find notes |
+| Path                              | Action   | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/server/db/schema.ts`         | created  | 16 §8 tables (users, session, account, verification, medications, medication_schedules, dose_events, dose_actions, adherence_daily, caregiver_relationships, caregiver_invitations, caregiver_alerts, notifications, ai_insights, user_preferences, demo_state). `time.BigInt`-free: `id text pk` + uuidv7, snake_case, `timestamptz`/`date`, enums as `text`+`$type` TS unions, all §8 indexes/uniques (incl. partial `medications_user_name_active_uq where archived_at is null` and `adherence_daily` UNIQUE NULLS NOT DISTINCT via `unique()`) |
+| `src/server/db/helpers.ts`        | created  | `uuidv7()` (RFC 9562, time-ordered), `utcDateKey`/`addDays`/`atTime`/`hhmm`, `upsertUser(db, input)` (stable id via `users.email` onConflictUpdate), `Db`/`DbTx` types                                                                                                                                                                                                                                                                                                                                                                             |
+| `src/server/db/client.ts`         | created  | singleton `Pool`+`drizzle({schema})` on `globalThis` (HMR-safe), `ssl: { rejectUnauthorized: false }`, `max: 3`, guarded `process.loadEnvFile()` at module scope                                                                                                                                                                                                                                                                                                                                                                                   |
+| `src/server/db/insert-schemas.ts` | created  | zod mirrors of all 16 insert types + `InsertSchemaEntry` demo rows (`satisfies typeof X.$inferInsert`)                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `src/server/db/demo-seed.ts`      | created  | §19 Arun Kumar workspace builder (transactional identity rebuild: delete-in-FK-order → 4 medications → 5 schedules → 84 dose_events + dose_actions → 17 adherence_daily → 3 ai_insights → demo_state) + `demoTotals(db)`                                                                                                                                                                                                                                                                                                                           |
+| `src/server/db/seed.ts`           | created  | idempotent: 2 dev users (alice/bob) + preferences, then `seedDemoWorkspace`; CLI main-guard via `argv[1]`                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `src/server/db/migrate.ts`        | created  | applies `./drizzle` journal through the verified client pool (replaces drizzle-kit migrate)                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/server/db/seed.test.ts`      | created  | skipIf-gated DB suite: seed idempotency (two runs → identical counts), §19 exact totals, Arun Kumar meds, zod per-table (16 rows parse; `{}` rejected)                                                                                                                                                                                                                                                                                                                                                                                             |
+| `drizzle/0000_new_red_hulk.sql`   | created  | generated migration (committed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `drizzle.config.ts`               | modified | loads `.env`, requires `DATABASE_URL`-derived connection string, appends `sslmode=require` (kept dataset param-free)                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `package.json`                    | modified | deps `drizzle-orm@0.45.3`, `pg@8.23.0`, `zod@4.6.5`; dev `@types/pg@8.23.1`; `db:migrate` → `tsx src/server/db/migrate.ts`                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `.env.example`                    | modified | Supabase session-pooler `DATABASE_URL` + SUPABASE_* key template w/ where-to-find notes                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -421,10 +421,10 @@ insert demo row".
   project ref `bujgsllqckllbnxecygj`, region ap-south-1. IPv6-only direct endpoint unreachable from this
   network, so the **session pooler (IPv4)** host `aws-0-ap-south-1.pooler.supabase.com:5432` is used.
 - **`uniqueIndex().on(...).nullsNotDistinct()` unsupported** in drizzle-orm 0.45.3 (builder is
-  `UniqueOnConstraintBuilder`→`UniqueConstraintBuilder`, but the *index* builder lacks the method).
+  `UniqueOnConstraintBuilder`→`UniqueConstraintBuilder`, but the _index_ builder lacks the method).
   The §8 unique constraint is expressed with **`unique(...).on(...).nullsNotDistinct()`** (a table
   constraint, same semantics/DDL) — verified `UNIQUE NULLS NOT DISTINCT(...)` in generated SQL.
-- **drizzle-kit `migrate` failed** (ECONNREFUSED) because its pool used the connection string *without*
+- **drizzle-kit `migrate` failed** (ECONNREFUSED) because its pool used the connection string _without_
   a working SSL mode — `sslmode=require` maps to verify-full under pg semantics; programmatic
   `migrate(db, { migrationsFolder })` through our `rejectUnauthorized:false` pool from `migrate.ts`
   applies cleanly. `db:generate`/`db:push` still use drizzle-kit.
@@ -481,30 +481,30 @@ users land on `/onboarding`, skip → `/dashboard`, logout → `/`, re-login →
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `drizzle/0001_auth_adapter_columns.sql` | created | additive migration (schema-step1 trick): account `id_token`, `access_token_expires_at`, `refresh_token_expires_at`; session `email`, `updated_at`; verification `updated_at` |
-| `drizzle/0002_password_hash_rename.sql` | created | `ALTER TABLE "account" RENAME COLUMN "password_hash" TO "password";` (Better Auth 1.7 expects `password`) |
-| `drizzle/meta/0001_snapshot.json`, `drizzle/meta/_journal.json` | modified | snapshot key `password_hash`→`password` + journal `idx: 2` appended so `db:generate` stays idempotent |
-| `src/server/auth/server.ts` | created | `betterAuth({ appName, drizzleAdapter(db…), emailAndPassword{minPasswordLength:8}, secret/baseURL from env, user.additionalFields{timezone,onboardingCompleted,isDemo} input:false, session{expiresIn 7d, updateAge 1d} })` |
-| `src/app/api/auth/[...all]/route.ts` | created | `toNextJsHandler(auth)` GET+POST |
-| `src/lib/auth-client.ts` | created | `createAuthClient()`; re-exports `authClient`, `useSession`, `signIn`, `signUp`, `signOut` |
-| `src/server/trpc/context.ts` | created | `createContext` resolves `auth.api.getSession({ headers })` → `{ db, user, session }` |
-| `src/server/trpc/trpc.ts` | created | `router`/`publicProcedure`/`protectedProcedure` (UNAUTHORIZED) |
-| `src/server/trpc/routers/auth.ts` + `root.ts` | created | `me` (public), `whoami` + `setOnboardingComplete` (protected) |
-| `src/app/api/trpc/[trpc]/route.ts` | created | `fetchRequestHandler` (GET+POST) |
-| `middleware.ts` | created | injects `x-pathname` header (matcher excludes static/assets) |
-| `src/server/auth/require-user.ts` | created | redirect gate → `/login?next=` (safe, guarded) |
-| `src/shared/validations/auth.ts` + `auth.test.ts` | created | §13 schemas: name trim 2–100, email trim/lower, password ≥8 + letter + number; loginSchema + normalized email, `rememberMe` as required boolean |
-| `src/features/auth/flow.ts` + `flow.test.ts` | created | `safeNext()` (open-redirect/auth-route guard) + `hasOnboarded(Record<string, unknown>)` |
-| `src/features/auth/auth-error.ts` | created | better-auth error-code → UI message mapping |
-| `src/features/auth/*.tsx` (AuthShell, AuthFooter, PasswordInput, LoginForm, RegisterForm, SignOutButton, SkipOnboardingButton) | created | Stitch screens from UI-kit primitives, RHF+zodResolver, error Alert (destructive) |
-| `src/components/icons/google-icon.tsx` | created | Google "G" mark for the disabled SSO button (hex exempt — outside `src/features`) |
-| `src/app/(auth)/layout.tsx` + `login/page.tsx` + `register/page.tsx` | created | pre-authed redirect (+onboarding), heading, next-preserving swap link |
-| `src/app/(app)/layout.tsx` + `dashboard/page.tsx` + `onboarding/page.tsx` | created | requireUser gate + placeholder screens (email, sign out, skip-onboarding) |
-| `e2e/auth.spec.ts` | created | unauthenticated redirect + register→onboarding→dashboard→logout→login round trip |
-| `.env` | modified | `BETTER_AUTH_SECRET` (base64 via node crypto — no `openssl` on PATH) + `BETTER_AUTH_URL` |
-| `.env.example` | modified | `BETTER_AUTH_URL=http://localhost:3000` export |
+| Path                                                                                                                           | Action   | Purpose                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `drizzle/0001_auth_adapter_columns.sql`                                                                                        | created  | additive migration (schema-step1 trick): account `id_token`, `access_token_expires_at`, `refresh_token_expires_at`; session `email`, `updated_at`; verification `updated_at`                                                |
+| `drizzle/0002_password_hash_rename.sql`                                                                                        | created  | `ALTER TABLE "account" RENAME COLUMN "password_hash" TO "password";` (Better Auth 1.7 expects `password`)                                                                                                                   |
+| `drizzle/meta/0001_snapshot.json`, `drizzle/meta/_journal.json`                                                                | modified | snapshot key `password_hash`→`password` + journal `idx: 2` appended so `db:generate` stays idempotent                                                                                                                       |
+| `src/server/auth/server.ts`                                                                                                    | created  | `betterAuth({ appName, drizzleAdapter(db…), emailAndPassword{minPasswordLength:8}, secret/baseURL from env, user.additionalFields{timezone,onboardingCompleted,isDemo} input:false, session{expiresIn 7d, updateAge 1d} })` |
+| `src/app/api/auth/[...all]/route.ts`                                                                                           | created  | `toNextJsHandler(auth)` GET+POST                                                                                                                                                                                            |
+| `src/lib/auth-client.ts`                                                                                                       | created  | `createAuthClient()`; re-exports `authClient`, `useSession`, `signIn`, `signUp`, `signOut`                                                                                                                                  |
+| `src/server/trpc/context.ts`                                                                                                   | created  | `createContext` resolves `auth.api.getSession({ headers })` → `{ db, user, session }`                                                                                                                                       |
+| `src/server/trpc/trpc.ts`                                                                                                      | created  | `router`/`publicProcedure`/`protectedProcedure` (UNAUTHORIZED)                                                                                                                                                              |
+| `src/server/trpc/routers/auth.ts` + `root.ts`                                                                                  | created  | `me` (public), `whoami` + `setOnboardingComplete` (protected)                                                                                                                                                               |
+| `src/app/api/trpc/[trpc]/route.ts`                                                                                             | created  | `fetchRequestHandler` (GET+POST)                                                                                                                                                                                            |
+| `middleware.ts`                                                                                                                | created  | injects `x-pathname` header (matcher excludes static/assets)                                                                                                                                                                |
+| `src/server/auth/require-user.ts`                                                                                              | created  | redirect gate → `/login?next=` (safe, guarded)                                                                                                                                                                              |
+| `src/shared/validations/auth.ts` + `auth.test.ts`                                                                              | created  | §13 schemas: name trim 2–100, email trim/lower, password ≥8 + letter + number; loginSchema + normalized email, `rememberMe` as required boolean                                                                             |
+| `src/features/auth/flow.ts` + `flow.test.ts`                                                                                   | created  | `safeNext()` (open-redirect/auth-route guard) + `hasOnboarded(Record<string, unknown>)`                                                                                                                                     |
+| `src/features/auth/auth-error.ts`                                                                                              | created  | better-auth error-code → UI message mapping                                                                                                                                                                                 |
+| `src/features/auth/*.tsx` (AuthShell, AuthFooter, PasswordInput, LoginForm, RegisterForm, SignOutButton, SkipOnboardingButton) | created  | Stitch screens from UI-kit primitives, RHF+zodResolver, error Alert (destructive)                                                                                                                                           |
+| `src/components/icons/google-icon.tsx`                                                                                         | created  | Google "G" mark for the disabled SSO button (hex exempt — outside `src/features`)                                                                                                                                           |
+| `src/app/(auth)/layout.tsx` + `login/page.tsx` + `register/page.tsx`                                                           | created  | pre-authed redirect (+onboarding), heading, next-preserving swap link                                                                                                                                                       |
+| `src/app/(app)/layout.tsx` + `dashboard/page.tsx` + `onboarding/page.tsx`                                                      | created  | requireUser gate + placeholder screens (email, sign out, skip-onboarding)                                                                                                                                                   |
+| `e2e/auth.spec.ts`                                                                                                             | created  | unauthenticated redirect + register→onboarding→dashboard→logout→login round trip                                                                                                                                            |
+| `.env`                                                                                                                         | modified | `BETTER_AUTH_SECRET` (base64 via node crypto — no `openssl` on PATH) + `BETTER_AUTH_URL`                                                                                                                                    |
+| `.env.example`                                                                                                                 | modified | `BETTER_AUTH_URL=http://localhost:3000` export                                                                                                                                                                              |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -565,21 +565,21 @@ nav model in `nav.ts`, and all validation bounds are declared once in `constants
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/shared/enums.ts` | created | **Single source** for: DOSE_STATUSES, DOSE_EVENT_STATUSES, MEDICATION_STATUSES, DOSE_SOURCES, DOSE_ACTION_TYPES, USER_DOSE_ACTIONS, CAREGIVER_RELATIONSHIP_STATUSES, RELATION_TYPES, INVITATION_STATUSES, CAREGIVER_ALERT_TYPES, ALERT_STATUSES, NOTIFICATION_TYPES(+TABS), INSIGHT_CATEGORIES, INSIGHT_SOURCES, SUGGESTED_ACTIONS, THEMES, UI_DENSITIES, DEMO_SCENARIOS (+`DemoScenario` alias), FREQUENCY_LABELS(-_TEXT), TIME_BUCKETS(-_TEXT), REPORT_GRANULARITIES(-_TEXT), RANGE_PRESETS(-_TEXT) |
-| `src/shared/status.ts` | modified | `DOSE_STATUSES`/`DoseStatus` now re-exported from `enums.ts` (display union members sourced once) |
-| `src/server/db/schema.ts` | modified | imports + re-exports value/type enums from `@shared/enums` (deleted 16 local `[...] as const` + type unions) |
-| `src/server/db/insert-schemas.ts` | modified | `DOSE_ACTIONS` import → `DOSE_ACTION_TYPES` |
-| `src/shared/constants.ts` | created | defaults (MISSED_AFTER_DEFAULT=30, SNOOZE_MIN_DEFAULT=10, MAX_SNOOZES_DEFAULT=3, REMINDER_BEFORE_DEFAULT=5, HORIZON_DAYS=14, RECENT_INSIGHTS=5, MAX_SCHEDULE_SLOTS=6, HISTORY_PAGE_SIZE=25, LIST_PAGE_SIZE=20, INVITATION_TTL_DAYS=7, INSIGHT_MAX_ROWS=20), `VALUE_LIMITS` (single source for ranges), name/note/dosage/report caps, DEMO identities, TIME_BUCKET_BOUNDS (§10.5) |
-| `src/shared/times.ts` | created | localDateKey, isSameLocalDay, parseHhMm + `HHMM_REGEX`, combineDateAndTime, startOfLocalDay, addLocalDays, rangeByPreset (overload: numeric presets optional opts / `custom` requires from/to), bucketOf, now()/setNowImpl()/resetNowImpl() (§10.8 seam) |
-| `src/shared/types.ts` | created | §9 DTOs: UserProfile, Medication(+Lite), ScheduleSlot, DoseEvent, DoseAction, AdherenceDay, StreakSummary, Trend, TimeBucketStats, AdherenceSummary, MedicationPerformance, Dashboard, Notif, Caregiver+Permissions(+DEFAULT_*), Insight, Report(+Row/TrendPoint), ReminderSettings, AppearanceSettings, TimeRange |
-| `src/shared/nav.ts` | created | §14 nav model: `NavIconName` (string names — shared stays free of lucide/React), NAV_ITEMS, SETTINGS_NAV, BOTTOM_NAV, NAV_GROUP_ORDER, ALL_NAV_HREFS |
-| `src/shared/validations/common.ts` | created | emailSchema (trim/lower), dateKeySchema, uuidSchema, nameSchema, cappedTextSchema, boundedTextSchema, TIMEZONE_LIST + timezoneSchema |
-| `src/shared/validations/auth.ts` | modified | rebuilt on `common.ts` primitives (same §13 rules as Phase 06) |
-| `src/shared/validations/{onboarding,medication,schedule,doseAction,caregiver,settings,reports}.ts` | created | all remaining §13 schemas (see deviations for exact shapes) |
-| `src/shared/enums.test.ts`, `src/shared/times.test.ts`, `src/shared/validations/validations.test.ts` | created | Phase 07 unit suites |
-| `package.json` | modified | deps `date-fns@4.4.0`, `@date-fns/tz@1.5.0` |
+| Path                                                                                                 | Action   | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/enums.ts`                                                                                | created  | **Single source** for: DOSE_STATUSES, DOSE_EVENT_STATUSES, MEDICATION_STATUSES, DOSE_SOURCES, DOSE_ACTION_TYPES, USER_DOSE_ACTIONS, CAREGIVER_RELATIONSHIP_STATUSES, RELATION_TYPES, INVITATION_STATUSES, CAREGIVER_ALERT_TYPES, ALERT_STATUSES, NOTIFICATION_TYPES(+TABS), INSIGHT_CATEGORIES, INSIGHT_SOURCES, SUGGESTED_ACTIONS, THEMES, UI_DENSITIES, DEMO_SCENARIOS (+`DemoScenario` alias), FREQUENCY_LABELS(-_TEXT), TIME_BUCKETS(-_TEXT), REPORT_GRANULARITIES(-_TEXT), RANGE_PRESETS(-_TEXT) |
+| `src/shared/status.ts`                                                                               | modified | `DOSE_STATUSES`/`DoseStatus` now re-exported from `enums.ts` (display union members sourced once)                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `src/server/db/schema.ts`                                                                            | modified | imports + re-exports value/type enums from `@shared/enums` (deleted 16 local `[...] as const` + type unions)                                                                                                                                                                                                                                                                                                                                                                                          |
+| `src/server/db/insert-schemas.ts`                                                                    | modified | `DOSE_ACTIONS` import → `DOSE_ACTION_TYPES`                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `src/shared/constants.ts`                                                                            | created  | defaults (MISSED_AFTER_DEFAULT=30, SNOOZE_MIN_DEFAULT=10, MAX_SNOOZES_DEFAULT=3, REMINDER_BEFORE_DEFAULT=5, HORIZON_DAYS=14, RECENT_INSIGHTS=5, MAX_SCHEDULE_SLOTS=6, HISTORY_PAGE_SIZE=25, LIST_PAGE_SIZE=20, INVITATION_TTL_DAYS=7, INSIGHT_MAX_ROWS=20), `VALUE_LIMITS` (single source for ranges), name/note/dosage/report caps, DEMO identities, TIME_BUCKET_BOUNDS (§10.5)                                                                                                                      |
+| `src/shared/times.ts`                                                                                | created  | localDateKey, isSameLocalDay, parseHhMm + `HHMM_REGEX`, combineDateAndTime, startOfLocalDay, addLocalDays, rangeByPreset (overload: numeric presets optional opts / `custom` requires from/to), bucketOf, now()/setNowImpl()/resetNowImpl() (§10.8 seam)                                                                                                                                                                                                                                              |
+| `src/shared/types.ts`                                                                                | created  | §9 DTOs: UserProfile, Medication(+Lite), ScheduleSlot, DoseEvent, DoseAction, AdherenceDay, StreakSummary, Trend, TimeBucketStats, AdherenceSummary, MedicationPerformance, Dashboard, Notif, Caregiver+Permissions(+DEFAULT_*), Insight, Report(+Row/TrendPoint), ReminderSettings, AppearanceSettings, TimeRange                                                                                                                                                                                    |
+| `src/shared/nav.ts`                                                                                  | created  | §14 nav model: `NavIconName` (string names — shared stays free of lucide/React), NAV_ITEMS, SETTINGS_NAV, BOTTOM_NAV, NAV_GROUP_ORDER, ALL_NAV_HREFS                                                                                                                                                                                                                                                                                                                                                  |
+| `src/shared/validations/common.ts`                                                                   | created  | emailSchema (trim/lower), dateKeySchema, uuidSchema, nameSchema, cappedTextSchema, boundedTextSchema, TIMEZONE_LIST + timezoneSchema                                                                                                                                                                                                                                                                                                                                                                  |
+| `src/shared/validations/auth.ts`                                                                     | modified | rebuilt on `common.ts` primitives (same §13 rules as Phase 06)                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `src/shared/validations/{onboarding,medication,schedule,doseAction,caregiver,settings,reports}.ts`   | created  | all remaining §13 schemas (see deviations for exact shapes)                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `src/shared/enums.test.ts`, `src/shared/times.test.ts`, `src/shared/validations/validations.test.ts` | created  | Phase 07 unit suites                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `package.json`                                                                                       | modified | deps `date-fns@4.4.0`, `@date-fns/tz@1.5.0`                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -597,12 +597,12 @@ nav model in `nav.ts`, and all validation bounds are declared once in `constants
   (server DTOs stay plain; this phase only defines the shapes).
 - **Validation bounds centralised in `VALUE_LIMITS`.** §13 repeats ranges in onboarding/settings/reports;
   `constants.ts` now holds the single source so no profile/reminder/report drift across phases.
-- **`reportsSchemaFor(todayKey?)`.** The "to ≤ today+1" ceiling needs the *server's* clock — the factory
+- **`reportsSchemaFor(todayKey?)`.** The "to ≤ today+1" ceiling needs the _server's_ clock — the factory
   takes an optional `todayKey`; the loopback suite tests both the loose client schema and the strict
   server factory with a fixed day. (First draft used a `"9999-12-31"` sentinel whose `addDayKey` crossed
   into a 5-digit year and broke string comparisons — replaced by the optional-arg design.)
 - **`rangeByPreset` semantics:** numeric presets return `[from = start-of-first-day, to = end of today
-  (23:59 local)]` — inclusive windows; `custom` returns the caller's from/to unmodified and throws at
+(23:59 local)]` — inclusive windows; `custom` returns the caller's from/to unmodified and throws at
   runtime if omitted (compile time already enforces via overloads).
 - **`@date-fns/tz`·`TZDate.toISOString()` renders wall-clock + offset** (e.g. `2026-06-15T00:00:00.000+05:30`),
   not `Z` — tests compare `getTime()` against `Date.UTC(...)` for absolutes instead of ISO strings.
@@ -638,6 +638,7 @@ nav model in `nav.ts`, and all validation bounds are declared once in `constants
   server boundary (Phase 20).
 - If any later phase needs a new persisted enum, add it to `enums.ts` (not `schema.ts`) and extend
   `enums.test.ts` lists.
+
 ## Phase 08 � Reusable component system completion (DONE)
 
 **Plan reference:** Phase 08 spec (`plan.md:959`); �15.2 (charts), �5 data/table recipe, plan.tsx:961
@@ -653,24 +654,24 @@ now mounted app-wide. All verification green (145 unit tests, 7/7 e2e).
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/lib/format.ts` + `format.test.ts` | created | date-key heads, 12/24h `formatHhmm`, percent/count/compact, plural, date-range, duration labels (�5 copy recipes) |
-| `src/lib/pagination.ts` + `pagination.test.ts` | created | `clampPage`/`paginate`/`getPageItems` (ellipsis window)/`pageSummary` |
-| `src/lib/chart-theme.ts` | created | `CHART_PALETTE` (emerald/cyan/magenta/amber/violet via `--color-chart-1..5`), `CHART_GRID #e2e8f0`, axis/font constants, `chartColor(i)` |
-| `src/lib/use-media-query.ts` | created | SSR-safe `useMediaQuery` + `useIsMobile`/`useIsDesktop` (match < 768 `BREAKPOINTS.md`) |
-| `src/components/ui/chart.tsx` + `chart-types.ts` + `chart.test.tsx` | created | `TrendChart` (area/line/bar, empty?EmptyState, glass tooltip, container heights) |
-| `src/components/ui/data-table.tsx` + `data-table.test.tsx` | created | generic `DataTable<T>` (sortable headers w/ `aria-sort`, internal pagination, loading skeleton, error+retry, empty state) |
-| `src/components/ui/range-picker.tsx` + `range-picker.test.tsx` | created | 7d/30d/90d/custom presets over `rangeByPreset`/`localDateKey`, custom twin `DatePicker`s, mobile bottom sheet |
-| `src/components/ui/responsive-dialog.tsx` + `responsive-dialog.test.tsx` | created | `ResponsiveDialog` � centered Dialog =md / Drawer <md |
-| `src/components/ui/confirmation-dialog.tsx` + `confirmation-dialog.test.tsx` | modified/created | narrowed `onOpenChange` to 1-arg consumer callback (see deviations) + confirm/cancel suite |
-| `src/components/ui/nav-icon.tsx` | created | `NAV_ICONS: Record<NavIconName, LucideIcon>` (all 14 names) + `NavigationIcon` |
-| `src/app/layout.tsx` | modified | `<Toaster position="top-center" richColors />` mounted in `body` (sonner, Phase 03 dep) |
-| `src/app/(marketing)/design-system/page.tsx` | modified | new `#data` "07 � Data" section: DataTable demo, TrendChart (area + empty) demos, RangePicker (now state), ResponsiveDialog + NavIcon row, table/chart datasets; feedback?08, overlays?09; nav link `#data` |
-| `e2e/design-system.spec.ts` | modified | added data-section e2e: DataTable rows + pagination summary, trend svg + empty state, RangePicker preset button |
-| `playwright.config.ts` | modified | `workers: 2`, `timeout: 60_000` � dev-server cold-compile hardening (see verification) |
-| `e2e/auth.spec.ts` | modified | explicit waits 30s?60s to match the hardened config |
-| `package.json` | modified | dep `recharts@3.10.1` (only new runtime dep this phase) |
+| Path                                                                         | Action           | Purpose                                                                                                                                                                                                     |
+| ---------------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/lib/format.ts` + `format.test.ts`                                       | created          | date-key heads, 12/24h `formatHhmm`, percent/count/compact, plural, date-range, duration labels (�5 copy recipes)                                                                                           |
+| `src/lib/pagination.ts` + `pagination.test.ts`                               | created          | `clampPage`/`paginate`/`getPageItems` (ellipsis window)/`pageSummary`                                                                                                                                       |
+| `src/lib/chart-theme.ts`                                                     | created          | `CHART_PALETTE` (emerald/cyan/magenta/amber/violet via `--color-chart-1..5`), `CHART_GRID #e2e8f0`, axis/font constants, `chartColor(i)`                                                                    |
+| `src/lib/use-media-query.ts`                                                 | created          | SSR-safe `useMediaQuery` + `useIsMobile`/`useIsDesktop` (match < 768 `BREAKPOINTS.md`)                                                                                                                      |
+| `src/components/ui/chart.tsx` + `chart-types.ts` + `chart.test.tsx`          | created          | `TrendChart` (area/line/bar, empty?EmptyState, glass tooltip, container heights)                                                                                                                            |
+| `src/components/ui/data-table.tsx` + `data-table.test.tsx`                   | created          | generic `DataTable<T>` (sortable headers w/ `aria-sort`, internal pagination, loading skeleton, error+retry, empty state)                                                                                   |
+| `src/components/ui/range-picker.tsx` + `range-picker.test.tsx`               | created          | 7d/30d/90d/custom presets over `rangeByPreset`/`localDateKey`, custom twin `DatePicker`s, mobile bottom sheet                                                                                               |
+| `src/components/ui/responsive-dialog.tsx` + `responsive-dialog.test.tsx`     | created          | `ResponsiveDialog` � centered Dialog =md / Drawer <md                                                                                                                                                       |
+| `src/components/ui/confirmation-dialog.tsx` + `confirmation-dialog.test.tsx` | modified/created | narrowed `onOpenChange` to 1-arg consumer callback (see deviations) + confirm/cancel suite                                                                                                                  |
+| `src/components/ui/nav-icon.tsx`                                             | created          | `NAV_ICONS: Record<NavIconName, LucideIcon>` (all 14 names) + `NavigationIcon`                                                                                                                              |
+| `src/app/layout.tsx`                                                         | modified         | `<Toaster position="top-center" richColors />` mounted in `body` (sonner, Phase 03 dep)                                                                                                                     |
+| `src/app/(marketing)/design-system/page.tsx`                                 | modified         | new `#data` "07 � Data" section: DataTable demo, TrendChart (area + empty) demos, RangePicker (now state), ResponsiveDialog + NavIcon row, table/chart datasets; feedback?08, overlays?09; nav link `#data` |
+| `e2e/design-system.spec.ts`                                                  | modified         | added data-section e2e: DataTable rows + pagination summary, trend svg + empty state, RangePicker preset button                                                                                             |
+| `playwright.config.ts`                                                       | modified         | `workers: 2`, `timeout: 60_000` � dev-server cold-compile hardening (see verification)                                                                                                                      |
+| `e2e/auth.spec.ts`                                                           | modified         | explicit waits 30s?60s to match the hardened config                                                                                                                                                         |
+| `package.json`                                                               | modified         | dep `recharts@3.10.1` (only new runtime dep this phase)                                                                                                                                                     |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -743,16 +744,16 @@ map) + the frozen `NotificationBell.tsx` stub (`3c427aa`, committed on `main`).
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/components/layout/nav-model.ts` + `nav-model.test.ts` | created | pure helpers `isNavItemActive` / `getPageContext` (SECTION_ROOTS prefix match, settings-wildcard active rule, breadcrumb title + dynamic-child label detection) — single source for Sidebar/TopNav/Breadcrumbs/BottomNav/MoreSheet; 12 tests |
-| `src/components/layout/shell-context.ts` | created | `ShellContext` / `useShell` (throws outside provider), `ShellUser` + `ShellState` (pathname) |
-| `src/components/layout/AppShell.tsx` + `AppShell.test.tsx` | created | client shell: mounts `TRPCProvider` once, provides shell context, composes Sidebar/TopNav/content/BottomNav; 6 jsdom tests (mocked next/navigation, next/link, auth-client) |
-| `src/components/layout/{Sidebar,TopNav,Breadcrumbs,ProfileMenu,BottomNav,MoreSheet}.tsx` | created | the shell components (§7) |
-| `src/components/layout/nav-manifest.test.ts` | created | nav invariants + `ROUTE_MANIFEST` (owner/phase/existsNow) covering every `ALL_NAV_HREFS` href + file-exists check for `existsNow` routes — the merge-time dead-link guard |
-| `src/app/(app)/layout.tsx` | modified | Phase 06 placeholder rewritten: `requireUser()` → shell; stays provider-agnostic (see deviations) |
-| `src/app/(app)/{loading,error,not-found}.tsx` | created | group boundaries: skeleton layout (`role=status` "Loading your vault"), client `ErrorState` + reset, branded 404 ("Page not found" + "Back to dashboard") |
-| `e2e/shell.spec.ts` | created | desktop (sidebar states, shell persistence across registered routes, profile-menu sign-out) + mobile 390×844 (bottom nav, Schedule fallback, More sheet → Notifications); self-contained, own helpers inline |
+| Path                                                                                     | Action   | Purpose                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/components/layout/nav-model.ts` + `nav-model.test.ts`                               | created  | pure helpers `isNavItemActive` / `getPageContext` (SECTION_ROOTS prefix match, settings-wildcard active rule, breadcrumb title + dynamic-child label detection) — single source for Sidebar/TopNav/Breadcrumbs/BottomNav/MoreSheet; 12 tests |
+| `src/components/layout/shell-context.ts`                                                 | created  | `ShellContext` / `useShell` (throws outside provider), `ShellUser` + `ShellState` (pathname)                                                                                                                                                 |
+| `src/components/layout/AppShell.tsx` + `AppShell.test.tsx`                               | created  | client shell: mounts `TRPCProvider` once, provides shell context, composes Sidebar/TopNav/content/BottomNav; 6 jsdom tests (mocked next/navigation, next/link, auth-client)                                                                  |
+| `src/components/layout/{Sidebar,TopNav,Breadcrumbs,ProfileMenu,BottomNav,MoreSheet}.tsx` | created  | the shell components (§7)                                                                                                                                                                                                                    |
+| `src/components/layout/nav-manifest.test.ts`                                             | created  | nav invariants + `ROUTE_MANIFEST` (owner/phase/existsNow) covering every `ALL_NAV_HREFS` href + file-exists check for `existsNow` routes — the merge-time dead-link guard                                                                    |
+| `src/app/(app)/layout.tsx`                                                               | modified | Phase 06 placeholder rewritten: `requireUser()` → shell; stays provider-agnostic (see deviations)                                                                                                                                            |
+| `src/app/(app)/{loading,error,not-found}.tsx`                                            | created  | group boundaries: skeleton layout (`role=status` "Loading your vault"), client `ErrorState` + reset, branded 404 ("Page not found" + "Back to dashboard")                                                                                    |
+| `e2e/shell.spec.ts`                                                                      | created  | desktop (sidebar states, shell persistence across registered routes, profile-menu sign-out) + mobile 390×844 (bottom nav, Schedule fallback, More sheet → Notifications); self-contained, own helpers inline                                 |
 
 ### Design details worth pinning
 
@@ -780,7 +781,7 @@ map) + the frozen `NotificationBell.tsx` stub (`3c427aa`, committed on `main`).
   client shell subtree — still "inside the shell, once" (build-verified).
 - **Unbuilt routes render Next's ROOT 404, not `(app)/not-found.tsx`.** Next does not mount a route
   group's layout for never-registered segments (e.g. `/schedule` pre-Phase 14), so the branded group 404
-  only engages when a *registered* page calls `notFound()`/throws. `e2e/shell.spec.ts` asserts the real
+  only engages when a _registered_ page calls `notFound()`/throws. `e2e/shell.spec.ts` asserts the real
   default 404 for nav links to unbuilt routes and shell persistence across registered routes
   (`/dashboard` ↔ `/onboarding`).
 - **No config/package changes.** `playwright.config.ts` and `package.json` frozen; the shell spec's
@@ -828,18 +829,18 @@ validation (via `medicationSchema` at the router boundary), `frequencyLabel` der
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/shared/validations/medication.ts`, `schedule.ts` | read/unchanged | §13 contracts consumed by the router (`medicationSchema`, `scheduleSchema`) |
-| `src/server/domain/medications/slot-builder.ts` | created | `defaultSlot` (08:00 daily fallback) → validated `ScheduleSlotInput`; `toSlotInsert(slot, medicationId)` casting numerics to string for drizzle |
-| `src/server/domain/medications/repo.ts` | created | raw CRUD: `listActiveMedications`, `listArchivedMedications` (desc `archivedAt`), `listSlotsByMedicationIds`, `getMedicationById`, `findActiveByName` (partial-unique guard w/ `excludeId`), `insertMedication`, `replaceSlots` (delete+insert, owner-scoped), `updateMedication`, `setMedicationStatus`, `archiveMedication` (archivedAt + status→paused). All accept `Db | DbTx` |
-| `src/server/domain/medications/mapper.ts` | created | `frequencyLabelOf` (once-daily / twice-daily / n-times-daily / custom-weekdays), `toScheduleSlotDTO`, `toMedicationLite`, `toMedicationDTO` (casts numeric columns, sorts slots by time, `MedicationDTOExtras` placeholders) |
-| `src/server/domain/doseEvents/service.ts` | created (seam) | `ensureDoseEvents` + `voidFutureEvents` phase-11 no-op stubs typed `Db | DbTx`; Phase 12 fills in the real generator/voider |
-| `src/server/domain/medications/service.ts` | created | `medicationService.{list,get,create,update,setStatus,archive}` — each owner-scoped; create defaults to a single 08:00 daily slot when no schedule (§10.1); update diffs schedule (void+regenerate seam); archive soft-deletes and voids future events; all in `db.transaction` |
-| `src/server/trpc/routers/medication.ts` | created | list/get/create/update/setStatus/archive, all `protectedProcedure`; bodies `{ medication, schedule? }` validated by `medicationSchema`/`scheduleSchema`; service errors mapped to friendly messages |
-| `src/server/trpc/routers/aadhi.ts` | edited | registers `medication: medicationRouter` in `aadhiRouters` (Phase 09 territory: routers register here) |
-| `src/server/domain/medications/mapper.test.ts` | created | pure unit tests for `frequencyLabelOf` + DTO mapping (always runs, no DB) |
-| `src/server/domain/medications/service.test.ts` | created | DB-gated (`skipIf(!DATABASE_URL)`) integration: create/list/get round-trip, duplicate-name CONFLICT, foreign-owner NOT_FOUND, update rewrites slots, update foreign-owner denied, archive soft-delete+history — each wrapped in a rollback-only transaction |
+| Path                                                  | Action         | Purpose                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/validations/medication.ts`, `schedule.ts` | read/unchanged | §13 contracts consumed by the router (`medicationSchema`, `scheduleSchema`)                                                                                                                                                                                                                                                                                                |
+| `src/server/domain/medications/slot-builder.ts`       | created        | `defaultSlot` (08:00 daily fallback) → validated `ScheduleSlotInput`; `toSlotInsert(slot, medicationId)` casting numerics to string for drizzle                                                                                                                                                                                                                            |
+| `src/server/domain/medications/repo.ts`               | created        | raw CRUD: `listActiveMedications`, `listArchivedMedications` (desc `archivedAt`), `listSlotsByMedicationIds`, `getMedicationById`, `findActiveByName` (partial-unique guard w/ `excludeId`), `insertMedication`, `replaceSlots` (delete+insert, owner-scoped), `updateMedication`, `setMedicationStatus`, `archiveMedication` (archivedAt + status→paused). All accept `Db | DbTx`                                              |
+| `src/server/domain/medications/mapper.ts`             | created        | `frequencyLabelOf` (once-daily / twice-daily / n-times-daily / custom-weekdays), `toScheduleSlotDTO`, `toMedicationLite`, `toMedicationDTO` (casts numeric columns, sorts slots by time, `MedicationDTOExtras` placeholders)                                                                                                                                               |
+| `src/server/domain/doseEvents/service.ts`             | created (seam) | `ensureDoseEvents` + `voidFutureEvents` phase-11 no-op stubs typed `Db                                                                                                                                                                                                                                                                                                     | DbTx`; Phase 12 fills in the real generator/voider |
+| `src/server/domain/medications/service.ts`            | created        | `medicationService.{list,get,create,update,setStatus,archive}` — each owner-scoped; create defaults to a single 08:00 daily slot when no schedule (§10.1); update diffs schedule (void+regenerate seam); archive soft-deletes and voids future events; all in `db.transaction`                                                                                             |
+| `src/server/trpc/routers/medication.ts`               | created        | list/get/create/update/setStatus/archive, all `protectedProcedure`; bodies `{ medication, schedule? }` validated by `medicationSchema`/`scheduleSchema`; service errors mapped to friendly messages                                                                                                                                                                        |
+| `src/server/trpc/routers/aadhi.ts`                    | edited         | registers `medication: medicationRouter` in `aadhiRouters` (Phase 09 territory: routers register here)                                                                                                                                                                                                                                                                     |
+| `src/server/domain/medications/mapper.test.ts`        | created        | pure unit tests for `frequencyLabelOf` + DTO mapping (always runs, no DB)                                                                                                                                                                                                                                                                                                  |
+| `src/server/domain/medications/service.test.ts`       | created        | DB-gated (`skipIf(!DATABASE_URL)`) integration: create/list/get round-trip, duplicate-name CONFLICT, foreign-owner NOT_FOUND, update rewrites slots, update foreign-owner denied, archive soft-delete+history — each wrapped in a rollback-only transaction                                                                                                                |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -900,23 +901,23 @@ user's timezone through every generation/void seam.
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/shared/calc/schedule.ts` | created (pure) | `expandSchedule(med, slots, from, to, tz)` — deterministic day×enabled-slot expansion, med start/end bounds, weekday filter, per-slot dosage override, tz-correct instants, guard loop ceiling |
-| `src/shared/calc/schedule.test.ts` | created | 10 pure tests: once/twice/custom-weekdays, dosage override + fallback, inclusive start/end, disabled slots, weekdays filter, determinism, inverted/empty windows, tz-offset instants, leap/year rollover |
-| `src/server/domain/doseEvents/service.ts` | rewritten | Phase 11 stubs → real engine: `ensureDoseEvents` (clamped window ⊆ [startDate,endDate] ∪ today+HORIZON, `onConflictDoNothing` on the `(medicationId, scheduledFor)` unique, paused/archived → skipped), `voidFutureEvents` (statuses `upcoming/due/snoozed` + `scheduledFor ≥ fromDay` only), `extendHorizon`, `catchUp` (Phase 12 → gap-fill; Phase 13 folds reconcile) |
-| `src/server/domain/medicationSchedules/service.ts` | created | read facade: `listScheduleSlots(db, medicationId)` + `listSchedulesByMedicationIds` → `ScheduleSlotDTO` map, reused by Phase 14+ reads |
-| `src/server/domain/jobs/scheduler.ts` | created | `runCatchUpPass(db)` (all onboarded users → `catchUp`), `startScheduler({intervalMs})` (server-side `setInterval`, fires once immediately, `stop()` handle, crash-safe fire-and-forget) |
-| `src/server/domain/doseEvents/service.test.ts` | created | DB-gated 5 tests in rollback-only tx: 2/day boundary count, idempotency across default horizon, void preserves history, extend/catchUp parity, paused-skip |
-| `src/server/domain/medications/service.ts` | edited | seams now pass `timeZone`/`timezone`; `archive` gains a `timezone` param so voiding uses the user's clock |
-| `src/server/trpc/routers/medication.ts` | edited | `archive` passes `ctx.user.timezone ?? "UTC"` |
+| Path                                               | Action         | Purpose                                                                                                                                                                                                                                                                                                                                                                  |
+| -------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/shared/calc/schedule.ts`                      | created (pure) | `expandSchedule(med, slots, from, to, tz)` — deterministic day×enabled-slot expansion, med start/end bounds, weekday filter, per-slot dosage override, tz-correct instants, guard loop ceiling                                                                                                                                                                           |
+| `src/shared/calc/schedule.test.ts`                 | created        | 10 pure tests: once/twice/custom-weekdays, dosage override + fallback, inclusive start/end, disabled slots, weekdays filter, determinism, inverted/empty windows, tz-offset instants, leap/year rollover                                                                                                                                                                 |
+| `src/server/domain/doseEvents/service.ts`          | rewritten      | Phase 11 stubs → real engine: `ensureDoseEvents` (clamped window ⊆ [startDate,endDate] ∪ today+HORIZON, `onConflictDoNothing` on the `(medicationId, scheduledFor)` unique, paused/archived → skipped), `voidFutureEvents` (statuses `upcoming/due/snoozed` + `scheduledFor ≥ fromDay` only), `extendHorizon`, `catchUp` (Phase 12 → gap-fill; Phase 13 folds reconcile) |
+| `src/server/domain/medicationSchedules/service.ts` | created        | read facade: `listScheduleSlots(db, medicationId)` + `listSchedulesByMedicationIds` → `ScheduleSlotDTO` map, reused by Phase 14+ reads                                                                                                                                                                                                                                   |
+| `src/server/domain/jobs/scheduler.ts`              | created        | `runCatchUpPass(db)` (all onboarded users → `catchUp`), `startScheduler({intervalMs})` (server-side `setInterval`, fires once immediately, `stop()` handle, crash-safe fire-and-forget)                                                                                                                                                                                  |
+| `src/server/domain/doseEvents/service.test.ts`     | created        | DB-gated 5 tests in rollback-only tx: 2/day boundary count, idempotency across default horizon, void preserves history, extend/catchUp parity, paused-skip                                                                                                                                                                                                               |
+| `src/server/domain/medications/service.ts`         | edited         | seams now pass `timeZone`/`timezone`; `archive` gains a `timezone` param so voiding uses the user's clock                                                                                                                                                                                                                                                                |
+| `src/server/trpc/routers/medication.ts`            | edited         | `archive` passes `ctx.user.timezone ?? "UTC"`                                                                                                                                                                                                                                                                                                                            |
 
 ### Deviations & decisions (precise > faithful)
 
 - **`ensureDoseEvents` requires a per-call `timeZone`** rather than defaulting to UTC. §10.2
-  schedules are *local* times, so a wrong zone silently shifts every instant (fatal for
+  schedules are _local_ times, so a wrong zone silently shifts every instant (fatal for
   dashboard/schedule consistency). The Phase 12 seam contracts the caller to pass it.
-- **Explicit `to` bypasses the horizon clamp** (only *omitted* `to` = `today + HORIZON_DAYS`).
+- **Explicit `to` bypasses the horizon clamp** (only _omitted_ `to` = `today + HORIZON_DAYS`).
   This lets the acceptance test assert `2/day` on a fixed past window while the prod code
   path still grows to the horizon; deterministic `from ≤ to` guard returns early instead of
   looping on inverted windows.
@@ -928,7 +929,7 @@ user's timezone through every generation/void seam.
 - **`jobs/scheduler.ts` is opt-in** — it never auto-starts (no side effects on import),
   matching the frozen-config/no-surprise policy; a future integration point (Phase 13/14)
   calls `startScheduler` from the server bootstrap.
-- **`medicationSchedules/service.ts` stays read-only**; the *write* path remains the
+- **`medicationSchedules/service.ts` stays read-only**; the _write_ path remains the
   medication service's `replaceSlots` (Phase 11 owns schedule writes).
 
 ### Verification (all green)
@@ -970,22 +971,22 @@ walking clock. Domain-only — the UI surfaces land in Phase 14.
 
 ### Files created/modified (commit `9a72716`)
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/shared/calc/doseState.ts` | created | pure status machine: `deriveNextStatus`, `canTake/Snooze/SkipDoseStatus`, `canTakeUpcoming`, `applySnooze`, transition table, deadline math |
-| `src/shared/calc/doseState.test.ts` | created | 158-line transition + deadline + snooze-math suite |
-| `src/shared/calc/adherence.ts` | created | pure adherence math (`AdherenceDay`, bucketing, rates) |
-| `src/shared/calc/adherence.test.ts` | created | adherence calc suite |
-| `src/shared/calc/streaks.ts` / `performance.ts` | created | streak + per-med performance pure helpers |
-| `src/server/domain/doseEvents/reconcile.ts` | created | owner-scoped reconcile pass (pending → due/missed/snooze-expired) with `voided`/`missed_auto` audit rows |
-| `src/server/domain/doseEvents/producers.ts` | created | system-authored audit producers |
-| `src/server/domain/doseActions/service.ts` | created | take/snooze/skip single-transaction actions (idempotent, audit-append, adherence recompute) |
-| `src/server/domain/adherence/{materialize,summary,service}.ts` | created | `recomputeDay`/`recomputeRange`/`pruneAdherence`, `buildSummary`, and the router-facing `summary`/`byMedication`/`patterns` |
-| `src/server/domain/adherence/materialize.test.ts` | created | DB-gated recompute tests |
-| `src/server/trpc/routers/adherence.ts` | created | `adherence.summary` / `adherence.byMedication` / `adherence.patterns` (preset or clamped-custom range) |
-| `src/server/trpc/routers/aadhi.ts` | edited | registered `adherence` router |
-| `src/server/domain/jobs/scheduler.ts` | edited | folds reconcile into the catch-up tick |
-| `src/server/db/{helpers,demo-seed}.ts`, `src/shared/constants.ts`, `impl.md`, `vitest.config.ts` | edited | tx helper shims / demo-seed tweak / `REPORT_MAX_SPAN_DAYS` / log row / worker config |
+| Path                                                                                             | Action  | Purpose                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/calc/doseState.ts`                                                                   | created | pure status machine: `deriveNextStatus`, `canTake/Snooze/SkipDoseStatus`, `canTakeUpcoming`, `applySnooze`, transition table, deadline math |
+| `src/shared/calc/doseState.test.ts`                                                              | created | 158-line transition + deadline + snooze-math suite                                                                                          |
+| `src/shared/calc/adherence.ts`                                                                   | created | pure adherence math (`AdherenceDay`, bucketing, rates)                                                                                      |
+| `src/shared/calc/adherence.test.ts`                                                              | created | adherence calc suite                                                                                                                        |
+| `src/shared/calc/streaks.ts` / `performance.ts`                                                  | created | streak + per-med performance pure helpers                                                                                                   |
+| `src/server/domain/doseEvents/reconcile.ts`                                                      | created | owner-scoped reconcile pass (pending → due/missed/snooze-expired) with `voided`/`missed_auto` audit rows                                    |
+| `src/server/domain/doseEvents/producers.ts`                                                      | created | system-authored audit producers                                                                                                             |
+| `src/server/domain/doseActions/service.ts`                                                       | created | take/snooze/skip single-transaction actions (idempotent, audit-append, adherence recompute)                                                 |
+| `src/server/domain/adherence/{materialize,summary,service}.ts`                                   | created | `recomputeDay`/`recomputeRange`/`pruneAdherence`, `buildSummary`, and the router-facing `summary`/`byMedication`/`patterns`                 |
+| `src/server/domain/adherence/materialize.test.ts`                                                | created | DB-gated recompute tests                                                                                                                    |
+| `src/server/trpc/routers/adherence.ts`                                                           | created | `adherence.summary` / `adherence.byMedication` / `adherence.patterns` (preset or clamped-custom range)                                      |
+| `src/server/trpc/routers/aadhi.ts`                                                               | edited  | registered `adherence` router                                                                                                               |
+| `src/server/domain/jobs/scheduler.ts`                                                            | edited  | folds reconcile into the catch-up tick                                                                                                      |
+| `src/server/db/{helpers,demo-seed}.ts`, `src/shared/constants.ts`, `impl.md`, `vitest.config.ts` | edited  | tx helper shims / demo-seed tweak / `REPORT_MAX_SPAN_DAYS` / log row / worker config                                                        |
 
 ### Deviations & decisions
 
@@ -1011,29 +1012,29 @@ walking clock. Domain-only — the UI surfaces land in Phase 14.
 **Objective met:** the canonical `schedule.day` / `schedule.get` read routers, the missing
 `dose.take/snooze/skip` action routers, the schedule read service + dose DTO mappers, Today's
 Schedule + dose-detail pages with take/snooze/skip-in-place, and the shared action/colour
-display atoms. The adherence *pages* were split to a parallel worker (they consume the Phase 13
+display atoms. The adherence _pages_ were split to a parallel worker (they consume the Phase 13
 `adherence.*` router unchanged).
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/server/domain/doseEvents/mapper.ts` | created | `displayStatusOf` (persistent → display, incl. `due-now`), `toDoseEventDTO`, `toDoseActionDTO`, `toMedicationLiteMap` |
-| `src/server/domain/schedule/service.ts` | created | `scheduleService.day` (reconcile + catchUp + local-day window) and `.get` (event + audit timeline) |
-| `src/server/trpc/routers/schedule.ts` | created | `schedule.day(date)` + `schedule.get(id)` (protected) |
-| `src/server/trpc/routers/dose.ts` | created | `dose.take` / `dose.snooze` / `dose.skip` via `doseActionSchema` + `doseActionsService` |
-| `src/server/trpc/routers/aadhi.ts` | edited | registered `schedule` + `dose` routers |
-| `src/shared/types.ts` | edited | `DoseEventDTO.status` widened to the display `DoseStatus`; added `ScheduleDayDTO`, `DoseDetailDTO` |
-| `src/shared/actions.ts` | created | `DOSE_ACTION_META` labels for the audit log (§8.6) |
-| `src/shared/medColor.ts` (+ test) | created | med hex → semantic colour prefix (swatch overrides + channel heuristic) |
-| `src/lib/format.ts` (+ test) | edited | added `formatInstant(instant, tz)`, `shiftDateKey(key, days)` |
-| `src/components/ui/confirmation-dialog.tsx` | edited | accept optional `children` (skip-reason field) |
-| `src/features/dose/{DoseCard,DoseDetailPage,SkipDialog,useDoseActions,types}.tsx/ts` | created | dose row, detail + timeline, skip-confirm (+ reason), idempotent action hooks w/ cache invalidation, display atoms |
-| `src/features/dose/models.test.ts` | created | `actionableStatus` / `actionLabel` tests |
-| `src/features/schedule/{SchedulePage,useMedicationStatuses}.tsx/ts` | created | day feed: prev/today/next, grouped sections, empty/error/skeleton; med status map for action gating |
-| `src/app/(app)/schedule/page.tsx` + `[doseId]/page.tsx` | created | server wrappers (`requireUser`) → client pages |
-| `src/shared/medColor.test.ts`, `src/lib/format.test.ts` | created/edited | colour + date/time atom tests |
-| `impl.md` | edited | Phase 13 row → `done` (`9a72716`); Phase 14 row → `in_progress` |
+| Path                                                                                 | Action         | Purpose                                                                                                               |
+| ------------------------------------------------------------------------------------ | -------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `src/server/domain/doseEvents/mapper.ts`                                             | created        | `displayStatusOf` (persistent → display, incl. `due-now`), `toDoseEventDTO`, `toDoseActionDTO`, `toMedicationLiteMap` |
+| `src/server/domain/schedule/service.ts`                                              | created        | `scheduleService.day` (reconcile + catchUp + local-day window) and `.get` (event + audit timeline)                    |
+| `src/server/trpc/routers/schedule.ts`                                                | created        | `schedule.day(date)` + `schedule.get(id)` (protected)                                                                 |
+| `src/server/trpc/routers/dose.ts`                                                    | created        | `dose.take` / `dose.snooze` / `dose.skip` via `doseActionSchema` + `doseActionsService`                               |
+| `src/server/trpc/routers/aadhi.ts`                                                   | edited         | registered `schedule` + `dose` routers                                                                                |
+| `src/shared/types.ts`                                                                | edited         | `DoseEventDTO.status` widened to the display `DoseStatus`; added `ScheduleDayDTO`, `DoseDetailDTO`                    |
+| `src/shared/actions.ts`                                                              | created        | `DOSE_ACTION_META` labels for the audit log (§8.6)                                                                    |
+| `src/shared/medColor.ts` (+ test)                                                    | created        | med hex → semantic colour prefix (swatch overrides + channel heuristic)                                               |
+| `src/lib/format.ts` (+ test)                                                         | edited         | added `formatInstant(instant, tz)`, `shiftDateKey(key, days)`                                                         |
+| `src/components/ui/confirmation-dialog.tsx`                                          | edited         | accept optional `children` (skip-reason field)                                                                        |
+| `src/features/dose/{DoseCard,DoseDetailPage,SkipDialog,useDoseActions,types}.tsx/ts` | created        | dose row, detail + timeline, skip-confirm (+ reason), idempotent action hooks w/ cache invalidation, display atoms    |
+| `src/features/dose/models.test.ts`                                                   | created        | `actionableStatus` / `actionLabel` tests                                                                              |
+| `src/features/schedule/{SchedulePage,useMedicationStatuses}.tsx/ts`                  | created        | day feed: prev/today/next, grouped sections, empty/error/skeleton; med status map for action gating                   |
+| `src/app/(app)/schedule/page.tsx` + `[doseId]/page.tsx`                              | created        | server wrappers (`requireUser`) → client pages                                                                        |
+| `src/shared/medColor.test.ts`, `src/lib/format.test.ts`                              | created/edited | colour + date/time atom tests                                                                                         |
+| `impl.md`                                                                            | edited         | Phase 13 row → `done` (`9a72716`); Phase 14 row → `in_progress`                                                       |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -1077,22 +1078,22 @@ session (verified & committed together here), and the Phase 14-deferred `/adhere
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/server/domain/dashboard/service.ts` | created | `dashboardService.get(db, userId, timeZone)` — composes `scheduleService.day`, `adherenceService.summary` (7-day window), `medicationService.list`, latest `ai_insights` row, caregiver counts → `DashboardDTO` |
-| `src/server/trpc/routers/dashboard.ts` | created | `dashboard.get` protected procedure |
-| `src/server/trpc/routers/aadhi.ts` | edited | registered `dashboard: dashboardRouter` |
-| `src/server/domain/medications/extras.ts` | created | `medicationExtras(db, userId, timeZone, meds)` — bulk `nextDoseAt` (soonest unresolved dose ≥ local-day start) + `adherencePercent` (30-day window via shared `medicationPerformance`) → `Map` |
-| `src/server/domain/medications/service.ts` | edited | `list`/`get` now fill `nextDoseAt`/`adherencePercent` via extras (were null placeholders); `timezone` param defaults `"UTC"` |
-| `src/features/dashboard/*` (9 files) | created | `DashboardPage`, `StatRail`, `NextDoseHero`, `TodayFeed`, `AdherenceWidget`, `MedSummary`, `InsightWidget`, `CaregiverStatus`, `QuickActions` |
-| `src/app/(app)/dashboard/page.tsx` | rewritten | server component (`requireUser`) → client `DashboardPage` |
-| `src/features/medications/*`, `src/app/(app)/medications/**` | created (worker) | medication CRUD UI: list table, detail page, new/edit forms — verified + committed here |
-| `src/features/adherence/{AdherencePage,MedicationAdherencePage}.tsx` | created | §11.8 pages: `RangePicker` (7/30/90d+custom), stat rail, trend line + 7-day avg, time-of-day bars, missed-dose heat strip; per-med `DataTable` |
-| `src/app/(app)/adherence/*`, `medications/page.tsx` | created | server wrappers → client pages |
-| `src/features/dose/useDoseActions.ts` | edited | invalidation extended: `schedule.day/get`, `adherence.summary`, `dashboard.get`, `medication.list` |
-| `src/components/layout/nav-manifest.test.ts` | edited | `existsNow: true` for the phase-15 routes (medications CRUD, adherence, dashboard) |
-| `src/server/domain/dashboard/service.test.ts` | created | 5 DB-gated tests: empty dashboard, seeded nextDose, frozen-clock missedToday, extras fill, latest insight |
-| `impl.md` | edited | Phase 15 row → `done`; this section appended |
+| Path                                                                 | Action           | Purpose                                                                                                                                                                                                         |
+| -------------------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/server/domain/dashboard/service.ts`                             | created          | `dashboardService.get(db, userId, timeZone)` — composes `scheduleService.day`, `adherenceService.summary` (7-day window), `medicationService.list`, latest `ai_insights` row, caregiver counts → `DashboardDTO` |
+| `src/server/trpc/routers/dashboard.ts`                               | created          | `dashboard.get` protected procedure                                                                                                                                                                             |
+| `src/server/trpc/routers/aadhi.ts`                                   | edited           | registered `dashboard: dashboardRouter`                                                                                                                                                                         |
+| `src/server/domain/medications/extras.ts`                            | created          | `medicationExtras(db, userId, timeZone, meds)` — bulk `nextDoseAt` (soonest unresolved dose ≥ local-day start) + `adherencePercent` (30-day window via shared `medicationPerformance`) → `Map`                  |
+| `src/server/domain/medications/service.ts`                           | edited           | `list`/`get` now fill `nextDoseAt`/`adherencePercent` via extras (were null placeholders); `timezone` param defaults `"UTC"`                                                                                    |
+| `src/features/dashboard/*` (9 files)                                 | created          | `DashboardPage`, `StatRail`, `NextDoseHero`, `TodayFeed`, `AdherenceWidget`, `MedSummary`, `InsightWidget`, `CaregiverStatus`, `QuickActions`                                                                   |
+| `src/app/(app)/dashboard/page.tsx`                                   | rewritten        | server component (`requireUser`) → client `DashboardPage`                                                                                                                                                       |
+| `src/features/medications/*`, `src/app/(app)/medications/**`         | created (worker) | medication CRUD UI: list table, detail page, new/edit forms — verified + committed here                                                                                                                         |
+| `src/features/adherence/{AdherencePage,MedicationAdherencePage}.tsx` | created          | §11.8 pages: `RangePicker` (7/30/90d+custom), stat rail, trend line + 7-day avg, time-of-day bars, missed-dose heat strip; per-med `DataTable`                                                                  |
+| `src/app/(app)/adherence/*`, `medications/page.tsx`                  | created          | server wrappers → client pages                                                                                                                                                                                  |
+| `src/features/dose/useDoseActions.ts`                                | edited           | invalidation extended: `schedule.day/get`, `adherence.summary`, `dashboard.get`, `medication.list`                                                                                                              |
+| `src/components/layout/nav-manifest.test.ts`                         | edited           | `existsNow: true` for the phase-15 routes (medications CRUD, adherence, dashboard)                                                                                                                              |
+| `src/server/domain/dashboard/service.test.ts`                        | created          | 5 DB-gated tests: empty dashboard, seeded nextDose, frozen-clock missedToday, extras fill, latest insight                                                                                                       |
+| `impl.md`                                                            | edited           | Phase 15 row → `done`; this section appended                                                                                                                                                                    |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -1103,7 +1104,7 @@ session (verified & committed together here), and the Phase 14-deferred `/adhere
   "null until later" gap.
 - **`currentStreak` reflects the 7-day window** (summary is windowed); not a full-history streak.
   Cost is small for the dashboard; `adherence.summary` unpicked ranges still give true streaks.
-- **Caregiver tile**: `newAlerts` caps at 50 and counts alerts where the user is patient *or*
+- **Caregiver tile**: `newAlerts` caps at 50 and counts alerts where the user is patient _or_
   caregiver; `connectedCount` = active relationships where I'm either side (deliberately quiet
   until Phase 17 builds the full caregiver pages).
 - **No dead links**: `QuickActions` targets `/medications` (not the unbuilt `/reports`); the
@@ -1137,7 +1138,7 @@ session (verified & committed together here), and the Phase 14-deferred `/adhere
 ## Phase 16 — History + Reports + Notifications
 
 **Plan reference:** `plan.md` §21 Phase 16 bundle: §11.10 history page (`plan.md:667`), §10.9 reports
-(`plan.md:575` — build *exclusively* from `adherenceService`, CSV export `GET /api/reports/export`),
+(`plan.md:575` — build _exclusively_ from `adherenceService`, CSV export `GET /api/reports/export`),
 §11.11 `/reports` page (`plan.md:659`), §11.13 notifications (`plan.md:667`), §10.7 notification
 domain. **Objective met:** three new domains (history, reports, notifications) with tRPC routers
 registered on `aadhi`, three new pages under `/history`, `/reports`, `/notifications`, the live
@@ -1145,33 +1146,33 @@ notification bell in the shell, producers wired for dose events, plus the CSV ex
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/shared/calc/report.ts` | created | pure aggregation: `periodKey` (daily / ISO-week `YYYY-Www` / monthly `YYYY-MM`), `aggregateReport(days, granularity)` → `{ table, trend }`, `periodLabel` — no I/O, unit-testable |
-| `src/server/domain/history/service.ts` | created | `historyService.query(db, userId, timeZone, q)` — cursor pages of `dose_actions` joined to the current med snapshot (archived meds still resolve) + event status; range / med / status filters |
-| `src/server/trpc/routers/history.ts` | created | `history.query` protected procedure (`historyQuerySchema`, `timeZone = ctx.user.timezone ?? "UTC"`) |
-| `src/features/history/{HistoryPage,FilterBar,HistoryTimeline,HistoryRow,HistorySkeleton}.tsx` | created | §11.10 page: day-grouped timeline, status + med + range filters, "was missed / archived" badges |
-| `src/app/(app)/history/page.tsx` | created | server wrapper → client `HistoryPage` |
-| `src/server/domain/reports/service.ts` | created | `reportsService.generate(db, userId, timeZone, input)` — `adherenceService.summary` → `aggregateReport` (no bespoke read path) |
-| `src/server/trpc/routers/reports.ts` | created | `reports.generate` with `reportsSchemaFor(localDateKey(now(), "UTC"))` (from≤to, span≤366d, to≤today+1) |
-| `src/app/api/reports/export/route.ts` | created | CSV export: Better Auth session check, `reportsSchemaFor` `safeParse`, deterministic header `period,scheduled,taken,missed,skipped,adherence_percent`, `Content-Disposition` attachment |
-| `src/features/reports/*` (7 files) | created | `ReportsPage`, `RangePicker` reuse, `GranularityTabs`, `SummaryTable`, `MissedAnalysis`, `TrendChartBlock`, `DownloadButton` (client `fetch` → blob download) |
-| `src/app/(app)/reports/page.tsx` | created | server wrapper → client `ReportsPage` |
-| `src/server/domain/notifications/{service.ts,channels.ts}` | created | §10.7: single writer `notificationsService.create` (pref gate → dedupe → channel fan-out), `list`/`unreadCount`/`markRead`/`markAllRead`; `inAppChannel` (authoritative row), `consoleChannel`, `defaultChannels` |
-| `src/server/trpc/routers/notifications.ts` | created | `notifications.list/unreadCount/markRead/markAllRead` protected procedures |
-| `src/features/notifications/*`, `src/components/layout/NotificationBell.tsx` | created | §11.13 page (tab filter), popover bell wired to `unreadCount` + live event bus |
-| `src/app/(app)/notifications/page.tsx` | created | server wrapper → client `NotificationsPage` |
-| `src/server/domain/adherence/{summary.ts,service.ts}` | edited | `SummaryScope.medicationId` optional; `bucketStatsFor` gained a `medicationId` filter; `adherenceService.summary(db, userId, timeZone, window, medicationId?)` |
-| `src/server/domain/doseEvents/service.ts` (miss path) | edited | missed-dose producer writes `notificationsService.create(...{type:"missed_dose"})` |
-| `src/server/trpc/routers/aadhi.ts` | edited | registered `history`, `reports`, `notifications` routers |
-| `src/components/layout/nav-manifest.test.ts` | edited | `existsNow: true` + `EXPECTED_ROUTE_FILES` for `/history`, `/reports`, `/notifications` |
-| `src/shared/validations/{history.ts,reports.ts}` | created | zod schemas incl. `reportsSchemaFor(todayKey)` generator |
-| `src/shared/types.ts`, `src/shared/constants.ts`, `src/shared/enums.ts` | edited | `HistoryPageDTO`, `ReportDTO`, `HISTORY_PAGE_SIZE`, `NOTIFICATION_*` type/tab sets |
-| `src/shared/calc/report.test.ts` | created | 7 pure aggregation tests (daily/weekly ISO-week/monthly rolls, no-data suppression, trend alignment) |
-| `src/server/domain/history/service.test.ts` | created | 6 DB-gated tests (newest-first, taken incl. take-late, snoozed rows, med scope, cursor pagination, archived med) |
-| `src/server/domain/notifications/service.test.ts` | created | 6 DB-gated tests (insert+list, entityId dedupe, system no-dedupe, pref gate, unread-first + mark-read/all, tab filter) |
-| `src/server/domain/reports/service.test.ts` | created | 3 DB-gated tests reusing the §19 demo fixture (84/76/5/3 → 90.5% across daily/weekly/monthly) |
-| `impl.md` | edited | Phase 16 row → `done`; this section appended |
+| Path                                                                                          | Action  | Purpose                                                                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/calc/report.ts`                                                                   | created | pure aggregation: `periodKey` (daily / ISO-week `YYYY-Www` / monthly `YYYY-MM`), `aggregateReport(days, granularity)` → `{ table, trend }`, `periodLabel` — no I/O, unit-testable                                 |
+| `src/server/domain/history/service.ts`                                                        | created | `historyService.query(db, userId, timeZone, q)` — cursor pages of `dose_actions` joined to the current med snapshot (archived meds still resolve) + event status; range / med / status filters                    |
+| `src/server/trpc/routers/history.ts`                                                          | created | `history.query` protected procedure (`historyQuerySchema`, `timeZone = ctx.user.timezone ?? "UTC"`)                                                                                                               |
+| `src/features/history/{HistoryPage,FilterBar,HistoryTimeline,HistoryRow,HistorySkeleton}.tsx` | created | §11.10 page: day-grouped timeline, status + med + range filters, "was missed / archived" badges                                                                                                                   |
+| `src/app/(app)/history/page.tsx`                                                              | created | server wrapper → client `HistoryPage`                                                                                                                                                                             |
+| `src/server/domain/reports/service.ts`                                                        | created | `reportsService.generate(db, userId, timeZone, input)` — `adherenceService.summary` → `aggregateReport` (no bespoke read path)                                                                                    |
+| `src/server/trpc/routers/reports.ts`                                                          | created | `reports.generate` with `reportsSchemaFor(localDateKey(now(), "UTC"))` (from≤to, span≤366d, to≤today+1)                                                                                                           |
+| `src/app/api/reports/export/route.ts`                                                         | created | CSV export: Better Auth session check, `reportsSchemaFor` `safeParse`, deterministic header `period,scheduled,taken,missed,skipped,adherence_percent`, `Content-Disposition` attachment                           |
+| `src/features/reports/*` (7 files)                                                            | created | `ReportsPage`, `RangePicker` reuse, `GranularityTabs`, `SummaryTable`, `MissedAnalysis`, `TrendChartBlock`, `DownloadButton` (client `fetch` → blob download)                                                     |
+| `src/app/(app)/reports/page.tsx`                                                              | created | server wrapper → client `ReportsPage`                                                                                                                                                                             |
+| `src/server/domain/notifications/{service.ts,channels.ts}`                                    | created | §10.7: single writer `notificationsService.create` (pref gate → dedupe → channel fan-out), `list`/`unreadCount`/`markRead`/`markAllRead`; `inAppChannel` (authoritative row), `consoleChannel`, `defaultChannels` |
+| `src/server/trpc/routers/notifications.ts`                                                    | created | `notifications.list/unreadCount/markRead/markAllRead` protected procedures                                                                                                                                        |
+| `src/features/notifications/*`, `src/components/layout/NotificationBell.tsx`                  | created | §11.13 page (tab filter), popover bell wired to `unreadCount` + live event bus                                                                                                                                    |
+| `src/app/(app)/notifications/page.tsx`                                                        | created | server wrapper → client `NotificationsPage`                                                                                                                                                                       |
+| `src/server/domain/adherence/{summary.ts,service.ts}`                                         | edited  | `SummaryScope.medicationId` optional; `bucketStatsFor` gained a `medicationId` filter; `adherenceService.summary(db, userId, timeZone, window, medicationId?)`                                                    |
+| `src/server/domain/doseEvents/service.ts` (miss path)                                         | edited  | missed-dose producer writes `notificationsService.create(...{type:"missed_dose"})`                                                                                                                                |
+| `src/server/trpc/routers/aadhi.ts`                                                            | edited  | registered `history`, `reports`, `notifications` routers                                                                                                                                                          |
+| `src/components/layout/nav-manifest.test.ts`                                                  | edited  | `existsNow: true` + `EXPECTED_ROUTE_FILES` for `/history`, `/reports`, `/notifications`                                                                                                                           |
+| `src/shared/validations/{history.ts,reports.ts}`                                              | created | zod schemas incl. `reportsSchemaFor(todayKey)` generator                                                                                                                                                          |
+| `src/shared/types.ts`, `src/shared/constants.ts`, `src/shared/enums.ts`                       | edited  | `HistoryPageDTO`, `ReportDTO`, `HISTORY_PAGE_SIZE`, `NOTIFICATION_*` type/tab sets                                                                                                                                |
+| `src/shared/calc/report.test.ts`                                                              | created | 7 pure aggregation tests (daily/weekly ISO-week/monthly rolls, no-data suppression, trend alignment)                                                                                                              |
+| `src/server/domain/history/service.test.ts`                                                   | created | 6 DB-gated tests (newest-first, taken incl. take-late, snoozed rows, med scope, cursor pagination, archived med)                                                                                                  |
+| `src/server/domain/notifications/service.test.ts`                                             | created | 6 DB-gated tests (insert+list, entityId dedupe, system no-dedupe, pref gate, unread-first + mark-read/all, tab filter)                                                                                            |
+| `src/server/domain/reports/service.test.ts`                                                   | created | 3 DB-gated tests reusing the §19 demo fixture (84/76/5/3 → 90.5% across daily/weekly/monthly)                                                                                                                     |
+| `impl.md`                                                                                     | edited  | Phase 16 row → `done`; this section appended                                                                                                                                                                      |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -1180,7 +1181,7 @@ notification bell in the shell, producers wired for dose events, plus the CSV ex
   action writer (see Phase 13).
 - **Status filter semantics:** `snoozed` matches only `action = "snooze"` rows (snooze is an audit
   event; the final event status is still pending/taken); every other status filters on the event's
-  *resolved* status (`doseEvents.status`) — take-late events resolve to `taken` with `meta.takenLate`
+  _resolved_ status (`doseEvents.status`) — take-late events resolve to `taken` with `meta.takenLate`
   and correctly appear under "taken". Tested explicitly.
 - **Archived meds resolve in history** via a left-join to the soft-deleted `medications` row (stable
   name/colour) rather than falling back to "Unknown" — `toMedicationLiteMap` on the page's med ids.
@@ -1223,20 +1224,20 @@ Phase 11/12 service + dose-engine seam (schedules default to the §10.2 08:00/20
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/shared/validations/onboarding.ts` | created | `onboardingSchema` — IANA timezone membership (`timezoneSchema`), 4 reminder numbers bounded by `VALUE_LIMITS`, `addSampleMed` boolean (default false) |
-| `src/shared/validations/onboarding.test.ts` | created | unit schema tests: valid payload, default `addSampleMed`, string-number coercion, non-IANA rejection, low/high range rejection per field, non-integer rejection |
-| `src/server/domain/settings/get-or-createPreferences.ts` | created | owner-scoped upsert of `user_preferences`; falls back to the §10.3 engine defaults; `getPreferences` read for future settings |
-| `src/server/domain/settings/get-or-createPreferences.test.ts` | created | DB-gated (rollback-transaction) tests: fresh-user create, upsert-on-rerun keeps a single row, null read before init |
-| `src/server/trpc/routers/onboarding.ts` | created | `onboarding.complete` protected mutation: prefs upsert + `users.timezone` + `onboardingCompleted=true` + optional sample med (CONFLICT-ignored for idempotent re-runs) |
-| `src/server/trpc/routers/aadhi.ts` | edited | registered `onboarding: onboardingRouter` (the only aadhi-track registration point) |
-| `src/features/onboarding/OnboardingWizard.tsx` | created | client wizard: 3-step state machine, per-step `trigger()` validation, stepper pills, error alert, submit via `api.onboarding.complete`, redirect `/dashboard` |
-| `src/features/onboarding/steps/{ProfileStep,RemindersStep,FinishStep}.tsx` | created | timezone select; 4 number fields + sample-med toggle (Base UI); review summary |
-| `src/features/onboarding/onboarding.test.tsx` | created | component tests: walk-through + submit payload assertion, sample toggle + finish summary, step-blocking on out-of-range value |
-| `src/app/(app)/onboarding/page.tsx` | rewritten | renders wizard for fresh users; completed-check is an **authoritative DB read** (see deviation); `redirect("/dashboard")` when done |
-| `src/app/(app)/dashboard/page.tsx` | edited | dropped the now-dead "Continue onboarding" link (onboarding gates completed users) |
-| `e2e/{auth,shell}.spec.ts` | edited | `registerAndEnter` walks the wizard (Next, Next, Continue); post-completion `/onboarding` visits assert the `/dashboard` redirect |
+| Path                                                                       | Action    | Purpose                                                                                                                                                                |
+| -------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/validations/onboarding.ts`                                     | created   | `onboardingSchema` — IANA timezone membership (`timezoneSchema`), 4 reminder numbers bounded by `VALUE_LIMITS`, `addSampleMed` boolean (default false)                 |
+| `src/shared/validations/onboarding.test.ts`                                | created   | unit schema tests: valid payload, default `addSampleMed`, string-number coercion, non-IANA rejection, low/high range rejection per field, non-integer rejection        |
+| `src/server/domain/settings/get-or-createPreferences.ts`                   | created   | owner-scoped upsert of `user_preferences`; falls back to the §10.3 engine defaults; `getPreferences` read for future settings                                          |
+| `src/server/domain/settings/get-or-createPreferences.test.ts`              | created   | DB-gated (rollback-transaction) tests: fresh-user create, upsert-on-rerun keeps a single row, null read before init                                                    |
+| `src/server/trpc/routers/onboarding.ts`                                    | created   | `onboarding.complete` protected mutation: prefs upsert + `users.timezone` + `onboardingCompleted=true` + optional sample med (CONFLICT-ignored for idempotent re-runs) |
+| `src/server/trpc/routers/aadhi.ts`                                         | edited    | registered `onboarding: onboardingRouter` (the only aadhi-track registration point)                                                                                    |
+| `src/features/onboarding/OnboardingWizard.tsx`                             | created   | client wizard: 3-step state machine, per-step `trigger()` validation, stepper pills, error alert, submit via `api.onboarding.complete`, redirect `/dashboard`          |
+| `src/features/onboarding/steps/{ProfileStep,RemindersStep,FinishStep}.tsx` | created   | timezone select; 4 number fields + sample-med toggle (Base UI); review summary                                                                                         |
+| `src/features/onboarding/onboarding.test.tsx`                              | created   | component tests: walk-through + submit payload assertion, sample toggle + finish summary, step-blocking on out-of-range value                                          |
+| `src/app/(app)/onboarding/page.tsx`                                        | rewritten | renders wizard for fresh users; completed-check is an **authoritative DB read** (see deviation); `redirect("/dashboard")` when done                                    |
+| `src/app/(app)/dashboard/page.tsx`                                         | edited    | dropped the now-dead "Continue onboarding" link (onboarding gates completed users)                                                                                     |
+| `e2e/{auth,shell}.spec.ts`                                                 | edited    | `registerAndEnter` walks the wizard (Next, Next, Continue); post-completion `/onboarding` visits assert the `/dashboard` redirect                                      |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -1246,12 +1247,12 @@ Phase 11/12 service + dose-engine seam (schedules default to the §10.2 08:00/20
   `users.onboarding_completed` directly (server-side, authed). Same reason the e2e now asserts
   the `/dashboard` redirect on revisits.
 - **`z.coerce.number()` in the router boundary, plain strings in the form.** The RHF number
-  inputs register *without* `valueAsNumber`: `valueAsNumber` turns a cleared input into `NaN`,
+  inputs register _without_ `valueAsNumber`: `valueAsNumber` turns a cleared input into `NaN`,
   which Zod reports as "expected number, received NaN" instead of the humanized range message.
   Leaving the inputs as strings lets the shared schema coerce (`"0"` → 0 → "…must be at least…")
   and keeps one source of truth for messages server- and client-side.
 - **Reminders step threads `formState.errors` per field** — without it, failed step validation
-  blocked advancing with *no visible message* (caught by the component test).
+  blocked advancing with _no visible message_ (caught by the component test).
 - **`(app)` route group, not `(auth)`.** Phase 09 shell hand-off — onboarding lives under the
   authenticated shell. Completed users redirect away, so the short-lived wizard never rustles
   the shell nav.
@@ -1275,7 +1276,7 @@ Phase 11/12 service + dose-engine seam (schedules default to the §10.2 08:00/20
 ### Hand-off notes for later phases
 
 - `/schedule` (Phase 14) and `/medications` (Phase 15) should be reachable for the freshly
-  onboarded user *without* running onboarding again — the DB gate handles that.
+  onboarded user _without_ running onboarding again — the DB gate handles that.
 - The `timezone` saved here is the `${ctx.user.timezone}` every medication/dose seam reads
   (`ctx.user.timezone ?? "UTC"`); users who never ran onboarding still default to UTC.
 - `settings` (later phase) reuses `getOrCreatePreferences`/`getPreferences` — keep prefs
@@ -1294,28 +1295,28 @@ The dashboard insight + caregiver tiles are now real reads, not stubs.
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/server/domain/caregiver/service.ts` | edited | lifecycle + authorization matrix hardened; new `evaluateAdherenceDrop` (§10.6 optional alert) |
-| `src/server/domain/caregiver/service.test.ts` | created | 12 DB-gated tests: invite/preview/accept, self-invite + duplicate blocking, patient-only management, cross-patient leakage denial, revoke severs access, patient-readable own alert, permission gates, missed-dose dedupe, adherence-drop rules |
-| `src/server/trpc/routers/caregiver.ts` | edited | `accept` wrapped in `ctx.db.transaction` for atomic accept + notify |
-| `src/server/domain/insights/service.ts` | edited | `snapshot()` is now strictly read-only (`readOnly: true` on both adherence reads) |
-| `src/server/domain/insights/service.test.ts` | created | 8 tests: never-mutate proof, snapshot caps, fallback-labelled generation, prerequisites empty state, prune to `INSIGHT_MAX_ROWS`, prompt/contract boundary |
-| `src/server/domain/adherence/materialize.ts` | edited | extracted pure `aggregateEventDays`/`selectEventRows`; added read-only twin `readEventRange` |
-| `src/server/domain/adherence/summary.ts` | edited | `SummaryScope.readOnly`; `reconcileThenRecompute()` helper splits the write/read branches |
-| `src/server/domain/adherence/service.ts` | edited | `AdherenceReadOptions { readOnly }` on `summary()` / `byMedication()` |
-| `src/server/domain/jobs/scheduler.ts` | edited | reconcile pass tallies `adherenceDropAlerts` and calls `evaluateAdherenceDrop` per user |
-| `src/features/dashboard/{InsightWidget,CaregiverStatus,DashboardPage}.tsx` | edited | stub fill: category/source chips, real links, empty states |
-| `src/components/layout/nav-manifest.test.ts` | edited | `/insights` now `existsNow: true` + route-file mapping |
-| `vitest.config.ts` | edited | `testTimeout`/`hookTimeout` 30s (DB suites were tripping the 5s default) |
-| `src/components/layout/AppShell.test.tsx` | edited | stale Phase 16 assertion: the top-header Notifications affordance is the `NotificationBell` button, not a link |
+| Path                                                                       | Action  | Purpose                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/server/domain/caregiver/service.ts`                                   | edited  | lifecycle + authorization matrix hardened; new `evaluateAdherenceDrop` (§10.6 optional alert)                                                                                                                                                   |
+| `src/server/domain/caregiver/service.test.ts`                              | created | 12 DB-gated tests: invite/preview/accept, self-invite + duplicate blocking, patient-only management, cross-patient leakage denial, revoke severs access, patient-readable own alert, permission gates, missed-dose dedupe, adherence-drop rules |
+| `src/server/trpc/routers/caregiver.ts`                                     | edited  | `accept` wrapped in `ctx.db.transaction` for atomic accept + notify                                                                                                                                                                             |
+| `src/server/domain/insights/service.ts`                                    | edited  | `snapshot()` is now strictly read-only (`readOnly: true` on both adherence reads)                                                                                                                                                               |
+| `src/server/domain/insights/service.test.ts`                               | created | 8 tests: never-mutate proof, snapshot caps, fallback-labelled generation, prerequisites empty state, prune to `INSIGHT_MAX_ROWS`, prompt/contract boundary                                                                                      |
+| `src/server/domain/adherence/materialize.ts`                               | edited  | extracted pure `aggregateEventDays`/`selectEventRows`; added read-only twin `readEventRange`                                                                                                                                                    |
+| `src/server/domain/adherence/summary.ts`                                   | edited  | `SummaryScope.readOnly`; `reconcileThenRecompute()` helper splits the write/read branches                                                                                                                                                       |
+| `src/server/domain/adherence/service.ts`                                   | edited  | `AdherenceReadOptions { readOnly }` on `summary()` / `byMedication()`                                                                                                                                                                           |
+| `src/server/domain/jobs/scheduler.ts`                                      | edited  | reconcile pass tallies `adherenceDropAlerts` and calls `evaluateAdherenceDrop` per user                                                                                                                                                         |
+| `src/features/dashboard/{InsightWidget,CaregiverStatus,DashboardPage}.tsx` | edited  | stub fill: category/source chips, real links, empty states                                                                                                                                                                                      |
+| `src/components/layout/nav-manifest.test.ts`                               | edited  | `/insights` now `existsNow: true` + route-file mapping                                                                                                                                                                                          |
+| `vitest.config.ts`                                                         | edited  | `testTimeout`/`hookTimeout` 30s (DB suites were tripping the 5s default)                                                                                                                                                                        |
+| `src/components/layout/AppShell.test.tsx`                                  | edited  | stale Phase 16 assertion: the top-header Notifications affordance is the `NotificationBell` button, not a link                                                                                                                                  |
 
 ### Deviations & decisions (precise > faithful)
 
 - **Insight snapshots read events, not `adherence_daily`.** The first implementation of the
   read-only path only read materialized daily rows, which made insights silently empty for any user
   who had never opened the adherence dashboard (the scheduler never materializes). `readEventRange`
-  is the read-only twin of `recomputeRange`, so the snapshot is both read-only *and* always fresh.
+  is the read-only twin of `recomputeRange`, so the snapshot is both read-only _and_ always fresh.
 - **Caregiver scoping lives in the service, not the tRPC context.** The plan's "separate routers per
   audience" was dropped: `ctx` has no `role`/`patientUserId`, so every caregiver procedure is
   `protectedProcedure` + a service `requireCaregiverAccess` check. One router, one enforcement point.
@@ -1348,7 +1349,6 @@ The dashboard insight + caregiver tiles are now real reads, not stubs.
   `{ tone, insights[] }` with `INSIGHT_CATEGORIES` / `SUGGESTED_ACTIONS` members, or it silently
   falls back to the rule engine.
 
-
 ## Phase 18 - Settings + Demo mode + /help
 
 ### What was built
@@ -1378,29 +1378,29 @@ explicitly, not a footnote: insights describe patterns, they do not diagnose or 
 
 ### Files created/modified
 
-| Path | Action | Purpose |
-|---|---|---|
-| `src/shared/validations/settings.ts` | created | confirmation phrases, delete/export/reminder/scenario schemas, `DEMO_ACTIONS` |
-| `src/shared/types.ts` | edited | `ProfileDTO`, `ReminderSettingsPanelDTO`, `DemoStateDTO`, reshaped `DemoActionResultDTO`, extended `DataOverviewDTO` |
-| `src/server/domain/settings/service.ts` | created | profile, reminders, appearance, data overview, CSV export, delete-all, delete-account |
-| `src/server/domain/settings/service.test.ts` | created | 12 DB-gated tests (timezone re-bucketing, reminder patches, export contents, delete scoping) |
-| `src/server/trpc/routers/settings.ts` | created | `profile`, `reminders`, `appearance`, `dataOverview`, `exportCsv`, `deleteAllData`, `deleteAccount` |
-| `src/server/domain/demo/token.ts` | created | signed demo cookie: `issueDemoToken` / `verifyDemoToken` |
-| `src/server/domain/demo/service.ts` | created | `ensureDemoUser`, `simulateAction`, `applyScenario`, `generateCaregiverAlert`, `generateInsight`, `setTime`, `advanceDays`, `reset` |
-| `src/server/domain/demo/service.test.ts` | created | 14 DB-gated tests (cookie round-trip + tamper, all four dose actions, scenario rewrite bounds, clock advance, reset) |
-| `src/server/trpc/context.ts` | edited | demo-cookie subject resolution + `setNowImpl` / `resetNowImpl` |
-| `src/server/trpc/routers/demo.ts` | created | `enter`/`leave`/`state`/`simulateAction`/`applyScenario`/`generateCaregiverAlert`/`generateInsight`/`setTime`/`advanceDays`/`reset` |
-| `src/server/auth/resolve-demo-subject.ts` | created | server-side demo subject for layouts, installing the same clock override |
-| `src/features/settings/*.tsx` | created | `appearance-controller`, `SettingsNav`, `ProfileForm`, `ReminderSettings`, `CaregiverSettings`, `AppearancePanel`, `ExportButtons`, `DeleteFlow`, `DataOverview` |
-| `src/app/(app)/settings/**` | created | settings layout + 5 pages |
-| `src/features/demo/DemoBanner.tsx`, `DemoDock.tsx` | created | banner + floating simulation dock (bottom-right) with clock badge |
-| `src/features/demo/DemoLanding.tsx` | created | signed-out `/demo` landing page and enter CTA |
-| `src/app/demo/workspace/**` | created | demo shell + 8 thin re-exports of the real screens |
-| `src/components/layout/{nav-model,shell-context,AppShell,Sidebar,TopNav,MoreSheet,Breadcrumbs,BottomNav}.tsx` | edited | `basePath` support so the demo workspace reuses the real nav |
-| `src/features/help/{help-content.ts,HelpContent.tsx}`, `src/app/help/page.tsx` | created | `/help` content + single auth-aware route |
-| `src/features/landing/{Footer,AiChatFab}.tsx` | edited | demo link; FAB label now states the AI is informational |
-| `src/components/layout/nav-manifest.test.ts` | edited | `/settings/*`, `/help`, `/demo` pinned; new Phase 18 dead-link suite |
-| `src/components/layout/nav-model.test.ts` | edited | 6 new tests for `stripBasePath` / `withBasePath` / base-path breadcrumbs |
+| Path                                                                                                          | Action  | Purpose                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/shared/validations/settings.ts`                                                                          | created | confirmation phrases, delete/export/reminder/scenario schemas, `DEMO_ACTIONS`                                                                                    |
+| `src/shared/types.ts`                                                                                         | edited  | `ProfileDTO`, `ReminderSettingsPanelDTO`, `DemoStateDTO`, reshaped `DemoActionResultDTO`, extended `DataOverviewDTO`                                             |
+| `src/server/domain/settings/service.ts`                                                                       | created | profile, reminders, appearance, data overview, CSV export, delete-all, delete-account                                                                            |
+| `src/server/domain/settings/service.test.ts`                                                                  | created | 12 DB-gated tests (timezone re-bucketing, reminder patches, export contents, delete scoping)                                                                     |
+| `src/server/trpc/routers/settings.ts`                                                                         | created | `profile`, `reminders`, `appearance`, `dataOverview`, `exportCsv`, `deleteAllData`, `deleteAccount`                                                              |
+| `src/server/domain/demo/token.ts`                                                                             | created | signed demo cookie: `issueDemoToken` / `verifyDemoToken`                                                                                                         |
+| `src/server/domain/demo/service.ts`                                                                           | created | `ensureDemoUser`, `simulateAction`, `applyScenario`, `generateCaregiverAlert`, `generateInsight`, `setTime`, `advanceDays`, `reset`                              |
+| `src/server/domain/demo/service.test.ts`                                                                      | created | 14 DB-gated tests (cookie round-trip + tamper, all four dose actions, scenario rewrite bounds, clock advance, reset)                                             |
+| `src/server/trpc/context.ts`                                                                                  | edited  | demo-cookie subject resolution + `setNowImpl` / `resetNowImpl`                                                                                                   |
+| `src/server/trpc/routers/demo.ts`                                                                             | created | `enter`/`leave`/`state`/`simulateAction`/`applyScenario`/`generateCaregiverAlert`/`generateInsight`/`setTime`/`advanceDays`/`reset`                              |
+| `src/server/auth/resolve-demo-subject.ts`                                                                     | created | server-side demo subject for layouts, installing the same clock override                                                                                         |
+| `src/features/settings/*.tsx`                                                                                 | created | `appearance-controller`, `SettingsNav`, `ProfileForm`, `ReminderSettings`, `CaregiverSettings`, `AppearancePanel`, `ExportButtons`, `DeleteFlow`, `DataOverview` |
+| `src/app/(app)/settings/**`                                                                                   | created | settings layout + 5 pages                                                                                                                                        |
+| `src/features/demo/DemoBanner.tsx`, `DemoDock.tsx`                                                            | created | banner + floating simulation dock (bottom-right) with clock badge                                                                                                |
+| `src/features/demo/DemoLanding.tsx`                                                                           | created | signed-out `/demo` landing page and enter CTA                                                                                                                    |
+| `src/app/demo/workspace/**`                                                                                   | created | demo shell + 8 thin re-exports of the real screens                                                                                                               |
+| `src/components/layout/{nav-model,shell-context,AppShell,Sidebar,TopNav,MoreSheet,Breadcrumbs,BottomNav}.tsx` | edited  | `basePath` support so the demo workspace reuses the real nav                                                                                                     |
+| `src/features/help/{help-content.ts,HelpContent.tsx}`, `src/app/help/page.tsx`                                | created | `/help` content + single auth-aware route                                                                                                                        |
+| `src/features/landing/{Footer,AiChatFab}.tsx`                                                                 | edited  | demo link; FAB label now states the AI is informational                                                                                                          |
+| `src/components/layout/nav-manifest.test.ts`                                                                  | edited  | `/settings/*`, `/help`, `/demo` pinned; new Phase 18 dead-link suite                                                                                             |
+| `src/components/layout/nav-model.test.ts`                                                                     | edited  | 6 new tests for `stripBasePath` / `withBasePath` / base-path breadcrumbs                                                                                         |
 
 ### Deviations & decisions (precise > faithful)
 
@@ -1460,3 +1460,89 @@ explicitly, not a footnote: insights describe patterns, they do not diagnose or 
   ellipsis; both were caught by `pnpm build` (`stream did not contain valid UTF-8`) and fixed by
   re-encoding. All `src/**` is verified strict-UTF-8 now. Prefer the editor tools over
   `Get-Content -Raw | Set-Content` for files containing non-ASCII characters.
+
+---
+
+## Phase 19 - Quality sweep, test completion, E2E & delivery
+
+Code-complete. The release gate (`typecheck` -> `lint` -> `format:check` -> `test:coverage` ->
+`build` -> `test:e2e`) is documented in `docs/verification.md`.
+
+### Bugs found and fixed
+
+- **The demo workspace was broken beyond its dashboard.** `protectedProcedure` demanded a real
+  session, so every screen the demo nav could reach (`/reports`, `/adherence`, `/caregiver`, ...)
+  returned 401 for a signed-out visitor - the single page the entire marketing funnel points at.
+  `protectedProcedure` now accepts a validated demo subject, and the escape routes that must never
+  act on a shared demo account (`caregiver.invite`, `caregiver.accept`, `settings.deleteAccount`)
+  were moved onto a strict `sessionProcedure`.
+- **In-app links ejected visitors out of the demo base path.** `MedicationDetailPage`,
+  `AlertDetailPage`, `DoseDetailPage`, `CaregiverStatus`, `InsightWidget`, `CaregiverSettings`,
+  `Sidebar`, `TopNav`, `NotificationBell`, `ProfileMenu` and `NotificationsList` all hardcoded
+  `/medications`-style hrefs, so "Back to medications" from `/demo/workspace/medications/[id]`
+  landed on `/login`. All now resolve through `useAppHref()`.
+- **Medication writes did full historical reconcile work inside the write transaction.** Creating or
+  editing a medication called `reconcileUser` + `recomputeRange` over the user's entire history.
+  Replaced with `materializeEffectiveRange` (`src/server/domain/adherence/materialize.ts`), which
+  persists the same rows with no notification side effects.
+- **A stale `upcoming_dose` notification survived a direct `upcoming` -> `missed` transition.**
+  Covered by `src/server/domain/doseEvents/reconcile.test.ts`.
+- **`Vitest` silently dropped a whole test file.** Under v8 coverage a recycled worker could fail
+  to start ("Timeout waiting for worker to respond"), which Vitest reports as an *unhandled error*
+  while still exiting 0 - 48 files reported green out of 49. The unit pool is now pinned to
+  `maxWorkers: 1`; `docs/verification.md` explains how to detect a recurrence.
+- **The status filter on the medication list did not filter.** Picking "Paused" still listed active
+  rows and vice versa, and an archived-only search reported a misleading "no match" empty state.
+- **A per-medication reminder lead-time picker was dead UI.** `reminderBeforeMinutes` is a *user*
+  preference (`user_preferences.reminder_before_minutes`), not a medications column, so a picker on
+  the wizard would validate, round-trip and then be discarded by the server. Removed from the
+  wizard; the real control is Settings -> Reminders.
+- **The E2E suite asserted the bugs it should have caught.** `shell.spec.ts` expected
+  `heading[name="404"]` to be *visible* after clicking `/schedule`, written when the route did not
+  exist. It would have stayed green forever while a shipped nav link 404'd.
+- **No skip link anywhere in the app** (WCAG 2.4.1). Added as the first tab stop. The shell
+  deliberately does *not* add its own `<main>`: each feature screen owns that landmark, and a
+  second or nested one is invalid and trips axe's duplicate-main rule.
+
+### Tests added
+
+| File | Covers |
+|---|---|
+| `src/server/domain/doseEvents/reconcile.test.ts` | reminder producers, preference/medication gating, missed transition, stale-notification fix |
+| `src/features/medications/medication-utils.test.ts` | `filterMedications` (name/dose/unit/time, status scoping, empty state) + display helpers |
+| `src/lib/download.test.ts` | CSV download anchor, deferred `revokeObjectURL` (Safari), Blob passthrough |
+| `src/components/layout/clock-context.test.tsx` | demo clock: initial value, dock push, release-to-real-time, provider-less `useClock` |
+| `src/components/layout/AppShell.test.tsx` | skip link + focusable target, no duplicate `<main>` |
+| `src/components/layout/nav-manifest.test.ts` | every canonical nav href also resolves under `/demo/workspace` |
+| `e2e/demo.spec.ts` | the 401 regression guard: every demo destination renders, hrefs stay in-base, reset confirm/cancel |
+| `e2e/medications.spec.ts` | wizard create, search, status filter, pause/resume, detail, validation |
+| `e2e/a11y.spec.ts` | axe WCAG 2.0/2.1 A+AA over marketing/app/demo, one `<main>` + one `<h1>`, named icon controls |
+| `e2e/responsive.spec.ts` | mobile/tablet/desktop overflow, sidebar vs bottom nav, sheet focus + Escape |
+
+### Coverage
+
+`src/shared/calc/**` and `src/shared/validations/**` are the instrumented surface - the pure decision
+cores where a wrong answer is a wrong dose state. Thresholds are enforced (90/85/90/90 and
+80/75/80/80). React and server wiring is covered by the DB suites and E2E, where instrumentation
+would not make it more meaningful.
+
+### Verification so far
+
+- `pnpm typecheck` - clean
+- `pnpm lint` - clean (0 errors, 0 warnings)
+- `pnpm format:check` - clean (repo-wide; see the separate formatting commit)
+- `pnpm test:coverage` - **49 files, 366 tests passed**, 97.18% stmts / 91.17% branches
+- `pnpm build` - not yet re-run this phase
+- `pnpm test:e2e` - not yet executed; specs are written but unverified against a live server
+- Full server suite - not yet re-run this phase
+
+### Hand-off notes for later phases
+
+- `pnpm format:check` was failing on 380 files before this phase. It was normalized in a separate
+  commit so the Phase 19 diff stays reviewable; expect whitespace-only churn there.
+- Vitest 5 removed `poolOptions`. The single-worker guarantee is `maxWorkers: 1`.
+- `e2e/helpers.ts` holds the register -> onboard -> create-medication flows. New specs should use it
+  rather than re-implementing the selector work; each spec gets a unique account.
+- Any new `(app)` screen needs a matching `src/app/demo/workspace/<screen>/page.tsx`, or the
+  nav-manifest test fails. `/caregiver/accept` is the documented exception (session-only).
+- E2E writes real rows. `E2E_DATABASE_URL` must point at a throwaway database.

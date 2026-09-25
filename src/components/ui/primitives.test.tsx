@@ -17,10 +17,14 @@ import { DatePicker } from "@/components/ui/date-picker";
 describe("Phase 03 custom primitives (smoke)", () => {
   it("renders Chip with tone data attribute + content", () => {
     const { getByText, getByTestId } = render(
-      <span data-testid="chip-host"><Chip tone="magenta">Chronic</Chip></span>,
+      <span data-testid="chip-host">
+        <Chip tone="magenta">Chronic</Chip>
+      </span>,
     );
     expect(getByText("Chronic")).toBeTruthy();
-    expect(getByTestId("chip-host").querySelector("[data-slot='chip']")?.getAttribute("data-tone")).toBe("magenta");
+    expect(
+      getByTestId("chip-host").querySelector("[data-slot='chip']")?.getAttribute("data-tone"),
+    ).toBe("magenta");
   });
 
   it("renders SectionLabel kicker with uppercase tracking classes", () => {
@@ -42,7 +46,12 @@ describe("Phase 03 custom primitives (smoke)", () => {
 
   it("ListRow is a button when onClick is set (a11y)", () => {
     const { getByText } = render(
-      <ListRow icon={Pill} title="Metformin 500mg" right={<StatusBadge status="taken" />} onClick={() => {}} />,
+      <ListRow
+        icon={Pill}
+        title="Metformin 500mg"
+        right={<StatusBadge status="taken" />}
+        onClick={() => {}}
+      />,
     );
     const row = getByText("Metformin 500mg").closest("[data-slot='list-row']");
     expect(row?.getAttribute("role")).toBe("button");

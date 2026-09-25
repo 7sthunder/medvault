@@ -1,3 +1,5 @@
+import { log } from "@/lib/log";
+
 import { db, pool } from "./client";
 import { seedDemoWorkspace } from "./demo-seed";
 import type { Db } from "./helpers";
@@ -27,8 +29,17 @@ export async function seedAll(target: Db = db) {
       .values({
         userId,
         theme: "light",
-        notificationPrefs: { doseReminders: true, caregiverMissedAlerts: true, insights: true, sounds: true },
-        caregiverAlertPrefs: { missedDoseOn: true, adherenceDropThreshold: null, dailyDigest: false },
+        notificationPrefs: {
+          doseReminders: true,
+          caregiverMissedAlerts: true,
+          insights: true,
+          sounds: true,
+        },
+        caregiverAlertPrefs: {
+          missedDoseOn: true,
+          adherenceDropThreshold: null,
+          dailyDigest: false,
+        },
       })
       .onConflictDoNothing();
   }
@@ -44,13 +55,13 @@ async function main() {
     /* no .env — DATABASE_URL must already be in the environment */
   }
   if (!process.env.DATABASE_URL) {
-    console.error("DATABASE_URL is missing — set it in .env before running pnpm db:seed");
+    log.error("DATABASE_URL is missing — set it in .env before running pnpm db:seed");
     process.exit(1);
   }
 
   const { devUsers, demo } = await seedAll();
-  console.log(`seed: ${devUsers} dev users + preferences`);
-  console.log(
+  log.info(`seed: ${devUsers} dev users + preferences`);
+  log.info(
     `seed: demo workspace (${demo.scheduled} scheduled / ${demo.taken} taken / ${demo.missed} missed / ${demo.skipped} skipped / ${demo.snoozed} snoozed)`,
   );
   await pool.end();
@@ -58,8 +69,8 @@ async function main() {
 
 const entry = process.argv[1]?.replace(/\\/g, "/").split("/").pop();
 if (entry === "seed.ts") {
-  main().catch((err) => {
-    console.error(err);
+  main().catch((error) => {
+    log.error("Database seed failed", { error });
     process.exit(1);
   });
 }

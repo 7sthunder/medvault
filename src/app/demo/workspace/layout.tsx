@@ -8,10 +8,11 @@ import { DemoBanner } from "@/features/demo/DemoBanner";
 import { DemoDock } from "@/features/demo/DemoDock";
 import { resolveDemoSubject } from "@/server/auth/resolve-demo-subject";
 import { DEMO_COOKIE, verifyDemoToken } from "@/server/domain/demo/token";
+import { BRAND } from "@/shared/brand";
 
 export const metadata: Metadata = {
   title: "Demo workspace",
-  description: "A fully populated sample MedVault workspace you can simulate against.",
+  description: `A fully populated sample ${BRAND.name} workspace you can simulate against.`,
 };
 /**
  * Phase 18 — `/demo/workspace/*` shell (plan §10.8).
@@ -39,6 +40,7 @@ export default async function DemoWorkspaceLayout({ children }: { children: Reac
       isDemo={subject!.isDemo}
       basePath="/demo/workspace"
       overlay={<DemoDock />}
+      simulationNow={subject!.simulationNow}
     >
       <DemoBanner />
       {children}

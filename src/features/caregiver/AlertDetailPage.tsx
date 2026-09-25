@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, BellRing, Check, CheckCheck, History } from "lucide-react";
 import { toast } from "sonner";
 
-import { useShell } from "@/components/layout/shell-context";
+import { useAppHref, useShell } from "@/components/layout/shell-context";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +30,7 @@ const ALERT_STATUS_LABEL: Readonly<Record<CaregiverAlertDetailDTO["status"], str
 export function AlertDetailPage({ alertIdPromise }: { alertIdPromise: Promise<string> }) {
   const alertId = use(alertIdPromise);
   const { user } = useShell();
+  const href = useAppHref();
   const utils = api.useUtils();
   const detail = api.caregiver.alertDetail.useQuery({ alertId }, { staleTime: 15_000 });
   const action = api.caregiver.alertAction.useMutation({
@@ -72,7 +73,7 @@ export function AlertDetailPage({ alertIdPromise }: { alertIdPromise: Promise<st
           title="Alert not found"
           description="This alert may have been removed or you may no longer have access to it."
           action={
-            <Link href="/caregiver">
+            <Link href={href("/caregiver")}>
               <Button variant="outline">Back to caregiver</Button>
             </Link>
           }
@@ -90,7 +91,10 @@ export function AlertDetailPage({ alertIdPromise }: { alertIdPromise: Promise<st
 
       <header className="mt-6 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <SectionLabel tone="magenta" leading={<BellRing className="size-3.5" aria-hidden="true" />}>
+          <SectionLabel
+            tone="magenta"
+            leading={<BellRing className="size-3.5" aria-hidden="true" />}
+          >
             Caregiver alert
           </SectionLabel>
           <h1 className="mt-1 font-heading text-2xl font-extrabold text-ink-900">{alert.title}</h1>
@@ -107,32 +111,46 @@ export function AlertDetailPage({ alertIdPromise }: { alertIdPromise: Promise<st
       <Card className="mt-6 shadow-card-sm">
         <CardHeader>
           <CardTitle>What happened</CardTitle>
-          <CardDescription>Shared by {alert.patientName} with you as their caregiver.</CardDescription>
+          <CardDescription>
+            Shared by {alert.patientName} with you as their caregiver.
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <p className="text-sm leading-6 text-ink-800">{alert.body}</p>
 
           <dl className="grid gap-3 rounded-xl bg-bg-soft p-4 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Patient</dt>
+              <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                Patient
+              </dt>
               <dd className="mt-1 font-medium text-ink-900">{alert.patientName}</dd>
             </div>
             {alert.medicationName && (
               <div>
-                <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Medication</dt>
+                <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  Medication
+                </dt>
                 <dd className="mt-1 font-medium text-ink-900">{alert.medicationName}</dd>
               </div>
             )}
             {alert.scheduledFor && (
               <div>
-                <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Scheduled for</dt>
-                <dd className="mt-1 font-medium text-ink-900">{formatDateTime(alert.scheduledFor, user.timezone)}</dd>
+                <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  Scheduled for
+                </dt>
+                <dd className="mt-1 font-medium text-ink-900">
+                  {formatDateTime(alert.scheduledFor, user.timezone)}
+                </dd>
               </div>
             )}
             {alert.resolvedAt && (
               <div>
-                <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Resolved</dt>
-                <dd className="mt-1 font-medium text-ink-900">{formatDateTime(alert.resolvedAt, user.timezone)}</dd>
+                <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  Resolved
+                </dt>
+                <dd className="mt-1 font-medium text-ink-900">
+                  {formatDateTime(alert.resolvedAt, user.timezone)}
+                </dd>
               </div>
             )}
           </dl>
@@ -177,7 +195,10 @@ export function AlertDetailPage({ alertIdPromise }: { alertIdPromise: Promise<st
                   {alert.history.map((item) => {
                     const meta = actionMeta(item.action);
                     return (
-                      <li key={item.id} className="flex gap-3 border-b border-border/60 px-3 py-3 last:border-b-0">
+                      <li
+                        key={item.id}
+                        className="flex gap-3 border-b border-border/60 px-3 py-3 last:border-b-0"
+                      >
                         <span
                           aria-hidden="true"
                           className="mt-1 size-2 shrink-0 rounded-full bg-primary"
@@ -248,9 +269,10 @@ function AlertActions({
 }
 
 function BackLink() {
+  const href = useAppHref();
   return (
     <Link
-      href="/caregiver"
+      href={href("/caregiver")}
       className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-ink-800"
     >
       <ArrowLeft className="size-4" aria-hidden="true" />

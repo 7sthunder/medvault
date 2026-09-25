@@ -1,6 +1,7 @@
 "use client";
 
 import { localDateKey } from "@/shared/times";
+import { useNow } from "@/components/layout/clock-context";
 import { useShell } from "@/components/layout/shell-context";
 import { api } from "@/lib/trpc";
 
@@ -12,10 +13,11 @@ import { api } from "@/lib/trpc";
  */
 export function useDoseActions() {
   const { user } = useShell();
+  const now = useNow();
   const utils = api.useUtils();
 
   const invalidateDoseViews = () => {
-    const today = localDateKey(new Date(), user.timezone);
+    const today = localDateKey(now, user.timezone);
     void utils.schedule.day.invalidate({ date: today });
     void utils.schedule.get.invalidate();
     void utils.adherence.summary.invalidate();

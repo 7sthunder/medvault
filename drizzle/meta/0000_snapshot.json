@@ -77,12 +77,8 @@
           "name": "account_user_id_users_id_fk",
           "tableFrom": "account",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -183,12 +179,8 @@
           "name": "adherence_daily_user_id_users_id_fk",
           "tableFrom": "adherence_daily",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -196,12 +188,8 @@
           "name": "adherence_daily_medication_id_medications_id_fk",
           "tableFrom": "adherence_daily",
           "tableTo": "medications",
-          "columnsFrom": [
-            "medication_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["medication_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -211,11 +199,7 @@
         "adherence_daily_user_date_med_uq": {
           "name": "adherence_daily_user_date_med_uq",
           "nullsNotDistinct": true,
-          "columns": [
-            "user_id",
-            "date",
-            "medication_id"
-          ]
+          "columns": ["user_id", "date", "medication_id"]
         }
       },
       "policies": {},
@@ -316,12 +300,8 @@
           "name": "ai_insights_user_id_users_id_fk",
           "tableFrom": "ai_insights",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -454,12 +434,8 @@
           "name": "caregiver_alerts_patient_user_id_users_id_fk",
           "tableFrom": "caregiver_alerts",
           "tableTo": "users",
-          "columnsFrom": [
-            "patient_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["patient_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -467,12 +443,8 @@
           "name": "caregiver_alerts_caregiver_user_id_users_id_fk",
           "tableFrom": "caregiver_alerts",
           "tableTo": "users",
-          "columnsFrom": [
-            "caregiver_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["caregiver_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -480,12 +452,8 @@
           "name": "caregiver_alerts_relationship_id_caregiver_relationships_id_fk",
           "tableFrom": "caregiver_alerts",
           "tableTo": "caregiver_relationships",
-          "columnsFrom": [
-            "relationship_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["relationship_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -493,12 +461,8 @@
           "name": "caregiver_alerts_dose_event_id_dose_events_id_fk",
           "tableFrom": "caregiver_alerts",
           "tableTo": "dose_events",
-          "columnsFrom": [
-            "dose_event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["dose_event_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -571,12 +535,8 @@
           "name": "caregiver_invitations_patient_user_id_users_id_fk",
           "tableFrom": "caregiver_invitations",
           "tableTo": "users",
-          "columnsFrom": [
-            "patient_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["patient_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -586,9 +546,7 @@
         "caregiver_invitations_token_unique": {
           "name": "caregiver_invitations_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -728,12 +686,8 @@
           "name": "caregiver_relationships_patient_user_id_users_id_fk",
           "tableFrom": "caregiver_relationships",
           "tableTo": "users",
-          "columnsFrom": [
-            "patient_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["patient_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -741,12 +695,8 @@
           "name": "caregiver_relationships_caregiver_user_id_users_id_fk",
           "tableFrom": "caregiver_relationships",
           "tableTo": "users",
-          "columnsFrom": [
-            "caregiver_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["caregiver_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -754,12 +704,8 @@
           "name": "caregiver_relationships_invited_by_user_id_users_id_fk",
           "tableFrom": "caregiver_relationships",
           "tableTo": "users",
-          "columnsFrom": [
-            "invited_by_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invited_by_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -827,12 +773,8 @@
           "name": "demo_state_user_id_users_id_fk",
           "tableFrom": "demo_state",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -928,12 +870,8 @@
           "name": "dose_actions_user_id_users_id_fk",
           "tableFrom": "dose_actions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -941,12 +879,8 @@
           "name": "dose_actions_dose_event_id_dose_events_id_fk",
           "tableFrom": "dose_actions",
           "tableTo": "dose_events",
-          "columnsFrom": [
-            "dose_event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["dose_event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1169,12 +1103,8 @@
           "name": "dose_events_user_id_users_id_fk",
           "tableFrom": "dose_events",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1182,12 +1112,8 @@
           "name": "dose_events_medication_id_medications_id_fk",
           "tableFrom": "dose_events",
           "tableTo": "medications",
-          "columnsFrom": [
-            "medication_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["medication_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1195,12 +1121,8 @@
           "name": "dose_events_schedule_id_medication_schedules_id_fk",
           "tableFrom": "dose_events",
           "tableTo": "medication_schedules",
-          "columnsFrom": [
-            "schedule_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["schedule_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1317,12 +1239,8 @@
           "name": "medication_schedules_medication_id_medications_id_fk",
           "tableFrom": "medication_schedules",
           "tableTo": "medications",
-          "columnsFrom": [
-            "medication_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["medication_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1504,12 +1422,8 @@
           "name": "medications_user_id_users_id_fk",
           "tableFrom": "medications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1629,12 +1543,8 @@
           "name": "notifications_user_id_users_id_fk",
           "tableFrom": "notifications",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1699,12 +1609,8 @@
           "name": "session_user_id_users_id_fk",
           "tableFrom": "session",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1714,9 +1620,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -1810,12 +1714,8 @@
           "name": "user_preferences_user_id_users_id_fk",
           "tableFrom": "user_preferences",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1904,9 +1804,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

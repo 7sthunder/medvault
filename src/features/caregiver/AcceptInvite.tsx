@@ -21,7 +21,9 @@ export function AcceptInvite({ token, nextPath }: { token: string; nextPath?: st
   const { user } = useShell();
   const router = useRouter();
   const utils = api.useUtils();
-  const destination = nextPath ?? (token ? `/caregiver/accept?token=${encodeURIComponent(token)}` : "/caregiver/accept");
+  const destination =
+    nextPath ??
+    (token ? `/caregiver/accept?token=${encodeURIComponent(token)}` : "/caregiver/accept");
   const preview = api.caregiver.preview.useQuery(
     { token },
     { enabled: token.length > 0, staleTime: 15_000, retry: false },
@@ -103,11 +105,18 @@ export function AcceptInvite({ token, nextPath }: { token: string; nextPath?: st
     <main className="mx-auto max-w-2xl">
       <BackLink />
       <header className="mt-6">
-        <SectionLabel tone="violet" leading={<ShieldCheck className="size-3.5" aria-hidden="true" />}>
+        <SectionLabel
+          tone="violet"
+          leading={<ShieldCheck className="size-3.5" aria-hidden="true" />}
+        >
           Caregiver invitation
         </SectionLabel>
-        <h1 className="mt-1 font-heading text-2xl font-extrabold text-ink-900">Care for {preview.data.patientName}?</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Review the access below before connecting.</p>
+        <h1 className="mt-1 font-heading text-2xl font-extrabold text-ink-900">
+          Care for {preview.data.patientName}?
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Review the access below before connecting.
+        </p>
       </header>
 
       <Card className="mt-6 shadow-card-sm">
@@ -120,7 +129,9 @@ export function AcceptInvite({ token, nextPath }: { token: string; nextPath?: st
         <CardContent className="flex flex-col gap-6">
           {preview.data.message && (
             <div className="rounded-xl bg-primary-soft px-4 py-3 text-sm text-ink-800">
-              <p className="mb-1 text-xs font-semibold tracking-wide text-primary-dark uppercase">Message</p>
+              <p className="mb-1 text-xs font-semibold tracking-wide text-primary-dark uppercase">
+                Message
+              </p>
               <p>“{preview.data.message}”</p>
             </div>
           )}
@@ -131,7 +142,11 @@ export function AcceptInvite({ token, nextPath }: { token: string; nextPath?: st
               What this caregiver can see
             </h2>
             <div className="mt-3 rounded-xl border border-border bg-background p-3">
-              <PermissionsEditor permissions={preview.data.permissions} onChange={() => undefined} disabled />
+              <PermissionsEditor
+                permissions={preview.data.permissions}
+                onChange={() => undefined}
+                disabled
+              />
             </div>
           </section>
 
@@ -148,7 +163,11 @@ export function AcceptInvite({ token, nextPath }: { token: string; nextPath?: st
                 Not now
               </Button>
             </Link>
-            <Button type="button" onClick={() => accept.mutate({ token })} disabled={accept.isPending}>
+            <Button
+              type="button"
+              onClick={() => accept.mutate({ token })}
+              disabled={accept.isPending}
+            >
               {accept.isPending ? "Accepting…" : "Accept invitation"}
             </Button>
           </div>
@@ -175,7 +194,15 @@ function AuthLinks({ nextPath }: { nextPath: string }) {
   const query = `?next=${encodeURIComponent(nextPath)}`;
   return (
     <p className="mt-6 text-center text-sm text-muted-foreground">
-      Need to use another account? <Link className="font-semibold text-primary hover:underline" href={`/login${query}`}>Log in</Link> or <Link className="font-semibold text-primary hover:underline" href={`/register${query}`}>Register</Link>.
+      Need to use another account?{" "}
+      <Link className="font-semibold text-primary hover:underline" href={`/login${query}`}>
+        Log in
+      </Link>{" "}
+      or{" "}
+      <Link className="font-semibold text-primary hover:underline" href={`/register${query}`}>
+        Register
+      </Link>
+      .
     </p>
   );
 }

@@ -59,9 +59,11 @@ function permissionsOf(raw: unknown | null): CaregiverPermissions {
   return {
     viewAdherence: p?.viewAdherence ?? DEFAULT_CAREGIVER_PERMISSIONS.viewAdherence,
     viewMedications: p?.viewMedications ?? DEFAULT_CAREGIVER_PERMISSIONS.viewMedications,
-    receiveMissedDoseAlerts: p?.receiveMissedDoseAlerts ?? DEFAULT_CAREGIVER_PERMISSIONS.receiveMissedDoseAlerts,
+    receiveMissedDoseAlerts:
+      p?.receiveMissedDoseAlerts ?? DEFAULT_CAREGIVER_PERMISSIONS.receiveMissedDoseAlerts,
     receiveInsights: p?.receiveInsights ?? DEFAULT_CAREGIVER_PERMISSIONS.receiveInsights,
-    canAcknowledgeAlerts: p?.canAcknowledgeAlerts ?? DEFAULT_CAREGIVER_PERMISSIONS.canAcknowledgeAlerts,
+    canAcknowledgeAlerts:
+      p?.canAcknowledgeAlerts ?? DEFAULT_CAREGIVER_PERMISSIONS.canAcknowledgeAlerts,
   };
 }
 
@@ -116,8 +118,13 @@ function toAlertDTO(
   };
 }
 
-function alertSnapshot(row: AlertRow): { medicationName?: string | null; scheduledFor?: string | null } | null {
-  const data = (row.data ?? null) as { medicationName?: string | null; scheduledFor?: string | null } | null;
+function alertSnapshot(
+  row: AlertRow,
+): { medicationName?: string | null; scheduledFor?: string | null } | null {
+  const data = (row.data ?? null) as {
+    medicationName?: string | null;
+    scheduledFor?: string | null;
+  } | null;
   return data;
 }
 
@@ -125,12 +132,19 @@ function alertSnapshot(row: AlertRow): { medicationName?: string | null; schedul
 async function namesOf(db: Db | DbTx, ids: string[]): Promise<Map<string, string>> {
   const unique = [...new Set(ids.filter(Boolean))];
   if (unique.length === 0) return new Map();
-  const rows = await db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, unique));
+  const rows = await db
+    .select({ id: users.id, name: users.name })
+    .from(users)
+    .where(inArray(users.id, unique));
   return new Map(rows.map((r) => [r.id, r.name]));
 }
 
 /** (patient, email) already has a live invitation? */
-async function pendingInvitationFor(db: Db | DbTx, patientUserId: string, email: string): Promise<InvitationRow | null> {
+async function pendingInvitationFor(
+  db: Db | DbTx,
+  patientUserId: string,
+  email: string,
+): Promise<InvitationRow | null> {
   const [row] = await db
     .select()
     .from(caregiverInvitations)
@@ -151,8 +165,16 @@ export const caregiverService = {
    * selected permissions (schema §8.9 + Phase 17 `permissions` column). Blocks
    * self-invites and duplicate pending invites for the same (patient, email).
    */
-  async invite(db: Db | DbTx, patientUserId: string, input: CaregiverInviteInput): Promise<CaregiverInviteResultDTO> {
-    const [existingPatient] = await db.select({ id: users.id }).from(users).where(eq(users.email, input.email)).limit(1);
+  async invite(
+    db: Db | DbTx,
+    patientUserId: string,
+    input: CaregiverInviteInput,
+  ): Promise<CaregiverInviteResultDTO> {
+    const [existingPatient] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, input.email))
+      .limit(1);
     if (existingPatient?.id === patientUserId) {
       throw new InviteError("You can't invite yourself as a caregiver.");
     }
@@ -181,7 +203,10 @@ export const caregiverService = {
    * caregiver redeems it. Only leaks what the token already authorises the holder to redeem;
    * expired/used tokens preview `null` so the page can render the right empty state.
    */
-  async previewByToken(db: Db | DbTx, token: string): Promise<CaregiverInvitationPreviewDTO | null> {
+  async previewByToken(
+    db: Db | DbTx,
+    token: string,
+  ): Promise<CaregiverInvitationPreviewDTO | null> {
     const [inv] = await db
       .select()
       .from(caregiverInvitations)
@@ -189,7 +214,11 @@ export const caregiverService = {
       .limit(1);
     if (!inv) return null;
     if (inv.expiresAt.getTime() < now().getTime()) return null;
-    const [patient] = await db.select({ name: users.name }).from(users).where(eq(users.id, inv.patientUserId)).limit(1);
+    const [patient] = await db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, inv.patientUserId))
+      .limit(1);
     return {
       patientName: patient?.name ?? "Patient",
       message: inv.message ?? null,
@@ -203,7 +232,11 @@ export const caregiverService = {
    * (auto-accept on redemption) with the invited (or default) permissions. Re-activates
    * a prior revoked relationship for the same pair; idempotent when already active.
    */
-  async accept(db: Db | DbTx, caregiverUserId: string, token: string): Promise<CaregiverRelationshipDTO> {
+  async accept(
+    db: Db | DbTx,
+    caregiverUserId: string,
+    token: string,
+  ): Promise<CaregiverRelationshipDTO> {
     const [inv] = await db
       .select()
       .from(caregiverInvitations)
@@ -213,7 +246,10 @@ export const caregiverService = {
 
     const at = now();
     if (inv.expiresAt.getTime() < at.getTime()) {
-      await db.update(caregiverInvitations).set({ status: "expired" }).where(eq(caregiverInvitations.id, inv.id));
+      await db
+        .update(caregiverInvitations)
+        .set({ status: "expired" })
+        .where(eq(caregiverInvitations.id, inv.id));
       throw new InviteError("This invitation has expired.");
     }
     if (inv.patientUserId === caregiverUserId) {
@@ -276,8 +312,15 @@ export const caregiverService = {
       row = created!;
     }
 
-    await db.update(caregiverInvitations).set({ status: "accepted" }).where(eq(caregiverInvitations.id, inv.id));
-    return toRelationshipDTO(row, names.get(inv.patientUserId) ?? "Patient", names.get(caregiverUserId) ?? "Caregiver");
+    await db
+      .update(caregiverInvitations)
+      .set({ status: "accepted" })
+      .where(eq(caregiverInvitations.id, inv.id));
+    return toRelationshipDTO(
+      row,
+      names.get(inv.patientUserId) ?? "Patient",
+      names.get(caregiverUserId) ?? "Caregiver",
+    );
   },
 
   /**
@@ -295,7 +338,12 @@ export const caregiverService = {
       db
         .select()
         .from(caregiverRelationships)
-        .where(and(eq(caregiverRelationships.caregiverUserId, userId), eq(caregiverRelationships.status, ACTIVE)))
+        .where(
+          and(
+            eq(caregiverRelationships.caregiverUserId, userId),
+            eq(caregiverRelationships.status, ACTIVE),
+          ),
+        )
         .orderBy(desc(caregiverRelationships.updatedAt)),
       db
         .select()
@@ -319,7 +367,11 @@ export const caregiverService = {
 
     return {
       asPatient: asPatient.map((r) =>
-        toRelationshipDTO(r, names.get(r.patientUserId) ?? "Patient", names.get(r.caregiverUserId) ?? "Caregiver"),
+        toRelationshipDTO(
+          r,
+          names.get(r.patientUserId) ?? "Patient",
+          names.get(r.caregiverUserId) ?? "Caregiver",
+        ),
       ),
       asCaregiver: asCaregiver.map((r): CaregiverPatientDTO => ({
         relationshipId: r.id,
@@ -346,16 +398,26 @@ export const caregiverService = {
   ): Promise<CaregiverRelationshipDTO> {
     const row = await ownedRelationship(db, patientUserId, relationshipId);
     if (!row) throw new AuthGateError("Relationship not found.");
-    if (row.status !== ACTIVE) throw new AuthGateError("This caregiver connection is no longer active.");
+    if (row.status !== ACTIVE)
+      throw new AuthGateError("This caregiver connection is no longer active.");
 
     const [updated] = await db
       .update(caregiverRelationships)
       .set({ permissions, updatedAt: new Date() })
-      .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.status, ACTIVE)))
+      .where(
+        and(
+          eq(caregiverRelationships.id, relationshipId),
+          eq(caregiverRelationships.status, ACTIVE),
+        ),
+      )
       .returning();
     if (!updated) throw new AuthGateError("This caregiver connection is no longer active.");
     const names = await namesOf(db, [row.patientUserId, row.caregiverUserId]);
-    return toRelationshipDTO(updated, names.get(row.patientUserId) ?? "Patient", names.get(row.caregiverUserId) ?? "Caregiver");
+    return toRelationshipDTO(
+      updated,
+      names.get(row.patientUserId) ?? "Patient",
+      names.get(row.caregiverUserId) ?? "Caregiver",
+    );
   },
 
   /** Patient revokes a relationship — stops all future alerts; row kept for history. */
@@ -366,7 +428,12 @@ export const caregiverService = {
     await db
       .update(caregiverRelationships)
       .set({ status: "revoked", revokedAt: now(), updatedAt: new Date() })
-      .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.status, ACTIVE)));
+      .where(
+        and(
+          eq(caregiverRelationships.id, relationshipId),
+          eq(caregiverRelationships.status, ACTIVE),
+        ),
+      );
   },
 
   /** Caregiver steps away from a patient — same soft-delete semantics, caller differs. */
@@ -374,26 +441,46 @@ export const caregiverService = {
     const [row] = await db
       .select()
       .from(caregiverRelationships)
-      .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.caregiverUserId, caregiverUserId)))
+      .where(
+        and(
+          eq(caregiverRelationships.id, relationshipId),
+          eq(caregiverRelationships.caregiverUserId, caregiverUserId),
+        ),
+      )
       .limit(1);
     if (!row) throw new AuthGateError("Relationship not found.");
     if (row.status === "revoked") return;
     await db
       .update(caregiverRelationships)
       .set({ status: "revoked", revokedAt: now(), updatedAt: new Date() })
-      .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.status, ACTIVE)));
+      .where(
+        and(
+          eq(caregiverRelationships.id, relationshipId),
+          eq(caregiverRelationships.status, ACTIVE),
+        ),
+      );
   },
 
   /** Patient recalls a pending invitation before it is redeemed. */
-  async revokeInvitation(db: Db | DbTx, patientUserId: string, invitationId: string): Promise<void> {
+  async revokeInvitation(
+    db: Db | DbTx,
+    patientUserId: string,
+    invitationId: string,
+  ): Promise<void> {
     const [row] = await db
       .select()
       .from(caregiverInvitations)
-      .where(and(eq(caregiverInvitations.id, invitationId), eq(caregiverInvitations.patientUserId, patientUserId)))
+      .where(
+        and(
+          eq(caregiverInvitations.id, invitationId),
+          eq(caregiverInvitations.patientUserId, patientUserId),
+        ),
+      )
       .limit(1);
     if (!row) throw new AuthGateError("Invitation not found.");
     if (row.status === "revoked") return;
-    if (row.status !== "pending") throw new AuthGateError("This invitation can no longer be revoked.");
+    if (row.status !== "pending")
+      throw new AuthGateError("This invitation can no longer be revoked.");
     await db
       .update(caregiverInvitations)
       .set({ status: "revoked" })
@@ -429,7 +516,11 @@ export const caregiverService = {
       .limit(1);
     if (!row) return null;
     const names = await namesOf(db, [patientUserId, caregiverUserId]);
-    return toRelationshipDTO(row, names.get(patientUserId) ?? "Patient", names.get(caregiverUserId) ?? "Caregiver");
+    return toRelationshipDTO(
+      row,
+      names.get(patientUserId) ?? "Patient",
+      names.get(caregiverUserId) ?? "Caregiver",
+    );
   },
 
   /** Read-only patient overview for an authorized caregiver (§11.12 caregiver mode). */
@@ -441,7 +532,8 @@ export const caregiverService = {
   ): Promise<PatientOverviewDTO | null> {
     const rel = await caregiverService.requireCaregiverAccess(db, caregiverUserId, patientUserId);
     if (!rel) return null;
-    if (!rel.permissions.viewAdherence) throw new AuthGateError("view-adherence permission is required.");
+    if (!rel.permissions.viewAdherence)
+      throw new AuthGateError("view-adherence permission is required.");
 
     const todayKey = localDateKey(now(), timeZone);
     const dayStart = combineDateAndTime(todayKey, "00:00", timeZone);
@@ -449,8 +541,14 @@ export const caregiverService = {
 
     const [day, summary7, summary30, alerts] = await Promise.all([
       scheduleService.day(db, patientUserId, timeZone, todayKey),
-      adherenceService.summary(db, patientUserId, timeZone, { from: addLocalDays(dayStart, -6, timeZone), to: dayEnd }),
-      adherenceService.summary(db, patientUserId, timeZone, { from: addLocalDays(dayStart, -29, timeZone), to: dayEnd }),
+      adherenceService.summary(db, patientUserId, timeZone, {
+        from: addLocalDays(dayStart, -6, timeZone),
+        to: dayEnd,
+      }),
+      adherenceService.summary(db, patientUserId, timeZone, {
+        from: addLocalDays(dayStart, -29, timeZone),
+        to: dayEnd,
+      }),
       caregiverService.listPatientAlerts(db, caregiverUserId, patientUserId),
     ]);
 
@@ -478,7 +576,11 @@ export const caregiverService = {
   },
 
   /** Caregiver alert feed for their own patient (owner-scoped by caregiverUserId). */
-  async listPatientAlerts(db: Db | DbTx, caregiverUserId: string, patientUserId: string): Promise<CaregiverAlertDTO[]> {
+  async listPatientAlerts(
+    db: Db | DbTx,
+    caregiverUserId: string,
+    patientUserId: string,
+  ): Promise<CaregiverAlertDTO[]> {
     const rows = await db
       .select()
       .from(caregiverAlerts)
@@ -505,7 +607,11 @@ export const caregiverService = {
     actorUserId: string,
     alertId: string,
   ): Promise<CaregiverAlertDetailDTO | null> {
-    const [row] = await db.select().from(caregiverAlerts).where(eq(caregiverAlerts.id, alertId)).limit(1);
+    const [row] = await db
+      .select()
+      .from(caregiverAlerts)
+      .where(eq(caregiverAlerts.id, alertId))
+      .limit(1);
     if (!row) return null;
 
     if (row.patientUserId === actorUserId) {
@@ -522,19 +628,33 @@ export const caregiverService = {
       ? (await db.select().from(doseEvents).where(eq(doseEvents.id, row.doseEventId)).limit(1))[0]
       : undefined;
     const med = event
-      ? (await db.select().from(medications).where(eq(medications.id, event.medicationId)).limit(1))[0]
+      ? (
+          await db.select().from(medications).where(eq(medications.id, event.medicationId)).limit(1)
+        )[0]
       : undefined;
     const actions = event
-      ? await db.select().from(doseActions).where(eq(doseActions.doseEventId, event.id)).orderBy(doseActions.occurredAt)
+      ? await db
+          .select()
+          .from(doseActions)
+          .where(eq(doseActions.doseEventId, event.id))
+          .orderBy(doseActions.occurredAt)
       : [];
 
     return {
       ...toAlertDTO(row, names, {
-        medicationName: event ? med?.name ?? null : null,
+        medicationName: event ? (med?.name ?? null) : null,
         scheduledFor: event ? event.scheduledFor.toISOString() : undefined,
       }),
       patientUserId: row.patientUserId,
-      history: event && med ? actions.map((a) => toDoseActionDTO(a, med, { eventStatus: event!.status, eventScheduledFor: event!.scheduledFor })) : [],
+      history:
+        event && med
+          ? actions.map((a) =>
+              toDoseActionDTO(a, med, {
+                eventStatus: event!.status,
+                eventScheduledFor: event!.scheduledFor,
+              }),
+            )
+          : [],
     };
   },
 
@@ -552,11 +672,17 @@ export const caregiverService = {
     const [alert] = await db
       .select()
       .from(caregiverAlerts)
-      .where(and(eq(caregiverAlerts.id, alertId), eq(caregiverAlerts.caregiverUserId, caregiverUserId)))
+      .where(
+        and(eq(caregiverAlerts.id, alertId), eq(caregiverAlerts.caregiverUserId, caregiverUserId)),
+      )
       .limit(1);
     if (!alert) throw new AuthGateError("Alert not found.");
 
-    const rel = await caregiverService.requireCaregiverAccess(db, caregiverUserId, alert.patientUserId);
+    const rel = await caregiverService.requireCaregiverAccess(
+      db,
+      caregiverUserId,
+      alert.patientUserId,
+    );
     if (!rel || !rel.permissions.canAcknowledgeAlerts) {
       throw new AuthGateError("You don't have permission to manage this alert.");
     }
@@ -577,21 +703,34 @@ export const caregiverService = {
    * `adherence_drop` alert per qualifying ACTIVE relationship. Deduped per relationship per
    * local day so a recurring job can never spam the same drop. Returns alerts created.
    */
-  async evaluateAdherenceDrop(db: Db | DbTx, patientUserId: string, timeZone: string, at: Date = now()): Promise<number> {
+  async evaluateAdherenceDrop(
+    db: Db | DbTx,
+    patientUserId: string,
+    timeZone: string,
+    at: Date = now(),
+  ): Promise<number> {
     const [prefs] = await db
       .select({ caregiverAlertPrefs: userPreferences.caregiverAlertPrefs })
       .from(userPreferences)
       .where(eq(userPreferences.userId, patientUserId))
       .limit(1);
-    const threshold = (prefs?.caregiverAlertPrefs as { adherenceDropThreshold?: number | null } | null)
-      ?.adherenceDropThreshold;
+    const threshold = (
+      prefs?.caregiverAlertPrefs as { adherenceDropThreshold?: number | null } | null
+    )?.adherenceDropThreshold;
     if (threshold === null || threshold === undefined) return 0;
 
     const relationships = await db
       .select()
       .from(caregiverRelationships)
-      .where(and(eq(caregiverRelationships.patientUserId, patientUserId), eq(caregiverRelationships.status, ACTIVE)));
-    const targets = relationships.filter((r) => permissionsOf(r.permissions).receiveMissedDoseAlerts);
+      .where(
+        and(
+          eq(caregiverRelationships.patientUserId, patientUserId),
+          eq(caregiverRelationships.status, ACTIVE),
+        ),
+      );
+    const targets = relationships.filter(
+      (r) => permissionsOf(r.permissions).receiveMissedDoseAlerts,
+    );
     if (targets.length === 0) return 0;
 
     const todayKey = localDateKey(at, timeZone);
@@ -599,7 +738,10 @@ export const caregiverService = {
     const dayEnd = combineDateAndTime(todayKey, "23:59", timeZone);
 
     const [current, previous, patientRows] = await Promise.all([
-      adherenceService.summary(db, patientUserId, timeZone, { from: addLocalDays(dayStart, -6, timeZone), to: dayEnd }),
+      adherenceService.summary(db, patientUserId, timeZone, {
+        from: addLocalDays(dayStart, -6, timeZone),
+        to: dayEnd,
+      }),
       adherenceService.summary(db, patientUserId, timeZone, {
         from: addLocalDays(dayStart, -13, timeZone),
         to: addLocalDays(dayStart, -7, timeZone),
@@ -669,23 +811,45 @@ export const caregiverService = {
    * mirrored to the caregiver's notification center via the §10.7 single writer.
    * Returns how many alerts were actually created.
    */
-  async createMissedDoseAlert(db: Db | DbTx, patientUserId: string, ref: MissedDoseRef, at: Date): Promise<number> {
+  async createMissedDoseAlert(
+    db: Db | DbTx,
+    patientUserId: string,
+    ref: MissedDoseRef,
+    at: Date,
+  ): Promise<number> {
     const relationships = await db
       .select()
       .from(caregiverRelationships)
-      .where(and(eq(caregiverRelationships.patientUserId, patientUserId), eq(caregiverRelationships.status, ACTIVE)));
-    const targets = relationships.filter((r) => permissionsOf(r.permissions).receiveMissedDoseAlerts);
+      .where(
+        and(
+          eq(caregiverRelationships.patientUserId, patientUserId),
+          eq(caregiverRelationships.status, ACTIVE),
+        ),
+      );
+    const targets = relationships.filter(
+      (r) => permissionsOf(r.permissions).receiveMissedDoseAlerts,
+    );
     if (targets.length === 0) return 0;
 
-    const [med] = await db.select().from(medications).where(eq(medications.id, ref.medicationId)).limit(1);
-    const [patient] = await db.select({ name: users.name }).from(users).where(eq(users.id, patientUserId)).limit(1);
+    const [med] = await db
+      .select()
+      .from(medications)
+      .where(eq(medications.id, ref.medicationId))
+      .limit(1);
+    const [patient] = await db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, patientUserId))
+      .limit(1);
 
     let created = 0;
     for (const rel of targets) {
       const [existing] = await db
         .select({ id: caregiverAlerts.id })
         .from(caregiverAlerts)
-        .where(and(eq(caregiverAlerts.doseEventId, ref.id), eq(caregiverAlerts.relationshipId, rel.id)))
+        .where(
+          and(eq(caregiverAlerts.doseEventId, ref.id), eq(caregiverAlerts.relationshipId, rel.id)),
+        )
         .limit(1);
       if (existing) continue;
 
@@ -745,7 +909,12 @@ async function ownedRelationship(
   const [row] = await db
     .select()
     .from(caregiverRelationships)
-    .where(and(eq(caregiverRelationships.id, relationshipId), eq(caregiverRelationships.patientUserId, patientUserId)))
+    .where(
+      and(
+        eq(caregiverRelationships.id, relationshipId),
+        eq(caregiverRelationships.patientUserId, patientUserId),
+      ),
+    )
     .limit(1);
   return row ?? null;
 }

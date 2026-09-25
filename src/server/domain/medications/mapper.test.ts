@@ -48,9 +48,9 @@ describe("frequencyLabelOf (§8.4)", () => {
   });
 
   it("2 enabled full-week slots → twice-daily", () => {
-    expect(frequencyLabelOf([slot({ timeOfDay: "08:00" }), slot({ id: "slot-2", timeOfDay: "20:00" })])).toBe(
-      "twice-daily",
-    );
+    expect(
+      frequencyLabelOf([slot({ timeOfDay: "08:00" }), slot({ id: "slot-2", timeOfDay: "20:00" })]),
+    ).toBe("twice-daily");
   });
 
   it("3+ enabled full-week slots → n-times-daily", () => {
@@ -72,15 +72,21 @@ describe("frequencyLabelOf (§8.4)", () => {
   });
 
   it("disabled slots are ignored", () => {
-    expect(frequencyLabelOf([slot({ enabled: false }), slot({ id: "slot-2", timeOfDay: "20:00", enabled: false })])).toBe(
-      "custom-weekdays",
-    );
+    expect(
+      frequencyLabelOf([
+        slot({ enabled: false }),
+        slot({ id: "slot-2", timeOfDay: "20:00", enabled: false }),
+      ]),
+    ).toBe("custom-weekdays");
   });
 });
 
 describe("mappers", () => {
   it("toMedicationDTO casts numeric dosage to a number and sorts slots by time", () => {
-    const dto = toMedicationDTO(med(), [slot({ id: "s2", timeOfDay: "20:00" }), slot({ id: "s1", timeOfDay: "06:00" })]);
+    const dto = toMedicationDTO(med(), [
+      slot({ id: "s2", timeOfDay: "20:00" }),
+      slot({ id: "s1", timeOfDay: "06:00" }),
+    ]);
     expect(dto.dosageAmount).toBe(500);
     expect(dto.slots.map((s) => s.timeOfDay)).toEqual(["06:00", "20:00"]);
     expect(dto.nextDoseAt).toBeNull();
@@ -88,13 +94,18 @@ describe("mappers", () => {
   });
 
   it("toMedicationDTO honours extras", () => {
-    const dto = toMedicationDTO(med(), [slot()], { nextDoseAt: new Date("2026-01-02T08:00:00Z"), adherencePercent: 90.4 });
+    const dto = toMedicationDTO(med(), [slot()], {
+      nextDoseAt: new Date("2026-01-02T08:00:00Z"),
+      adherencePercent: 90.4,
+    });
     expect(dto.nextDoseAt).toEqual(new Date("2026-01-02T08:00:00Z"));
     expect(dto.adherencePercent).toBe(90.4);
   });
 
   it("toScheduleSlotDTO casts numeric dosage and passes through nulls", () => {
-    const dto = toScheduleSlotDTO(slot({ dosageAmount: null, instructionOverride: "Take with food" }));
+    const dto = toScheduleSlotDTO(
+      slot({ dosageAmount: null, instructionOverride: "Take with food" }),
+    );
     expect(dto.dosageAmount).toBeNull();
     expect(dto.instructionOverride).toBe("Take with food");
     expect(dto.enabled).toBe(true);

@@ -2,7 +2,11 @@ import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 
 import type { Db, DbTx } from "@/server/db/helpers";
 import { uuidv7 } from "@/server/db/helpers";
-import { doseEvents, medications as schemaMedications, medicationSchedules as schemaSchedules } from "@/server/db/schema";
+import {
+  doseEvents,
+  medications as schemaMedications,
+  medicationSchedules as schemaSchedules,
+} from "@/server/db/schema";
 import { HORIZON_DAYS } from "@/shared/constants";
 import { DOSE_EVENT_STATUSES } from "@/shared/enums";
 import type { DoseEventStatus } from "@/shared/enums";
@@ -53,7 +57,8 @@ export async function ensureDoseEvents(
     .select()
     .from(schemaMedications)
     .where(and(eq(schemaMedications.id, medicationId), eq(schemaMedications.userId, userId)));
-  if (!med) throw new Error(`ensureDoseEvents: unknown medication ${medicationId} for user ${userId}`);
+  if (!med)
+    throw new Error(`ensureDoseEvents: unknown medication ${medicationId} for user ${userId}`);
   if (med.archivedAt || med.status !== "active") return { ensured: 0, skipped: true };
 
   const slots = await db
@@ -63,7 +68,8 @@ export async function ensureDoseEvents(
     .orderBy(schemaSchedules.timeOfDay);
 
   // §10.2 clamping: window ⊆ [startDate, endDate] and `to` ≤ today+HORIZON.
-  const from = (input.from ?? med.startDate) > med.startDate ? (input.from ?? med.startDate) : med.startDate;
+  const from =
+    (input.from ?? med.startDate) > med.startDate ? (input.from ?? med.startDate) : med.startDate;
   let to = input.to ?? horizonEndKey(timeZone);
   if (med.endDate && to > med.endDate) to = med.endDate;
   if (from > to) return { ensured: 0, skipped: false };
@@ -133,7 +139,11 @@ export async function extendHorizon(
     .select()
     .from(schemaMedications)
     .where(
-      and(eq(schemaMedications.userId, userId), eq(schemaMedications.status, "active"), isNull(schemaMedications.archivedAt)),
+      and(
+        eq(schemaMedications.userId, userId),
+        eq(schemaMedications.status, "active"),
+        isNull(schemaMedications.archivedAt),
+      ),
     );
   let ensured = 0;
   for (const med of meds) {
@@ -148,6 +158,10 @@ export async function extendHorizon(
  * = extendHorizon only; Phase 13 folds `reconcile.run` (missed detection) into it so reads
  * stay canonical without a clock dependency.
  */
-export async function catchUp(db: Db | DbTx, userId: string, timeZone: string): Promise<{ medications: number; ensured: number }> {
+export async function catchUp(
+  db: Db | DbTx,
+  userId: string,
+  timeZone: string,
+): Promise<{ medications: number; ensured: number }> {
   return extendHorizon(db, userId, timeZone);
 }

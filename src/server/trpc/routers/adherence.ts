@@ -29,7 +29,11 @@ export const adherenceRangeSchema = z
 
 export type AdherenceRangeInput = z.infer<typeof adherenceRangeSchema>;
 
-function resolveWindow(timeZone: string, input: AdherenceRangeInput): { from: Date; to: Date } {
+function resolveWindow(
+  timeZone: string,
+  input: AdherenceRangeInput,
+  at: Date,
+): { from: Date; to: Date } {
   if (input.range === "custom") {
     return {
       from: combineDateAndTime(input.from!, "00:00", timeZone),
@@ -37,7 +41,7 @@ function resolveWindow(timeZone: string, input: AdherenceRangeInput): { from: Da
     };
   }
   const preset: Exclude<RangePreset, "custom"> = input.range ?? "30d";
-  return rangeByPreset(preset, { now: now(), timeZone });
+  return rangeByPreset(preset, { now: at, timeZone });
 }
 
 function assertSpan(timeZone: string, from: Date, to: Date): void {
@@ -48,7 +52,10 @@ function assertSpan(timeZone: string, from: Date, to: Date): void {
         86_400_000,
     ) + 1;
   if (days > REPORT_MAX_SPAN_DAYS) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: `Range exceeds ${REPORT_MAX_SPAN_DAYS} days.` });
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Range exceeds ${REPORT_MAX_SPAN_DAYS} days.`,
+    });
   }
 }
 
@@ -57,25 +64,28 @@ const rangeProcedure = protectedProcedure.input(adherenceRangeSchema);
 export const adherenceRouter = router({
   /** One `AdherenceSummaryDTO` for the period (days, streak, trend, buckets). */
   summary: rangeProcedure.query(async ({ ctx, input }) => {
+    const at = now();
     const timeZone = ctx.user.timezone ?? "UTC";
-    const window = resolveWindow(timeZone, input);
+    const window = resolveWindow(timeZone, input, at);
     assertSpan(timeZone, window.from, window.to);
-    return adherenceService.summary(ctx.db, ctx.user.id, timeZone, window);
+    return adherenceService.summary(ctx.db, ctx.user.id, timeZone, window, null, { now: at });
   }),
 
   /** Per-medication performance rows for the period. */
   byMedication: rangeProcedure.query(async ({ ctx, input }) => {
+    const at = now();
     const timeZone = ctx.user.timezone ?? "UTC";
-    const window = resolveWindow(timeZone, input);
+    const window = resolveWindow(timeZone, input, at);
     assertSpan(timeZone, window.from, window.to);
-    return adherenceService.byMedication(ctx.db, ctx.user.id, timeZone, window);
+    return adherenceService.byMedication(ctx.db, ctx.user.id, timeZone, window, { now: at });
   }),
 
   /** Time-of-day pattern table for the period. */
   patterns: rangeProcedure.query(async ({ ctx, input }) => {
+    const at = now();
     const timeZone = ctx.user.timezone ?? "UTC";
-    const window = resolveWindow(timeZone, input);
+    const window = resolveWindow(timeZone, input, at);
     assertSpan(timeZone, window.from, window.to);
-    return adherenceService.patterns(ctx.db, ctx.user.id, timeZone, window);
+    return adherenceService.patterns(ctx.db, ctx.user.id, timeZone, window, { now: at });
   }),
 });

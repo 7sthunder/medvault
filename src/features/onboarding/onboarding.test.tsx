@@ -91,6 +91,8 @@ describe("OnboardingWizard (phase 10)", () => {
     await user.click(screen.getByRole("button", { name: /Next/i }));
 
     expect(await screen.findByText("Snooze must be at least 1.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Continue to dashboard/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Continue to dashboard/i }),
+    ).not.toBeInTheDocument();
   });
 });

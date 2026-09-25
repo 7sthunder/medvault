@@ -4,11 +4,13 @@ import { useState } from "react";
 import { Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { triggerFileDownload } from "@/lib/download";
 import { toast } from "sonner";
 
 /**
- * §11.11 CSV download — navigates to the authenticated CSV export route with exactly
- * the controls the current report used, so the file matches what's on screen.
+ * §11.11 CSV download — fetches the authenticated CSV export route with exactly the controls the
+ * current report used, so the file matches what's on screen. The route resolves the demo subject as
+ * well as a real session, so this button works identically inside `/demo/workspace`.
  */
 export function DownloadButton({
   from,
@@ -29,17 +31,11 @@ export function DownloadButton({
   async function handleDownload() {
     setDownloading(true);
     try {
-      const res = await fetch(`/api/reports/export?${params.toString()}`, { credentials: "include" });
+      const res = await fetch(`/api/reports/export?${params.toString()}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error((await res.json().catch(() => null))?.error);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `medvault-report-${from}_${to}-${granularity}.csv`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      URL.revokeObjectURL(url);
+      triggerFileDownload(`medvault-report-${from}_${to}-${granularity}.csv`, await res.blob());
     } catch {
       toast.error("Export failed — try again in a moment.");
     } finally {
@@ -48,7 +44,12 @@ export function DownloadButton({
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={() => void handleDownload()} disabled={downloading}>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => void handleDownload()}
+      disabled={downloading}
+    >
       <Download className="size-4" />
       {downloading ? "Preparing…" : "Download CSV"}
     </Button>

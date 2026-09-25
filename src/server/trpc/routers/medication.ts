@@ -16,12 +16,14 @@ const medicationBody = z.object({
 
 export const medicationRouter = router({
   list: protectedProcedure.query(async ({ ctx }) =>
-    medicationService.list(ctx.db, ctx.user.id),
+    medicationService.list(ctx.db, ctx.user.id, ctx.user.timezone ?? "UTC"),
   ),
 
   get: protectedProcedure
     .input(z.object({ id: uuidSchema }))
-    .query(async ({ ctx, input }) => medicationService.get(ctx.db, ctx.user.id, input.id)),
+    .query(async ({ ctx, input }) =>
+      medicationService.get(ctx.db, ctx.user.id, input.id, ctx.user.timezone ?? "UTC"),
+    ),
 
   create: protectedProcedure
     .input(medicationBody)
@@ -43,7 +45,13 @@ export const medicationRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) =>
-      medicationService.setStatus(ctx.db, ctx.user.id, ctx.user.timezone ?? "UTC", input.id, input.status),
+      medicationService.setStatus(
+        ctx.db,
+        ctx.user.id,
+        ctx.user.timezone ?? "UTC",
+        input.id,
+        input.status,
+      ),
     ),
 
   archive: protectedProcedure

@@ -1,15 +1,15 @@
-import type { ComponentProps, ReactNode } from "react"
-import type { LucideIcon } from "lucide-react"
-import { cn } from "cn"
+import type { ComponentProps, ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
+import { cn } from "cn";
 
 export interface EmptyStateProps extends ComponentProps<"div"> {
-  icon?: LucideIcon
-  title: string
-  description?: ReactNode
+  icon?: LucideIcon;
+  title: string;
+  description?: ReactNode;
   /** Optional action (usually a Button) */
-  action?: ReactNode
+  action?: ReactNode;
   /** Compact variant for inline/panel empties (smaller tile + text) */
-  compact?: boolean
+  compact?: boolean;
 }
 
 /**
@@ -31,7 +31,7 @@ export function EmptyState({
       className={cn(
         "flex flex-col items-center justify-center gap-2 text-center",
         compact ? "gap-1.5 p-4" : "gap-3 p-8",
-        className
+        className,
       )}
       {...props}
     >
@@ -40,14 +40,19 @@ export function EmptyState({
           aria-hidden="true"
           className={cn(
             "flex items-center justify-center rounded-2xl bg-primary-tint text-primary-dark",
-            compact ? "size-10" : "size-14"
+            compact ? "size-10" : "size-14",
           )}
         >
           <Icon className={compact ? "size-5" : "size-7"} strokeWidth={2.2} />
         </span>
       )}
       <div className="grid gap-1">
-        <p className={cn("font-heading font-semibold text-ink-900", compact ? "text-sm" : "text-base")}>
+        <p
+          className={cn(
+            "font-heading font-semibold text-ink-900",
+            compact ? "text-sm" : "text-base",
+          )}
+        >
           {title}
         </p>
         {description && (
@@ -56,5 +61,5 @@ export function EmptyState({
       </div>
       {action && <div className="mt-1">{action}</div>}
     </div>
-  )
+  );
 }

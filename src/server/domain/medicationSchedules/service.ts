@@ -11,7 +11,10 @@ import type { ScheduleSlotDTO } from "@/shared/types";
  * `doseEvents/service.ts` (ensure/void/extend) which consumes the pure
  * `shared/calc/schedule.expandSchedule`; this service must stay DB-read-only.
  */
-export async function listScheduleSlots(db: Db | DbTx, medicationId: string): Promise<ScheduleSlotDTO[]> {
+export async function listScheduleSlots(
+  db: Db | DbTx,
+  medicationId: string,
+): Promise<ScheduleSlotDTO[]> {
   const slots = await listSlotsByMedicationIds(db, [medicationId]);
   return slots.map(toScheduleSlotDTO);
 }

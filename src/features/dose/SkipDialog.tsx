@@ -40,12 +40,10 @@ export function SkipDialog({
       description={
         target ? (
           <>
-            This dose will be recorded as skipped and won&apos;t count toward your daily
-            adherence. You can optionally tell us why.
+            This dose will be recorded as skipped and won&apos;t count toward your daily adherence.
+            You can optionally tell us why.
           </>
-        ) : (
-          undefined
-        )
+        ) : undefined
       }
       confirmLabel="Skip dose"
       onConfirm={() => onConfirm?.(reason.trim() || undefined)}

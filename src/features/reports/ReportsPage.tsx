@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CalendarX2 } from "lucide-react";
 
+import { useNow } from "@/components/layout/clock-context";
 import { useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +33,7 @@ import { TrendChartBlock } from "./TrendChartBlock";
 export function ReportsPage() {
   const { user } = useShell();
   const timeZone = user.timezone;
-  const now = new Date();
+  const now = useNow();
   const defaultRange = presetRange("30d", timeZone, now);
   const [range, setRange] = useState<DateRange>(defaultRange);
   const [granularity, setGranularity] = useState<ReportGranularity>("daily");
@@ -58,7 +59,12 @@ export function ReportsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <DownloadButton from={range.from} to={range.to} granularity={granularity} medicationId={medicationId} />
+          <DownloadButton
+            from={range.from}
+            to={range.to}
+            granularity={granularity}
+            medicationId={medicationId}
+          />
           <RangePicker
             value={range}
             onChange={setRange}
@@ -129,7 +135,9 @@ export function ReportsPage() {
           </Card>
           <Card className="shadow-card-sm">
             <CardHeader>
-              <CardTitle className="text-sm font-medium text-ink-900">Missed-dose analysis</CardTitle>
+              <CardTitle className="text-sm font-medium text-ink-900">
+                Missed-dose analysis
+              </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <MissedAnalysis granularity={granularity} rows={report.data.table} />
@@ -163,7 +171,12 @@ function StatRail({ report }: { report: ReportDTO }) {
         tone="emerald"
         subtitle={percent == null ? "no required doses" : "of required doses"}
       />
-      <StatCard title="Scheduled" value={formatCount(totals.scheduled)} tone="blue" subtitle="doses in range" />
+      <StatCard
+        title="Scheduled"
+        value={formatCount(totals.scheduled)}
+        tone="blue"
+        subtitle="doses in range"
+      />
       <StatCard
         title="Taken"
         value={formatCount(totals.taken)}

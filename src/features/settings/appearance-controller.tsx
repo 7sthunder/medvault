@@ -18,13 +18,19 @@ import type { AppearanceSettingsDTO } from "@/shared/types";
  */
 
 /** Resolve `theme` against the OS preference. Pure — safe to unit test. */
-export function resolveTheme(theme: AppearanceSettingsDTO["theme"], prefersDark: boolean): "light" | "dark" {
+export function resolveTheme(
+  theme: AppearanceSettingsDTO["theme"],
+  prefersDark: boolean,
+): "light" | "dark" {
   if (theme === "system") return prefersDark ? "dark" : "light";
   return theme;
 }
 
 /** Class list `<html>` should carry for the given appearance. Pure. */
-export function appearanceClassName(appearance: AppearanceSettingsDTO, prefersDark: boolean): string {
+export function appearanceClassName(
+  appearance: AppearanceSettingsDTO,
+  prefersDark: boolean,
+): string {
   return resolveTheme(appearance.theme, prefersDark) === "dark" ? "dark" : "";
 }
 

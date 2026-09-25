@@ -5,6 +5,7 @@ import { Ambulance } from "lucide-react";
 import Link from "next/link";
 
 import { useInView } from "@/features/landing/use-in-view";
+import { BRAND } from "@/shared/brand";
 
 /* Port of `App.jsx:1221–1297` (AiChatFab) → routes to `/help`.
    Plan §11.15: the affordance must not imply a live medical adviser, so the label says what it
@@ -17,11 +18,20 @@ export default function AiChatFab() {
     <div ref={fabRef}>
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: fabIn ? 1 : 0, scale: fabIn ? 1 : 0, rotate: fabIn ? [0, -8, 8, 0] : 0 }}
+        animate={{
+          opacity: fabIn ? 1 : 0,
+          scale: fabIn ? 1 : 0,
+          rotate: fabIn ? [0, -8, 8, 0] : 0,
+        }}
         transition={{
           duration: 0.45,
           delay: 0.35,
-          rotate: { duration: 0.6, repeat: fabIn ? Infinity : 0, repeatDelay: 2.4, ease: "easeInOut" },
+          rotate: {
+            duration: 0.6,
+            repeat: fabIn ? Infinity : 0,
+            repeatDelay: 2.4,
+            ease: "easeInOut",
+          },
           type: "spring",
           stiffness: 260,
           damping: 15,
@@ -31,7 +41,7 @@ export default function AiChatFab() {
         <Link
           href="/help"
           className="flex items-center gap-2 text-sm font-bold text-white"
-          aria-label="About MedVault AI — informational only, not medical advice"
+          aria-label={`About ${BRAND.ai.name} — informational only, not medical advice`}
         >
           <Ambulance size={21} aria-hidden />
           <span className="hidden sm:inline">Ask AI</span>

@@ -47,7 +47,10 @@ export function issueDemoToken(userId: string, issuedAt: number = Date.now()): s
 }
 
 /** Verify + decode. Returns `null` for anything malformed, forged or expired. */
-export function verifyDemoToken(token: string | undefined | null, now: number = Date.now()): string | null {
+export function verifyDemoToken(
+  token: string | undefined | null,
+  now: number = Date.now(),
+): string | null {
   if (!token) return null;
   const dot = token.lastIndexOf(".");
   if (dot <= 0) return null;

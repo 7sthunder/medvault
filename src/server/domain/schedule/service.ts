@@ -18,7 +18,11 @@ import type { DoseDetailDTO, ScheduleDayDTO } from "@/shared/types";
 
 import { catchUp } from "@/server/domain/doseEvents/service";
 import { reconcileUser } from "@/server/domain/doseEvents/reconcile";
-import { toDoseActionDTO, toDoseEventDTO, toMedicationLiteMap } from "@/server/domain/doseEvents/mapper";
+import {
+  toDoseActionDTO,
+  toDoseEventDTO,
+  toMedicationLiteMap,
+} from "@/server/domain/doseEvents/mapper";
 
 async function missedAfterFor(db: Db | DbTx, userId: string): Promise<number> {
   const [prefs] = await db
@@ -39,7 +43,12 @@ export const scheduleService = {
    * §11.7 `schedule.day(date)` — the whole day's dose feed. Reconciles + extends the
    * horizon first so stale-past days are canonical and today's future events exist.
    */
-  async day(db: Db | DbTx, userId: string, timeZone: string, dateKey: string): Promise<ScheduleDayDTO> {
+  async day(
+    db: Db | DbTx,
+    userId: string,
+    timeZone: string,
+    dateKey: string,
+  ): Promise<ScheduleDayDTO> {
     const at = now();
     await reconcileUser(db, userId, { now: at });
     await catchUp(db, userId, timeZone);
@@ -51,12 +60,15 @@ export const scheduleService = {
       db
         .select()
         .from(doseEvents)
-        .where(and(eq(doseEvents.userId, userId), gte(doseEvents.scheduledFor, from), lt(doseEvents.scheduledFor, to)))
+        .where(
+          and(
+            eq(doseEvents.userId, userId),
+            gte(doseEvents.scheduledFor, from),
+            lt(doseEvents.scheduledFor, to),
+          ),
+        )
         .orderBy(doseEvents.scheduledFor),
-      db
-        .select()
-        .from(medications)
-        .where(eq(medications.userId, userId)),
+      db.select().from(medications).where(eq(medications.userId, userId)),
     ]);
     const meds = toMedicationLiteMap(medRows);
 
@@ -74,7 +86,12 @@ export const scheduleService = {
    * §11.7 `dose.get` — one owned dose + its append-only action history (snooze/miss
    * timeline). Reconciles first so the returned status is the live one.
    */
-  async get(db: Db | DbTx, userId: string, timeZone: string, doseId: string): Promise<DoseDetailDTO | null> {
+  async get(
+    db: Db | DbTx,
+    userId: string,
+    timeZone: string,
+    doseId: string,
+  ): Promise<DoseDetailDTO | null> {
     const at = now();
     await reconcileUser(db, userId, { now: at });
     const missedAfter = await missedAfterFor(db, userId);
@@ -86,7 +103,11 @@ export const scheduleService = {
       .limit(1);
     if (!event) return null;
 
-    const [med] = await db.select().from(medications).where(eq(medications.id, event.medicationId)).limit(1);
+    const [med] = await db
+      .select()
+      .from(medications)
+      .where(eq(medications.id, event.medicationId))
+      .limit(1);
     if (!med) return null;
 
     const actions = await db
@@ -98,7 +119,10 @@ export const scheduleService = {
     return {
       event: toDoseEventDTO(event, med, { now: at, missedAfterMinutes: missedAfter }),
       history: actions.map((a) =>
-        toDoseActionDTO(a, med, { eventStatus: event.status, eventScheduledFor: event.scheduledFor }),
+        toDoseActionDTO(a, med, {
+          eventStatus: event.status,
+          eventScheduledFor: event.scheduledFor,
+        }),
       ),
     };
   },

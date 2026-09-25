@@ -75,7 +75,11 @@ const DEFAULT_CAREGIVER_PREFS: CaregiverAlertPrefs = {
 
 /** Read `user_preferences` or synthesise engine defaults for a user that has no row yet. */
 async function readPrefs(db: Db | DbTx, userId: string) {
-  const [row] = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1);
+  const [row] = await db
+    .select()
+    .from(userPreferences)
+    .where(eq(userPreferences.userId, userId))
+    .limit(1);
   if (row) return row;
   return {
     userId,
@@ -96,7 +100,11 @@ async function readPrefs(db: Db | DbTx, userId: string) {
  * Upsert the mutable `user_preferences` columns. Uses `onConflictDoUpdate` so a user who never
  * ran onboarding still gets a row (the same semantics as `getOrCreatePreferences`).
  */
-async function writePrefs(db: Db | DbTx, userId: string, patch: Partial<typeof userPreferences.$inferInsert>) {
+async function writePrefs(
+  db: Db | DbTx,
+  userId: string,
+  patch: Partial<typeof userPreferences.$inferInsert>,
+) {
   const [row] = await db
     .insert(userPreferences)
     .values({ userId, ...patch, updatedAt: new Date() })
@@ -108,7 +116,10 @@ async function writePrefs(db: Db | DbTx, userId: string, patch: Partial<typeof u
   return row!;
 }
 
-async function medicationReminderRows(db: Db | DbTx, userId: string): Promise<MedicationReminderRowDTO[]> {
+async function medicationReminderRows(
+  db: Db | DbTx,
+  userId: string,
+): Promise<MedicationReminderRowDTO[]> {
   const rows = await db
     .select({
       id: medications.id,
@@ -130,7 +141,11 @@ async function medicationReminderRows(db: Db | DbTx, userId: string): Promise<Me
   }));
 }
 
-async function countRows(db: Db | DbTx, table: { userId: unknown }, userId: string): Promise<number> {
+async function countRows(
+  db: Db | DbTx,
+  table: { userId: unknown },
+  userId: string,
+): Promise<number> {
   const [row] = await db
     .select({ n: count() })
     .from(table as typeof doseEvents)
@@ -215,7 +230,10 @@ export const settingsService = {
       maxSnoozes: input.maxSnoozes,
       reminderBeforeMinutes: input.reminderBeforeMinutes,
       notificationPrefs: input.notificationPrefs,
-      caregiverAlertPrefs: { ...input.caregiverAlertPrefs, adherenceDropThreshold: input.caregiverAlertPrefs.adherenceDropThreshold ?? null },
+      caregiverAlertPrefs: {
+        ...input.caregiverAlertPrefs,
+        adherenceDropThreshold: input.caregiverAlertPrefs.adherenceDropThreshold ?? null,
+      },
       updatedAt: new Date(),
     });
     return settingsService.getReminderSettings(db, userId);
@@ -248,8 +266,15 @@ export const settingsService = {
     return prefs.caregiverAlertPrefs as CaregiverAlertPrefs;
   },
 
-  async updateCaregiverPrefs(db: Db | DbTx, userId: string, prefs: CaregiverAlertPrefs): Promise<CaregiverAlertPrefs> {
-    const next: CaregiverAlertPrefs = { ...prefs, adherenceDropThreshold: prefs.adherenceDropThreshold ?? null };
+  async updateCaregiverPrefs(
+    db: Db | DbTx,
+    userId: string,
+    prefs: CaregiverAlertPrefs,
+  ): Promise<CaregiverAlertPrefs> {
+    const next: CaregiverAlertPrefs = {
+      ...prefs,
+      adherenceDropThreshold: prefs.adherenceDropThreshold ?? null,
+    };
     await writePrefs(db, userId, { caregiverAlertPrefs: next, updatedAt: new Date() });
     return next;
   },
@@ -261,7 +286,11 @@ export const settingsService = {
     return { theme: prefs.theme, reduceMotion: prefs.reduceMotion, uiDensity: prefs.uiDensity };
   },
 
-  async updateAppearance(db: Db | DbTx, userId: string, input: AppearanceSettingsDTO): Promise<AppearanceSettingsDTO> {
+  async updateAppearance(
+    db: Db | DbTx,
+    userId: string,
+    input: AppearanceSettingsDTO,
+  ): Promise<AppearanceSettingsDTO> {
     await writePrefs(db, userId, {
       theme: input.theme,
       reduceMotion: input.reduceMotion,
@@ -299,7 +328,11 @@ export const settingsService = {
    * CSV export of the caller's own rows. Deterministic column order, RFC-4180 quoting, and a
    * fixed column set per scope so a diff of two exports is meaningful.
    */
-  async exportCsv(db: Db | DbTx, userId: string, scope: ExportScope): Promise<{ filename: string; csv: string }> {
+  async exportCsv(
+    db: Db | DbTx,
+    userId: string,
+    scope: ExportScope,
+  ): Promise<{ filename: string; csv: string }> {
     const parts: string[] = [];
 
     if (scope === "medications" || scope === "all") {
@@ -319,7 +352,16 @@ export const settingsService = {
 
       parts.push(
         toCsv(
-          ["id", "name", "dosage_amount", "dosage_unit", "status", "start_date", "end_date", "reminders_enabled"],
+          [
+            "id",
+            "name",
+            "dosage_amount",
+            "dosage_unit",
+            "status",
+            "start_date",
+            "end_date",
+            "reminders_enabled",
+          ],
           meds.map((m) => [
             "",
             m.name,
@@ -379,8 +421,12 @@ export const settingsService = {
       );
     }
 
-    const suffix = scope === "all" ? "vault" : scope === "medications" ? "medications" : "dose-events";
-    return { filename: `medvault-${suffix}-${new Date().toISOString().slice(0, 10)}.csv`, csv: parts.join("\n\n") };
+    const suffix =
+      scope === "all" ? "vault" : scope === "medications" ? "medications" : "dose-events";
+    return {
+      filename: `medvault-${suffix}-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv: parts.join("\n\n"),
+    };
   },
 
   /**
@@ -395,7 +441,10 @@ export const settingsService = {
     await db.transaction(async (tx) => {
       await settingsService.deleteAllDataRows(tx, userId);
       // Keep the account usable: preferences survive so the next sign-in keeps its theme/timezone.
-      await tx.update(userPreferences).set({ updatedAt: new Date() }).where(eq(userPreferences.userId, userId));
+      await tx
+        .update(userPreferences)
+        .set({ updatedAt: new Date() })
+        .where(eq(userPreferences.userId, userId));
     });
     return { deleted: true };
   },
@@ -426,7 +475,9 @@ export const settingsService = {
     await tx.delete(caregiverAlerts).where(eq(caregiverAlerts.caregiverUserId, userId));
     await tx.delete(caregiverInvitations).where(eq(caregiverInvitations.patientUserId, userId));
     await tx.delete(caregiverRelationships).where(eq(caregiverRelationships.patientUserId, userId));
-    await tx.delete(caregiverRelationships).where(eq(caregiverRelationships.caregiverUserId, userId));
+    await tx
+      .delete(caregiverRelationships)
+      .where(eq(caregiverRelationships.caregiverUserId, userId));
     await tx.delete(doseActions).where(eq(doseActions.userId, userId));
     await tx.delete(adherenceDaily).where(eq(adherenceDaily.userId, userId));
     await tx.delete(aiInsights).where(eq(aiInsights.userId, userId));
@@ -449,6 +500,7 @@ function isoOrEmpty(value: Date | null): string {
 
 /** Minimal RFC-4180 CSV: quote when the value contains a comma, quote or newline. */
 function toCsv(header: string[], rows: string[][]): string {
-  const cell = (value: string) => (/[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
+  const cell = (value: string) =>
+    /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
   return [header.join(","), ...rows.map((row) => row.map(cell).join(","))].join("\n");
 }

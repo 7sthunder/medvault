@@ -84,10 +84,18 @@ export async function medicationExtras(
     if (!nextByMed.has(row.medicationId)) nextByMed.set(row.medicationId, row.scheduledFor);
   }
 
-  const eventsByMed = new Map<string, { status: DoseEventStatus; scheduledFor: Date; takenAt: Date | null; snoozeCount: number }[]>();
+  const eventsByMed = new Map<
+    string,
+    { status: DoseEventStatus; scheduledFor: Date; takenAt: Date | null; snoozeCount: number }[]
+  >();
   for (const row of resolved) {
     const bucket = eventsByMed.get(row.medicationId) ?? [];
-    bucket!.push({ status: row.status as DoseEventStatus, scheduledFor: row.scheduledFor, takenAt: row.takenAt, snoozeCount: row.snoozeCount });
+    bucket!.push({
+      status: row.status as DoseEventStatus,
+      scheduledFor: row.scheduledFor,
+      takenAt: row.takenAt,
+      snoozeCount: row.snoozeCount,
+    });
     eventsByMed.set(row.medicationId, bucket!);
   }
 

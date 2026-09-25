@@ -18,11 +18,7 @@ export function StatusIndicator({ status, className, ...props }: StatusIndicator
       aria-label={meta.aria}
       data-status={status}
       data-slot="status-indicator"
-      className={cn(
-        "inline-flex items-center gap-1.5 text-xs font-semibold",
-        meta.fg,
-        className,
-      )}
+      className={cn("inline-flex items-center gap-1.5 text-xs font-semibold", meta.fg, className)}
       {...props}
     >
       {meta.ping ? (

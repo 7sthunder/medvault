@@ -21,6 +21,12 @@ import type { ShellUser } from "@/components/layout/shell-context";
 export interface ResolvedSubject {
   user: ShellUser;
   isDemo: boolean;
+  /**
+   * Phase 19 — the simulated instant for this subject, or `null` when the clock is real. Handed to
+   * the browser so the client clock and the server clock agree about "today" on first paint
+   * (`ClockProvider` then keeps it live as the dock moves the simulation).
+   */
+  simulationNow: Date | null;
 }
 
 export async function resolveDemoSubject(): Promise<ResolvedSubject | null> {
@@ -30,6 +36,7 @@ export async function resolveDemoSubject(): Promise<ResolvedSubject | null> {
     resetNowImpl();
     return {
       isDemo: false,
+      simulationNow: null,
       user: {
         id: session.user.id,
         name: session.user.name,
@@ -54,6 +61,7 @@ export async function resolveDemoSubject(): Promise<ResolvedSubject | null> {
 
   return {
     isDemo: true,
+    simulationNow,
     user: {
       id: demo.id,
       name: demo.name,

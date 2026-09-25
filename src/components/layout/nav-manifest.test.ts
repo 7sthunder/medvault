@@ -2,13 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import {
-  ALL_NAV_HREFS,
-  BOTTOM_NAV,
-  NAV_GROUP_ORDER,
-  NAV_ITEMS,
-  SETTINGS_NAV,
-} from "@shared/nav";
+import { ALL_NAV_HREFS, BOTTOM_NAV, NAV_GROUP_ORDER, NAV_ITEMS, SETTINGS_NAV } from "@shared/nav";
 import { HELP_CARDS, HELP_FAQS, HELP_SECTIONS } from "@/features/help/help-content";
 
 interface RouteOwner {
@@ -152,10 +146,34 @@ const PHASE_18_ROUTE_FILES: readonly string[] = [
   "src/app/help/page.tsx",
   "src/app/(marketing)/demo/page.tsx",
   "src/app/demo/workspace/layout.tsx",
-  ...["dashboard", "schedule", "medications", "history", "adherence", "insights", "reports", "caregiver", "help"].map(
-    (screen) => `src/app/demo/workspace/${screen}/page.tsx`,
-  ),
+  ...[
+    "dashboard",
+    "schedule",
+    "medications",
+    "history",
+    "adherence",
+    "insights",
+    "reports",
+    "caregiver",
+    "help",
+  ].map((screen) => `src/app/demo/workspace/${screen}/page.tsx`),
 ];
+
+/**
+ * Phase 19 — the demo workspace renders the *real* screens, so its shell generates the same nav
+ * hrefs a signed-in user gets. Every one of them needs a file under `/demo/workspace`, otherwise a
+ * link that works in the app 404s in the demo. Derived from `ALL_NAV_HREFS` so adding a canonical
+ * href automatically demands a demo counterpart.
+ *
+ * `/caregiver/accept` is deliberately excluded: redeeming a caregiver invitation is a
+ * session-only procedure (`sessionProcedure`), so a demo subject can never complete it. The demo
+ * has no pending invitations to accept either.
+ */
+const DEMO_WORKSPACE_OMITTED: readonly string[] = ["/caregiver/accept"];
+
+const DEMO_WORKSPACE_ROUTE_FILES: readonly string[] = ALL_NAV_HREFS.filter(
+  (href) => !DEMO_WORKSPACE_OMITTED.includes(href),
+).map((href) => `src/app/demo/workspace${href === "/help" ? "/help" : href}/page.tsx`);
 
 /**
  * Help cards link to real app screens; `/demo` is the one that lives in the marketing group,
@@ -185,8 +203,20 @@ describe("phase 18 routes (settings, demo, help) have no dead links", () => {
     }
   });
 
+  it("every canonical nav href also resolves inside the demo workspace", () => {
+    for (const file of DEMO_WORKSPACE_ROUTE_FILES) {
+      expect(existsSync(path.resolve(process.cwd(), file)), `${file} should exist`).toBe(true);
+    }
+  });
+
+  it("the demo workspace root resolves instead of 404ing", () => {
+    expect(existsSync(path.resolve(process.cwd(), "src/app/demo/workspace/page.tsx"))).toBe(true);
+  });
+
   it("every href in the help content is a mapped, real screen", () => {
-    const hrefs = HELP_CARDS.map((card) => card.href).filter((href): href is string => Boolean(href));
+    const hrefs = HELP_CARDS.map((card) => card.href).filter((href): href is string =>
+      Boolean(href),
+    );
     expect(hrefs.length).toBeGreaterThan(0);
     for (const href of hrefs) {
       expect(href.startsWith("/")).toBe(true);

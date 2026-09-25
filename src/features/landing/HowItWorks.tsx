@@ -37,7 +37,11 @@ export default function HowItWorks() {
   const [howRef, howIn] = useInView<HTMLDivElement>();
 
   return (
-    <section id="how-it-works" className="bg-background overflow-hidden" style={{ padding: "100px 4% 140px" }}>
+    <section
+      id="how-it-works"
+      className="bg-background overflow-hidden"
+      style={{ padding: "100px 4% 140px" }}
+    >
       <div
         ref={howRef}
         style={{
@@ -72,7 +76,15 @@ export default function HowItWorks() {
               transition: `all 0.8s ease ${i * 0.2}s`,
             }}
           >
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 200, width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 200,
+                width: "100%",
+              }}
+            >
               <div style={{ transform: "scale(1.15)" }}>{step.mascot}</div>
             </div>
             <div className="w-full">
@@ -94,7 +106,10 @@ export default function HowItWorks() {
               >
                 {step.num}
               </div>
-              <h3 className="font-heading text-ink-900 text-xl font-extrabold" style={{ marginBottom: 12, lineHeight: 1.25 }}>
+              <h3
+                className="font-heading text-ink-900 text-xl font-extrabold"
+                style={{ marginBottom: 12, lineHeight: 1.25 }}
+              >
                 {step.title}
               </h3>
               <p className="text-ink-500" style={{ fontSize: 14.5, lineHeight: 1.75 }}>

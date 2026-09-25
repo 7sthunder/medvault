@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react"
+import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Bell,
@@ -14,9 +14,9 @@ import {
   ShieldCheck,
   Sparkles,
   Users,
-} from "lucide-react"
+} from "lucide-react";
 
-import type { NavIconName } from "@shared/nav"
+import type { NavIconName } from "@shared/nav";
 
 /**
  * Phase 08 — `NavIconName` → lucide map. The nav *model* (`src/shared/nav.ts`)
@@ -37,17 +37,17 @@ export const NAV_ICONS: Record<NavIconName, LucideIcon> = {
   plus: Plus,
   home: Home,
   more: MoreHorizontal,
-}
+};
 
 export function NavIcon({
   name,
   className,
   "aria-hidden": ariaHidden = true,
 }: {
-  name: NavIconName
-  className?: string
-  "aria-hidden"?: boolean
+  name: NavIconName;
+  className?: string;
+  "aria-hidden"?: boolean;
 }) {
-  const Icon = NAV_ICONS[name]
-  return <Icon className={className} aria-hidden={ariaHidden} />
+  const Icon = NAV_ICONS[name];
+  return <Icon className={className} aria-hidden={ariaHidden} />;
 }

@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type { ReactElement, ReactNode } from "react"
-import { cn } from "cn"
+import type { ReactElement, ReactNode } from "react";
+import { cn } from "cn";
 
 import {
   Dialog,
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
@@ -21,19 +21,19 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"
-import { useIsMobile } from "@/lib/use-media-query"
+} from "@/components/ui/drawer";
+import { useIsMobile } from "@/lib/use-media-query";
 
 export interface ResponsiveDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title?: ReactNode
-  description?: ReactNode
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: ReactNode;
+  description?: ReactNode;
   /** Element to clone as the trigger (both DialogTrigger and DrawerTrigger). */
-  trigger?: ReactElement
-  children: ReactNode
-  footer?: ReactNode
-  className?: string
+  trigger?: ReactElement;
+  children: ReactNode;
+  footer?: ReactNode;
+  className?: string;
 }
 
 /**
@@ -52,7 +52,7 @@ export function ResponsiveDialog({
   footer,
   className,
 }: ResponsiveDialogProps) {
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
@@ -70,7 +70,7 @@ export function ResponsiveDialog({
           {footer && <DrawerFooter>{footer}</DrawerFooter>}
         </DrawerContent>
       </Drawer>
-    )
+    );
   }
 
   return (
@@ -87,5 +87,5 @@ export function ResponsiveDialog({
         {footer && <DialogFooter showCloseButton={false}>{footer}</DialogFooter>}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

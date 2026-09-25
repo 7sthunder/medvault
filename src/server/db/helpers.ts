@@ -62,7 +62,9 @@ export function hhmm(d: Date): string {
 export async function upsertUser(
   db: Db | DbTx,
   input: Pick<typeof schema.users.$inferInsert, "name" | "email"> &
-    Partial<Omit<typeof schema.users.$inferInsert, "id" | "name" | "email" | "createdAt" | "updatedAt">>,
+    Partial<
+      Omit<typeof schema.users.$inferInsert, "id" | "name" | "email" | "createdAt" | "updatedAt">
+    >,
 ): Promise<string> {
   const [row] = await db
     .insert(schema.users)

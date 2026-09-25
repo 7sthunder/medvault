@@ -21,5 +21,7 @@ export const scheduleRouter = router({
   /** §11.7 `dose.get` — one owned dose + its action timeline (snooze/miss). */
   get: protectedProcedure
     .input(z.object({ id: uuidSchema }))
-    .query(async ({ ctx, input }) => scheduleService.get(ctx.db, ctx.user.id, ctx.user.timezone ?? "UTC", input.id)),
+    .query(async ({ ctx, input }) =>
+      scheduleService.get(ctx.db, ctx.user.id, ctx.user.timezone ?? "UTC", input.id),
+    ),
 });

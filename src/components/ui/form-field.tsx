@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import type { ComponentProps, ReactElement, ReactNode } from "react"
-import { createElement, useId } from "react"
-import { AlertCircle } from "lucide-react"
-import { cn } from "cn"
+import type { ComponentProps, ReactElement, ReactNode } from "react";
+import { createElement, useId } from "react";
+import { AlertCircle } from "lucide-react";
+import { cn } from "cn";
 
 export interface FormFieldProps extends Omit<ComponentProps<"div">, "children"> {
-  label: string
+  label: string;
   /** The single control. `FormField` wires `id`, `aria-invalid`, `aria-describedby`. */
-  children: ReactElement
-  error?: string | null
-  hint?: ReactNode
-  required?: boolean
+  children: ReactElement;
+  error?: string | null;
+  hint?: ReactNode;
+  required?: boolean;
 }
 
 /**
@@ -27,9 +27,9 @@ export function FormField({
   className,
   ...props
 }: FormFieldProps) {
-  const fieldId = useId()
-  const descId = useId()
-  const describedBy = error || hint ? descId : undefined
+  const fieldId = useId();
+  const descId = useId();
+  const describedBy = error || hint ? descId : undefined;
 
   return (
     <div data-slot="form-field" className={cn("grid gap-1.5", className)} {...props}>
@@ -58,7 +58,7 @@ export function FormField({
         </p>
       )}
     </div>
-  )
+  );
 }
 
 /** Clones the control, injecting id + a11y props (explicit id is kept). */
@@ -67,18 +67,18 @@ function renderLabeledControl(
   fieldId: string,
   _descId: string,
   invalid: boolean,
-  describedBy?: string
+  describedBy?: string,
 ): ReactElement {
   const original = control.props as {
-    id?: string
-    children?: ReactNode
-    [key: string]: unknown
-  }
+    id?: string;
+    children?: ReactNode;
+    [key: string]: unknown;
+  };
   const props = {
     ...original,
     id: original.id ?? fieldId,
     "aria-invalid": invalid || undefined,
     "aria-describedby": describedBy,
-  }
-  return createElement(control.type, props, original.children)
+  };
+  return createElement(control.type, props, original.children);
 }

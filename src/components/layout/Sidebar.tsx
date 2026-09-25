@@ -41,7 +41,7 @@ function SidebarLink({ href, label, icon }: SidebarLinkProps) {
         "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
         active
           ? "bg-primary-tint text-primary-dark"
-          : "text-ink-600 hover:bg-muted hover:text-ink-900"
+          : "text-ink-600 hover:bg-muted hover:text-ink-900",
       )}
     >
       <NavIcon name={icon} className="size-4.5" />
@@ -61,11 +61,15 @@ function GroupLabel({ label }: { label: string }) {
 function SidebarContent() {
   const primaryGroups = NAV_GROUP_ORDER.filter((group) => group !== "bottom");
   const bottomItems = NAV_ITEMS.filter((item) => item.group === "bottom");
+  const { basePath } = useShell();
 
   return (
     <div className="flex h-full flex-col gap-6">
-      <Brand size={36} href="/dashboard" />
-      <nav aria-label="Main navigation" className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
+      <Brand size={36} href={withBasePath("/dashboard", basePath)} />
+      <nav
+        aria-label="Main navigation"
+        className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto"
+      >
         {primaryGroups.map((group) => (
           <div key={group} className="grid gap-1">
             <GroupLabel label={GROUP_LABELS[group]} />
@@ -96,9 +100,7 @@ export function Sidebar({ open, onOpenChange }: SidebarProps) {
         <DrawerPrimitive.Portal>
           <DrawerPrimitive.Backdrop className="fixed inset-0 z-50 bg-ink-900/40 duration-150 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 lg:hidden" />
           <DrawerPrimitive.Popup className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] flex-col gap-4 border-r border-border bg-background p-4 outline-none duration-300 data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-left-2 data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-left-2 lg:hidden">
-            <DrawerPrimitive.Title className="sr-only">
-              Navigation menu
-            </DrawerPrimitive.Title>
+            <DrawerPrimitive.Title className="sr-only">Navigation menu</DrawerPrimitive.Title>
             <SidebarContent />
           </DrawerPrimitive.Popup>
         </DrawerPrimitive.Portal>

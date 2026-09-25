@@ -5,12 +5,7 @@
 
 import { z } from "zod";
 
-import {
-  DOSAGE_AMOUNT_MAX,
-  INSTRUCTIONS_MAX,
-  MED_NAME_MAX,
-  NOTES_MAX,
-} from "../constants";
+import { DOSAGE_AMOUNT_MAX, INSTRUCTIONS_MAX, MED_NAME_MAX, NOTES_MAX } from "../constants";
 import { MEDICATION_STATUSES } from "../enums";
 import { dateKeySchema } from "./common";
 
@@ -40,7 +35,9 @@ export const medicationSchema = z
       .trim()
       .min(1, "Unit is required.")
       .max(20, "Unit must be at most 20 characters."),
-    instructions: nullableText(z.string().trim().max(INSTRUCTIONS_MAX, `At most ${INSTRUCTIONS_MAX} characters.`)),
+    instructions: nullableText(
+      z.string().trim().max(INSTRUCTIONS_MAX, `At most ${INSTRUCTIONS_MAX} characters.`),
+    ),
     notes: nullableText(z.string().trim().max(NOTES_MAX, `At most ${NOTES_MAX} characters.`)),
     status: z.enum(MEDICATION_STATUSES).default("active"),
     startDate: dateKeySchema,

@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { redirect } from "next/navigation"
-import { useState, type ReactNode } from "react"
+import { redirect } from "next/navigation";
+import { useState, type ReactNode } from "react";
 import {
   AlertCircle,
   BellRing,
@@ -14,39 +14,29 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Trash2,
-} from "lucide-react"
-import { toast } from "sonner"
+} from "lucide-react";
+import { toast } from "sonner";
 
-import { Brand } from "@/components/brand/Brand"
-import { Logo } from "@/components/brand/Logo"
-import { Wordmark } from "@/components/brand/Wordmark"
-import { AiBrandLockup } from "@/components/brand/Brand"
+import { Brand } from "@/components/brand/Brand";
+import { Logo } from "@/components/brand/Logo";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { AiBrandLockup } from "@/components/brand/Brand";
+import { BRAND } from "@/shared/brand";
 
-import {
-  Alert,
-  AlertAction,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Chip } from "@/components/ui/chip"
-import { ConfirmationDialog } from "@/components/ui/confirmation-dialog"
-import { DataTable, type DataTableColumn } from "@/components/ui/data-table"
-import { DatePicker } from "@/components/ui/date-picker"
-import { TrendChart } from "@/components/ui/chart"
-import { NavIcon } from "@/components/ui/nav-icon"
-import { RangePicker, type DateRange } from "@/components/ui/range-picker"
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog"
+import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Chip } from "@/components/ui/chip";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TrendChart } from "@/components/ui/chart";
+import { NavIcon } from "@/components/ui/nav-icon";
+import { RangePicker, type DateRange } from "@/components/ui/range-picker";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import {
   Dialog,
   DialogContent,
@@ -55,7 +45,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
@@ -65,7 +55,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"
+} from "@/components/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,13 +63,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { EmptyState } from "@/components/ui/empty-state"
-import { ErrorState } from "@/components/ui/error-state"
-import { FormField } from "@/components/ui/form-field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ListRow } from "@/components/ui/list-row"
+} from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ListRow } from "@/components/ui/list-row";
 import {
   Pagination,
   PaginationContent,
@@ -88,7 +78,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"
+} from "@/components/ui/pagination";
 import {
   Popover,
   PopoverContent,
@@ -96,42 +86,53 @@ import {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { SectionLabel } from "@/components/ui/section-label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
-import { StatCard } from "@/components/ui/stat-card"
-import { StatusBadge } from "@/components/ui/status-badge"
-import { StatusIndicator } from "@/components/ui/status-indicator"
-import { Switch } from "@/components/ui/switch"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { TimePicker } from "@/components/ui/time-picker"
-import { Toaster } from "@/components/ui/sonner"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+} from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SectionLabel } from "@/components/ui/section-label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatCard } from "@/components/ui/stat-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusIndicator } from "@/components/ui/status-indicator";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { TimePicker } from "@/components/ui/time-picker";
+import { Toaster } from "@/components/ui/sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-import { ALL_TOKENS, COLOR_TOKENS } from "@/lib/token-doc"
-import { cn } from "@/lib/utils"
-import { DOSE_STATUSES } from "@/shared/status"
+import { ALL_TOKENS, COLOR_TOKENS } from "@/lib/token-doc";
+import { cn } from "@/lib/utils";
+import { DOSE_STATUSES } from "@/shared/status";
 
 if (process.env.NODE_ENV !== "development") {
-  redirect("/")
+  redirect("/");
 }
 
 const MEDS = [
-  { name: "Metformin 500mg", dose: "1 tablet · every 8h", time: "08:00 · 14:00 · 20:00", status: "taken" },
+  {
+    name: "Metformin 500mg",
+    dose: "1 tablet · every 8h",
+    time: "08:00 · 14:00 · 20:00",
+    status: "taken",
+  },
   { name: "Atorvastatin 20mg", dose: "1 tablet · once daily", time: "21:00", status: "due-now" },
   { name: "Levothyroxine 50µg", dose: "1 tablet · once daily", time: "07:30", status: "upcoming" },
   { name: "Ibuprofen 400mg", dose: "1 tablet · as needed", time: "12:00", status: "missed" },
-] as const
+] as const;
 
 interface TableRow {
-  name: string
-  dose: string
-  time: string
-  status: "taken" | "due-now" | "upcoming" | "missed" | "skipped"
+  name: string;
+  dose: string;
+  time: string;
+  status: "taken" | "due-now" | "upcoming" | "missed" | "skipped";
 }
 
 const TABLE_ROWS: TableRow[] = [
@@ -145,7 +146,7 @@ const TABLE_ROWS: TableRow[] = [
   { name: "Pantoprazole 40mg", dose: "1 tablet", time: "07:00", status: "taken" },
   { name: "Aspirin 81mg", dose: "1 tablet", time: "08:00", status: "taken" },
   { name: "B12 1000µg", dose: "1 lozenge", time: "09:00", status: "upcoming" },
-]
+];
 
 const TABLE_COLUMNS: DataTableColumn<TableRow>[] = [
   { key: "name", header: "Medication", value: (r) => r.name },
@@ -157,7 +158,7 @@ const TABLE_COLUMNS: DataTableColumn<TableRow>[] = [
     value: (r) => r.status,
     render: (r) => <StatusBadge status={r.status} />,
   },
-]
+];
 
 const ADHERENCE_DATA = [
   { day: "2026-05-14", taken: 88, missed: 12 },
@@ -167,7 +168,7 @@ const ADHERENCE_DATA = [
   { day: "2026-05-18", taken: 91, missed: 9 },
   { day: "2026-05-19", taken: 96, missed: 4 },
   { day: "2026-05-20", taken: 100, missed: 0 },
-]
+];
 
 function StorySection({
   id,
@@ -175,10 +176,10 @@ function StorySection({
   title,
   children,
 }: {
-  id: string
-  kicker: string
-  title: string
-  children: ReactNode
+  id: string;
+  kicker: string;
+  title: string;
+  children: ReactNode;
 }) {
   return (
     <section id={id} data-slot={id} className="grid gap-5">
@@ -188,13 +189,11 @@ function StorySection({
       </div>
       {children}
     </section>
-  )
+  );
 }
 
 function StoryGrid({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <div className={cn("flex flex-wrap items-start gap-4", className)}>{children}</div>
-  )
+  return <div className={cn("flex flex-wrap items-start gap-4", className)}>{children}</div>;
 }
 
 function StoryTile({
@@ -202,31 +201,31 @@ function StoryTile({
   children,
   className,
 }: {
-  label: string
-  children: ReactNode
-  className?: string
+  label: string;
+  children: ReactNode;
+  className?: string;
 }) {
   return (
     <div className={cn("grid min-w-40 gap-2", className)}>
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       {children}
     </div>
-  )
+  );
 }
 
 export default function DesignSystemPage() {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [doseTime, setDoseTime] = useState("08:00")
-  const [doseDate, setDoseDate] = useState("")
-  const [pillCount, setPillCount] = useState("2")
-  const [frequency, setFrequency] = useState("daily-fixed")
-  const [takeNow, setTakeNow] = useState(true)
-  const [remember, setRemember] = useState(true)
-  const [remindVia, setRemindVia] = useState("push")
-  const [tab, setTab] = useState("today")
-  const [range, setRange] = useState<DateRange>({ from: "2026-05-14", to: "2026-05-20" })
-  const [responsiveOpen, setResponsiveOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [doseTime, setDoseTime] = useState("08:00");
+  const [doseDate, setDoseDate] = useState("");
+  const [pillCount, setPillCount] = useState("2");
+  const [frequency, setFrequency] = useState("daily-fixed");
+  const [takeNow, setTakeNow] = useState(true);
+  const [remember, setRemember] = useState(true);
+  const [remindVia, setRemindVia] = useState("push");
+  const [tab, setTab] = useState("today");
+  const [range, setRange] = useState<DateRange>({ from: "2026-05-14", to: "2026-05-20" });
+  const [responsiveOpen, setResponsiveOpen] = useState(false);
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -257,7 +256,8 @@ export default function DesignSystemPage() {
       {/* Hero */}
       <div className="bg-hero-gradient border-b border-border">
         <div className="mx-auto w-full max-w-6xl px-4 py-14">
-          <SectionLabel tone="emerald">MedVault · Phase 03</SectionLabel>
+          <SectionLabel tone="emerald">{BRAND.name} · Phase 03</SectionLabel>
+
           <h1 className="mt-2 max-w-2xl font-heading text-4xl font-extrabold tracking-tight text-ink-900 sm:text-5xl">
             One token set, one component language.
           </h1>
@@ -266,8 +266,12 @@ export default function DesignSystemPage() {
             against the Stitch export (§7). No hardcoded brand hex anywhere in features.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Button size="lg"><Plus data-icon="inline-start" /> Add medication</Button>
-            <Button size="lg" variant="secondary"><HeartPulse data-icon="inline-start" /> Secondary</Button>
+            <Button size="lg">
+              <Plus data-icon="inline-start" /> Add medication
+            </Button>
+            <Button size="lg" variant="secondary">
+              <HeartPulse data-icon="inline-start" /> Secondary
+            </Button>
             <AiBrandLockup Icon={MessageSquareText} href="/design-system" />
           </div>
         </div>
@@ -293,7 +297,9 @@ export default function DesignSystemPage() {
                     <p className="truncate font-medium text-ink-900">{t.label}</p>
                     <p className="truncate text-xs text-muted-foreground">{t.cssVar}</p>
                   </div>
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-ink-600">{t.value}</code>
+                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-ink-600">
+                    {t.value}
+                  </code>
                   {t.provenance === "extended" && <Badge variant="outline">plan §12</Badge>}
                 </div>
               ))}
@@ -303,14 +309,16 @@ export default function DesignSystemPage() {
               <p className="text-xs font-medium text-muted-foreground">Shadows (§5.4)</p>
               <div className="flex flex-wrap gap-6 bg-muted/60 p-6 rounded-xl">
                 {ALL_TOKENS.filter((t) => t.cssVar.startsWith("--shadow")).map((t) => (
-<div key={t.cssVar} className="grid gap-2">
-                  <div
-                    className="h-16 w-24 rounded-lg bg-card ring-1 ring-ink-900/5"
-                    style={{ boxShadow: `var(${t.cssVar})` }}
-                  />
-                  <p className="text-xs text-muted-foreground">{t.label}</p>
-                  <code className="rounded bg-muted px-1 py-0.5 text-xs text-ink-600">{t.cssVar}</code>
-                </div>
+                  <div key={t.cssVar} className="grid gap-2">
+                    <div
+                      className="h-16 w-24 rounded-lg bg-card ring-1 ring-ink-900/5"
+                      style={{ boxShadow: `var(${t.cssVar})` }}
+                    />
+                    <p className="text-xs text-muted-foreground">{t.label}</p>
+                    <code className="rounded bg-muted px-1 py-0.5 text-xs text-ink-600">
+                      {t.cssVar}
+                    </code>
+                  </div>
                 ))}
               </div>
               <Separator className="my-2" />
@@ -328,19 +336,33 @@ export default function DesignSystemPage() {
         <StorySection id="type" kicker="02 · Type" title="Type scale (§5.2)">
           <div className="grid max-w-2xl gap-5 rounded-xl border border-border bg-card p-6">
             <SectionLabel tone="violet">Your medications, one tap away</SectionLabel>
-            <h1 className="font-heading font-extrabold tracking-tight text-ink-900" style={{ fontSize: "clamp(42px,5.5vw,72px)", lineHeight: 1.08, letterSpacing: "-0.03em" }}>
+            <h1
+              className="font-heading font-extrabold tracking-tight text-ink-900"
+              style={{
+                fontSize: "clamp(42px,5.5vw,72px)",
+                lineHeight: 1.08,
+                letterSpacing: "-0.03em",
+              }}
+            >
               Never miss a dose again.
             </h1>
-            <h2 className="font-heading font-bold tracking-tight text-ink-900" style={{ fontSize: "clamp(28px,3.5vw,44px)" }}>
+            <h2
+              className="font-heading font-bold tracking-tight text-ink-900"
+              style={{ fontSize: "clamp(28px,3.5vw,44px)" }}
+            >
               Built for real routines, not just reminders.
             </h2>
-            <h3 className="font-heading font-extrabold tracking-tight text-ink-900" style={{ fontSize: "clamp(24px,2.6vw,32px)" }}>
+            <h3
+              className="font-heading font-extrabold tracking-tight text-ink-900"
+              style={{ fontSize: "clamp(24px,2.6vw,32px)" }}
+            >
               All your meds in one place
             </h3>
             <p style={{ fontSize: "16px" }} className="leading-relaxed text-ink-600">
               Body copy sits at 15–17px in ink-600 with relaxed leading — readable on cards,
-              dashboards and mobile. <span className="font-semibold text-ink-900">Semibold ink-900</span>{" "}
-              for emphasis, never a colour substitute.
+              dashboards and mobile.{" "}
+              <span className="font-semibold text-ink-900">Semibold ink-900</span> for emphasis,
+              never a colour substitute.
             </p>
           </div>
         </StorySection>
@@ -355,7 +377,9 @@ export default function DesignSystemPage() {
               <Button className="hover:bg-primary-dark">Save changes</Button>
             </StoryTile>
             <StoryTile label="Secondary">
-              <Button variant="secondary"><Plus data-icon="inline-start" /> Add medication</Button>
+              <Button variant="secondary">
+                <Plus data-icon="inline-start" /> Add medication
+              </Button>
             </StoryTile>
             <StoryTile label="Outline">
               <Button variant="outline">View schedule</Button>
@@ -364,7 +388,9 @@ export default function DesignSystemPage() {
               <Button variant="ghost">Skip</Button>
             </StoryTile>
             <StoryTile label="Destructive">
-              <Button variant="destructive"><Trash2 data-icon="inline-start" /> Delete</Button>
+              <Button variant="destructive">
+                <Trash2 data-icon="inline-start" /> Delete
+              </Button>
             </StoryTile>
             <StoryTile label="Link">
               <Button variant="link">Manage reminders</Button>
@@ -512,12 +538,18 @@ export default function DesignSystemPage() {
         </StorySection>
 
         {/* ============ MEDICATION STORY ============ */}
-        <StorySection id="meds" kicker="06 · Stitch story" title="Medication list (§1 dashboard · §2)">
+        <StorySection
+          id="meds"
+          kicker="06 · Stitch story"
+          title="Medication list (§1 dashboard · §2)"
+        >
           <div className="grid gap-8 lg:grid-cols-2">
             <Card className="shadow-card-sm">
               <CardHeader>
                 <CardTitle>Today — 4 of 6 taken</CardTitle>
-                <CardDescription>Stitch med card: icon tile, name, dose, times, status</CardDescription>
+                <CardDescription>
+                  Stitch med card: icon tile, name, dose, times, status
+                </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-2">
                 {MEDS.map((m) => (
@@ -526,7 +558,13 @@ export default function DesignSystemPage() {
                     icon={Pill}
                     iconClass="bg-primary-tint text-primary-dark"
                     title={m.name}
-                    subtitle={<span className="flex items-center gap-2"><span>{m.dose}</span><Clock className="size-3" />{m.time}</span>}
+                    subtitle={
+                      <span className="flex items-center gap-2">
+                        <span>{m.dose}</span>
+                        <Clock className="size-3" />
+                        {m.time}
+                      </span>
+                    }
                     right={<StatusBadge status={m.status} />}
                     onClick={() => setDialogOpen(true)}
                   />
@@ -554,7 +592,11 @@ export default function DesignSystemPage() {
                 icon={Pill}
                 title="No medications yet"
                 description="Add your first medication to build today's schedule."
-                action={<Button size="sm"><Plus data-icon="inline-start" /> Add medication</Button>}
+                action={
+                  <Button size="sm">
+                    <Plus data-icon="inline-start" /> Add medication
+                  </Button>
+                }
               />
             </div>
           </div>
@@ -599,7 +641,12 @@ export default function DesignSystemPage() {
                 <p className="text-xs font-medium text-muted-foreground">
                   TrendChart · empty state (graceful, never blank)
                 </p>
-                <TrendChart kind="line" data={[]} xKey="day" series={[{ key: "taken", name: "Taken" }]} />
+                <TrendChart
+                  kind="line"
+                  data={[]}
+                  xKey="day"
+                  series={[{ key: "taken", name: "Taken" }]}
+                />
               </div>
             </div>
 
@@ -647,7 +694,24 @@ export default function DesignSystemPage() {
                 NavIcon · shared nav icon map (§14 / Phase 08)
               </p>
               <div className="flex flex-wrap gap-4 rounded-xl border border-border bg-card p-5">
-                {(["dashboard", "medications", "schedule", "history", "adherence", "insights", "reports", "caregiver", "notifications", "settings", "help", "home", "plus", "more"] as const).map((name) => (
+                {(
+                  [
+                    "dashboard",
+                    "medications",
+                    "schedule",
+                    "history",
+                    "adherence",
+                    "insights",
+                    "reports",
+                    "caregiver",
+                    "notifications",
+                    "settings",
+                    "help",
+                    "home",
+                    "plus",
+                    "more",
+                  ] as const
+                ).map((name) => (
                   <span key={name} className="grid items-center gap-1 text-center">
                     <NavIcon name={name} className="mx-auto size-5 text-ink-600" />
                     <span className="text-[10px] text-muted-foreground">{name}</span>
@@ -665,17 +729,25 @@ export default function DesignSystemPage() {
               <BellRing className="size-4" aria-hidden="true" />
               <AlertTitle>Dose due at 21:00</AlertTitle>
               <AlertDescription>Atorvastatin 20 mg — it&apos;s timed with dinner.</AlertDescription>
-              <AlertAction><Button size="sm">Mark taken</Button></AlertAction>
+              <AlertAction>
+                <Button size="sm">Mark taken</Button>
+              </AlertAction>
             </Alert>
             <ErrorState
               compact
               icon={AlertCircle}
               title="Couldn't load your history"
-              action={<Button variant="outline" size="sm">Retry</Button>}
+              action={
+                <Button variant="outline" size="sm">
+                  Retry
+                </Button>
+              }
             />
             <StoryTile label="Chips (§2 dashboard topics)">
               <StoryGrid className="gap-2">
-                <Chip tone="emerald" leading={<Check className="size-3.5" />}>On track</Chip>
+                <Chip tone="emerald" leading={<Check className="size-3.5" />}>
+                  On track
+                </Chip>
                 <Chip tone="cyan">Morning</Chip>
                 <Chip tone="magenta">Chronic</Chip>
                 <Chip tone="violet">AI insight</Chip>
@@ -692,7 +764,11 @@ export default function DesignSystemPage() {
         </StorySection>
 
         {/* ============ OVERLAYS ============ */}
-        <StorySection id="overlays" kicker="09 · Overlays" title="Dialog, drawer, menus, tabs, tooltips">
+        <StorySection
+          id="overlays"
+          kicker="09 · Overlays"
+          title="Dialog, drawer, menus, tabs, tooltips"
+        >
           <StoryGrid className="items-end">
             <StoryTile label="Dialog">
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -703,7 +779,9 @@ export default function DesignSystemPage() {
                     <DialogDescription>Metformin 500 mg — take now with water?</DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setDialogOpen(false)}>Not now</Button>
+                    <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                      Not now
+                    </Button>
                     <Button onClick={() => setDialogOpen(false)}>Taken</Button>
                   </DialogFooter>
                 </DialogContent>
@@ -730,7 +808,9 @@ export default function DesignSystemPage() {
 
             <StoryTile label="Dropdown">
               <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="outline" />}>More</DropdownMenuTrigger>
+                <DropdownMenuTrigger render={<Button variant="outline" />}>
+                  More
+                </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuLabel>Medication</DropdownMenuLabel>
                   <DropdownMenuItem onClick={() => toast("Editing medication")}>
@@ -749,7 +829,9 @@ export default function DesignSystemPage() {
 
             <StoryTile label="Popover">
               <Popover>
-                <PopoverTrigger render={<Button variant="outline" />}>Why this rate?</PopoverTrigger>
+                <PopoverTrigger render={<Button variant="outline" />}>
+                  Why this rate?
+                </PopoverTrigger>
                 <PopoverContent>
                   <PopoverHeader>
                     <PopoverTitle>94.2% adherence</PopoverTitle>
@@ -778,9 +860,15 @@ export default function DesignSystemPage() {
                   <TabsTrigger value="history">History</TabsTrigger>
                 </TabsList>
                 <TabsContent value={tab} className="pt-2">
-                  {tab === "today" && <p className="text-sm text-muted-foreground">4 doses today.</p>}
-                  {tab === "upcoming" && <p className="text-sm text-muted-foreground">Next dose 21:00.</p>}
-                  {tab === "history" && <p className="text-sm text-muted-foreground">30-day log ready.</p>}
+                  {tab === "today" && (
+                    <p className="text-sm text-muted-foreground">4 doses today.</p>
+                  )}
+                  {tab === "upcoming" && (
+                    <p className="text-sm text-muted-foreground">Next dose 21:00.</p>
+                  )}
+                  {tab === "history" && (
+                    <p className="text-sm text-muted-foreground">30-day log ready.</p>
+                  )}
                 </TabsContent>
               </Tabs>
             </StoryTile>
@@ -801,12 +889,26 @@ export default function DesignSystemPage() {
             <StoryTile label="Pagination">
               <Pagination>
                 <PaginationContent>
-                  <PaginationItem><PaginationPrevious href="#" /></PaginationItem>
-                  <PaginationItem><PaginationLink href="#">1</PaginationLink></PaginationItem>
-                  <PaginationItem><PaginationLink href="#" isActive>2</PaginationLink></PaginationItem>
-                  <PaginationItem><PaginationLink href="#">3</PaginationLink></PaginationItem>
-                  <PaginationItem><PaginationEllipsis /></PaginationItem>
-                  <PaginationItem><PaginationNext href="#" /></PaginationItem>
+                  <PaginationItem>
+                    <PaginationPrevious href="#" />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#">1</PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#" isActive>
+                      2
+                    </PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#">3</PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext href="#" />
+                  </PaginationItem>
                 </PaginationContent>
               </Pagination>
             </StoryTile>
@@ -816,7 +918,8 @@ export default function DesignSystemPage() {
         {/* ============ FOOTER ============ */}
         <footer className="border-t border-border pt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            Built from plan §5 — verify against <code className="rounded bg-muted px-1 py-0.5 text-xs">docs/stitch-analysis.md</code>
+            Built from plan §5 — verify against{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">docs/stitch-analysis.md</code>
           </p>
         </footer>
       </main>
@@ -828,12 +931,12 @@ export default function DesignSystemPage() {
         description="Atorvastatin 20 mg and its schedule will be removed from the app."
         confirmLabel="Delete"
         onConfirm={() => {
-          setConfirmOpen(false)
-          toast("Medication deleted")
+          setConfirmOpen(false);
+          toast("Medication deleted");
         }}
       />
     </div>
-  )
+  );
 }
 
 function SectionLink({ href, children }: { href: string; children: ReactNode }) {
@@ -844,28 +947,32 @@ function SectionLink({ href, children }: { href: string; children: ReactNode }) 
     >
       {children}
     </a>
-  )
+  );
 }
 
 /** §5.5 pill stepper used for "pills to take". */
-function TimeStepper({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (value: string) => void
-}) {
+function TimeStepper({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
     <div className="inline-flex h-8 items-center rounded-lg border border-border bg-background px-1 text-sm">
-      <Button variant="ghost" size="icon-sm" aria-label="Decrease pills" onClick={() => onChange(String(Math.max(0, Number(value) - 1)))}>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Decrease pills"
+        onClick={() => onChange(String(Math.max(0, Number(value) - 1)))}
+      >
         <Plus className="rotate-45" />
       </Button>
       <span aria-live="polite" className="min-w-6 text-center text-sm font-semibold text-ink-900">
         {value}
       </span>
-      <Button variant="ghost" size="icon-sm" aria-label="Increase pills" onClick={() => onChange(String(Number(value) + 1))}>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Increase pills"
+        onClick={() => onChange(String(Number(value) + 1))}
+      >
         <Plus />
       </Button>
     </div>
-  )
+  );
 }

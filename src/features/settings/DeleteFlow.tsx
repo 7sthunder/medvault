@@ -89,8 +89,8 @@ export function DeleteFlow({ hasDemoData }: { hasDemoData: boolean }) {
         <CardHeader>
           <CardTitle className="text-ink-900">Delete all data</CardTitle>
           <CardDescription>
-            Removes every medication, dose, insight and notification. Your login stays active so
-            you can start fresh. This can&apos;t be undone.
+            Removes every medication, dose, insight and notification. Your login stays active so you
+            can start fresh. This can&apos;t be undone.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -111,8 +111,8 @@ export function DeleteFlow({ hasDemoData }: { hasDemoData: boolean }) {
         <CardHeader>
           <CardTitle className="text-ink-900">Delete account</CardTitle>
           <CardDescription>
-            Deletes your account and every trace of your data, then signs you out. This can&apos;t be
-            undone.
+            Deletes your account and every trace of your data, then signs you out. This can&apos;t
+            be undone.
           </CardDescription>
         </CardHeader>
         <CardContent>

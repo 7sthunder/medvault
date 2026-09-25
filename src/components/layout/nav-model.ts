@@ -91,11 +91,7 @@ export function getPageContext(pathname: string, basePath?: string): ShellPageCo
     const label = PAGE_TITLES[p] ?? titleCase(tailOf(p));
     return {
       title: label,
-      crumbs: [
-        { label: "Home", href: home },
-        { label: "Settings", href: settings },
-        { label },
-      ],
+      crumbs: [{ label: "Home", href: home }, { label: "Settings", href: settings }, { label }],
     };
   }
 
@@ -103,10 +99,7 @@ export function getPageContext(pathname: string, basePath?: string): ShellPageCo
   if (exact) {
     return {
       title: exact,
-      crumbs: [
-        { label: "Home", href: home },
-        { label: exact },
-      ],
+      crumbs: [{ label: "Home", href: home }, { label: exact }],
     };
   }
 
@@ -126,9 +119,6 @@ export function getPageContext(pathname: string, basePath?: string): ShellPageCo
   const title = titleCase(tailOf(p));
   return {
     title,
-    crumbs: [
-      { label: "Home", href: home },
-      { label: title },
-    ],
+    crumbs: [{ label: "Home", href: home }, { label: title }],
   };
 }

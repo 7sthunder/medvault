@@ -13,7 +13,11 @@ import { VALUE_LIMITS } from "../constants";
 import { timezoneSchema } from "./common";
 
 const intInRange = (min: number, max: number, label: string) =>
-  z.coerce.number().int().min(min, `${label} must be at least ${min}.`).max(max, `${label} must be at most ${max}.`);
+  z.coerce
+    .number()
+    .int()
+    .min(min, `${label} must be at least ${min}.`)
+    .max(max, `${label} must be at most ${max}.`);
 
 export const onboardingSchema = z.object({
   timezone: timezoneSchema,
@@ -22,7 +26,11 @@ export const onboardingSchema = z.object({
     VALUE_LIMITS.missedAfterMinutes.max,
     "Missed-after",
   ),
-  snoozeMinutes: intInRange(VALUE_LIMITS.snoozeMinutes.min, VALUE_LIMITS.snoozeMinutes.max, "Snooze"),
+  snoozeMinutes: intInRange(
+    VALUE_LIMITS.snoozeMinutes.min,
+    VALUE_LIMITS.snoozeMinutes.max,
+    "Snooze",
+  ),
   maxSnoozes: intInRange(VALUE_LIMITS.maxSnoozes.min, VALUE_LIMITS.maxSnoozes.max, "Snoozes"),
   reminderBeforeMinutes: intInRange(
     VALUE_LIMITS.reminderBeforeMinutes.min,

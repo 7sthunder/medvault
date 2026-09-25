@@ -49,7 +49,15 @@ export function AlertFeed({
   emptyDescription?: string;
 }) {
   if (items.length === 0) {
-    return <EmptyState className="py-6" compact icon={BellRing} title={emptyTitle} description={emptyDescription} />;
+    return (
+      <EmptyState
+        className="py-6"
+        compact
+        icon={BellRing}
+        title={emptyTitle}
+        description={emptyDescription}
+      />
+    );
   }
 
   return (

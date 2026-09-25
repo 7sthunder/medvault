@@ -9,9 +9,7 @@ test("design system catalogue renders Stitch stories + status chips", async ({ p
 
   // §12: all 8 status chips render (never colour-only)
   await expect(page.locator("[data-slot='chip']").first()).toBeVisible();
-  await expect(
-    page.locator("[data-slot='status'] [data-slot='status-badge']"),
-  ).toHaveCount(8);
+  await expect(page.locator("[data-slot='status'] [data-slot='status-badge']")).toHaveCount(8);
 
   // medication story uses §2 cards + list rows
   await expect(page.locator("[data-slot='list-row']").first()).toBeVisible();

@@ -18,7 +18,9 @@ export async function requireUser(next?: string | null) {
         ? next
         : h.get("x-pathname");
     const suffix =
-      attempted && attempted !== "/" && attempted !== "/login" ? `?next=${encodeURIComponent(attempted)}` : "";
+      attempted && attempted !== "/" && attempted !== "/login"
+        ? `?next=${encodeURIComponent(attempted)}`
+        : "";
     redirect(`/login${suffix}`);
   }
   return session;

@@ -38,8 +38,16 @@ export const reminderSettingsSchema = z.object({
     .int()
     .min(VALUE_LIMITS.missedAfterMinutes.min)
     .max(VALUE_LIMITS.missedAfterMinutes.max),
-  snoozeMinutes: z.coerce.number().int().min(VALUE_LIMITS.snoozeMinutes.min).max(VALUE_LIMITS.snoozeMinutes.max),
-  maxSnoozes: z.coerce.number().int().min(VALUE_LIMITS.maxSnoozes.min).max(VALUE_LIMITS.maxSnoozes.max),
+  snoozeMinutes: z.coerce
+    .number()
+    .int()
+    .min(VALUE_LIMITS.snoozeMinutes.min)
+    .max(VALUE_LIMITS.snoozeMinutes.max),
+  maxSnoozes: z.coerce
+    .number()
+    .int()
+    .min(VALUE_LIMITS.maxSnoozes.min)
+    .max(VALUE_LIMITS.maxSnoozes.max),
   reminderBeforeMinutes: z.coerce
     .number()
     .int()

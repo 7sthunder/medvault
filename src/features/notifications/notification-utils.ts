@@ -1,4 +1,12 @@
-import { BellRing, CalendarClock, HeartPulse, Lightbulb, Megaphone, Siren, Sparkles } from "lucide-react";
+import {
+  BellRing,
+  CalendarClock,
+  HeartPulse,
+  Lightbulb,
+  Megaphone,
+  Siren,
+  Sparkles,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import type { NotificationType } from "@/shared/enums";
@@ -24,7 +32,10 @@ export const NOTIFICATION_TYPE_UI: Record<NotificationType, NotificationTypeUi> 
  * Where a notification's tap should take the user by entity type (§11.13 per-row link).
  * Falls back to `/notifications` when the target route isn't built yet.
  */
-export function notificationHref(entityType: NonNullable<import("@/shared/types").NotifDTO["entityType"]> | null, entityId: string | null): string {
+export function notificationHref(
+  entityType: NonNullable<import("@/shared/types").NotifDTO["entityType"]> | null,
+  entityId: string | null,
+): string {
   if (entityId) {
     if (entityType === "doseEvent") return `/schedule/${entityId}`;
     if (entityType === "medication") return `/medications/${entityId}`;

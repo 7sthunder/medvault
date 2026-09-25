@@ -210,7 +210,10 @@ dbTests("demo domain — simulation actions", () => {
         .limit(1);
       if (!event) return;
 
-      const result = await demoService.simulateAction(tx, { action: "miss", doseEventId: event.id });
+      const result = await demoService.simulateAction(tx, {
+        action: "miss",
+        doseEventId: event.id,
+      });
       expect(result.ok).toBe(true);
       const [row] = await tx
         .select({ status: doseEvents.status })
@@ -251,7 +254,11 @@ dbTests("demo domain — scenarios", () => {
       expect(result.action).toBe("scenario");
       expect(result.detail.length).toBeGreaterThan(0);
 
-      const [row] = await tx.select().from(demoStates).where(eq(demoStates.userId, demo.id)).limit(1);
+      const [row] = await tx
+        .select()
+        .from(demoStates)
+        .where(eq(demoStates.userId, demo.id))
+        .limit(1);
       expect(row?.scenario).toBe("decline");
 
       const missed = await tx
@@ -336,7 +343,8 @@ describe("demo contracts", () => {
   it("demoTimeSchema rejects a simulated instant more than a year from real time", () => {
     expect(demoTimeSchema.safeParse({ simulationNow: new Date() }).success).toBe(true);
     expect(
-      demoTimeSchema.safeParse({ simulationNow: new Date(Date.now() + 400 * 24 * 60 * 60 * 1000) }).success,
+      demoTimeSchema.safeParse({ simulationNow: new Date(Date.now() + 400 * 24 * 60 * 60 * 1000) })
+        .success,
     ).toBe(false);
   });
 
@@ -355,7 +363,11 @@ describe("demo contracts", () => {
     expect(verifyDemoToken("not-a-token")).toBeNull();
     expect(verifyDemoToken(`${body}.${signature}x`)).toBeNull();
     // Re-signing the body with a different id must not validate against the old signature.
-    expect(verifyDemoToken(`${Buffer.from('{"userId":"evil","issuedAt":1}').toString("base64url")}.${signature}`)).toBeNull();
+    expect(
+      verifyDemoToken(
+        `${Buffer.from('{"userId":"evil","issuedAt":1}').toString("base64url")}.${signature}`,
+      ),
+    ).toBeNull();
     // An honest but expired token is rejected too.
     const stale = issueDemoToken("user-123", Date.now() - 13 * 60 * 60 * 1000);
     expect(verifyDemoToken(stale)).toBeNull();

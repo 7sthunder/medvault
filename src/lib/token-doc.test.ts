@@ -43,9 +43,7 @@ describe("design tokens (§5)", () => {
   });
 
   it("design constants (radius, gradients) exist in globals.css", () => {
-    expect(CSS_NORMALIZED).toContain(
-      normalize(`--radius:${DESIGN_CONSTANTS.radiusBase}`),
-    );
+    expect(CSS_NORMALIZED).toContain(normalize(`--radius:${DESIGN_CONSTANTS.radiusBase}`));
     expect(CSS_NORMALIZED).toContain(DESIGN_CONSTANTS.heroGradientVar);
     expect(CSS_NORMALIZED).toContain(DESIGN_CONSTANTS.logoGradientVar);
   });

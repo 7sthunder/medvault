@@ -7,11 +7,7 @@
 import { z } from "zod";
 
 /** Normalised email: trimmed, lower-cased, valid address. */
-export const emailSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .email("Enter a valid email address.");
+export const emailSchema = z.string().trim().toLowerCase().email("Enter a valid email address.");
 
 /** Calendar-day key `YYYY-MM-DD` (adherence/reports/medication start/end dates). */
 export const dateKeySchema = z
@@ -42,7 +38,12 @@ export function cappedTextSchema(max: number, message = `Must be at most ${max} 
 }
 
 /** Required text capped at a min/max length (plain labels). */
-export function boundedTextSchema(min: number, max: number, minMessage: string, maxMessage: string) {
+export function boundedTextSchema(
+  min: number,
+  max: number,
+  minMessage: string,
+  maxMessage: string,
+) {
   return z
     .string()
     .trim()

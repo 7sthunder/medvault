@@ -13,7 +13,13 @@ import type { ReportRow } from "@/shared/types";
  * §11.11 missed-dose analysis — the worst rows in the report (missed > 0), leading
  * with the missiest period. Downstream of the same ReportRow table so numbers match.
  */
-export function MissedAnalysis({ granularity, rows }: { granularity: ReportGranularity; rows: ReportRow[] }) {
+export function MissedAnalysis({
+  granularity,
+  rows,
+}: {
+  granularity: ReportGranularity;
+  rows: ReportRow[];
+}) {
   const missed = rows
     .filter((row) => row.missed > 0)
     .sort((a, b) => b.missed - a.missed || a.adherencePercent! - b.adherencePercent!);
@@ -32,7 +38,9 @@ export function MissedAnalysis({ granularity, rows }: { granularity: ReportGranu
       key: "period",
       header: granularity === "daily" ? "Day" : granularity === "weekly" ? "Week" : "Month",
       value: (row) => periodLabel(row.period, granularity),
-      render: (row) => <span className="font-medium text-ink-900">{periodLabel(row.period, granularity)}</span>,
+      render: (row) => (
+        <span className="font-medium text-ink-900">{periodLabel(row.period, granularity)}</span>
+      ),
     },
     { key: "missed", header: "Missed", value: (row) => row.missed, align: "right" },
     {
@@ -44,7 +52,15 @@ export function MissedAnalysis({ granularity, rows }: { granularity: ReportGranu
         row.adherencePercent == null ? (
           <span className="text-muted-foreground">No data</span>
         ) : (
-          <Chip tone={row.adherencePercent >= 80 ? "emerald" : row.adherencePercent >= 60 ? "amber" : "magenta"}>
+          <Chip
+            tone={
+              row.adherencePercent >= 80
+                ? "emerald"
+                : row.adherencePercent >= 60
+                  ? "amber"
+                  : "magenta"
+            }
+          >
             {formatPercent(row.adherencePercent)}
           </Chip>
         ),
@@ -65,7 +81,11 @@ export function MissedAnalysis({ granularity, rows }: { granularity: ReportGranu
       rowKey={(row) => row.period}
       ariaLabel="Missed dose analysis"
       pageSize={0}
-      footer={missed.length > 0 ? `${missed.length} period${missed.length > 1 ? "s" : ""} with missed doses` : undefined}
+      footer={
+        missed.length > 0
+          ? `${missed.length} period${missed.length > 1 ? "s" : ""} with missed doses`
+          : undefined
+      }
     />
   );
 }

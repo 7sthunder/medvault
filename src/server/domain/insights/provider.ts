@@ -12,11 +12,12 @@
  */
 
 import { INSIGHT_CATEGORIES, SUGGESTED_ACTIONS } from "@/shared/enums";
+import { BRAND } from "@/shared/brand";
 import type { InsightItem, InsightSnapshot } from "@/shared/validations/insight";
 
 /** Fixed, in-code coaching prompt (§10.10). Behavioral only. */
 export const AI_SYSTEM_PROMPT = [
-  "You are MedVault's adherence coach. You help a patient notice patterns in how reliably they take their medication.",
+  `You are ${BRAND.name}'s adherence coach. You help a patient notice patterns in how reliably they take their medication.`,
   "STRICT RULES:",
   "- Do NOT diagnose any condition.",
   "- Do NOT prescribe, dose, or recommend starting, stopping or changing any medication or dosage.",
@@ -38,6 +39,8 @@ export interface AiInsightProvider {
   generate(snapshot: InsightSnapshot): Promise<unknown>;
 }
 
+export const AI_REQUEST_TIMEOUT_MS = 10_000;
+
 /** Provider resolution — null (fallback) unless a Gemini key is configured. */
 export function resolveAiProvider(): AiInsightProvider | null {
   const key = process.env.AI_GEMINI_API_KEY;
@@ -50,30 +53,45 @@ export function resolveAiProvider(): AiInsightProvider | null {
 }
 
 async function geminiGenerate(key: string, snapshot: InsightSnapshot): Promise<unknown> {
-  const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": key,
-    },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: `${AI_SYSTEM_PROMPT}\n\nSnapshot:\n${JSON.stringify(snapshot)}` }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.3,
-        maxOutputTokens: 1024,
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
+  try {
+    const res = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": key,
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: `${AI_SYSTEM_PROMPT}\n\nSnapshot:\n${JSON.stringify(snapshot)}` }],
+            },
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.3,
+            maxOutputTokens: 1024,
+          },
+        }),
+        signal: controller.signal,
       },
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`gemini generateContent failed: ${res.status}`);
+    );
+    if (!res.ok) {
+      throw new Error(`gemini generateContent failed: ${res.status}`);
+    }
+    const payload = (await res.json()) as {
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    };
+    const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("gemini returned no text candidate");
+    return JSON.parse(text) as unknown;
+  } finally {
+    clearTimeout(timeout);
   }
-  const payload = (await res.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
-  };
-  const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("gemini returned no text candidate");
-  return JSON.parse(text) as unknown;
 }
 
 /** Make a bespoke item for tests/tooling without touching the LLM. */

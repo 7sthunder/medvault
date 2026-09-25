@@ -19,7 +19,9 @@ function isFullWeek(slot: Pick<SlotRow, "daysOfWeek">): boolean {
  * / "n-times-daily" only apply when every enabled slot runs the full week; any non-weekly
  * day set (or a paused/disabled schedule) is "custom-weekdays".
  */
-export function frequencyLabelOf(slots: readonly Pick<SlotRow, "enabled" | "daysOfWeek">[]): FrequencyLabel {
+export function frequencyLabelOf(
+  slots: readonly Pick<SlotRow, "enabled" | "daysOfWeek">[],
+): FrequencyLabel {
   const enabled = slots.filter((slot) => slot.enabled);
   if (enabled.length > 0 && enabled.every(isFullWeek)) {
     if (enabled.length === 1) return "once-daily";
@@ -58,7 +60,11 @@ export interface MedicationDTOExtras {
   adherencePercent?: number | null;
 }
 
-export function toMedicationDTO(row: MedRow, slots: SlotRow[], extras: MedicationDTOExtras = {}): MedicationDTO {
+export function toMedicationDTO(
+  row: MedRow,
+  slots: SlotRow[],
+  extras: MedicationDTOExtras = {},
+): MedicationDTO {
   return {
     id: row.id,
     name: row.name,
@@ -74,9 +80,7 @@ export function toMedicationDTO(row: MedRow, slots: SlotRow[], extras: Medicatio
     archivedAt: row.archivedAt,
     createdAt: row.createdAt,
     frequencyLabel: frequencyLabelOf(slots),
-    slots: slots
-      .map(toScheduleSlotDTO)
-      .sort((a, b) => a.timeOfDay.localeCompare(b.timeOfDay)),
+    slots: slots.map(toScheduleSlotDTO).sort((a, b) => a.timeOfDay.localeCompare(b.timeOfDay)),
     nextDoseAt: extras.nextDoseAt ?? null,
     adherencePercent: extras.adherencePercent ?? null,
   };

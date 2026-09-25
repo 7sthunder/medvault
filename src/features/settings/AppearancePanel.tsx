@@ -68,9 +68,9 @@ export function AppearancePanel() {
 
   const dirty = Boolean(
     draft &&
-      (draft.theme !== query.data.theme ||
-        draft.uiDensity !== query.data.uiDensity ||
-        draft.reduceMotion !== query.data.reduceMotion),
+    (draft.theme !== query.data.theme ||
+      draft.uiDensity !== query.data.uiDensity ||
+      draft.reduceMotion !== query.data.reduceMotion),
   );
 
   const commit = () => {
@@ -83,7 +83,9 @@ export function AppearancePanel() {
       <Card className="shadow-card-sm">
         <CardHeader>
           <CardTitle className="text-ink-900">Theme</CardTitle>
-          <CardDescription>Applies immediately — you don&apos;t have to save to preview it.</CardDescription>
+          <CardDescription>
+            Applies immediately — you don&apos;t have to save to preview it.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <fieldset>
@@ -96,7 +98,11 @@ export function AppearancePanel() {
                   <button
                     key={option.value}
                     type="button"
-                    onClick={() => setDraft((current) => (current ? { ...current, theme: option.value } : current))}
+                    onClick={() =>
+                      setDraft((current) =>
+                        current ? { ...current, theme: option.value } : current,
+                      )
+                    }
                     aria-pressed={active}
                     className={
                       active
@@ -133,7 +139,9 @@ export function AppearancePanel() {
                     key={option.value}
                     type="button"
                     onClick={() =>
-                      setDraft((current) => (current ? { ...current, uiDensity: option.value } : current))
+                      setDraft((current) =>
+                        current ? { ...current, uiDensity: option.value } : current,
+                      )
                     }
                     aria-pressed={active}
                     className={
@@ -171,7 +179,9 @@ export function AppearancePanel() {
               id="reduce-motion"
               checked={draft?.reduceMotion ?? false}
               onCheckedChange={(next) =>
-                setDraft((current) => (current ? { ...current, reduceMotion: next === true } : current))
+                setDraft((current) =>
+                  current ? { ...current, reduceMotion: next === true } : current,
+                )
               }
             />
           </div>
@@ -182,7 +192,12 @@ export function AppearancePanel() {
         <Button onClick={commit} disabled={!dirty || save.isPending}>
           {save.isPending ? "Saving…" : "Save changes"}
         </Button>
-        <Button type="button" variant="ghost" disabled={!dirty} onClick={() => setDraft(query.data)}>
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={!dirty}
+          onClick={() => setDraft(query.data)}
+        >
           Discard
         </Button>
       </div>

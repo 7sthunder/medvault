@@ -5,6 +5,7 @@ import { AlertTriangle } from "lucide-react";
 
 import { ErrorState } from "@/components/ui/error-state";
 import { Button } from "@/components/ui/button";
+import { log } from "@/lib/log";
 
 export default function AppError({
   error,
@@ -14,7 +15,7 @@ export default function AppError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    log.error("Application route failed", { error, digest: error.digest });
   }, [error]);
 
   return (

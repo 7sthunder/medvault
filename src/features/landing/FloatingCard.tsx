@@ -41,7 +41,9 @@ export default function FloatingCard({
         >
           {title}
         </h3>
-        <p className={`mt-2 leading-relaxed text-ink-600 ${emphasis ? "text-sm" : "text-[0.8125rem]"}`}>
+        <p
+          className={`mt-2 leading-relaxed text-ink-600 ${emphasis ? "text-sm" : "text-[0.8125rem]"}`}
+        >
           {description}
         </p>
       </div>
@@ -66,7 +68,12 @@ export default function FloatingCard({
           className={glass}
           style={{ rotate: rotateDeg }}
           animate={isVisible ? { y: [0, -8, 0] } : { y: 0 }}
-          transition={{ repeat: isVisible ? Infinity : 0, duration: 5 + delay * 0.12, ease: "easeInOut", delay: 0.45 + delay * 0.18 }}
+          transition={{
+            repeat: isVisible ? Infinity : 0,
+            duration: 5 + delay * 0.12,
+            ease: "easeInOut",
+            delay: 0.45 + delay * 0.18,
+          }}
         >
           {shell}
         </motion.div>

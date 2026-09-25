@@ -69,13 +69,29 @@ function FloatingNotification({
         <Icon size={22} style={{ color: TONE_VAR[tone] }} />
       </div>
       <div style={{ flex: 1, overflow: "hidden" }}>
-        <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-ink-900)", whiteSpace: "nowrap" }}>
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: 700,
+            color: "var(--color-ink-900)",
+            whiteSpace: "nowrap",
+          }}
+        >
           {title}
         </div>
-        <div style={{ fontSize: "11px", color: "var(--color-ink-500)", marginTop: "1px" }}>{subtitle}</div>
+        <div style={{ fontSize: "11px", color: "var(--color-ink-500)", marginTop: "1px" }}>
+          {subtitle}
+        </div>
       </div>
       {time && (
-        <div style={{ fontSize: "10px", color: "var(--color-ink-400)", alignSelf: "flex-start", marginTop: "3px" }}>
+        <div
+          style={{
+            fontSize: "10px",
+            color: "var(--color-ink-400)",
+            alignSelf: "flex-start",
+            marginTop: "3px",
+          }}
+        >
           {time}
         </div>
       )}

@@ -36,7 +36,8 @@ export function BottomNav() {
               );
             }
 
-            const active = item.href === "more" ? moreOpen : isNavItemActive(item.href, pathname, basePath);
+            const active =
+              item.href === "more" ? moreOpen : isNavItemActive(item.href, pathname, basePath);
 
             if (item.href === "more") {
               return (
@@ -46,13 +47,16 @@ export function BottomNav() {
                   onClick={() => setMoreOpen(true)}
                   className={cn(
                     "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
-                    active ? "text-primary" : "text-muted-foreground"
+                    active ? "text-primary" : "text-muted-foreground",
                   )}
                 >
                   <span className="relative flex items-center justify-center">
                     <NavIcon name={item.icon} className="size-5" />
                     {active && (
-                      <span className="absolute top-full h-1 w-1 rounded-full bg-primary" aria-hidden="true" />
+                      <span
+                        className="absolute top-full h-1 w-1 rounded-full bg-primary"
+                        aria-hidden="true"
+                      />
                     )}
                   </span>
                   <span>{item.label}</span>
@@ -67,13 +71,16 @@ export function BottomNav() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
-                  active ? "text-primary" : "text-muted-foreground"
+                  active ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 <span className="relative flex items-center justify-center">
                   <NavIcon name={item.icon} className="size-5" />
                   {active && (
-                    <span className="absolute top-full h-1 w-1 rounded-full bg-primary" aria-hidden="true" />
+                    <span
+                      className="absolute top-full h-1 w-1 rounded-full bg-primary"
+                      aria-hidden="true"
+                    />
                   )}
                 </span>
                 <span>{item.label}</span>

@@ -4,7 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 vi.mock("next/link", () => ({
-  default: (props: { href: string; children: ReactNode; className?: string; style?: CSSProperties }) => (
+  default: (props: {
+    href: string;
+    children: ReactNode;
+    className?: string;
+    style?: CSSProperties;
+  }) => (
     <a href={props.href} className={props.className} style={props.style}>
       {props.children}
     </a>
@@ -43,8 +48,13 @@ describe("phase 04 marketing landing (/ — Nav + Hero smoke)", () => {
 
   it("renders hero heading and primary/demo CTAs", () => {
     render(<Hero />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(/Your entire\s*medical life/i);
-    expect(screen.getByRole("link", { name: /Create Your Health Vault/i })).toHaveAttribute("href", "/register");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+      /Your entire\s*medical life/i,
+    );
+    expect(screen.getByRole("link", { name: /Create Your Health Vault/i })).toHaveAttribute(
+      "href",
+      "/register",
+    );
     expect(screen.getByRole("link", { name: /Watch Demo/i })).toHaveAttribute("href", "/demo");
   });
 });

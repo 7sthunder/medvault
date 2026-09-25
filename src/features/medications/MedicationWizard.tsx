@@ -10,7 +10,8 @@ import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useShell } from "@/components/layout/shell-context";
+import { useNow } from "@/components/layout/clock-context";
+import { useAppHref, useShell } from "@/components/layout/shell-context";
 import { api } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { localDateKey } from "@/shared/times";
@@ -48,7 +49,9 @@ export interface MedicationWizardProps {
 export function MedicationWizard({ mode, medicationId }: MedicationWizardProps) {
   const router = useRouter();
   const { user } = useShell();
-  const [defaultStartDate] = useState(() => localDateKey(new Date(), user.timezone));
+  const href = useAppHref();
+  const now = useNow();
+  const [defaultStartDate] = useState(() => localDateKey(now, user.timezone));
 
   const editQuery = api.medication.get.useQuery(
     { id: medicationId ?? "" },
@@ -104,7 +107,7 @@ export function MedicationWizard({ mode, medicationId }: MedicationWizardProps) 
           title="Medication not found"
           description="This medication could not be loaded. It may have been archived or removed."
           action={
-            <Button variant="outline" onClick={() => router.push("/medications")}>
+            <Button variant="outline" onClick={() => router.push(href("/medications"))}>
               Back to medications
             </Button>
           }
@@ -162,10 +165,12 @@ export function MedicationWizard({ mode, medicationId }: MedicationWizardProps) 
     const onSuccess = () => {
       void refreshViews();
       toast.success(mode === "create" ? "Medication added" : "Medication updated");
-      router.push(mode === "create" ? "/medications" : `/medications/${medicationId}`);
+      router.push(href(mode === "create" ? "/medications" : `/medications/${medicationId}`));
     };
     const onError = (error: unknown) =>
-      setServerError(error instanceof Error ? error.message : "Couldn't save your medication right now.");
+      setServerError(
+        error instanceof Error ? error.message : "Couldn't save your medication right now.",
+      );
 
     if (mode === "create") {
       create.mutate(payload, { onSuccess, onError });
@@ -230,7 +235,12 @@ export function MedicationWizard({ mode, medicationId }: MedicationWizardProps) 
       </div>
 
       <footer className="mt-10 flex items-center justify-between gap-3">
-        <Button type="button" variant="outline" onClick={goBack} disabled={step === 0 || isMutating}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={goBack}
+          disabled={step === 0 || isMutating}
+        >
           Back
         </Button>
         {canNext ? (
@@ -239,11 +249,7 @@ export function MedicationWizard({ mode, medicationId }: MedicationWizardProps) 
           </Button>
         ) : (
           <Button type="button" onClick={submit} disabled={isMutating}>
-            {isMutating
-              ? "Saving…"
-              : mode === "create"
-                ? "Add medication"
-                : "Save changes"}
+            {isMutating ? "Saving…" : mode === "create" ? "Add medication" : "Save changes"}
           </Button>
         )}
       </footer>

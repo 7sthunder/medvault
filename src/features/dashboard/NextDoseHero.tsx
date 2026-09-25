@@ -27,12 +27,24 @@ export interface NextDoseHeroProps {
  * Renders the shared `DoseCard` (with Take/Snooze/Skip) on an emerald-tinted glass
  * card so it pulls focus; when nothing is due it shows the "All caught up" state.
  */
-export function NextDoseHero({ dose, medStatus, timeZone, now, busy, onTake, onSnooze, onSkip }: NextDoseHeroProps) {
+export function NextDoseHero({
+  dose,
+  medStatus,
+  timeZone,
+  now,
+  busy,
+  onTake,
+  onSnooze,
+  onSkip,
+}: NextDoseHeroProps) {
   const [skipTarget, setSkipTarget] = useState<{ id: string; name: string } | null>(null);
 
   if (!dose) {
     return (
-      <Card data-slot="next-dose-hero" className="border-primary/20 bg-primary-tint/40 shadow-card-lg">
+      <Card
+        data-slot="next-dose-hero"
+        className="border-primary/20 bg-primary-tint/40 shadow-card-lg"
+      >
         <CardContent className="px-4 py-6">
           <EmptyState
             compact
@@ -46,7 +58,10 @@ export function NextDoseHero({ dose, medStatus, timeZone, now, busy, onTake, onS
   }
 
   return (
-    <Card data-slot="next-dose-hero" className="border-primary/20 bg-primary-tint/40 shadow-card-lg">
+    <Card
+      data-slot="next-dose-hero"
+      className="border-primary/20 bg-primary-tint/40 shadow-card-lg"
+    >
       <CardContent className="px-4 py-5">
         <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wide text-primary-dark uppercase">
           <Clock className="size-3.5" aria-hidden="true" />

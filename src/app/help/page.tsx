@@ -7,11 +7,11 @@ import { AppearanceController } from "@/features/settings/appearance-controller"
 import { auth } from "@/server/auth/server";
 import { db } from "@/server/db/client";
 import { settingsService } from "@/server/domain/settings/service";
+import { BRAND } from "@/shared/brand";
 
 export const metadata: Metadata = {
   title: "Help & how it works",
-  description:
-    "How MedVault works — setting up medications, taking and snoozing doses, understanding adherence, caregiver access, and your data.",
+  description: `How ${BRAND.name} works — setting up medications, taking and snoozing doses, understanding adherence, caregiver access, and your data.`,
 };
 
 /**

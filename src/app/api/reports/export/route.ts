@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { auth } from "@/server/auth/server";
 import { db } from "@/server/db/client";
+import { resolveDemoSubject } from "@/server/auth/resolve-demo-subject";
 import { reportsService } from "@/server/domain/reports/service";
 import { localDateKey, now } from "@/shared/times";
 import { reportsSchemaFor } from "@/shared/validations/reports";
@@ -12,13 +12,15 @@ import { reportsSchemaFor } from "@/shared/validations/reports";
  * `reportsService.generate` report as an attachment CSV (deterministic column order).
  */
 export async function GET(request: Request) {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
+  const subject = await resolveDemoSubject();
+  if (!subject) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const at = now();
+  const timeZone = subject.user.timezone ?? "UTC";
   const { searchParams } = new URL(request.url);
-  const parsed = reportsSchemaFor(localDateKey(now(), "UTC")).safeParse({
+  const parsed = reportsSchemaFor(localDateKey(at, timeZone)).safeParse({
     from: searchParams.get("from") ?? undefined,
     to: searchParams.get("to") ?? undefined,
     granularity: searchParams.get("granularity") ?? undefined,
@@ -29,8 +31,7 @@ export async function GET(request: Request) {
   }
 
   const input = parsed.data;
-  const timeZone = session.user.timezone ?? "UTC";
-  const report = await reportsService.generate(db, session.user.id, timeZone, input);
+  const report = await reportsService.generate(db, subject.user.id, timeZone, input, { now: at });
 
   const header = ["period", "scheduled", "taken", "missed", "skipped", "adherence_percent"];
   const rows = report.table.map((row) => [

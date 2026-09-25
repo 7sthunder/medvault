@@ -23,14 +23,20 @@ export const insightToneSchema = z.enum(["neutral", "encouraging"]);
 /** One behavioral-insight item. strip-unknowns by default (Zod object). */
 export const insightItemSchema = z.object({
   category: z.enum(INSIGHT_CATEGORIES),
-  summary: z.string().min(1, "Summary is required.").max(280, "Summary must be at most 280 characters."),
+  summary: z
+    .string()
+    .min(1, "Summary is required.")
+    .max(280, "Summary must be at most 280 characters."),
   detail: z.string().max(1200, "Detail must be at most 1200 characters.").nullable().optional(),
   suggestedActionType: z.enum(SUGGESTED_ACTIONS).nullable().optional(),
 });
 
 /** Full structured-insight response from the AI provider (or the fallback engine). */
 export const insightResponseSchema = z.object({
-  insights: z.array(insightItemSchema).min(1, "At least one insight is required.").max(5, "At most 5 insights."),
+  insights: z
+    .array(insightItemSchema)
+    .min(1, "At least one insight is required.")
+    .max(5, "At most 5 insights."),
   tone: insightToneSchema,
 });
 

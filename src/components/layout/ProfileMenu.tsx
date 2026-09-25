@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 
-import { useShell } from "@/components/layout/shell-context";
+import { useAppHref, useShell } from "@/components/layout/shell-context";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -28,6 +28,7 @@ function initials(name: string): string {
 
 export function ProfileMenu() {
   const { user } = useShell();
+  const href = useAppHref();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -39,7 +40,14 @@ export function ProfileMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button variant="ghost" size="icon" className="rounded-full" aria-label="Open profile menu" />}
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            aria-label="Open profile menu"
+          />
+        }
       >
         <Avatar>
           {user.image ? <AvatarImage src={user.image} alt={user.name} /> : null}
@@ -54,7 +62,7 @@ export function ProfileMenu() {
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href="/settings/profile" />}>
+        <DropdownMenuItem render={<Link href={href("/settings/profile")} />}>
           <Settings aria-hidden="true" />
           Settings
         </DropdownMenuItem>

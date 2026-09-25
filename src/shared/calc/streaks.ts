@@ -46,7 +46,10 @@ function longestStreak(sorted: StreakDayInput[]): number {
   return longest;
 }
 
-export function computeStreaks(days: readonly StreakDayInput[], todayKey: string): StreakSummaryDTO {
+export function computeStreaks(
+  days: readonly StreakDayInput[],
+  todayKey: string,
+): StreakSummaryDTO {
   const sorted = [...days].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
   // Anchor: the most recent in-regimen day at or before today.

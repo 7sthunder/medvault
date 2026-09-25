@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
+
+import { withBasePath } from "@/components/layout/nav-model";
 
 export interface ShellUser {
   id: string;
@@ -33,4 +35,17 @@ export function useShell(): ShellState {
   const ctx = useContext(ShellContext);
   if (!ctx) throw new Error("useShell must be used inside <AppShell>");
   return ctx;
+}
+
+/**
+ * Phase 19 — build an in-app href for the shell you are actually inside.
+ *
+ * The nav chrome already routed through `withBasePath`, but every `router.push` in a feature
+ * screen was a hardcoded `/medications/new`, which silently ejected a visitor out of
+ * `/demo/workspace` and into the signed-in app. Every push/Link in a feature should go through
+ * this so the demo workspace stays self-contained.
+ */
+export function useAppHref(): (href: string) => string {
+  const { basePath } = useShell();
+  return useMemo(() => (href: string) => withBasePath(href, basePath), [basePath]);
 }

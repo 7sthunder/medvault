@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
+import { useAppHref } from "@/components/layout/shell-context";
+
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -15,6 +17,7 @@ import { NOTIFICATION_TYPE_UI, notificationHref } from "./notification-utils";
 
 export function NotificationsList({ items }: { items: NotifDTO[] }) {
   const router = useRouter();
+  const href = useAppHref();
   const utils = api.useUtils();
   const markRead = api.notifications.markRead.useMutation({
     onSuccess: () => {
@@ -64,7 +67,7 @@ export function NotificationsList({ items }: { items: NotifDTO[] }) {
               }
               onClick={() => {
                 if (!read) markRead.mutate({ notificationId: notif.id });
-                router.push(notificationHref(notif.entityType, notif.entityId));
+                router.push(href(notificationHref(notif.entityType, notif.entityId)));
               }}
             />
           </li>

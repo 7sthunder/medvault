@@ -15,7 +15,11 @@ const dbTests = describe.skipIf(!process.env.DATABASE_URL);
  * run against a transaction that is ALWAYS rolled back, so writes never leak into
  * other parallel test workers (seed.test.ts asserts whole-table row counts).
  */
-async function inRollbackTransaction<T>(name: string, email: string, fn: (tx: DbTx, userId: string) => Promise<T>): Promise<T> {
+async function inRollbackTransaction<T>(
+  name: string,
+  email: string,
+  fn: (tx: DbTx, userId: string) => Promise<T>,
+): Promise<T> {
   let caught: Error | null = null;
   let result: T | undefined;
   try {
@@ -67,57 +71,61 @@ afterAll(async () => {
 });
 
 dbTests("medicationService CRUD (§10.1)", () => {
-  it(
-    "create → list/get round-trip with a default slot",
-    async () => {
-      const name = `Metformin ${uuidv7().slice(0, 8)}`;
-      const outcome = await inRollbackTransaction(
-        "Med Crud One",
-        "med-crud-one@medvault.local",
-        async (tx, userId) => {
-          const created = await medicationService.create(tx, userId, "UTC", { medication: validMedication(name) });
+  it("create → list/get round-trip with a default slot", async () => {
+    const name = `Metformin ${uuidv7().slice(0, 8)}`;
+    const outcome = await inRollbackTransaction(
+      "Med Crud One",
+      "med-crud-one@medvault.local",
+      async (tx, userId) => {
+        const created = await medicationService.create(tx, userId, "UTC", {
+          medication: validMedication(name),
+        });
 
-          expect(created.dosageAmount).toBe(500);
-          expect(created.frequencyLabel).toBe("once-daily");
-          expect(created.slots).toHaveLength(1);
-          expect(created.slots[0]!.timeOfDay).toBe("08:00");
+        expect(created.dosageAmount).toBe(500);
+        expect(created.frequencyLabel).toBe("once-daily");
+        expect(created.slots).toHaveLength(1);
+        expect(created.slots[0]!.timeOfDay).toBe("08:00");
 
-          const byId = await medicationService.get(tx, userId, created.id);
-          expect(byId.id).toBe(created.id);
-          expect(byId.name).toBe(created.name);
+        const byId = await medicationService.get(tx, userId, created.id);
+        expect(byId.id).toBe(created.id);
+        expect(byId.name).toBe(created.name);
 
-          const { medications: list, archived } = await medicationService.list(tx, userId);
-          expect(list.map((m) => m.id)).toContain(created.id);
-          expect(archived).toHaveLength(0);
-        },
-      );
-      expect(outcome).toBeUndefined();
-    },
-    30_000,
-  );
+        const { medications: list, archived } = await medicationService.list(tx, userId);
+        expect(list.map((m) => m.id)).toContain(created.id);
+        expect(archived).toHaveLength(0);
+      },
+    );
+    expect(outcome).toBeUndefined();
+  }, 30_000);
 
-  it(
-    "create rejects duplicate active names",
-    async () => {
-      await inRollbackTransaction("Med Crud Dup", "med-crud-dup@medvault.local", async (tx, userId) => {
+  it("create rejects duplicate active names", async () => {
+    await inRollbackTransaction(
+      "Med Crud Dup",
+      "med-crud-dup@medvault.local",
+      async (tx, userId) => {
         const input = { medication: validMedication(`Dup ${uuidv7().slice(0, 8)}`) };
         await medicationService.create(tx, userId, "UTC", input);
         await expect(medicationService.create(tx, userId, "UTC", input)).rejects.toMatchObject({
           code: "CONFLICT",
         });
-      });
-    },
-    30_000,
-  );
+      },
+    );
+  }, 30_000);
 
-  it(
-    "get denies a foreign owner (NOT_FOUND, not leaking existence)",
-    async () => {
-      const name = `Metformin ${uuidv7().slice(0, 8)}`;
-      await inRollbackTransaction("Med Crud Owner", "med-crud-owner@medvault.local", async (tx, ownerId) => {
+  it("get denies a foreign owner (NOT_FOUND, not leaking existence)", async () => {
+    const name = `Metformin ${uuidv7().slice(0, 8)}`;
+    await inRollbackTransaction(
+      "Med Crud Owner",
+      "med-crud-owner@medvault.local",
+      async (tx, ownerId) => {
         const [outsider] = await tx
           .insert(users)
-          .values({ id: uuidv7(), name: "Med Crud Outsider", email: "med-crud-outsider@medvault.local", timezone: "UTC" })
+          .values({
+            id: uuidv7(),
+            name: "Med Crud Outsider",
+            email: "med-crud-outsider@medvault.local",
+            timezone: "UTC",
+          })
           .returning({ id: users.id });
         const created = await medicationService.create(tx, ownerId, "UTC", {
           medication: validMedication(name),
@@ -125,43 +133,62 @@ dbTests("medicationService CRUD (§10.1)", () => {
         await expect(medicationService.get(tx, outsider!.id, created.id)).rejects.toMatchObject({
           code: "NOT_FOUND",
         });
-      });
-    },
-    30_000,
-  );
+      },
+    );
+  }, 30_000);
 
-  it(
-    "update rewrites schedule slots and keeps history",
-    async () => {
-      const name = `Metformin ${uuidv7().slice(0, 8)}`;
-      await inRollbackTransaction("Med Crud Update", "med-crud-update@medvault.local", async (tx, userId) => {
-        const created = await medicationService.create(tx, userId, "UTC", { medication: validMedication(name) });
+  it("update rewrites schedule slots and keeps history", async () => {
+    const name = `Metformin ${uuidv7().slice(0, 8)}`;
+    await inRollbackTransaction(
+      "Med Crud Update",
+      "med-crud-update@medvault.local",
+      async (tx, userId) => {
+        const created = await medicationService.create(tx, userId, "UTC", {
+          medication: validMedication(name),
+        });
         const updated = await medicationService.update(tx, userId, "UTC", {
           id: created.id,
           medication: { ...validMedication(name), remindersEnabled: false },
           schedule: {
             slots: [
-              { timeOfDay: "08:00", daysOfWeek: [0, 1, 2, 3, 4, 5, 6], dosageAmount: null, instructionOverride: null, enabled: true },
-              { timeOfDay: "20:00", daysOfWeek: [0, 1, 2, 3, 4, 5, 6], dosageAmount: null, instructionOverride: null, enabled: true },
+              {
+                timeOfDay: "08:00",
+                daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+                dosageAmount: null,
+                instructionOverride: null,
+                enabled: true,
+              },
+              {
+                timeOfDay: "20:00",
+                daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+                dosageAmount: null,
+                instructionOverride: null,
+                enabled: true,
+              },
             ],
           },
         });
         expect(updated.remindersEnabled).toBe(false);
         expect(updated.slots).toHaveLength(2);
         expect(updated.frequencyLabel).toBe("twice-daily");
-      });
-    },
-    30_000,
-  );
+      },
+    );
+  }, 30_000);
 
-  it(
-    "update rejects editing someone else's medication",
-    async () => {
-      const name = `Metformin ${uuidv7().slice(0, 8)}`;
-      await inRollbackTransaction("Med Crud U2", "med-crud-u2@medvault.local", async (tx, ownerId) => {
+  it("update rejects editing someone else's medication", async () => {
+    const name = `Metformin ${uuidv7().slice(0, 8)}`;
+    await inRollbackTransaction(
+      "Med Crud U2",
+      "med-crud-u2@medvault.local",
+      async (tx, ownerId) => {
         const [outsider] = await tx
           .insert(users)
-          .values({ id: uuidv7(), name: "Med Crud U3", email: "med-crud-u3@medvault.local", timezone: "UTC" })
+          .values({
+            id: uuidv7(),
+            name: "Med Crud U3",
+            email: "med-crud-u3@medvault.local",
+            timezone: "UTC",
+          })
           .returning({ id: users.id });
         const created = await medicationService.create(tx, ownerId, "UTC", {
           medication: validMedication(name),
@@ -172,17 +199,19 @@ dbTests("medicationService CRUD (§10.1)", () => {
             medication: { ...validMedication(name) },
           }),
         ).rejects.toMatchObject({ code: "NOT_FOUND" });
-      });
-    },
-    30_000,
-  );
+      },
+    );
+  }, 30_000);
 
-  it(
-    "archive soft-deletes: excluded from list, kept in archived bucket, still gettable",
-    async () => {
-      const name = `Metformin ${uuidv7().slice(0, 8)}`;
-      await inRollbackTransaction("Med Crud Archive", "med-crud-archive@medvault.local", async (tx, userId) => {
-        const created = await medicationService.create(tx, userId, "UTC", { medication: validMedication(name) });
+  it("archive soft-deletes: excluded from list, kept in archived bucket, still gettable", async () => {
+    const name = `Metformin ${uuidv7().slice(0, 8)}`;
+    await inRollbackTransaction(
+      "Med Crud Archive",
+      "med-crud-archive@medvault.local",
+      async (tx, userId) => {
+        const created = await medicationService.create(tx, userId, "UTC", {
+          medication: validMedication(name),
+        });
         const archived = await medicationService.archive(tx, userId, "UTC", created.id);
         expect(archived.archivedAt).not.toBeNull();
         expect(archived.status).toBe("paused");
@@ -194,8 +223,7 @@ dbTests("medicationService CRUD (§10.1)", () => {
         // history preserved: get() still resolves it
         const byId = await medicationService.get(tx, userId, created.id);
         expect(byId.id).toBe(created.id);
-      });
-    },
-    30_000,
-  );
+      },
+    );
+  }, 30_000);
 });

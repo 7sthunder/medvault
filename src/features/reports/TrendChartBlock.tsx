@@ -25,9 +25,7 @@ export function TrendChartBlock({ report }: { report: ReportDTO }) {
         <TrendChart
           kind="area"
           data={data}
-          series={[
-            { key: "adherence", name: "Adherence" },
-          ]}
+          series={[{ key: "adherence", name: "Adherence" }]}
           xKey="label"
           height={240}
           formatValue={(v) => (typeof v === "number" ? formatPercent(v) : String(v))}

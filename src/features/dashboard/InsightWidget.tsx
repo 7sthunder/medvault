@@ -6,8 +6,10 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { SectionLabel } from "@/components/ui/section-label";
+import { useAppHref } from "@/components/layout/shell-context";
 import { formatInstant } from "@/lib/format";
 import type { InsightDTO } from "@/shared/types";
+import { BRAND } from "@/shared/brand";
 
 import { categoryTone, sourceLabel } from "@/features/insights/meta";
 
@@ -16,7 +18,14 @@ import { categoryTone, sourceLabel } from "@/features/insights/meta";
  * row with its category + source tag (AI vs "generated from your data") and links into the
  * full `/insights` stack. Plain text only — the AI text is never rendered as HTML/markdown.
  */
-export function InsightWidget({ insight, timeZone }: { insight: InsightDTO | null; timeZone: string }) {
+export function InsightWidget({
+  insight,
+  timeZone,
+}: {
+  insight: InsightDTO | null;
+  timeZone: string;
+}) {
+  const href = useAppHref();
   return (
     <section aria-label="AI insight summary">
       <div className="flex items-center justify-between gap-2">
@@ -26,7 +35,7 @@ export function InsightWidget({ insight, timeZone }: { insight: InsightDTO | nul
         </SectionLabel>
         {insight && (
           <Link
-            href="/insights"
+            href={href("/insights")}
             className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary-dark hover:underline"
           >
             All insights
@@ -38,11 +47,17 @@ export function InsightWidget({ insight, timeZone }: { insight: InsightDTO | nul
         <Card className="mt-2 bg-magenta-tint/40 shadow-card-sm">
           <CardContent className="px-4 py-4">
             <div className="flex flex-wrap items-center gap-1.5">
-              <Chip tone={categoryTone(insight.category)}>{insight.category.replace(/_/g, " ")}</Chip>
-              <Chip tone={insight.source === "ai" ? "violet" : "slate"}>{sourceLabel(insight.source)}</Chip>
+              <Chip tone={categoryTone(insight.category)}>
+                {insight.category.replace(/_/g, " ")}
+              </Chip>
+              <Chip tone={insight.source === "ai" ? "violet" : "slate"}>
+                {sourceLabel(insight.source)}
+              </Chip>
             </div>
             <p className="mt-2 text-sm font-semibold text-ink-900">{insight.summary}</p>
-            {insight.detail && <p className="mt-1 text-sm text-muted-foreground">{insight.detail}</p>}
+            {insight.detail && (
+              <p className="mt-1 text-sm text-muted-foreground">{insight.detail}</p>
+            )}
             <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted-foreground">
               <span>Generated {formatInstant(insight.createdAt, timeZone)}</span>
             </div>
@@ -50,9 +65,9 @@ export function InsightWidget({ insight, timeZone }: { insight: InsightDTO | nul
         </Card>
       ) : (
         <p className="mt-2 rounded-xl border border-dashed border-border bg-card/60 px-4 py-4 text-sm text-muted-foreground">
-          No insights yet — once you&apos;ve logged a few days, MedVault will surface patterns here. Generate them
-          any time from the{" "}
-          <Link className="font-semibold text-primary hover:underline" href="/insights">
+          No insights yet — once you&apos;ve logged a few days, {BRAND.name} will surface patterns
+          here. Generate them any time from the{" "}
+          <Link className="font-semibold text-primary hover:underline" href={href("/insights")}>
             insights page
           </Link>
           .

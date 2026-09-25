@@ -173,9 +173,7 @@ export const medications = pgTable(
     status: text("status").$type<MedicationStatus>().notNull().default("active"),
     startDate: date("start_date").notNull(),
     endDate: date("end_date"),
-    color: text("color")
-      .notNull()
-      .default("#10b981"),
+    color: text("color").notNull().default("#10b981"),
     remindersEnabled: boolean("reminders_enabled").notNull().default(true),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -200,7 +198,10 @@ export const medicationSchedules = pgTable(
       .notNull()
       .references(() => medications.id, { onDelete: "cascade" }),
     timeOfDay: text("time_of_day").notNull(),
-    daysOfWeek: smallint("days_of_week").array().notNull().default(sql`ARRAY[0,1,2,3,4,5,6]`),
+    daysOfWeek: smallint("days_of_week")
+      .array()
+      .notNull()
+      .default(sql`ARRAY[0,1,2,3,4,5,6]`),
     dosageAmount: numeric("dosage_amount", { precision: 10, scale: 2 }),
     instructionOverride: text("instruction_override"),
     enabled: boolean("enabled").notNull().default(true),
@@ -225,7 +226,9 @@ export const doseEvents = pgTable(
     medicationId: text("medication_id")
       .notNull()
       .references(() => medications.id, { onDelete: "cascade" }),
-    scheduleId: text("schedule_id").references(() => medicationSchedules.id, { onDelete: "set null" }),
+    scheduleId: text("schedule_id").references(() => medicationSchedules.id, {
+      onDelete: "set null",
+    }),
     scheduledFor: timestamp("scheduled_for", { withTimezone: true }).notNull(),
     status: text("status").$type<DoseEventStatus>().notNull().default("upcoming"),
     missedDeadline: timestamp("missed_deadline", { withTimezone: true }),
@@ -290,7 +293,9 @@ export const adherenceDaily = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    unique("adherence_daily_user_date_med_uq").on(t.userId, t.date, t.medicationId).nullsNotDistinct(),
+    unique("adherence_daily_user_date_med_uq")
+      .on(t.userId, t.date, t.medicationId)
+      .nullsNotDistinct(),
   ],
 );
 
@@ -309,7 +314,9 @@ export const caregiverRelationships = pgTable(
     status: text("status").$type<CaregiverRelationshipStatus>().notNull().default("pending"),
     relationType: text("relation_type").$type<RelationType>().notNull().default("family"),
     permissions: jsonb("permissions"),
-    invitedByUserId: text("invited_by_user_id").references(() => users.id, { onDelete: "set null" }),
+    invitedByUserId: text("invited_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
     acceptedAt: timestamp("accepted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -324,29 +331,26 @@ export const caregiverRelationships = pgTable(
 
 /* ── §8.9 caregiver_invitations ── */
 
-export const caregiverInvitations = pgTable(
-  "caregiver_invitations",
-  {
-    id: text("id").primaryKey(),
-    patientUserId: text("patient_user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    email: text("email").notNull(),
-    token: text("token").notNull().unique(),
-    message: text("message"),
-    /**
-     * Phase 17 — the invited permission set (§10.6: "selected permissions" travel with the
-     * invite so auto-accept on redemption applies the patient's choices before the pair is
-     * created). `caregiver_relationships.permissions` mirrors it once accepted.
-     */
-    permissions: jsonb("permissions"),
-    status: text("status").$type<InvitationStatus>().notNull().default("pending"),
-    expiresAt: timestamp("expires_at", { withTimezone: true })
-      .notNull()
-      .default(sql`now() + interval '7 days'`),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-);
+export const caregiverInvitations = pgTable("caregiver_invitations", {
+  id: text("id").primaryKey(),
+  patientUserId: text("patient_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  token: text("token").notNull().unique(),
+  message: text("message"),
+  /**
+   * Phase 17 — the invited permission set (§10.6: "selected permissions" travel with the
+   * invite so auto-accept on redemption applies the patient's choices before the pair is
+   * created). `caregiver_relationships.permissions` mirrors it once accepted.
+   */
+  permissions: jsonb("permissions"),
+  status: text("status").$type<InvitationStatus>().notNull().default("pending"),
+  expiresAt: timestamp("expires_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now() + interval '7 days'`),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 /* ── §8.10 caregiver_alerts ── */
 

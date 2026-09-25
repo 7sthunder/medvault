@@ -32,19 +32,37 @@ export interface SummaryScope {
    * alerts, while still reporting numbers identical to every other adherence surface.
    */
   readOnly?: boolean;
+  now?: Date;
 }
 
 const RESOLVED = ["taken", "missed", "skipped"] as const;
 
-export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<AdherenceSummaryDTO> {
+export async function buildSummary(
+  db: DbClient,
+  scope: SummaryScope,
+): Promise<AdherenceSummaryDTO> {
   const { userId, timeZone, medicationId, readOnly = false } = scope;
-  const at = now();
+  const at = scope.now ?? now();
 
   const fromKey = localDateKey(scope.from, timeZone);
   const toKey = localDateKey(scope.to, timeZone);
   const recDays = readOnly
-    ? await readEventRange(db, { userId, fromKey, toKey, timeZone, now: at, medicationId: medicationId ?? null })
-    : await reconcileThenRecompute(db, { userId, timeZone, fromKey, toKey, medicationId: medicationId ?? null, now: at });
+    ? await readEventRange(db, {
+        userId,
+        fromKey,
+        toKey,
+        timeZone,
+        now: at,
+        medicationId: medicationId ?? null,
+      })
+    : await reconcileThenRecompute(db, {
+        userId,
+        timeZone,
+        fromKey,
+        toKey,
+        medicationId: medicationId ?? null,
+        now: at,
+      });
   const byDay = new Map(recDays.map((d) => [d.date, d]));
 
   // Full contiguous calendar window — days without regimen become "no data" gaps.
@@ -92,7 +110,14 @@ export async function buildSummary(db: DbClient, scope: SummaryScope): Promise<A
 /** Canonical write path: reconcile so statuses are instant-correct, then re-materialize. */
 async function reconcileThenRecompute(
   db: DbClient,
-  opts: { userId: string; timeZone: string; fromKey: string; toKey: string; medicationId: string | null; now: Date },
+  opts: {
+    userId: string;
+    timeZone: string;
+    fromKey: string;
+    toKey: string;
+    medicationId: string | null;
+    now: Date;
+  },
 ) {
   await reconcileUser(db, opts.userId, { now: opts.now });
   return recomputeRange(db, {
@@ -132,7 +157,11 @@ async function bucketStatsFor(
       ),
     );
   return bucketStats(
-    rows.map((r) => ({ scheduledFor: r.scheduledFor, status: r.status, snoozeCount: r.snoozeCount ?? 0 })),
+    rows.map((r) => ({
+      scheduledFor: r.scheduledFor,
+      status: r.status,
+      snoozeCount: r.snoozeCount ?? 0,
+    })),
     timeZone,
   );
 }

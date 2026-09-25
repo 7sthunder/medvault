@@ -8,7 +8,11 @@ import { api } from "@/lib/trpc";
 import { NOTIFICATION_TABS } from "@/shared/enums";
 import type { NotificationTab } from "@/shared/enums";
 
-import { NotificationsError, NotificationsList, NotificationsListSkeleton } from "./NotificationsList";
+import {
+  NotificationsError,
+  NotificationsList,
+  NotificationsListSkeleton,
+} from "./NotificationsList";
 
 const TAB_LABELS: Record<NotificationTab, string> = {
   all: "All",
@@ -27,7 +31,10 @@ export function NotificationsPage() {
   const [tab, setTab] = useState<NotificationTab>("all");
   const [cursor, setCursor] = useState<string | null>(null);
 
-  const list = api.notifications.list.useQuery({ tab, cursor: cursor ?? undefined }, { staleTime: 15_000 });
+  const list = api.notifications.list.useQuery(
+    { tab, cursor: cursor ?? undefined },
+    { staleTime: 15_000 },
+  );
   const unread = api.notifications.unreadCount.useQuery(undefined, { staleTime: 15_000 });
   const utils = api.useUtils();
 
@@ -52,16 +59,25 @@ export function NotificationsPage() {
           </p>
         </div>
         {hasUnread && (
-          <Button variant="outline" size="sm" disabled={markAll.isPending} onClick={() => markAll.mutate()}>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={markAll.isPending}
+            onClick={() => markAll.mutate()}
+          >
             Mark all read
           </Button>
         )}
       </header>
 
-      <Tabs value={tab} onValueChange={(value) => {
-        setTab(value as NotificationTab);
-        setCursor(null);
-      }} className="mt-6">
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          setTab(value as NotificationTab);
+          setCursor(null);
+        }}
+        className="mt-6"
+      >
         <TabsList className="w-full" variant="default">
           {NOTIFICATION_TABS.map((t) => (
             <TabsTrigger key={t} value={t} className="h-8 px-3">

@@ -1,15 +1,8 @@
-import type { ComponentProps, ReactNode } from "react"
-import { cn } from "cn"
+import type { ComponentProps, ReactNode } from "react";
+import { cn } from "cn";
 
 export type ChipTone =
-  | "emerald"
-  | "cyan"
-  | "magenta"
-  | "violet"
-  | "blue"
-  | "amber"
-  | "slate"
-  | "neutral"
+  "emerald" | "cyan" | "magenta" | "violet" | "blue" | "amber" | "slate" | "neutral";
 
 const CHIP_TONES: Record<ChipTone, string> = {
   emerald: "bg-primary-tint text-primary-dark",
@@ -20,15 +13,15 @@ const CHIP_TONES: Record<ChipTone, string> = {
   amber: "bg-amber-tint text-amber-600",
   slate: "bg-bg-soft text-ink-500",
   neutral: "border border-border bg-background text-ink-600",
-}
+};
 
 export interface ChipProps extends ComponentProps<"span"> {
-  tone?: ChipTone
+  tone?: ChipTone;
   /**
    * Optional leading glyph (icon name handled by the consumer to keep this
    * primitive ui-free — pass an <Icon /> node instead).
    */
-  leading?: ReactNode
+  leading?: ReactNode;
 }
 
 /**
@@ -36,13 +29,7 @@ export interface ChipProps extends ComponentProps<"span"> {
  * text (contrast-adjusted shade), rounded-full pill. Colour is decoration; pass
  * explicit text/aria when the chip carries semantic weight.
  */
-export function Chip({
-  tone = "emerald",
-  leading,
-  className,
-  children,
-  ...props
-}: ChipProps) {
+export function Chip({ tone = "emerald", leading, className, children, ...props }: ChipProps) {
   return (
     <span
       data-slot="chip"
@@ -50,12 +37,12 @@ export function Chip({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap",
         CHIP_TONES[tone],
-        className
+        className,
       )}
       {...props}
     >
       {leading}
       {children}
     </span>
-  )
+  );
 }

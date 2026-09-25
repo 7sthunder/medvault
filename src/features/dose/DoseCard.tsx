@@ -34,12 +34,23 @@ function relativeTag(instant: Date, now: Date): string {
  * buttons only while the dose is actionable (due/snoozed), everything else is a
  * passive display row. Paused medications show a Schedule-paused hint instead.
  */
-export function DoseCard({ dose, medStatus, timeZone, now, onTake, onSnooze, onSkip, busy }: DoseCardProps) {
+export function DoseCard({
+  dose,
+  medStatus,
+  timeZone,
+  now,
+  onTake,
+  onSnooze,
+  onSkip,
+  busy,
+}: DoseCardProps) {
   const { scheduledFor, status } = dose;
   const tag = relativeTag(scheduledFor, now);
 
   const actionDisabled = medStatus !== "active" || busy;
-  const showActions = (status === "due-now" || status === "snoozed" || status === "upcoming") && medStatus === "active";
+  const showActions =
+    (status === "due-now" || status === "snoozed" || status === "upcoming") &&
+    medStatus === "active";
   const snoozed = status === "snoozed";
   const overdue = status === "due-now";
 
@@ -83,7 +94,12 @@ export function DoseCard({ dose, medStatus, timeZone, now, onTake, onSnooze, onS
 
         {showActions ? (
           <div className="mt-2 flex items-center gap-1.5">
-            <Button size="sm" variant="default" onClick={() => onTake(dose)} disabled={actionDisabled}>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => onTake(dose)}
+              disabled={actionDisabled}
+            >
               Mark taken
             </Button>
             <Button
@@ -107,7 +123,9 @@ export function DoseCard({ dose, medStatus, timeZone, now, onTake, onSnooze, onS
             </Button>
           </div>
         ) : medStatus === "paused" && status !== "canceled" ? (
-          <p className="mt-2 text-xs font-medium text-ink-500">Schedule paused — resume from the medication.</p>
+          <p className="mt-2 text-xs font-medium text-ink-500">
+            Schedule paused — resume from the medication.
+          </p>
         ) : null}
       </div>
 

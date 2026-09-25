@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { getPageContext, isNavItemActive, stripBasePath, withBasePath } from "@/components/layout/nav-model";
+import {
+  getPageContext,
+  isNavItemActive,
+  stripBasePath,
+  withBasePath,
+} from "@/components/layout/nav-model";
 
 describe("isNavItemActive", () => {
   it("matches the exact pathname", () => {
@@ -114,7 +119,6 @@ describe("demo base path", () => {
     expect(isNavItemActive("/settings/profile", "/demo/workspace/settings/data", BASE)).toBe(true);
     expect(isNavItemActive("/medications", "/demo/workspace/schedule", BASE)).toBe(false);
   });
-
 
   it("strips the base path and maps the workspace root to the dashboard", () => {
     expect(stripBasePath("/demo/workspace/schedule", BASE)).toBe("/schedule");

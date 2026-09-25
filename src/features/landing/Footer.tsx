@@ -1,6 +1,7 @@
 import { CalendarCheck2, MapPin, MessageCircleHeart } from "lucide-react";
 
 import { Logo } from "@/components/brand/Logo";
+import { BRAND } from "@/shared/brand";
 
 const FOOTER_COLUMNS = [
   {
@@ -35,7 +36,11 @@ const FOOTER_COLUMNS = [
 
 const CONTACT_ROWS = [
   { icon: CalendarCheck2, text: "+1 (000) 000-0000", href: "tel:+10000000000" },
-  { icon: MessageCircleHeart, text: "hello@medvault.example", href: "mailto:hello@medvault.example" },
+  {
+    icon: MessageCircleHeart,
+    text: "hello@medvault.example",
+    href: "mailto:hello@medvault.example",
+  },
   { icon: MapPin, text: "123 Health St, MedVille, MV 00000", href: undefined },
 ];
 
@@ -45,14 +50,17 @@ function FooterBrand() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
       <Logo size={38} />
-      <span className="footer-brand-label">MedVault</span>
+      <span className="footer-brand-label">{BRAND.name}</span>
     </div>
   );
 }
 
 export default function Footer() {
   return (
-    <footer className="bg-ink-900 text-white" style={{ padding: "80px 6% 36px", borderTopLeftRadius: 48, borderTopRightRadius: 48 }}>
+    <footer
+      className="bg-ink-900 text-white"
+      style={{ padding: "80px 6% 36px", borderTopLeftRadius: 48, borderTopRightRadius: 48 }}
+    >
       <div className="flex flex-wrap gap-16">
         <div style={{ flex: "1 1 300px", minWidth: 260 }}>
           <FooterBrand />
@@ -107,9 +115,10 @@ export default function Footer() {
       <div className="border-t border-white/10" style={{ margin: "60px 0 28px" }} />
 
       <div className="text-white/50 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <span>© 2026 MedVault. All rights reserved.</span>
+        <span>© 2026 {BRAND.name}. All rights reserved.</span>
         <span>
-          Made with <span className="text-primary">💚</span> for your health · <span className="text-white/70">Privacy-first</span>
+          Made with <span className="text-primary">💚</span> for your health ·{" "}
+          <span className="text-white/70">Privacy-first</span>
         </span>
       </div>
     </footer>

@@ -29,7 +29,11 @@ export function localDateKey(date: Date | string | number, timeZone: string): st
 }
 
 /** True when `a` and `b` fall on the same calendar day in `timeZone`. */
-export function isSameLocalDay(a: Date | string | number, b: Date | string | number, timeZone: string): boolean {
+export function isSameLocalDay(
+  a: Date | string | number,
+  b: Date | string | number,
+  timeZone: string,
+): boolean {
   return localDateKey(a, timeZone) === localDateKey(b, timeZone);
 }
 
@@ -117,7 +121,10 @@ export function rangeByPreset(
  * edges declared in `TIME_BUCKET_BOUNDS`. Hour is assumed local to the user.
  */
 export function bucketOf(hour: number): TimeBucket {
-  const buckets = Object.entries(TIME_BUCKET_BOUNDS) as [TimeBucket, { start: number; end: number }][];
+  const buckets = Object.entries(TIME_BUCKET_BOUNDS) as [
+    TimeBucket,
+    { start: number; end: number },
+  ][];
   for (const [bucket, { start, end }] of buckets) {
     if (hour >= start && hour < end) return bucket;
   }

@@ -27,12 +27,8 @@ import { api } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { FREQUENCY_LABEL_TEXT } from "@/shared/enums";
 
-import {
-  daysLabel,
-  dosageLabel,
-  medTintClasses,
-  slotTimeLine,
-} from "./medication-utils";
+import { useAppHref } from "@/components/layout/shell-context";
+import { daysLabel, dosageLabel, medTintClasses, slotTimeLine } from "./medication-utils";
 
 /**
  * §11.6 medication detail — one medication's identity, current schedule slots
@@ -44,6 +40,7 @@ export function MedicationDetailPage({
   medicationIdPromise: Promise<string>;
 }) {
   const id = use(medicationIdPromise);
+  const href = useAppHref();
   const get = api.medication.get.useQuery({ id });
   const setStatus = api.medication.setStatus.useMutation();
   const archive = api.medication.archive.useMutation();
@@ -69,7 +66,7 @@ export function MedicationDetailPage({
           title="Medication not found"
           description="This medication could not be loaded. It may have been archived or removed."
           action={
-            <Link href="/medications">
+            <Link href={href("/medications")}>
               <Button variant="outline">
                 <ArrowLeft className="mr-1.5" aria-hidden="true" />
                 Back to medications
@@ -90,7 +87,7 @@ export function MedicationDetailPage({
   return (
     <main className="mx-auto max-w-3xl">
       <Link
-        href="/medications"
+        href={href("/medications")}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -125,7 +122,7 @@ export function MedicationDetailPage({
 
         <div className="flex flex-wrap items-center gap-2">
           {!archived && (
-            <Link href={`/medications/${med.id}/edit`}>
+            <Link href={href(`/medications/${med.id}/edit`)}>
               <Button variant="outline" disabled={refreshing}>
                 <Pencil data-icon="inline-start" aria-hidden="true" />
                 Edit
@@ -136,18 +133,22 @@ export function MedicationDetailPage({
             <Button
               variant={paused ? "default" : "outline"}
               disabled={refreshing}
-              onClick={() => (paused ? setStatus.mutate(
-                { id: med.id, status: "active" },
-                {
-                  onSuccess: () => {
-                    void utils.medication.list.invalidate();
-                    void utils.schedule.day.invalidate();
-                    void utils.schedule.get.invalidate();
-                    toast.success(`${med.name} resumed`);
-                  },
-                  onError: () => toast.error(`Couldn’t resume ${med.name}.`),
-                },
-              ) : setPauseOpen(true))}
+              onClick={() =>
+                paused
+                  ? setStatus.mutate(
+                      { id: med.id, status: "active" },
+                      {
+                        onSuccess: () => {
+                          void utils.medication.list.invalidate();
+                          void utils.schedule.day.invalidate();
+                          void utils.schedule.get.invalidate();
+                          toast.success(`${med.name} resumed`);
+                        },
+                        onError: () => toast.error(`Couldn’t resume ${med.name}.`),
+                      },
+                    )
+                  : setPauseOpen(true)
+              }
             >
               {paused ? (
                 <Play data-icon="inline-start" aria-hidden="true" />
@@ -158,7 +159,11 @@ export function MedicationDetailPage({
             </Button>
           )}
           {!archived && (
-            <Button variant="destructive" disabled={refreshing} onClick={() => setArchiveOpen(true)}>
+            <Button
+              variant="destructive"
+              disabled={refreshing}
+              onClick={() => setArchiveOpen(true)}
+            >
               <Archive data-icon="inline-start" aria-hidden="true" />
               Archive
             </Button>

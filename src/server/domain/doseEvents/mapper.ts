@@ -15,7 +15,10 @@ type ActionRow = typeof doseActions.$inferSelect;
  * Terminal statuses (taken/missed/skipped/canceled) pass through unchanged.
  */
 export function displayStatusOf(
-  event: Pick<typeof doseEvents.$inferSelect, "status" | "scheduledFor" | "missedDeadline" | "snoozeUntil">,
+  event: Pick<
+    typeof doseEvents.$inferSelect,
+    "status" | "scheduledFor" | "missedDeadline" | "snoozeUntil"
+  >,
   now: Date,
   missedAfterMinutes: number,
 ): DoseStatus {

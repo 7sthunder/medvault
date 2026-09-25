@@ -378,7 +378,12 @@ export const INSERT_SCHEMAS: InsertSchemaEntry[] = [
     demoRow: {
       userId: "user-demo",
       theme: "system",
-      notificationPrefs: { doseReminders: true, caregiverMissedAlerts: true, insights: true, sounds: true },
+      notificationPrefs: {
+        doseReminders: true,
+        caregiverMissedAlerts: true,
+        insights: true,
+        sounds: true,
+      },
       caregiverAlertPrefs: { missedDoseOn: true, adherenceDropThreshold: null, dailyDigest: false },
     } satisfies typeof userPreferences.$inferInsert,
   },

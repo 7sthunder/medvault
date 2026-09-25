@@ -284,7 +284,11 @@ export const demoService = {
     const simulationNow = (await resolveSimulationNow(db, demo.id)) ?? new Date();
     const dayStart = startOfLocalDay(simulationNow, demo.timezone);
     const from = addLocalDays(dayStart, -(SCENARIO_DAYS - 1), demo.timezone);
-    const to = combineDateAndTime(localDateKey(simulationNow, demo.timezone), "23:59", demo.timezone);
+    const to = combineDateAndTime(
+      localDateKey(simulationNow, demo.timezone),
+      "23:59",
+      demo.timezone,
+    );
 
     const events = await db
       .select({
@@ -520,9 +524,7 @@ async function markMissed(
   return {
     ok: changed,
     action: "miss",
-    detail: changed
-      ? "Dose marked as missed."
-      : "No change — that dose can't be marked missed.",
+    detail: changed ? "Dose marked as missed." : "No change — that dose can't be marked missed.",
     doseEventId: doseId,
     changed: changed ? 1 : 0,
   };
@@ -537,7 +539,11 @@ async function markMissed(
  * Evening doses are the failure point in `decline` because the §19 fixture's own miss pattern is
  * an afternoon one, which keeps the resulting insight coherent with that story.
  */
-function scenarioOutcome(scenario: DemoScenario, dayIndex: number, hour: number): "taken" | "missed" | "skipped" {
+function scenarioOutcome(
+  scenario: DemoScenario,
+  dayIndex: number,
+  hour: number,
+): "taken" | "missed" | "skipped" {
   if (scenario === "baseline") return "taken";
   const progress = dayIndex / Math.max(1, SCENARIO_DAYS - 1);
   const evening = hour >= 12;
@@ -586,7 +592,8 @@ function desiredColumns(desired: "taken" | "missed" | "skipped", scheduledFor: D
 }
 
 function scenarioMessage(scenario: DemoScenario, changed: number): string {
-  const label = scenario === "decline" ? "declining" : scenario === "improvement" ? "improving" : "flat";
+  const label =
+    scenario === "decline" ? "declining" : scenario === "improvement" ? "improving" : "flat";
   if (changed === 0) return "Nothing to change — the window was already fully settled.";
   return `Applied a ${label} pattern across ${changed} past dose${changed === 1 ? "" : "s"}.`;
 }

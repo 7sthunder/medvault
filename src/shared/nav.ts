@@ -71,7 +71,12 @@ export const SETTINGS_NAV: readonly SettingsNavItem[] = [
 ] as const;
 
 /** Bottom navigation (mobile < md, plan §7/§16): Home, Schedule, Add, More. */
-export const BOTTOM_NAV: readonly { label: string; href: string; icon: NavIconName; add?: boolean }[] = [
+export const BOTTOM_NAV: readonly {
+  label: string;
+  href: string;
+  icon: NavIconName;
+  add?: boolean;
+}[] = [
   { label: "Home", href: "/dashboard", icon: "home" },
   { label: "Schedule", href: "/schedule", icon: "schedule" },
   { label: "Add", href: "/medications/new", icon: "plus", add: true },
@@ -79,7 +84,13 @@ export const BOTTOM_NAV: readonly { label: string; href: string; icon: NavIconNa
 ] as const;
 
 /** Group order used to render the sidebar sections. */
-export const NAV_GROUP_ORDER: readonly NavGroup[] = ["overview", "management", "intelligence", "care", "bottom"];
+export const NAV_GROUP_ORDER: readonly NavGroup[] = [
+  "overview",
+  "management",
+  "intelligence",
+  "care",
+  "bottom",
+];
 
 /** All nav hrefs (used by the "every href is real" route test + active-state logic). */
 export const ALL_NAV_HREFS: readonly string[] = [

@@ -29,13 +29,15 @@ export function periodKey(date: string, granularity: ReportGranularity): string 
 }
 
 function isoWeekOfDate(monday: Date): number {
-  const target = new Date(Date.UTC(monday.getUTCFullYear(), monday.getUTCMonth(), monday.getUTCDate()));
+  const target = new Date(
+    Date.UTC(monday.getUTCFullYear(), monday.getUTCMonth(), monday.getUTCDate()),
+  );
   const dayNr = (target.getUTCDay() + 6) % 7;
   target.setUTCDate(target.getUTCDate() - dayNr + 3);
   const firstThursday = target.valueOf();
   target.setUTCMonth(0, 1);
   if (target.getUTCDay() !== 4) {
-    target.setUTCMonth(0, 1 + ((4 - target.getUTCDay()) + 7) % 7);
+    target.setUTCMonth(0, 1 + ((4 - target.getUTCDay() + 7) % 7));
   }
   return 1 + Math.round((firstThursday - target.valueOf()) / 604800000);
 }
@@ -45,8 +47,14 @@ function isoWeekOfDate(monday: Date): number {
  * a regimen produce no row; periods with all-zero "no data" still surface (their
  * `adherencePercent` is `null`). Sorted by period ascending.
  */
-export function aggregateReport(days: readonly AdherenceDay[], granularity: ReportGranularity): ReportAggregate {
-  const byPeriod = new Map<string, { scheduled: number; taken: number; missed: number; skipped: number }>();
+export function aggregateReport(
+  days: readonly AdherenceDay[],
+  granularity: ReportGranularity,
+): ReportAggregate {
+  const byPeriod = new Map<
+    string,
+    { scheduled: number; taken: number; missed: number; skipped: number }
+  >();
 
   for (const day of days) {
     const key = periodKey(day.date, granularity);

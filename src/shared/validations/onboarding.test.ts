@@ -18,8 +18,15 @@ describe("onboardingSchema (§13 / plan.md:709)", () => {
   });
 
   it("defaults addSampleMed to false when omitted", () => {
-    const { timezone, missedAfterMinutes, snoozeMinutes, maxSnoozes, reminderBeforeMinutes } = VALID;
-    const res = onboardingSchema.safeParse({ timezone, missedAfterMinutes, snoozeMinutes, maxSnoozes, reminderBeforeMinutes });
+    const { timezone, missedAfterMinutes, snoozeMinutes, maxSnoozes, reminderBeforeMinutes } =
+      VALID;
+    const res = onboardingSchema.safeParse({
+      timezone,
+      missedAfterMinutes,
+      snoozeMinutes,
+      maxSnoozes,
+      reminderBeforeMinutes,
+    });
     expect(res.success).toBe(true);
     if (res.success) expect(res.data.addSampleMed).toBe(false);
   });

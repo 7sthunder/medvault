@@ -4,7 +4,15 @@ import { and, count, eq } from "drizzle-orm";
 import { db, pool } from "@/server/db/client";
 import { uuidv7 } from "@/server/db/helpers";
 import type { DbTx } from "@/server/db/helpers";
-import { adherenceDaily, aiInsights, doseActions, doseEvents, medications, notifications, users } from "@/server/db/schema";
+import {
+  adherenceDaily,
+  aiInsights,
+  doseActions,
+  doseEvents,
+  medications,
+  notifications,
+  users,
+} from "@/server/db/schema";
 import { INSIGHT_MAX_ROWS } from "@/shared/constants";
 import { insightResponseSchema } from "@/shared/validations/insight";
 
@@ -65,7 +73,13 @@ async function seedMed(tx: DbTx, userId: string) {
   return medicationId;
 }
 
-function doseEvent(overrides: Partial<typeof doseEvents.$inferInsert> & { id: string; userId: string; medicationId: string }) {
+function doseEvent(
+  overrides: Partial<typeof doseEvents.$inferInsert> & {
+    id: string;
+    userId: string;
+    medicationId: string;
+  },
+) {
   return {
     snoozeCount: 0,
     statusUpdatedAt: new Date(),
@@ -73,7 +87,11 @@ function doseEvent(overrides: Partial<typeof doseEvents.$inferInsert> & { id: st
   } as typeof doseEvents.$inferInsert;
 }
 
-async function countWhere(tx: DbTx, table: typeof doseActions | typeof adherenceDaily, userId: string): Promise<number> {
+async function countWhere(
+  tx: DbTx,
+  table: typeof doseActions | typeof adherenceDaily,
+  userId: string,
+): Promise<number> {
   const [row] = await tx
     .select({ n: count() })
     .from(table as typeof doseActions)
@@ -106,13 +124,21 @@ describe("insight output contract (§10.10 — behavioral boundary)", () => {
   it("rejects a diagnostic/prescriptive category and strips unknown keys", () => {
     const diagnostic = insightResponseSchema.safeParse({
       tone: "neutral",
-      insights: [{ category: "diagnosis", summary: "You have type 2 diabetes", suggestedActionType: null }],
+      insights: [
+        { category: "diagnosis", summary: "You have type 2 diabetes", suggestedActionType: null },
+      ],
     });
     expect(diagnostic.success).toBe(false);
 
     const prescriptive = insightResponseSchema.safeParse({
       tone: "encouraging",
-      insights: [{ category: "general", summary: "Stop taking Metformin", suggestedActionType: "increase_dose" }],
+      insights: [
+        {
+          category: "general",
+          summary: "Stop taking Metformin",
+          suggestedActionType: "increase_dose",
+        },
+      ],
     });
     expect(prescriptive.success).toBe(false);
 
@@ -156,8 +182,22 @@ describe("insight output contract (§10.10 — behavioral boundary)", () => {
     const snapshot = {
       windowDays: 30,
       generatedAt: new Date().toISOString(),
-      totals: { scheduled: 14, taken: 4, missed: 10, skipped: 0, snoozed: 0, adherencePercent: 28.6 },
-      daily: [...Array.from({ length: 7 }, (_, i) => day(`2026-05-${String(i + 1).padStart(2, "0")}`, 8, 2)), ...Array.from({ length: 7 }, (_, i) => day(`2026-04-${String(i + 1).padStart(2, "0")}`, 2, 8))],
+      totals: {
+        scheduled: 14,
+        taken: 4,
+        missed: 10,
+        skipped: 0,
+        snoozed: 0,
+        adherencePercent: 28.6,
+      },
+      daily: [
+        ...Array.from({ length: 7 }, (_, i) =>
+          day(`2026-05-${String(i + 1).padStart(2, "0")}`, 8, 2),
+        ),
+        ...Array.from({ length: 7 }, (_, i) =>
+          day(`2026-04-${String(i + 1).padStart(2, "0")}`, 2, 8),
+        ),
+      ],
       medications: [
         { name: "Metformin", adherencePercent: 30, taken: 3, missed: 7, skipped: 0 },
         { name: "Vitamin D", adherencePercent: 95, taken: 19, missed: 1, skipped: 0 },
@@ -173,193 +213,182 @@ describe("insight output contract (§10.10 — behavioral boundary)", () => {
     expect(first.length).toBeGreaterThan(0);
 
     // Highest-miss bucket + the medication gap are the two data-driven rules.
-    expect(first.some((i) => i.category === "missed_analysis" && /evening/i.test(i.summary))).toBe(true);
-    expect(first.some((i) => i.category === "medication_difference" && /Metformin/.test(i.summary))).toBe(true);
+    expect(first.some((i) => i.category === "missed_analysis" && /evening/i.test(i.summary))).toBe(
+      true,
+    );
+    expect(
+      first.some((i) => i.category === "medication_difference" && /Metformin/.test(i.summary)),
+    ).toBe(true);
     expect(first.every((i) => typeof i.summary === "string" && i.summary.length > 0)).toBe(true);
   });
 });
 
 dbTests("insight snapshot is strictly read-only (§10.10 never-mutate)", () => {
-  it(
-    "builds the snapshot without reconciling events, writing dose actions or materializing",
-    async () => {
-      await inRollbackTransaction(async (tx, userId) => {
-        const medicationId = await seedMed(tx, userId);
+  it("builds the snapshot without reconciling events, writing dose actions or materializing", async () => {
+    await inRollbackTransaction(async (tx, userId) => {
+      const medicationId = await seedMed(tx, userId);
 
-        // An overdue "upcoming" event: the canonical read path would flip it to `missed`
-        // and write a `missed_auto` dose action. The read-only path must not.
-        const staleId = uuidv7();
+      // An overdue "upcoming" event: the canonical read path would flip it to `missed`
+      // and write a `missed_auto` dose action. The read-only path must not.
+      const staleId = uuidv7();
+      await tx.insert(doseEvents).values(
+        doseEvent({
+          id: staleId,
+          userId,
+          medicationId,
+          scheduledFor: new Date(Date.now() - 3 * 86_400_000),
+          status: "upcoming",
+        }),
+      );
+
+      // Plus settled history so the snapshot has real numbers to report.
+      for (let i = 1; i <= 5; i += 1) {
         await tx.insert(doseEvents).values(
           doseEvent({
-            id: staleId,
+            id: uuidv7(),
             userId,
             medicationId,
-            scheduledFor: new Date(Date.now() - 3 * 86_400_000),
-            status: "upcoming",
+            scheduledFor: new Date(Date.now() - i * 86_400_000),
+            status: i === 5 ? "missed" : "taken",
+            takenAt: i === 5 ? null : new Date(),
           }),
         );
+      }
 
-        // Plus settled history so the snapshot has real numbers to report.
-        for (let i = 1; i <= 5; i += 1) {
+      const snapshot = await insightsService.snapshot(tx, userId, "UTC");
+
+      // Boundary: nothing was written.
+      const [event] = await tx
+        .select({ status: doseEvents.status })
+        .from(doseEvents)
+        .where(eq(doseEvents.id, staleId));
+      expect(event!.status).toBe("upcoming"); // not reconciled to `missed`
+      expect(await countWhere(tx, doseActions, userId)).toBe(0); // no missed_auto action
+      expect(await countWhere(tx, adherenceDaily, userId)).toBe(0); // not materialized
+      const [notif] = await tx
+        .select({ n: count() })
+        .from(notifications)
+        .where(eq(notifications.userId, userId));
+      expect(Number(notif!.n)).toBe(0); // no notification fan-out
+
+      // ...and it reports the same effective numbers the canonical write path would:
+      // the stale row is counted as missed in memory without being persisted as missed.
+      expect(snapshot.totals.scheduled).toBe(6);
+      expect(snapshot.totals.taken).toBe(4);
+      expect(snapshot.totals.missed).toBe(2);
+      expect(snapshot.medications.map((m) => m.name)).toContain("Metformin");
+      expect(snapshot.daily.length).toBeGreaterThan(0);
+    });
+  }, 30_000);
+
+  it("snapshot stays within the §10.10 size caps", async () => {
+    await inRollbackTransaction(async (tx, userId) => {
+      await seedMed(tx, userId);
+      const snapshot = await insightsService.snapshot(tx, userId, "UTC");
+      expect(snapshot.windowDays).toBe(30);
+      expect(snapshot.daily.length).toBeLessThanOrEqual(30);
+      expect(snapshot.medications.length).toBeLessThanOrEqual(50);
+      expect(snapshot.buckets.length).toBeLessThanOrEqual(4);
+    });
+  }, 30_000);
+});
+
+dbTests("insight generation (§10.10 fallback-safe pipeline)", () => {
+  it("falls back to the deterministic engine when no provider is configured, and labels the rows", async () => {
+    await withoutAiProvider(() =>
+      inRollbackTransaction(async (tx, userId) => {
+        const medicationId = await seedMed(tx, userId);
+        for (let i = 1; i <= 6; i += 1) {
           await tx.insert(doseEvents).values(
             doseEvent({
               id: uuidv7(),
               userId,
               medicationId,
               scheduledFor: new Date(Date.now() - i * 86_400_000),
-              status: i === 5 ? "missed" : "taken",
-              takenAt: i === 5 ? null : new Date(),
+              status: i <= 4 ? "taken" : "missed",
+              takenAt: i <= 4 ? new Date() : null,
             }),
           );
         }
 
-        const snapshot = await insightsService.snapshot(tx, userId, "UTC");
+        const result = await insightsService.generate(tx, userId, "UTC");
+        expect(result.source).toBe("fallback");
+        expect(result.empty).toBe(false);
+        expect(result.items.length).toBeGreaterThan(0);
+        expect(result.items.every((i) => i.source === "fallback")).toBe(true);
 
-        // Boundary: nothing was written.
-        const [event] = await tx
-          .select({ status: doseEvents.status })
-          .from(doseEvents)
-          .where(eq(doseEvents.id, staleId));
-        expect(event!.status).toBe("upcoming"); // not reconciled to `missed`
-        expect(await countWhere(tx, doseActions, userId)).toBe(0); // no missed_auto action
-        expect(await countWhere(tx, adherenceDaily, userId)).toBe(0); // not materialized
-        const [notif] = await tx.select({ n: count() }).from(notifications).where(eq(notifications.userId, userId));
-        expect(Number(notif!.n)).toBe(0); // no notification fan-out
+        // Snapshot is stored on the row and the user is notified via the single writer.
+        const [row] = await tx
+          .select({ dataSnapshot: aiInsights.dataSnapshot })
+          .from(aiInsights)
+          .where(eq(aiInsights.userId, userId))
+          .limit(1);
+        const raw = row!.dataSnapshot;
+        const stored = (typeof raw === "string" ? JSON.parse(raw) : raw) as {
+          windowDays: number;
+          totals: { taken: number };
+        };
+        expect(stored.windowDays).toBe(30);
+        expect(stored.totals.taken).toBe(4);
 
-        // ...and it is still accurate: read straight from the events.
-        expect(snapshot.totals.taken).toBe(4);
-        expect(snapshot.totals.missed).toBe(1);
-        expect(snapshot.medications.map((m) => m.name)).toContain("Metformin");
-        expect(snapshot.daily.length).toBeGreaterThan(0);
-      });
-    },
-    30_000,
-  );
+        const [notif] = await tx
+          .select({ n: count() })
+          .from(notifications)
+          .where(and(eq(notifications.userId, userId), eq(notifications.type, "insight")));
+        expect(Number(notif!.n)).toBe(1);
 
-  it(
-    "snapshot stays within the §10.10 size caps",
-    async () => {
-      await inRollbackTransaction(async (tx, userId) => {
-        await seedMed(tx, userId);
-        const snapshot = await insightsService.snapshot(tx, userId, "UTC");
-        expect(snapshot.windowDays).toBe(30);
-        expect(snapshot.daily.length).toBeLessThanOrEqual(30);
-        expect(snapshot.medications.length).toBeLessThanOrEqual(50);
-        expect(snapshot.buckets.length).toBeLessThanOrEqual(4);
-      });
-    },
-    30_000,
-  );
-});
+        expect(await insightsService.list(tx, userId)).toHaveLength(result.items.length);
+      }),
+    );
+  }, 30_000);
 
-dbTests("insight generation (§10.10 fallback-safe pipeline)", () => {
-  it(
-    "falls back to the deterministic engine when no provider is configured, and labels the rows",
-    async () => {
-      await withoutAiProvider(() =>
-        inRollbackTransaction(async (tx, userId) => {
-          const medicationId = await seedMed(tx, userId);
-          for (let i = 1; i <= 6; i += 1) {
-            await tx.insert(doseEvents).values(
-              doseEvent({
-                id: uuidv7(),
-                userId,
-                medicationId,
-                scheduledFor: new Date(Date.now() - i * 86_400_000),
-                status: i <= 4 ? "taken" : "missed",
-                takenAt: i <= 4 ? new Date() : null,
-              }),
-            );
-          }
+  it("returns the prerequisites state without persisting when there is no data", async () => {
+    await withoutAiProvider(() =>
+      inRollbackTransaction(async (tx, userId) => {
+        const result = await insightsService.generate(tx, userId, "UTC");
+        expect(result.empty).toBe(true);
+        expect(result.items).toEqual([]);
+        expect(await insightsService.list(tx, userId)).toEqual([]);
+      }),
+    );
+  }, 30_000);
 
-          const result = await insightsService.generate(tx, userId, "UTC");
-          expect(result.source).toBe("fallback");
-          expect(result.empty).toBe(false);
-          expect(result.items.length).toBeGreaterThan(0);
-          expect(result.items.every((i) => i.source === "fallback")).toBe(true);
-
-          // Snapshot is stored on the row and the user is notified via the single writer.
-          const [row] = await tx
-            .select({ dataSnapshot: aiInsights.dataSnapshot })
-            .from(aiInsights)
-            .where(eq(aiInsights.userId, userId))
-            .limit(1);
-          const raw = row!.dataSnapshot;
-          const stored = (typeof raw === "string" ? JSON.parse(raw) : raw) as {
-            windowDays: number;
-            totals: { taken: number };
-          };
-          expect(stored.windowDays).toBe(30);
-          expect(stored.totals.taken).toBe(4);
-
-          const [notif] = await tx
-            .select({ n: count() })
-            .from(notifications)
-            .where(and(eq(notifications.userId, userId), eq(notifications.type, "insight")));
-          expect(Number(notif!.n)).toBe(1);
-
-          expect(await insightsService.list(tx, userId)).toHaveLength(result.items.length);
-        }),
-      );
-    },
-    30_000,
-  );
-
-  it(
-    "returns the prerequisites state without persisting when there is no data",
-    async () => {
-      await withoutAiProvider(() =>
-        inRollbackTransaction(async (tx, userId) => {
-          const result = await insightsService.generate(tx, userId, "UTC");
-          expect(result.empty).toBe(true);
-          expect(result.items).toEqual([]);
-          expect(await insightsService.list(tx, userId)).toEqual([]);
-        }),
-      );
-    },
-    30_000,
-  );
-
-  it(
-    "prunes the history to the newest INSIGHT_MAX_ROWS rows",
-    async () => {
-      await withoutAiProvider(() =>
-        inRollbackTransaction(async (tx, userId) => {
-          const medicationId = await seedMed(tx, userId);
-          for (let i = 1; i <= 3; i += 1) {
-            await tx.insert(doseEvents).values(
-              doseEvent({
-                id: uuidv7(),
-                userId,
-                medicationId,
-                scheduledFor: new Date(Date.now() - i * 86_400_000),
-                status: "taken",
-                takenAt: new Date(),
-              }),
-            );
-          }
-
-          // Pre-fill beyond the cap so the prune branch is exercised.
-          for (let i = 0; i < INSIGHT_MAX_ROWS + 5; i += 1) {
-            await tx.insert(aiInsights).values({
+  it("prunes the history to the newest INSIGHT_MAX_ROWS rows", async () => {
+    await withoutAiProvider(() =>
+      inRollbackTransaction(async (tx, userId) => {
+        const medicationId = await seedMed(tx, userId);
+        for (let i = 1; i <= 3; i += 1) {
+          await tx.insert(doseEvents).values(
+            doseEvent({
               id: uuidv7(),
               userId,
-              category: "general",
-              summary: `Old insight ${i}`,
-              detail: null,
-              suggestedActionType: null,
-              dataSnapshot: "{}",
-              source: "fallback",
-              confidence: null,
-              createdAt: new Date(Date.now() - (INSIGHT_MAX_ROWS + 5 - i) * 60_000),
-            });
-          }
+              medicationId,
+              scheduledFor: new Date(Date.now() - i * 86_400_000),
+              status: "taken",
+              takenAt: new Date(),
+            }),
+          );
+        }
 
-          await insightsService.generate(tx, userId, "UTC");
-          expect(await insightsService.list(tx, userId)).toHaveLength(INSIGHT_MAX_ROWS);
-        }),
-      );
-    },
-    30_000,
-  );
+        // Pre-fill beyond the cap so the prune branch is exercised.
+        for (let i = 0; i < INSIGHT_MAX_ROWS + 5; i += 1) {
+          await tx.insert(aiInsights).values({
+            id: uuidv7(),
+            userId,
+            category: "general",
+            summary: `Old insight ${i}`,
+            detail: null,
+            suggestedActionType: null,
+            dataSnapshot: "{}",
+            source: "fallback",
+            confidence: null,
+            createdAt: new Date(Date.now() - (INSIGHT_MAX_ROWS + 5 - i) * 60_000),
+          });
+        }
+
+        await insightsService.generate(tx, userId, "UTC");
+        expect(await insightsService.list(tx, userId)).toHaveLength(INSIGHT_MAX_ROWS);
+      }),
+    );
+  }, 30_000);
 });

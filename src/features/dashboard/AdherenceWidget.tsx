@@ -26,9 +26,7 @@ export function AdherenceWidget({ week }: { week: AdherenceDay[] }) {
       </SectionLabel>
       <Card className="mt-2 shadow-card-sm">
         <CardHeader>
-          <CardTitle className="text-sm font-semibold text-ink-900">
-            Adherence trend
-          </CardTitle>
+          <CardTitle className="text-sm font-semibold text-ink-900">Adherence trend</CardTitle>
         </CardHeader>
         <CardContent>
           <TrendChart

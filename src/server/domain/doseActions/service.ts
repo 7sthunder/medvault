@@ -12,7 +12,13 @@ import type { DbClient } from "@/server/db/helpers";
 import { uuidv7 } from "@/server/db/helpers";
 import { doseActions, doseEvents, userPreferences } from "@/server/db/schema";
 import type { DoseEventStatus } from "@/shared/enums";
-import { HORIZON_DAYS, MAX_SNOOZES_DEFAULT, MISSED_AFTER_DEFAULT, REMINDER_BEFORE_DEFAULT, SNOOZE_MIN_DEFAULT } from "@/shared/constants";
+import {
+  HORIZON_DAYS,
+  MAX_SNOOZES_DEFAULT,
+  MISSED_AFTER_DEFAULT,
+  REMINDER_BEFORE_DEFAULT,
+  SNOOZE_MIN_DEFAULT,
+} from "@/shared/constants";
 import {
   applySnooze,
   canSkipDoseStatus,
@@ -86,7 +92,13 @@ async function loadSettings(tx: DbClient, userId: string): Promise<ActionSetting
 
 async function insertAudit(
   tx: DbClient,
-  input: { userId: string; doseEventId: string; action: "take" | "snooze" | "skip"; occurredAt: Date; meta: Record<string, unknown> },
+  input: {
+    userId: string;
+    doseEventId: string;
+    action: "take" | "snooze" | "skip";
+    occurredAt: Date;
+    meta: Record<string, unknown>;
+  },
 ): Promise<void> {
   await tx.insert(doseActions).values({
     id: uuidv7(),
@@ -98,7 +110,12 @@ async function insertAudit(
   });
 }
 
-async function recomputeDaysFor(tx: DbClient, userId: string, timeZone: string, ...instants: (Date | null)[]): Promise<void> {
+async function recomputeDaysFor(
+  tx: DbClient,
+  userId: string,
+  timeZone: string,
+  ...instants: (Date | null)[]
+): Promise<void> {
   const keys = new Set<string>();
   for (const instant of instants) {
     if (instant) keys.add(localDateKey(instant, timeZone));
@@ -110,7 +127,12 @@ async function recomputeDaysFor(tx: DbClient, userId: string, timeZone: string, 
 
 export const doseActionsService = {
   /** §10.4 take — incl. take-late from `missed`; repeated takes are idempotent no-ops. */
-  async take(db: DbClient, userId: string, doseId: string, opts: TakeOptions): Promise<DoseActionResult> {
+  async take(
+    db: DbClient,
+    userId: string,
+    doseId: string,
+    opts: TakeOptions,
+  ): Promise<DoseActionResult> {
     const at = opts.occurredAt ?? sharedNow();
     return db.transaction(async (tx) => {
       const id = doseId;
@@ -118,13 +140,20 @@ export const doseActionsService = {
       const settings = await loadSettings(tx, userId);
 
       // Reconcile to the live status first (upcoming → due, expired snooze → due, late → missed).
-      await applyReconcileToEvent(tx, event, { userId, now: at, missedAfterMinutes: settings.missedAfterMinutes });
+      await applyReconcileToEvent(tx, event, {
+        userId,
+        now: at,
+        missedAfterMinutes: settings.missedAfterMinutes,
+      });
       const liveStatus = deriveLiveStatus(event, at, settings.missedAfterMinutes);
 
       if (!canTakeDoseStatus(liveStatus)) {
         return { doseId: id, changed: false, status: event.status };
       }
-      if (liveStatus === "upcoming" && !canTakeUpcoming(event.scheduledFor, at, settings.reminderBeforeMinutes)) {
+      if (
+        liveStatus === "upcoming" &&
+        !canTakeUpcoming(event.scheduledFor, at, settings.reminderBeforeMinutes)
+      ) {
         throw new TRPCError({ code: "PRECONDITION_FAILED", message: "This dose is not due yet." });
       }
 
@@ -155,18 +184,33 @@ export const doseActionsService = {
   },
 
   /** §10.4 snooze — respects the per-dose cap and extends the miss grace deadline. */
-  async snooze(db: DbClient, userId: string, doseId: string, opts: SnoozeOptions): Promise<DoseActionResult> {
+  async snooze(
+    db: DbClient,
+    userId: string,
+    doseId: string,
+    opts: SnoozeOptions,
+  ): Promise<DoseActionResult> {
     const at = sharedNow();
     return db.transaction(async (tx) => {
       const id = doseId;
       const event = await loadOwnedEvent(tx, userId, doseId);
       const settings = await loadSettings(tx, userId);
 
-      await applyReconcileToEvent(tx, event, { userId, now: at, missedAfterMinutes: settings.missedAfterMinutes });
+      await applyReconcileToEvent(tx, event, {
+        userId,
+        now: at,
+        missedAfterMinutes: settings.missedAfterMinutes,
+      });
       const liveStatus = deriveLiveStatus(event, at, settings.missedAfterMinutes);
 
       if (!canSnoozeDoseStatus(liveStatus, event.snoozeCount, settings.maxSnoozes)) {
-        return { doseId: id, changed: false, status: liveStatus, snoozeCount: event.snoozeCount, snoozeUntil: event.snoozeUntil };
+        return {
+          doseId: id,
+          changed: false,
+          status: liveStatus,
+          snoozeCount: event.snoozeCount,
+          snoozeUntil: event.snoozeUntil,
+        };
       }
 
       const horizonEnd = new Date(at.getTime() + HORIZON_DAYS * 86_400_000);
@@ -202,22 +246,41 @@ export const doseActionsService = {
         doseEventId: doseId,
         action: "snooze",
         occurredAt: at,
-        meta: { snoozeMinutes: settings.snoozeMinutes, snoozeUntil: fields.snoozeUntil.toISOString(), snoozeCount: fields.snoozeCount },
+        meta: {
+          snoozeMinutes: settings.snoozeMinutes,
+          snoozeUntil: fields.snoozeUntil.toISOString(),
+          snoozeCount: fields.snoozeCount,
+        },
       });
       await recomputeDaysFor(tx, userId, opts.timeZone, event.scheduledFor);
-      return { doseId: id, changed: true, status: "snoozed", snoozeCount: fields.snoozeCount, snoozeUntil: fields.snoozeUntil };
+      return {
+        doseId: id,
+        changed: true,
+        status: "snoozed",
+        snoozeCount: fields.snoozeCount,
+        snoozeUntil: fields.snoozeUntil,
+      };
     });
   },
 
   /** §10.4 skip — from `due|snoozed` only; optional reason is audited. */
-  async skip(db: DbClient, userId: string, doseId: string, opts: SkipOptions): Promise<DoseActionResult> {
+  async skip(
+    db: DbClient,
+    userId: string,
+    doseId: string,
+    opts: SkipOptions,
+  ): Promise<DoseActionResult> {
     const at = sharedNow();
     return db.transaction(async (tx) => {
       const id = doseId;
       const event = await loadOwnedEvent(tx, userId, doseId);
       const settings = await loadSettings(tx, userId);
 
-      await applyReconcileToEvent(tx, event, { userId, now: at, missedAfterMinutes: settings.missedAfterMinutes });
+      await applyReconcileToEvent(tx, event, {
+        userId,
+        now: at,
+        missedAfterMinutes: settings.missedAfterMinutes,
+      });
       const liveStatus = deriveLiveStatus(event, at, settings.missedAfterMinutes);
 
       if (!canSkipDoseStatus(liveStatus)) {
@@ -226,7 +289,12 @@ export const doseActionsService = {
 
       const [hit] = await tx
         .update(doseEvents)
-        .set({ status: "skipped", skippedAt: at, skippedReason: opts.skipReason ?? null, statusUpdatedAt: at })
+        .set({
+          status: "skipped",
+          skippedAt: at,
+          skippedReason: opts.skipReason ?? null,
+          statusUpdatedAt: at,
+        })
         .where(
           and(
             eq(doseEvents.id, doseId),
@@ -252,7 +320,10 @@ export const doseActionsService = {
 
 /* What the event's status is right now (post-reconcile), never the stale row we loaded. */
 function deriveLiveStatus(
-  event: Pick<typeof doseEvents.$inferSelect, "status" | "scheduledFor" | "missedDeadline" | "snoozeUntil">,
+  event: Pick<
+    typeof doseEvents.$inferSelect,
+    "status" | "scheduledFor" | "missedDeadline" | "snoozeUntil"
+  >,
   at: Date,
   missedAfterMinutes: number,
 ): DoseEventStatus {

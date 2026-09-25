@@ -27,13 +27,7 @@ export type { DoseStatus };
  * the token set stays the only colour authority.
  */
 
-export type StatusTone =
-  | "emerald"
-  | "blue"
-  | "red"
-  | "amber"
-  | "slate"
-  | "neutral";
+export type StatusTone = "emerald" | "blue" | "red" | "amber" | "slate" | "neutral";
 
 export interface StatusMeta {
   /** Human label (plan §12 header row) */

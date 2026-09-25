@@ -76,7 +76,12 @@ export type UserDoseAction = (typeof USER_DOSE_ACTIONS)[number];
 
 /* ── §8.8–§8.10 — Caregiver domain ───────────────────────────────────────── */
 
-export const CAREGIVER_RELATIONSHIP_STATUSES = ["pending", "active", "declined", "revoked"] as const;
+export const CAREGIVER_RELATIONSHIP_STATUSES = [
+  "pending",
+  "active",
+  "declined",
+  "revoked",
+] as const;
 export type CaregiverRelationshipStatus = (typeof CAREGIVER_RELATIONSHIP_STATUSES)[number];
 
 export const RELATION_TYPES = ["family", "friend", "professional", "other"] as const;
@@ -124,7 +129,12 @@ export type InsightCategory = (typeof INSIGHT_CATEGORIES)[number];
 export const INSIGHT_SOURCES = ["ai", "fallback", "demo"] as const;
 export type InsightSource = (typeof INSIGHT_SOURCES)[number];
 
-export const SUGGESTED_ACTIONS = ["review_schedule", "review_reminders", "encourage", "review_caregiver"] as const;
+export const SUGGESTED_ACTIONS = [
+  "review_schedule",
+  "review_reminders",
+  "encourage",
+  "review_caregiver",
+] as const;
 export type SuggestedAction = (typeof SUGGESTED_ACTIONS)[number];
 
 /* ── §8.13 — Preferences ─────────────────────────────────────────────────── */
@@ -144,7 +154,12 @@ export type DemoScenario = DemoSscenario;
 
 /* ── §8.4 — Frequency labels (derived from schedule slots) ───────────────── */
 
-export const FREQUENCY_LABELS = ["once-daily", "twice-daily", "n-times-daily", "custom-weekdays"] as const;
+export const FREQUENCY_LABELS = [
+  "once-daily",
+  "twice-daily",
+  "n-times-daily",
+  "custom-weekdays",
+] as const;
 export type FrequencyLabel = (typeof FREQUENCY_LABELS)[number];
 
 export const FREQUENCY_LABEL_TEXT: Readonly<Record<FrequencyLabel, string>> = {

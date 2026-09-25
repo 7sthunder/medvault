@@ -26,7 +26,12 @@ async function rollbackUser<T>(fn: (tx: DbTx, userId: string) => Promise<T>): Pr
     await db.transaction(async (tx) => {
       const [user] = await tx
         .insert(users)
-        .values({ id: uuidv7(), name: "Prefs Tester", email: `prefs-${uuidv7().slice(0, 8)}@medvault.local`, timezone: "UTC" })
+        .values({
+          id: uuidv7(),
+          name: "Prefs Tester",
+          email: `prefs-${uuidv7().slice(0, 8)}@medvault.local`,
+          timezone: "UTC",
+        })
         .returning({ id: users.id });
       result = await fn(tx, user!.id);
       throw new RollbackSignal();
@@ -43,54 +48,42 @@ afterAll(async () => {
 });
 
 dbTests("getOrCreatePreferences (phase 10 / §8.13)", () => {
-  it(
-    "creates a row with the given defaults on a fresh user",
-    async () => {
-      await rollbackUser(async (tx, userId) => {
-        const row = await getOrCreatePreferences(tx, userId, DEFAULT_REMINDER_DEFAULTS);
-        expect(row).toMatchObject({ userId, ...DEFAULT_REMINDER_DEFAULTS });
-        expect(row!.theme).toBe("light");
+  it("creates a row with the given defaults on a fresh user", async () => {
+    await rollbackUser(async (tx, userId) => {
+      const row = await getOrCreatePreferences(tx, userId, DEFAULT_REMINDER_DEFAULTS);
+      expect(row).toMatchObject({ userId, ...DEFAULT_REMINDER_DEFAULTS });
+      expect(row!.theme).toBe("light");
 
-        const reread = await getPreferences(tx, userId);
-        expect(reread).not.toBeNull();
-        expect(reread!.missedAfterMinutes).toBe(DEFAULT_REMINDER_DEFAULTS.missedAfterMinutes);
+      const reread = await getPreferences(tx, userId);
+      expect(reread).not.toBeNull();
+      expect(reread!.missedAfterMinutes).toBe(DEFAULT_REMINDER_DEFAULTS.missedAfterMinutes);
+    });
+  }, 30_000);
+
+  it("upserts on re-run so remit always reflects the latest values", async () => {
+    await rollbackUser(async (tx, userId) => {
+      await getOrCreatePreferences(tx, userId, DEFAULT_REMINDER_DEFAULTS);
+      const updated = await getOrCreatePreferences(tx, userId, {
+        missedAfterMinutes: 45,
+        snoozeMinutes: 15,
+        maxSnoozes: 4,
+        reminderBeforeMinutes: 10,
       });
-    },
-    30_000,
-  );
+      expect(updated!.missedAfterMinutes).toBe(45);
+      expect(updated!.snoozeMinutes).toBe(15);
 
-  it(
-    "upserts on re-run so remit always reflects the latest values",
-    async () => {
-      await rollbackUser(async (tx, userId) => {
-        await getOrCreatePreferences(tx, userId, DEFAULT_REMINDER_DEFAULTS);
-        const updated = await getOrCreatePreferences(tx, userId, {
-          missedAfterMinutes: 45,
-          snoozeMinutes: 15,
-          maxSnoozes: 4,
-          reminderBeforeMinutes: 10,
-        });
-        expect(updated!.missedAfterMinutes).toBe(45);
-        expect(updated!.snoozeMinutes).toBe(15);
+      const all = await tx
+        .select({ userId: userPreferences.userId })
+        .from(userPreferences)
+        .where(eq(userPreferences.userId, userId));
+      expect(all.length).toBe(1); // upsert keeps a single row per user
+    });
+  }, 30_000);
 
-        const all = await tx
-          .select({ userId: userPreferences.userId })
-          .from(userPreferences)
-          .where(eq(userPreferences.userId, userId));
-        expect(all.length).toBe(1); // upsert keeps a single row per user
-      });
-    },
-    30_000,
-  );
-
-  it(
-    "returns null from getPreferences for a completely uninitialised user",
-    async () => {
-      await rollbackUser(async (tx, userId) => {
-        const prefs = await getPreferences(tx, userId);
-        expect(prefs).toBeNull();
-      });
-    },
-    30_000,
-  );
+  it("returns null from getPreferences for a completely uninitialised user", async () => {
+    await rollbackUser(async (tx, userId) => {
+      const prefs = await getPreferences(tx, userId);
+      expect(prefs).toBeNull();
+    });
+  }, 30_000);
 });

@@ -1,9 +1,16 @@
-import type { LucideIcon } from "lucide-react"
-import type { ComponentProps, ReactNode } from "react"
-import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "cn"
+import type { LucideIcon } from "lucide-react";
+import type { ComponentProps, ReactNode } from "react";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "cn";
 
-export type StatTone = "emerald" | "cyan" | "magenta" | "violet" | "blue" | "amber"
+export type StatTone = "emerald" | "cyan" | "magenta" | "violet" | "blue" | "amber";
 
 const STAT_TONES: Record<StatTone, string> = {
   emerald: "bg-primary-tint text-primary-dark",
@@ -12,18 +19,18 @@ const STAT_TONES: Record<StatTone, string> = {
   violet: "bg-violet-tint text-violet-600",
   blue: "bg-blue-tint text-blue-600",
   amber: "bg-amber-tint text-amber-600",
-}
+};
 
 export interface StatCardProps extends ComponentProps<typeof Card> {
-  title: string
-  value: string
+  title: string;
+  value: string;
   /** Optional icon shown in an accent tile (top-right) */
-  icon?: LucideIcon
-  tone?: StatTone
+  icon?: LucideIcon;
+  tone?: StatTone;
   /** Small context line under the value, e.g. trend "+12% vs last week" */
-  subtitle?: ReactNode
+  subtitle?: ReactNode;
   /** Optional footer slot (chips/actions) */
-  footer?: ReactNode
+  footer?: ReactNode;
 }
 
 /**
@@ -48,10 +55,7 @@ export function StatCard({
           <CardAction>
             <span
               aria-hidden="true"
-              className={cn(
-                "flex size-9 items-center justify-center rounded-xl",
-                STAT_TONES[tone]
-              )}
+              className={cn("flex size-9 items-center justify-center rounded-xl", STAT_TONES[tone])}
             >
               <Icon className="size-4.5" strokeWidth={2.2} />
             </span>
@@ -59,12 +63,10 @@ export function StatCard({
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
-        <span className="font-heading text-2xl font-bold tracking-tight text-ink-900">
-          {value}
-        </span>
+        <span className="font-heading text-2xl font-bold tracking-tight text-ink-900">{value}</span>
         {subtitle && <span className="text-xs text-muted-foreground">{subtitle}</span>}
       </CardContent>
       {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
-  )
+  );
 }

@@ -15,7 +15,11 @@ import { medicationPerformance } from "@/shared/calc/performance";
 
 import { buildSummary } from "./summary";
 import { pruneAdherence } from "./materialize";
-import type { AdherenceSummaryDTO, MedicationPerformanceDTO, TimeBucketStats } from "@/shared/types";
+import type {
+  AdherenceSummaryDTO,
+  MedicationPerformanceDTO,
+  TimeBucketStats,
+} from "@/shared/types";
 
 export interface AdherenceWindow {
   from: Date;
@@ -26,6 +30,7 @@ export interface AdherenceWindow {
 export interface AdherenceReadOptions {
   /** Build the DTO from materialized `adherence_daily` rows only — performs no writes. */
   readOnly?: boolean;
+  now?: Date;
 }
 
 const RESOLVED = ["taken", "missed", "skipped"] as const;
@@ -47,6 +52,7 @@ export const adherenceService = {
       to: window.to,
       medicationId,
       readOnly: options.readOnly ?? false,
+      now: options.now,
     });
   },
 
@@ -58,12 +64,17 @@ export const adherenceService = {
     window: AdherenceWindow,
     options: AdherenceReadOptions = {},
   ): Promise<MedicationPerformanceDTO[]> {
+    const at = options.now ?? now();
     if (!options.readOnly) {
-      await reconcileUser(db, userId, { now: now() });
+      await reconcileUser(db, userId, { now: at });
     }
 
     const start = combineDateAndTime(localDateKey(window.from, timeZone), "00:00", timeZone);
-    const end = addLocalDays(combineDateAndTime(localDateKey(window.to, timeZone), "00:00", timeZone), 1, timeZone);
+    const end = addLocalDays(
+      combineDateAndTime(localDateKey(window.to, timeZone), "00:00", timeZone),
+      1,
+      timeZone,
+    );
 
     const [meds, slots, rows] = await Promise.all([
       db.select().from(medications).where(eq(medications.userId, userId)),
@@ -102,18 +113,36 @@ export const adherenceService = {
         frequencyLabel: frequencyLabelOf(slotsByMed.get(med.id) ?? []),
         events: rows
           .filter((r) => r.medicationId === med.id)
-          .map((r) => ({ status: r.status, scheduledFor: r.scheduledFor, takenAt: r.takenAt, snoozeCount: r.snoozeCount ?? 0 })),
+          .map((r) => ({
+            status: r.status,
+            scheduledFor: r.scheduledFor,
+            takenAt: r.takenAt,
+            snoozeCount: r.snoozeCount ?? 0,
+          })),
       })),
       timeZone,
     );
   },
 
   /** Time-of-day pattern table for the period (§10.5 buckets). */
-  async patterns(db: DbClient, userId: string, timeZone: string, window: AdherenceWindow): Promise<TimeBucketStats[]> {
-    await reconcileUser(db, userId, { now: now() });
+  async patterns(
+    db: DbClient,
+    userId: string,
+    timeZone: string,
+    window: AdherenceWindow,
+    options: AdherenceReadOptions = {},
+  ): Promise<TimeBucketStats[]> {
+    const at = options.now ?? now();
+    if (!options.readOnly) {
+      await reconcileUser(db, userId, { now: at });
+    }
 
     const start = combineDateAndTime(localDateKey(window.from, timeZone), "00:00", timeZone);
-    const end = addLocalDays(combineDateAndTime(localDateKey(window.to, timeZone), "00:00", timeZone), 1, timeZone);
+    const end = addLocalDays(
+      combineDateAndTime(localDateKey(window.to, timeZone), "00:00", timeZone),
+      1,
+      timeZone,
+    );
     const rows = await db
       .select({
         scheduledFor: doseEvents.scheduledFor,
@@ -131,7 +160,11 @@ export const adherenceService = {
       );
 
     return bucketStats(
-      rows.map((r) => ({ scheduledFor: r.scheduledFor, status: r.status, snoozeCount: r.snoozeCount ?? 0 })),
+      rows.map((r) => ({
+        scheduledFor: r.scheduledFor,
+        status: r.status,
+        snoozeCount: r.snoozeCount ?? 0,
+      })),
       timeZone,
     );
   },

@@ -3,7 +3,8 @@
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { useShell } from "@/components/layout/shell-context";
+import { useNow } from "@/components/layout/clock-context";
+import { useAppHref, useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -30,6 +31,8 @@ import { TodayFeed } from "./TodayFeed";
 export function DashboardPage() {
   const { user } = useShell();
   const router = useRouter();
+  const href = useAppHref();
+  const now = useNow();
   const timeZone = user.timezone;
   const { data, isLoading, isError, error, refetch } = api.dashboard.get.useQuery(undefined, {
     staleTime: 30_000,
@@ -85,7 +88,7 @@ export function DashboardPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">Your doses at a glance.</p>
         </div>
-        <Button onClick={() => router.push("/medications/new")}>
+        <Button onClick={() => router.push(href("/medications/new"))}>
           <Plus data-icon="inline-start" aria-hidden="true" />
           Add medication
         </Button>
@@ -97,7 +100,7 @@ export function DashboardPage() {
           title="Set up your first medication"
           description="Add a medication to generate today's schedule and start tracking adherence."
           action={
-            <Button onClick={() => router.push("/medications/new")}>
+            <Button onClick={() => router.push(href("/medications/new"))}>
               <Plus data-icon="inline-start" aria-hidden="true" />
               Add your first medication
             </Button>
@@ -109,7 +112,7 @@ export function DashboardPage() {
             dose={heroDose}
             medStatus="active"
             timeZone={timeZone}
-            now={new Date()}
+            now={now}
             busy={isPending}
             onTake={(dose) => void take(dose.id)}
             onSnooze={(dose) => void snooze(dose.id)}

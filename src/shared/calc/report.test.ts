@@ -59,14 +59,18 @@ describe("report aggregation (§10.9)", () => {
   });
 
   it("omits no-data days (zero scheduled) from the table", () => {
-    const days = [day("2026-05-01", { scheduled: 2, taken: 2, missed: 0, skipped: 0, adherencePercent: 100 })];
+    const days = [
+      day("2026-05-01", { scheduled: 2, taken: 2, missed: 0, skipped: 0, adherencePercent: 100 }),
+    ];
     const { table } = aggregateReport(days, "daily");
     expect(table).toHaveLength(1);
     expect(table[0]!.period).toBe("2026-05-01");
   });
 
   it("produces a trend series aligned with the table", () => {
-    const days = [day("2026-05-01", { scheduled: 2, taken: 1, missed: 1, skipped: 0, adherencePercent: 50 })];
+    const days = [
+      day("2026-05-01", { scheduled: 2, taken: 1, missed: 1, skipped: 0, adherencePercent: 50 }),
+    ];
     const { table, trend } = aggregateReport(days, "daily");
     expect(trend).toHaveLength(1);
     expect(trend[0]!.label).toBe(table[0]!.period);

@@ -12,7 +12,18 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: ["Landingpage/**", "node_modules/**", ".next/**", "dist/**"],
+    ignores: [
+      "Landingpage/**",
+      "node_modules/**",
+      ".next/**",
+      "dist/**",
+      // Generated test output. `coverage/` is gitignored, but ESLint does not read .gitignore,
+      // so the v8 HTML report was being linted and reporting its own unused-disable comments.
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
+      "e2e-report/**",
+    ],
   },
   {
     files: ["src/features/**/*.{ts,tsx}"],
@@ -27,14 +38,14 @@ const eslintConfig = [
             "Hardcoded hex colour in features. Use a token from globals.css/token-doc instead.",
         },
         {
-          selector: 'TemplateLiteral > TemplateElement[value.cooked=/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/]',
+          selector:
+            "TemplateLiteral > TemplateElement[value.cooked=/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/]",
           message:
             "Hardcoded hex colour in features. Use a token from globals.css/token-doc instead.",
         },
         {
           selector: "Literal[value=/^rgba?\\((\\s*[0-9.]+(\\s*%?)\\s*,){3}[0-9./\\s%]+\\)$/]",
-          message:
-            "Hardcoded colour in features. Use a token from globals.css/token-doc instead.",
+          message: "Hardcoded colour in features. Use a token from globals.css/token-doc instead.",
         },
       ],
     },

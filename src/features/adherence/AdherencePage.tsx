@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useNow } from "@/components/layout/clock-context";
 import { useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +29,7 @@ import { localDateKey, rangeByPreset } from "@/shared/times";
 export function AdherencePage() {
   const { user } = useShell();
   const timeZone = user.timezone;
-  const now = new Date();
+  const now = useNow();
   const defaultRange = presetDateRange("30d", timeZone, now);
   const [range, setRange] = useState<DateRange>(defaultRange);
 
@@ -99,8 +100,18 @@ function StatRail({ summary }: { summary: AdherenceSummaryDTO }) {
         tone="emerald"
         subtitle={adherencePercent == null ? "no required doses" : "of required doses"}
       />
-      <StatCard title="Current streak" value={String(streak.current)} tone="violet" subtitle="days in a row" />
-      <StatCard title="Longest" value={String(streak.longest)} tone="cyan" subtitle="days in a row" />
+      <StatCard
+        title="Current streak"
+        value={String(streak.current)}
+        tone="violet"
+        subtitle="days in a row"
+      />
+      <StatCard
+        title="Longest"
+        value={String(streak.longest)}
+        tone="cyan"
+        subtitle="days in a row"
+      />
       <StatCard
         title="Scheduled"
         value={formatCount(scheduled)}
@@ -199,9 +210,7 @@ function MissedStrip({ summary }: { summary: AdherenceSummaryDTO }) {
         <span>Daily overview</span>
       </SectionLabel>
       {withDoses.length === 0 ? (
-        <p className="mt-2 text-sm text-muted-foreground">
-          No doses resolved in this window yet.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">No doses resolved in this window yet.</p>
       ) : (
         <div className="mt-2 grid grid-cols-7 gap-1.5 sm:grid-cols-12">
           {days.map((d) => {

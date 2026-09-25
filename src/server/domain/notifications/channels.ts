@@ -6,6 +6,7 @@
 
 import type { DbClient } from "@/server/db/helpers";
 import { notifications } from "@/server/db/schema";
+import { log } from "@/lib/log";
 import type { NotificationType } from "@/shared/enums";
 import type { NotifDTO } from "@/shared/types";
 
@@ -48,7 +49,7 @@ export const consoleChannel: NotificationChannel = {
   name: "console",
   deliver: (_db, input) => {
     if (process.env.NODE_ENV !== "production") {
-      console.debug(`[notification:${input.type}] ${input.title} — ${input.body}`);
+      log.debug("Notification mirrored", { type: input.type });
     }
   },
 };

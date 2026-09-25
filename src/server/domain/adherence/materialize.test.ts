@@ -34,45 +34,41 @@ afterAll(async () => {
 const dbTests = describe.skipIf(!process.env.DATABASE_URL);
 
 dbTests("adherence engine reproduces the §19 demo (§10.5 + plan acceptance)", () => {
-  it(
-    "summary() + recomputeRange reproduce 84/76/5/3/8 → 90.5% and the 7-day streak",
-    async () => {
-      const seeded = await seedDemoWorkspace(db);
-      expect(seeded).toMatchObject({ scheduled: 84, taken: 76, missed: 5, skipped: 3, snoozed: 8 });
+  it("summary() + recomputeRange reproduce 84/76/5/3/8 → 90.5% and the 7-day streak", async () => {
+    const seeded = await seedDemoWorkspace(db);
+    expect(seeded).toMatchObject({ scheduled: 84, taken: 76, missed: 5, skipped: 3, snoozed: 8 });
 
-      const { now, fromKey, toKey } = utcWindow();
-      const tz = "UTC";
-      const userId = seeded.userId;
+    const { now, fromKey, toKey } = utcWindow();
+    const tz = "UTC";
+    const userId = seeded.userId;
 
-      const summary = await adherenceService.summary(db, userId, tz, {
-        from: new Date(now.getTime() - 16 * 86_400_000),
-        to: now,
-      });
-      expect(summary.scheduled).toBe(84);
-      expect(summary.taken).toBe(76);
-      expect(summary.missed).toBe(5);
-      expect(summary.skipped).toBe(3);
-      expect(summary.snoozed).toBe(8);
-      expect(summary.adherencePercent).toBe(90.5);
-      expect(summary.streak.current).toBe(7);
-      expect(summary.streak.longest).toBeGreaterThanOrEqual(7);
-      expect(summary.days).toHaveLength(17);
+    const summary = await adherenceService.summary(db, userId, tz, {
+      from: new Date(now.getTime() - 16 * 86_400_000),
+      to: now,
+    });
+    expect(summary.scheduled).toBe(84);
+    expect(summary.taken).toBe(76);
+    expect(summary.missed).toBe(5);
+    expect(summary.skipped).toBe(3);
+    expect(summary.snoozed).toBe(8);
+    expect(summary.adherencePercent).toBe(90.5);
+    expect(summary.streak.current).toBe(7);
+    expect(summary.streak.longest).toBeGreaterThanOrEqual(7);
+    expect(summary.days).toHaveLength(17);
 
-      const days = await recomputeRange(db, { userId, fromKey, toKey, timeZone: tz, now });
-      const totals = days.reduce(
-        (acc, d) => ({
-          scheduled: acc.scheduled + d.scheduled,
-          taken: acc.taken + d.taken,
-          missed: acc.missed + d.missed,
-          skipped: acc.skipped + d.skipped,
-          snoozed: acc.snoozed + d.snoozed,
-        }),
-        { scheduled: 0, taken: 0, missed: 0, skipped: 0, snoozed: 0 },
-      );
-      expect(totals).toEqual({ scheduled: 84, taken: 76, missed: 5, skipped: 3, snoozed: 8 });
-      expect(days.filter((d) => d.streakDay)).toHaveLength(7);
-      expect(await pruneAdherence(db, userId)).toBe(0); // inside the 120-day history
-    },
-    90_000,
-  );
+    const days = await recomputeRange(db, { userId, fromKey, toKey, timeZone: tz, now });
+    const totals = days.reduce(
+      (acc, d) => ({
+        scheduled: acc.scheduled + d.scheduled,
+        taken: acc.taken + d.taken,
+        missed: acc.missed + d.missed,
+        skipped: acc.skipped + d.skipped,
+        snoozed: acc.snoozed + d.snoozed,
+      }),
+      { scheduled: 0, taken: 0, missed: 0, skipped: 0, snoozed: 0 },
+    );
+    expect(totals).toEqual({ scheduled: 84, taken: 76, missed: 5, skipped: 3, snoozed: 8 });
+    expect(days.filter((d) => d.streakDay)).toHaveLength(7);
+    expect(await pruneAdherence(db, userId)).toBe(0); // inside the 120-day history
+  }, 90_000);
 });

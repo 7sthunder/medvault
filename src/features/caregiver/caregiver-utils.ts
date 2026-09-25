@@ -1,9 +1,5 @@
 import type { ChipTone } from "@/components/ui/chip";
-import type {
-  CaregiverRelationshipStatus,
-  InvitationStatus,
-  RelationType,
-} from "@/shared/enums";
+import type { CaregiverRelationshipStatus, InvitationStatus, RelationType } from "@/shared/enums";
 
 /** §11.12 labels */
 export const RELATION_LABEL: Readonly<Record<RelationType, string>> = {
@@ -34,7 +30,12 @@ export function relationshipTone(status: CaregiverRelationshipStatus): ChipTone 
 }
 
 export interface PermissionRow {
-  key: "viewAdherence" | "viewMedications" | "receiveMissedDoseAlerts" | "receiveInsights" | "canAcknowledgeAlerts";
+  key:
+    | "viewAdherence"
+    | "viewMedications"
+    | "receiveMissedDoseAlerts"
+    | "receiveInsights"
+    | "canAcknowledgeAlerts";
   label: string;
   description: string;
 }
@@ -43,7 +44,15 @@ export interface PermissionRow {
 export const PERMISSION_ROWS: readonly PermissionRow[] = [
   { key: "viewAdherence", label: "View adherence", description: "See adherence rates and streak" },
   { key: "viewMedications", label: "View medications", description: "See the medication list" },
-  { key: "receiveMissedDoseAlerts", label: "Missed-dose alerts", description: "Get notified when a dose is missed" },
+  {
+    key: "receiveMissedDoseAlerts",
+    label: "Missed-dose alerts",
+    description: "Get notified when a dose is missed",
+  },
   { key: "receiveInsights", label: "Insight updates", description: "Receive AI insight summaries" },
-  { key: "canAcknowledgeAlerts", label: "Manage alerts", description: "Acknowledge and resolve alerts" },
+  {
+    key: "canAcknowledgeAlerts",
+    label: "Manage alerts",
+    description: "Acknowledge and resolve alerts",
+  },
 ];

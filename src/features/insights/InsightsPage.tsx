@@ -10,6 +10,7 @@ import { SectionLabel } from "@/components/ui/section-label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/trpc";
 import type { InsightSource } from "@/shared/enums";
+import { BRAND } from "@/shared/brand";
 import type { InsightDTO } from "@/shared/types";
 
 import { InsightCard } from "./InsightCard";
@@ -108,7 +109,7 @@ function InsightsPrereq() {
     <EmptyState
       icon={Sparkles}
       title="Not enough data yet"
-      description="Insights are built from your last 30 days. Add medications, take a few doses, then generate — MedVault will spot patterns for you."
+      description={`Insights are built from your last 30 days. Add medications, take a few doses, then generate — ${BRAND.name} will spot patterns for you.`}
     />
   );
 }

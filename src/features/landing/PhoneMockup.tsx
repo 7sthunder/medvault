@@ -56,7 +56,14 @@ function PhoneScreen() {
         </div>
         <div className="mvp-sc-row">
           <div className="mvp-sc-ico bg-primary-tint">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2" className="stroke-primary">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              strokeWidth="2"
+              className="stroke-primary"
+            >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14,2 14,8 20,8" />
               <line x1="16" y1="13" x2="8" y2="13" />
@@ -75,7 +82,14 @@ function PhoneScreen() {
         </div>
         <div className="mvp-sc-row">
           <div className="mvp-sc-ico bg-blue-tint">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2" className="stroke-blue">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              strokeWidth="2"
+              className="stroke-blue"
+            >
               <rect x="3" y="4" width="18" height="18" rx="2" />
               <line x1="16" y1="2" x2="16" y2="6" />
               <line x1="8" y1="2" x2="8" y2="6" />
@@ -96,16 +110,40 @@ function PhoneScreen() {
           </svg>
           <div className="mvp-nav-dot" />
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2" opacity="0.6" className="stroke-phone-muted">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          strokeWidth="2"
+          opacity="0.6"
+          className="stroke-phone-muted"
+        >
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
         </svg>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2" opacity="0.6" className="stroke-phone-muted">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          strokeWidth="2"
+          opacity="0.6"
+          className="stroke-phone-muted"
+        >
           <rect x="3" y="4" width="18" height="18" rx="2" />
           <line x1="16" y1="2" x2="16" y2="6" />
           <line x1="8" y1="2" x2="8" y2="6" />
           <line x1="3" y1="10" x2="21" y2="10" />
         </svg>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" strokeWidth="2" opacity="0.6" className="stroke-phone-muted">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          strokeWidth="2"
+          opacity="0.6"
+          className="stroke-phone-muted"
+        >
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
           <circle cx="12" cy="7" r="4" />
         </svg>
@@ -220,22 +258,32 @@ export default function PhoneMockup({ isVisible = true }: { isVisible?: boolean 
         <div
           key={`d${i}`}
           className="mvp-sp"
-          style={{
-            width: s.w,
-            height: s.h,
-            top: s.top,
-            left: s.left,
-            right: s.right,
-            "--d": s.d,
-            "--dl": s.dl,
-          } as React.CSSProperties}
+          style={
+            {
+              width: s.w,
+              height: s.h,
+              top: s.top,
+              left: s.left,
+              right: s.right,
+              "--d": s.d,
+              "--dl": s.dl,
+            } as React.CSSProperties
+          }
         />
       ))}
       {STARS.map((s, i) => (
         <div
           key={`s${i}`}
           className="mvp-star"
-          style={{ top: s.top, left: s.left, right: s.right, "--d": s.d, "--dl": s.dl } as React.CSSProperties}
+          style={
+            {
+              top: s.top,
+              left: s.left,
+              right: s.right,
+              "--d": s.d,
+              "--dl": s.dl,
+            } as React.CSSProperties
+          }
         />
       ))}
 

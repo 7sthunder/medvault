@@ -14,15 +14,15 @@ function stubMatchMedia(small: boolean) {
     addListener: vi.fn(),
     removeListener: vi.fn(),
     dispatchEvent: vi.fn(),
-  }))
+  }));
 }
 
 afterEach(() => {
-  vi.unstubAllGlobals()
-})
+  vi.unstubAllGlobals();
+});
 
 function renderDialog(isMobile: boolean) {
-  stubMatchMedia(isMobile)
+  stubMatchMedia(isMobile);
   return render(
     <ResponsiveDialog
       open
@@ -33,24 +33,24 @@ function renderDialog(isMobile: boolean) {
     >
       <p>Body content</p>
     </ResponsiveDialog>,
-  )
+  );
 }
 
 describe("ResponsiveDialog", () => {
   it("renders a centered dialog on desktop (md+)", () => {
-    renderDialog(false)
-    expect(screen.getByText("Adjust reminders")).toBeTruthy()
-    expect(screen.getByText("Body content")).toBeTruthy()
+    renderDialog(false);
+    expect(screen.getByText("Adjust reminders")).toBeTruthy();
+    expect(screen.getByText("Body content")).toBeTruthy();
     // Portals mount into document.body, so the container query would miss them.
-    expect(document.querySelector("[data-slot='dialog-content']")).toBeTruthy()
-    expect(document.querySelector("[data-slot='drawer-content']")).toBeNull()
-  })
+    expect(document.querySelector("[data-slot='dialog-content']")).toBeTruthy();
+    expect(document.querySelector("[data-slot='drawer-content']")).toBeNull();
+  });
 
   it("renders a bottom sheet on mobile (< md)", () => {
-    renderDialog(true)
-    expect(screen.getByText("Adjust reminders")).toBeTruthy()
-    expect(screen.getByText("Body content")).toBeTruthy()
-    expect(document.querySelector("[data-slot='drawer-content']")).toBeTruthy()
-    expect(document.querySelector("[data-slot='dialog-content']")).toBeNull()
-  })
-})
+    renderDialog(true);
+    expect(screen.getByText("Adjust reminders")).toBeTruthy();
+    expect(screen.getByText("Body content")).toBeTruthy();
+    expect(document.querySelector("[data-slot='drawer-content']")).toBeTruthy();
+    expect(document.querySelector("[data-slot='dialog-content']")).toBeNull();
+  });
+});

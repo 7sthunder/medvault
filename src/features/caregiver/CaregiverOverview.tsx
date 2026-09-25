@@ -69,12 +69,16 @@ export function CaregiverOverview() {
     <main className="mx-auto max-w-5xl">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <SectionLabel tone="violet" leading={<HeartHandshake className="size-3.5" aria-hidden="true" />}>
+          <SectionLabel
+            tone="violet"
+            leading={<HeartHandshake className="size-3.5" aria-hidden="true" />}
+          >
             Care circle
           </SectionLabel>
           <h1 className="mt-1 font-heading text-2xl font-extrabold text-ink-900">Caregiver</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Invite someone you trust, choose what they can see, and keep an eye on the moments that need attention.
+            Invite someone you trust, choose what they can see, and keep an eye on the moments that
+            need attention.
           </p>
         </div>
       </header>
@@ -83,10 +87,16 @@ export function CaregiverOverview() {
         <section aria-labelledby="caregiver-connections-heading">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <SectionLabel tone="emerald" leading={<Users className="size-3.5" aria-hidden="true" />}>
+              <SectionLabel
+                tone="emerald"
+                leading={<Users className="size-3.5" aria-hidden="true" />}
+              >
                 Your care circle
               </SectionLabel>
-              <h2 id="caregiver-connections-heading" className="mt-1 text-lg font-semibold text-ink-900">
+              <h2
+                id="caregiver-connections-heading"
+                className="mt-1 text-lg font-semibold text-ink-900"
+              >
                 People supporting you
               </h2>
             </div>
@@ -98,7 +108,9 @@ export function CaregiverOverview() {
                   <UserPlus className="size-4.5 text-primary" aria-hidden="true" />
                   Invite a caregiver
                 </CardTitle>
-                <CardDescription>Set the access they need before you send the invitation.</CardDescription>
+                <CardDescription>
+                  Set the access they need before you send the invitation.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <InviteForm />
@@ -106,7 +118,10 @@ export function CaregiverOverview() {
             </Card>
             <section aria-labelledby="caregiver-relationships-heading">
               <SectionLabel tone="blue">Connections</SectionLabel>
-              <h3 id="caregiver-relationships-heading" className="mt-1 text-sm font-semibold text-ink-900">
+              <h3
+                id="caregiver-relationships-heading"
+                className="mt-1 text-sm font-semibold text-ink-900"
+              >
                 Your caregivers
               </h3>
               <div className="mt-3">
@@ -121,7 +136,10 @@ export function CaregiverOverview() {
             <SectionLabel tone="magenta" leading={<Mail className="size-3.5" aria-hidden="true" />}>
               Invitations
             </SectionLabel>
-            <h2 id="caregiver-invitations-heading" className="mt-1 text-lg font-semibold text-ink-900">
+            <h2
+              id="caregiver-invitations-heading"
+              className="mt-1 text-lg font-semibold text-ink-900"
+            >
               Sent invitations
             </h2>
           </div>
@@ -141,7 +159,10 @@ export function CaregiverOverview() {
 
         <section aria-labelledby="caregiver-alerts-heading">
           <div>
-            <SectionLabel tone="magenta" leading={<BellRing className="size-3.5" aria-hidden="true" />}>
+            <SectionLabel
+              tone="magenta"
+              leading={<BellRing className="size-3.5" aria-hidden="true" />}
+            >
               Alerts
             </SectionLabel>
             <h2 id="caregiver-alerts-heading" className="mt-1 text-lg font-semibold text-ink-900">
@@ -163,13 +184,18 @@ export function CaregiverOverview() {
 
         <section aria-labelledby="caregiver-patients-heading">
           <div>
-            <SectionLabel tone="cyan" leading={<ShieldCheck className="size-3.5" aria-hidden="true" />}>
+            <SectionLabel
+              tone="cyan"
+              leading={<ShieldCheck className="size-3.5" aria-hidden="true" />}
+            >
               Caregiving
             </SectionLabel>
             <h2 id="caregiver-patients-heading" className="mt-1 text-lg font-semibold text-ink-900">
               Patients you care for
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">Your view is read-only and limited to each patient&apos;s granted permissions.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your view is read-only and limited to each patient&apos;s granted permissions.
+            </p>
           </div>
           {hasCaregivingConnections ? (
             <div className="mt-3 grid gap-6 xl:grid-cols-2">
@@ -231,14 +257,19 @@ function InvitationList({
         const pending = invitation.status === "pending";
         const revokingThis = revokingId === invitation.id;
         return (
-          <li key={invitation.id} className="rounded-xl border border-border bg-card shadow-card-sm">
+          <li
+            key={invitation.id}
+            className="rounded-xl border border-border bg-card shadow-card-sm"
+          >
             <ListRow
               icon={Mail}
               title={invitation.email}
               subtitle={`Invited ${formatDateTime(invitation.createdAt, timeZone)} · Expires ${formatDateTime(invitation.expiresAt, timeZone)}`}
               right={
                 <>
-                  <Chip tone={invitationTone(invitation.status)}>{INVITATION_STATUS_LABEL[invitation.status]}</Chip>
+                  <Chip tone={invitationTone(invitation.status)}>
+                    {INVITATION_STATUS_LABEL[invitation.status]}
+                  </Chip>
                   {pending && (
                     <Button
                       size="sm"
@@ -253,7 +284,9 @@ function InvitationList({
               }
             />
             {invitation.message && (
-              <p className="border-t border-border/60 px-4 py-3 text-sm text-muted-foreground">“{invitation.message}”</p>
+              <p className="border-t border-border/60 px-4 py-3 text-sm text-muted-foreground">
+                “{invitation.message}”
+              </p>
             )}
           </li>
         );

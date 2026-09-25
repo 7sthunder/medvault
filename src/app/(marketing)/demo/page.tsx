@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 
 import { DemoLanding } from "@/features/demo/DemoLanding";
+import { BRAND } from "@/shared/brand";
 
 export const metadata: Metadata = {
   title: "Try the demo",
-  description:
-    "Explore MedVault with a fully populated sample workspace — schedule, adherence charts, insights and caregiver alerts. No sign-up needed.",
+  description: `Explore ${BRAND.name} with a fully populated sample workspace — schedule, adherence charts, insights and caregiver alerts. No sign-up needed.`,
 };
 
 /**

@@ -12,7 +12,7 @@ import {
   notificationPrefsSchema,
   profileSchema,
 } from "@/shared/validations/settings";
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, router, sessionProcedure } from "../trpc";
 
 /**
  * Phase 18 — settings router (§10.11/§11.14).
@@ -25,21 +25,23 @@ import { protectedProcedure, router } from "../trpc";
 export const settingsRouter = router({
   /* ── Profile ─────────────────────────────────────────────────────────── */
 
-  profile: protectedProcedure.query(async ({ ctx }) => settingsService.getProfile(ctx.db, ctx.user.id)),
+  profile: protectedProcedure.query(async ({ ctx }) =>
+    settingsService.getProfile(ctx.db, ctx.user.id),
+  ),
 
-  updateProfile: protectedProcedure
-    .input(profileSchema)
-    .mutation(async ({ ctx, input }) => {
-      try {
-        return await settingsService.updateProfile(ctx.db, ctx.user.id, input);
-      } catch (error) {
-        throw mapSettingsError(error);
-      }
-    }),
+  updateProfile: protectedProcedure.input(profileSchema).mutation(async ({ ctx, input }) => {
+    try {
+      return await settingsService.updateProfile(ctx.db, ctx.user.id, input);
+    } catch (error) {
+      throw mapSettingsError(error);
+    }
+  }),
 
   /* ── Reminders ───────────────────────────────────────────────────────── */
 
-  reminders: protectedProcedure.query(async ({ ctx }) => settingsService.getReminderSettings(ctx.db, ctx.user.id)),
+  reminders: protectedProcedure.query(async ({ ctx }) =>
+    settingsService.getReminderSettings(ctx.db, ctx.user.id),
+  ),
 
   updateReminders: protectedProcedure
     .input(
@@ -52,34 +54,51 @@ export const settingsRouter = router({
         caregiverAlertPrefs: caregiverAlertPrefsSchema,
       }),
     )
-    .mutation(async ({ ctx, input }) => settingsService.updateReminderSettings(ctx.db, ctx.user.id, input)),
+    .mutation(async ({ ctx, input }) =>
+      settingsService.updateReminderSettings(ctx.db, ctx.user.id, input),
+    ),
 
   /** Bulk `remindersEnabled` toggle from the per-medication table. */
   setMedicationReminders: protectedProcedure
     .input(medicationReminderToggleSchema)
     .mutation(async ({ ctx, input }) =>
-      settingsService.setMedicationReminders(ctx.db, ctx.user.id, input.medicationIds, input.remindersEnabled),
+      settingsService.setMedicationReminders(
+        ctx.db,
+        ctx.user.id,
+        input.medicationIds,
+        input.remindersEnabled,
+      ),
     ),
 
   /* ── Caregiver alert prefs (relationship UI itself reuses §11.12) ────── */
 
-  caregiverPrefs: protectedProcedure.query(async ({ ctx }) => settingsService.getCaregiverPrefs(ctx.db, ctx.user.id)),
+  caregiverPrefs: protectedProcedure.query(async ({ ctx }) =>
+    settingsService.getCaregiverPrefs(ctx.db, ctx.user.id),
+  ),
 
   updateCaregiverPrefs: protectedProcedure
     .input(caregiverAlertPrefsSchema)
-    .mutation(async ({ ctx, input }) => settingsService.updateCaregiverPrefs(ctx.db, ctx.user.id, input)),
+    .mutation(async ({ ctx, input }) =>
+      settingsService.updateCaregiverPrefs(ctx.db, ctx.user.id, input),
+    ),
 
   /* ── Appearance ──────────────────────────────────────────────────────── */
 
-  appearance: protectedProcedure.query(async ({ ctx }) => settingsService.getAppearance(ctx.db, ctx.user.id)),
+  appearance: protectedProcedure.query(async ({ ctx }) =>
+    settingsService.getAppearance(ctx.db, ctx.user.id),
+  ),
 
   updateAppearance: protectedProcedure
     .input(appearanceSchema)
-    .mutation(async ({ ctx, input }) => settingsService.updateAppearance(ctx.db, ctx.user.id, input)),
+    .mutation(async ({ ctx, input }) =>
+      settingsService.updateAppearance(ctx.db, ctx.user.id, input),
+    ),
 
   /* ── Data governance ─────────────────────────────────────────────────── */
 
-  dataOverview: protectedProcedure.query(async ({ ctx }) => settingsService.getDataOverview(ctx.db, ctx.user.id)),
+  dataOverview: protectedProcedure.query(async ({ ctx }) =>
+    settingsService.getDataOverview(ctx.db, ctx.user.id),
+  ),
 
   /** Builds the CSV server-side; the client triggers the download via a route handler. */
   exportCsv: protectedProcedure
@@ -89,25 +108,21 @@ export const settingsRouter = router({
       return { filename, csv };
     }),
 
-  deleteAllData: protectedProcedure
-    .input(deleteAllDataSchema)
-    .mutation(async ({ ctx }) => {
-      try {
-        return await settingsService.deleteAllData(ctx.db, ctx.user.id);
-      } catch (error) {
-        throw mapSettingsError(error);
-      }
-    }),
+  deleteAllData: protectedProcedure.input(deleteAllDataSchema).mutation(async ({ ctx }) => {
+    try {
+      return await settingsService.deleteAllData(ctx.db, ctx.user.id);
+    } catch (error) {
+      throw mapSettingsError(error);
+    }
+  }),
 
-  deleteAccount: protectedProcedure
-    .input(deleteAccountSchema)
-    .mutation(async ({ ctx }) => {
-      try {
-        return await settingsService.deleteAccount(ctx.db, ctx.user.id);
-      } catch (error) {
-        throw mapSettingsError(error);
-      }
-    }),
+  deleteAccount: sessionProcedure.input(deleteAccountSchema).mutation(async ({ ctx }) => {
+    try {
+      return await settingsService.deleteAccount(ctx.db, ctx.user.id);
+    } catch (error) {
+      throw mapSettingsError(error);
+    }
+  }),
 });
 
 function mapSettingsError(error: unknown): TRPCError {

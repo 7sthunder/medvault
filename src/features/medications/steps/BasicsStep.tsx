@@ -69,7 +69,10 @@ export function BasicsStep({
 
         <div className="grid gap-1.5">
           <label htmlFor="medication-unit" className="text-[13px] font-semibold text-ink-800">
-            Unit <span aria-hidden="true" className="text-red">*</span>
+            Unit{" "}
+            <span aria-hidden="true" className="text-red">
+              *
+            </span>
           </label>
           {unitMode === "custom" ? (
             <Input
@@ -131,7 +134,10 @@ export function BasicsStep({
 
       <div className="grid gap-1.5">
         <p className="text-[13px] font-semibold text-ink-800">
-          Colour <span aria-hidden="true" className="text-red">*</span>
+          Colour{" "}
+          <span aria-hidden="true" className="text-red">
+            *
+          </span>
         </p>
         <div
           role="radiogroup"
@@ -165,7 +171,11 @@ export function BasicsStep({
         ) : null}
       </div>
 
-      <FormField label="Instructions" hint="How to take this medication." error={errors.instructions?.message}>
+      <FormField
+        label="Instructions"
+        hint="How to take this medication."
+        error={errors.instructions?.message}
+      >
         <Textarea
           rows={2}
           maxLength={INSTRUCTIONS_MAX}
@@ -174,20 +184,42 @@ export function BasicsStep({
         />
       </FormField>
 
-      <FormField label="Notes" hint="Anything else worth remembering." error={errors.notes?.message}>
-        <Textarea rows={3} maxLength={NOTES_MAX} placeholder="Optional notes…" {...register("notes")} />
+      <FormField
+        label="Notes"
+        hint="Anything else worth remembering."
+        error={errors.notes?.message}
+      >
+        <Textarea
+          rows={3}
+          maxLength={NOTES_MAX}
+          placeholder="Optional notes…"
+          {...register("notes")}
+        />
       </FormField>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border-strong bg-muted/30 px-4 py-3">
-        <div>
-          <p className="text-sm font-semibold text-ink-900">Reminders</p>
-          <p className="text-xs text-muted-foreground">Schedule dose reminders for this medication.</p>
+      <div className="flex flex-col gap-3 rounded-lg border border-border-strong bg-muted/30 px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-ink-900">Reminders</p>
+            <p className="text-xs text-muted-foreground">
+              Schedule dose reminders for this medication.
+            </p>
+          </div>
+          <Switch
+            checked={values.remindersEnabled}
+            aria-label="Enable reminders"
+            onCheckedChange={(value) =>
+              setValue("remindersEnabled", Boolean(value), { shouldValidate: true })
+            }
+          />
         </div>
-        <Switch
-          checked={values.remindersEnabled}
-          aria-label="Enable reminders"
-          onCheckedChange={(value) => setValue("remindersEnabled", Boolean(value), { shouldValidate: true })}
-        />
+
+        {/*
+          Deliberately no lead-time control here. `reminderBeforeMinutes` is a *user* preference
+          (user_preferences.reminder_before_minutes) read by the reconcile pass and the dose-action
+          guards, not a per-medication column — a picker on this form would validate, round-trip
+          and then be silently dropped by the server. The real control lives in Settings → Reminders.
+        */}
       </div>
     </div>
   );

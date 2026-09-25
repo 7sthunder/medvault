@@ -9,10 +9,7 @@ import { Input } from "@/components/ui/input";
  * Phase 06 — password field with a show/hide toggle (Stitch auth design).
  * Consumed inside `FormField` (receives id/aria-* via cloning).
  */
-export function PasswordInput({
-  disabled,
-  ...props
-}: React.ComponentProps<"input">) {
+export function PasswordInput({ disabled, ...props }: React.ComponentProps<"input">) {
   const [show, setShow] = useState(false);
   return (
     <div className="relative">

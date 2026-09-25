@@ -10,24 +10,22 @@ import { protectedProcedure, router } from "../trpc";
  * The UI invalidates schedule/adherence/dashboard queries after each action.
  */
 export const doseRouter = router({
-  take: protectedProcedure
-    .input(doseActionSchema)
-    .mutation(async ({ ctx, input }) =>
-      doseActionsService.take(ctx.db, ctx.user.id, input.doseId, { timeZone: ctx.user.timezone ?? "UTC" }),
-    ),
+  take: protectedProcedure.input(doseActionSchema).mutation(async ({ ctx, input }) =>
+    doseActionsService.take(ctx.db, ctx.user.id, input.doseId, {
+      timeZone: ctx.user.timezone ?? "UTC",
+    }),
+  ),
 
-  snooze: protectedProcedure
-    .input(doseActionSchema)
-    .mutation(async ({ ctx, input }) =>
-      doseActionsService.snooze(ctx.db, ctx.user.id, input.doseId, { timeZone: ctx.user.timezone ?? "UTC" }),
-    ),
+  snooze: protectedProcedure.input(doseActionSchema).mutation(async ({ ctx, input }) =>
+    doseActionsService.snooze(ctx.db, ctx.user.id, input.doseId, {
+      timeZone: ctx.user.timezone ?? "UTC",
+    }),
+  ),
 
-  skip: protectedProcedure
-    .input(doseActionSchema)
-    .mutation(async ({ ctx, input }) =>
-      doseActionsService.skip(ctx.db, ctx.user.id, input.doseId, {
-        timeZone: ctx.user.timezone ?? "UTC",
-        skipReason: input.action === "skip" ? input.skipReason : undefined,
-      }),
-    ),
+  skip: protectedProcedure.input(doseActionSchema).mutation(async ({ ctx, input }) =>
+    doseActionsService.skip(ctx.db, ctx.user.id, input.doseId, {
+      timeZone: ctx.user.timezone ?? "UTC",
+      skipReason: input.action === "skip" ? input.skipReason : undefined,
+    }),
+  ),
 });

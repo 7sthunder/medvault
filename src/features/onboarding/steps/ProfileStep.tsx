@@ -2,7 +2,13 @@
 
 import { AlertCircle } from "lucide-react";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TIMEZONE_LIST } from "@/shared/validations/common";
 
 /**
@@ -22,10 +28,19 @@ export function ProfileStep({
   return (
     <div className="grid gap-1.5">
       <label htmlFor="onboarding-timezone" className="text-[13px] font-semibold text-ink-800">
-        Time zone <span className="text-red" aria-hidden="true">*</span>
+        Time zone{" "}
+        <span className="text-red" aria-hidden="true">
+          *
+        </span>
       </label>
-      <p className="text-xs text-muted-foreground">Medication times are shown in your local time.</p>
-      <Select id="onboarding-timezone" value={value} onValueChange={(v) => onValueChange(v ?? "UTC")}>
+      <p className="text-xs text-muted-foreground">
+        Medication times are shown in your local time.
+      </p>
+      <Select
+        id="onboarding-timezone"
+        value={value}
+        onValueChange={(v) => onValueChange(v ?? "UTC")}
+      >
         <SelectTrigger className="w-full md:w-72" aria-label="Time zone">
           <SelectValue />
         </SelectTrigger>

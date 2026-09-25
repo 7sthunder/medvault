@@ -1,6 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
+import { log } from "@/lib/log";
+
 import * as schema from "./schema";
 
 /**
@@ -25,19 +27,21 @@ function createClient() {
     max: 3,
   });
   pool.on("error", (err) => {
-    console.error("unexpected error on idle postgres client", err);
+    log.error("Unexpected error on idle PostgreSQL client", { error: err });
   });
   return { pool, db: drizzle(pool, { schema }) };
 }
 
-const instance = globalForDb.__medvaultDb ?? (() => {
-  const created = createClient();
-  if (process.env.NODE_ENV !== "production") {
-    globalForDb.__medvaultDb = created;
-    globalForDb.__medvaultPool = created.pool;
-  }
-  return created;
-})();
+const instance =
+  globalForDb.__medvaultDb ??
+  (() => {
+    const created = createClient();
+    if (process.env.NODE_ENV !== "production") {
+      globalForDb.__medvaultDb = created;
+      globalForDb.__medvaultPool = created.pool;
+    }
+    return created;
+  })();
 
 export const db = instance.db;
 export const pool = instance.pool;

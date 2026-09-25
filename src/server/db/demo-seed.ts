@@ -31,10 +31,38 @@ export const DEMO_PATIENT_NAME = "Arun Kumar";
    Totals: 84 scheduled / 76 taken / 5 missed / 3 skipped → 76/84 = 90.5%. */
 
 const MEDS = [
-  { key: "metformin", name: "Metformin", dosageAmount: "500", dosageUnit: "mg", color: "#10b981", times: [8, 20] },
-  { key: "vitd", name: "Vitamin D", dosageAmount: "1000", dosageUnit: "IU", color: "#f59e0b", times: [10] },
-  { key: "aspirin", name: "Aspirin", dosageAmount: "75", dosageUnit: "mg", color: "#3b82f6", times: [8] },
-  { key: "b12", name: "Vitamin B12", dosageAmount: "500", dosageUnit: "mcg", color: "#f472b6", times: [9] },
+  {
+    key: "metformin",
+    name: "Metformin",
+    dosageAmount: "500",
+    dosageUnit: "mg",
+    color: "#10b981",
+    times: [8, 20],
+  },
+  {
+    key: "vitd",
+    name: "Vitamin D",
+    dosageAmount: "1000",
+    dosageUnit: "IU",
+    color: "#f59e0b",
+    times: [10],
+  },
+  {
+    key: "aspirin",
+    name: "Aspirin",
+    dosageAmount: "75",
+    dosageUnit: "mg",
+    color: "#3b82f6",
+    times: [8],
+  },
+  {
+    key: "b12",
+    name: "Vitamin B12",
+    dosageAmount: "500",
+    dosageUnit: "mcg",
+    color: "#f472b6",
+    times: [9],
+  },
 ] as const;
 
 const DAY_COUNT = 17; // days 0..16; >=10 is the perfect streak window
@@ -51,11 +79,17 @@ function outcomeFor(
   dayIndex: number,
 ): { status: DoseEventStatus; snoozed: boolean; skippedReason?: string } {
   if (medKey === "metformin" && hour === 20) {
-    if ((MET_PM_MISSED_DAYS as readonly number[]).includes(dayIndex)) return { status: "missed", snoozed: false };
-    if ((MET_PM_SNOOZED_DAYS as readonly number[]).includes(dayIndex)) return { status: "taken", snoozed: true };
+    if ((MET_PM_MISSED_DAYS as readonly number[]).includes(dayIndex))
+      return { status: "missed", snoozed: false };
+    if ((MET_PM_SNOOZED_DAYS as readonly number[]).includes(dayIndex))
+      return { status: "taken", snoozed: true };
   }
   if (medKey === "b12" && (B12_SKIPPED_DAYS as readonly number[]).includes(dayIndex)) {
-    return { status: "skipped", snoozed: false, skippedReason: dayIndex === 1 ? "Fasting today" : undefined };
+    return {
+      status: "skipped",
+      snoozed: false,
+      skippedReason: dayIndex === 1 ? "Fasting today" : undefined,
+    };
   }
   if (medKey === "vitd" && (VITD_SNOOZED_DAYS as readonly number[]).includes(dayIndex)) {
     return { status: "taken", snoozed: true };
@@ -108,8 +142,17 @@ export async function seedDemoWorkspace(db: DbClient): Promise<{
       .values({
         userId,
         theme: "system",
-        notificationPrefs: { doseReminders: true, caregiverMissedAlerts: true, insights: true, sounds: true },
-        caregiverAlertPrefs: { missedDoseOn: true, adherenceDropThreshold: null, dailyDigest: false },
+        notificationPrefs: {
+          doseReminders: true,
+          caregiverMissedAlerts: true,
+          insights: true,
+          sounds: true,
+        },
+        caregiverAlertPrefs: {
+          missedDoseOn: true,
+          adherenceDropThreshold: null,
+          dailyDigest: false,
+        },
       })
       .onConflictDoNothing();
 
@@ -141,12 +184,21 @@ export async function seedDemoWorkspace(db: DbClient): Promise<{
 
     const events: (typeof doseEvents.$inferInsert)[] = [];
     const actions: (typeof doseActions.$inferInsert)[] = [];
-    const daily: Record<string, { scheduled: number; taken: number; missed: number; skipped: number; snoozed: number }> = {};
+    const daily: Record<
+      string,
+      { scheduled: number; taken: number; missed: number; skipped: number; snoozed: number }
+    > = {};
 
     for (let i = 0; i < DAY_COUNT; i++) {
       const day = addDays(start, i);
       const dateKey = utcDateKey(day);
-      const bucket = (daily[dateKey] ??= { scheduled: 0, taken: 0, missed: 0, skipped: 0, snoozed: 0 });
+      const bucket = (daily[dateKey] ??= {
+        scheduled: 0,
+        taken: 0,
+        missed: 0,
+        skipped: 0,
+        snoozed: 0,
+      });
 
       for (const [medIdx, med] of MEDS.entries()) {
         if (med.key === "b12" && i === 0) continue; // B12 starts day 1
@@ -154,7 +206,10 @@ export async function seedDemoWorkspace(db: DbClient): Promise<{
           const scheduledFor = atTime(day, hour, 0);
           const outcome = outcomeFor(med.key, hour, i);
           const medRow = medRows[medIdx]!;
-          const slot = slotRows.find((s) => s.medicationId === medRow.id && s.timeOfDay === `${String(hour).padStart(2, "0")}:00`)!;
+          const slot = slotRows.find(
+            (s) =>
+              s.medicationId === medRow.id && s.timeOfDay === `${String(hour).padStart(2, "0")}:00`,
+          )!;
           const eventId = uuidv7();
 
           bucket.scheduled += 1;
@@ -171,7 +226,9 @@ export async function seedDemoWorkspace(db: DbClient): Promise<{
           });
 
           if (outcome.status === "taken") {
-            const takenAt = new Date(scheduledFor.getTime() + (outcome.snoozed ? SNOOZE_MINUTES : 12) * 60_000);
+            const takenAt = new Date(
+              scheduledFor.getTime() + (outcome.snoozed ? SNOOZE_MINUTES : 12) * 60_000,
+            );
             bucket.taken += 1;
             if (outcome.snoozed) {
               bucket.snoozed += 1;
@@ -190,7 +247,14 @@ export async function seedDemoWorkspace(db: DbClient): Promise<{
             } else {
               events[events.length - 1]!.takenAt = takenAt;
             }
-            actions.push({ id: uuidv7(), userId, doseEventId: eventId, action: "take", occurredAt: takenAt, meta: { source: "demo" } });
+            actions.push({
+              id: uuidv7(),
+              userId,
+              doseEventId: eventId,
+              action: "take",
+              occurredAt: takenAt,
+              meta: { source: "demo" },
+            });
           } else if (outcome.status === "missed") {
             const missedDeadline = new Date(scheduledFor.getTime() + MISSED_AFTER_MIN * 60_000);
             bucket.missed += 1;
@@ -225,22 +289,24 @@ export async function seedDemoWorkspace(db: DbClient): Promise<{
     await tx.insert(doseEvents).values(events);
     await tx.insert(doseActions).values(actions);
 
-    const adherenceRows: (typeof adherenceDaily.$inferInsert)[] = Object.entries(daily).map(([date, d], i) => {
-      const attended = d.taken + d.missed + d.skipped;
-      const percent = attended > 0 ? ((d.taken / attended) * 100).toFixed(2) : "0.00";
-      return {
-        id: uuidv7(),
-        userId,
-        date,
-        scheduled: d.scheduled,
-        taken: d.taken,
-        missed: d.missed,
-        skipped: d.skipped,
-        snoozed: d.snoozed,
-        adherencePercent: percent,
-        streakDay: i >= 10 && d.missed === 0 && d.skipped === 0,
-      };
-    });
+    const adherenceRows: (typeof adherenceDaily.$inferInsert)[] = Object.entries(daily).map(
+      ([date, d], i) => {
+        const attended = d.taken + d.missed + d.skipped;
+        const percent = attended > 0 ? ((d.taken / attended) * 100).toFixed(2) : "0.00";
+        return {
+          id: uuidv7(),
+          userId,
+          date,
+          scheduled: d.scheduled,
+          taken: d.taken,
+          missed: d.missed,
+          skipped: d.skipped,
+          snoozed: d.snoozed,
+          adherencePercent: percent,
+          streakDay: i >= 10 && d.missed === 0 && d.skipped === 0,
+        };
+      },
+    );
     await tx.insert(adherenceDaily).values(adherenceRows);
 
     const metforminId = medRows[0]!.id;
@@ -304,7 +370,11 @@ export async function seedDemoWorkspace(db: DbClient): Promise<{
 
 /** §19 totals pulled live from the DB (sums are seeds computed independently here). */
 export async function demoTotals(db: DbClient) {
-  const [demoUser] = await db.select({ id: users.id }).from(users).where(eq(users.email, DEMO_USER_EMAIL)).limit(1);
+  const [demoUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, DEMO_USER_EMAIL))
+    .limit(1);
   if (!demoUser) return null;
 
   const events = await db.select().from(doseEvents).where(eq(doseEvents.userId, demoUser.id));
@@ -323,6 +393,10 @@ export async function demoTotals(db: DbClient) {
     snoozeActions: snoozeActions.filter((a) => a.action === "snooze").length,
     streakDays: days.filter((d) => d.streakDay).length,
     dayRows: days.length,
-    percent: Number(events.length ? ((events.filter((e) => e.status === "taken").length / events.length) * 100).toFixed(1) : 0),
+    percent: Number(
+      events.length
+        ? ((events.filter((e) => e.status === "taken").length / events.length) * 100).toFixed(1)
+        : 0,
+    ),
   };
 }

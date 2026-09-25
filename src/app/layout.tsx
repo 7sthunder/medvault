@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
+import { BRAND } from "@/shared/brand";
 
 import "./globals.css";
 
@@ -13,11 +14,10 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "MedVault — AI Smart Medical Adherence & Tracker",
-    template: "%s · MedVault",
+    default: `${BRAND.name} — AI Smart Medical Adherence & Tracker`,
+    template: `%s · ${BRAND.name}`,
   },
-  description:
-    "MediTrack AI (MedVault) — AI-powered medical adherence tracking: schedules, doses, insights, and caregiver oversight.",
+  description: `${BRAND.name} brings your medical records, medicine schedules, appointments, and AI-powered health guidance into one beautifully simple, secure platform.`,
 };
 
 export default function RootLayout({

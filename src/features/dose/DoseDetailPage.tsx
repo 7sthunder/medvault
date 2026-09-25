@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionLabel } from "@/components/ui/section-label";
 import { StatusIndicator } from "@/components/ui/status-indicator";
-import { useShell } from "@/components/layout/shell-context";
+import { useAppHref, useShell } from "@/components/layout/shell-context";
 import { formatInstant } from "@/lib/format";
 import { api } from "@/lib/trpc";
 import { actionMeta } from "@/shared/actions";
@@ -25,6 +25,7 @@ import { SkipDialog } from "../dose/SkipDialog";
 export function DoseDetailPage({ doseIdPromise }: { doseIdPromise: Promise<string> }) {
   const doseId = use(doseIdPromise);
   const { user } = useShell();
+  const href = useAppHref();
   const timeZone = user.timezone;
   const { data, isLoading, isError } = api.schedule.get.useQuery({ id: doseId });
   const { take, snooze, skip, isPending } = useDoseActions();
@@ -39,7 +40,8 @@ export function DoseDetailPage({ doseIdPromise }: { doseIdPromise: Promise<strin
       const existing = byAction[label];
       if (existing) {
         existing.count += 1;
-        if (action.occurredAt > existing.lastOccurredAt) existing.lastOccurredAt = action.occurredAt;
+        if (action.occurredAt > existing.lastOccurredAt)
+          existing.lastOccurredAt = action.occurredAt;
       } else {
         byAction[label] = { count: 1, lastOccurredAt: action.occurredAt };
       }
@@ -63,7 +65,7 @@ export function DoseDetailPage({ doseIdPromise }: { doseIdPromise: Promise<strin
           title="Dose not found"
           description="This dose could not be loaded. It may have been archived or removed."
           action={
-            <Link href="/schedule">
+            <Link href={href("/schedule")}>
               <Button variant="outline">
                 <ArrowLeft className="mr-1.5" aria-hidden="true" />
                 Back to schedule
@@ -81,7 +83,7 @@ export function DoseDetailPage({ doseIdPromise }: { doseIdPromise: Promise<strin
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
       <Link
-        href="/schedule"
+        href={href("/schedule")}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-ink-800"
       >
         <ArrowLeft className="size-4" aria-hidden="true" />
@@ -96,7 +98,9 @@ export function DoseDetailPage({ doseIdPromise }: { doseIdPromise: Promise<strin
             style={{ backgroundColor: event.medication.color }}
           />
           <div>
-            <h1 className="font-heading text-2xl font-extrabold text-ink-900">{event.medication.name}</h1>
+            <h1 className="font-heading text-2xl font-extrabold text-ink-900">
+              {event.medication.name}
+            </h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
               {event.medication.dosageAmount} {event.medication.dosageUnit}
               {event.source === "demo" ? " · sample dose" : ""}
@@ -107,13 +111,25 @@ export function DoseDetailPage({ doseIdPromise }: { doseIdPromise: Promise<strin
       </header>
 
       <section aria-label="Dose actions" className="mt-6 flex flex-wrap items-center gap-2">
-        <Button variant="default" onClick={() => void take(doseId)} disabled={actionDisabled || !actionable}>
+        <Button
+          variant="default"
+          onClick={() => void take(doseId)}
+          disabled={actionDisabled || !actionable}
+        >
           Mark taken
         </Button>
-        <Button variant="outline" onClick={() => void snooze(doseId)} disabled={actionDisabled || !actionable}>
+        <Button
+          variant="outline"
+          onClick={() => void snooze(doseId)}
+          disabled={actionDisabled || !actionable}
+        >
           Snooze
         </Button>
-        <Button variant="ghost" onClick={() => setSkipOpen(true)} disabled={actionDisabled || !actionable}>
+        <Button
+          variant="ghost"
+          onClick={() => setSkipOpen(true)}
+          disabled={actionDisabled || !actionable}
+        >
           Skip this dose
         </Button>
         <span className="ml-auto text-sm text-muted-foreground">
@@ -129,13 +145,19 @@ export function DoseDetailPage({ doseIdPromise }: { doseIdPromise: Promise<strin
             <span data-status={event.status}>{event.status.replace(/-/g, " ")}</span>
           </DetailRow>
           {event.missedDeadline && (
-            <DetailRow label="Missed after">{formatInstant(event.missedDeadline, timeZone)}</DetailRow>
+            <DetailRow label="Missed after">
+              {formatInstant(event.missedDeadline, timeZone)}
+            </DetailRow>
           )}
           <DetailRow label="Snoozes used">{event.snoozeCount}</DetailRow>
           {event.snoozeUntil && (
-            <DetailRow label="Snoozed until">{formatInstant(event.snoozeUntil, timeZone)}</DetailRow>
+            <DetailRow label="Snoozed until">
+              {formatInstant(event.snoozeUntil, timeZone)}
+            </DetailRow>
           )}
-          {event.takenAt && <DetailRow label="Marked taken at">{formatInstant(event.takenAt, timeZone)}</DetailRow>}
+          {event.takenAt && (
+            <DetailRow label="Marked taken at">{formatInstant(event.takenAt, timeZone)}</DetailRow>
+          )}
           {event.skippedReason && <DetailRow label="Skip reason">{event.skippedReason}</DetailRow>}
         </dl>
       </section>

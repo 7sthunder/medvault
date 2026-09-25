@@ -123,71 +123,154 @@ export default function MedVaultPhoneSection() {
       <div className="mvp-scene">
         {/* Sparkle dots */}
         {[
-          {w:5,h:5,top:"10%",left:"18%",d:"2.4s",dl:"0s"},
-          {w:4,h:4,top:"20%",left:"8%",d:"3.1s",dl:"0.6s"},
-          {w:6,h:6,top:"15%",right:"10%",d:"2.7s",dl:"1.1s"},
-          {w:4,h:4,top:"35%",left:"5%",d:"3.5s",dl:"0.3s"},
-          {w:5,h:5,top:"70%",left:"10%",d:"2.9s",dl:"1.7s"},
-          {w:4,h:4,top:"78%",right:"8%",d:"3.3s",dl:"0.9s"},
-          {w:3,h:3,top:"85%",left:"30%",d:"2.5s",dl:"1.4s"},
-          {w:5,h:5,top:"88%",right:"22%",d:"3.7s",dl:"0.2s"},
-          {w:3,h:3,top:"55%",right:"5%",d:"2.6s",dl:"2s"},
-        ].map((s,i) => (
-          <div key={i} className="mvp-sp" style={{
-            width:s.w,height:s.h,top:s.top,left:s.left,right:s.right,
-            "--d":s.d,"--dl":s.dl,
-          }}/>
+          { w: 5, h: 5, top: "10%", left: "18%", d: "2.4s", dl: "0s" },
+          { w: 4, h: 4, top: "20%", left: "8%", d: "3.1s", dl: "0.6s" },
+          { w: 6, h: 6, top: "15%", right: "10%", d: "2.7s", dl: "1.1s" },
+          { w: 4, h: 4, top: "35%", left: "5%", d: "3.5s", dl: "0.3s" },
+          { w: 5, h: 5, top: "70%", left: "10%", d: "2.9s", dl: "1.7s" },
+          { w: 4, h: 4, top: "78%", right: "8%", d: "3.3s", dl: "0.9s" },
+          { w: 3, h: 3, top: "85%", left: "30%", d: "2.5s", dl: "1.4s" },
+          { w: 5, h: 5, top: "88%", right: "22%", d: "3.7s", dl: "0.2s" },
+          { w: 3, h: 3, top: "55%", right: "5%", d: "2.6s", dl: "2s" },
+        ].map((s, i) => (
+          <div
+            key={i}
+            className="mvp-sp"
+            style={{
+              width: s.w,
+              height: s.h,
+              top: s.top,
+              left: s.left,
+              right: s.right,
+              "--d": s.d,
+              "--dl": s.dl,
+            }}
+          />
         ))}
 
         {/* Star sparkles */}
         {[
-          {top:"8%",left:"30%",d:"3.2s",dl:"0.5s"},
-          {top:"22%",right:"15%",d:"2.8s",dl:"1.3s"},
-          {top:"60%",left:"7%",d:"3.6s",dl:"0.7s"},
-          {top:"75%",right:"12%",d:"2.9s",dl:"1.9s"},
-          {top:"90%",left:"55%",d:"3.4s",dl:"0.4s"},
-        ].map((s,i) => (
-          <div key={i} className="mvp-star" style={{top:s.top,left:s.left,right:s.right,"--d":s.d,"--dl":s.dl}}/>
+          { top: "8%", left: "30%", d: "3.2s", dl: "0.5s" },
+          { top: "22%", right: "15%", d: "2.8s", dl: "1.3s" },
+          { top: "60%", left: "7%", d: "3.6s", dl: "0.7s" },
+          { top: "75%", right: "12%", d: "2.9s", dl: "1.9s" },
+          { top: "90%", left: "55%", d: "3.4s", dl: "0.4s" },
+        ].map((s, i) => (
+          <div
+            key={i}
+            className="mvp-star"
+            style={{ top: s.top, left: s.left, right: s.right, "--d": s.d, "--dl": s.dl }}
+          />
         ))}
 
         {/* Phone */}
         <div className="mvp-phone-wrap">
           <div className="mvp-phone-outer">
             <div className="mvp-phone-inner">
-              <div className="mvp-btn-r"/>
-              <div className="mvp-btn-l1"/>
-              <div className="mvp-btn-l2"/>
+              <div className="mvp-btn-r" />
+              <div className="mvp-btn-l1" />
+              <div className="mvp-btn-l2" />
               <div className="mvp-screen">
-                <div className="mvp-notch"/>
+                <div className="mvp-notch" />
                 <div className="mvp-sc-body">
-                  <div className="mvp-sc-label">Recent Reports <span>›</span></div>
+                  <div className="mvp-sc-label">
+                    Recent Reports <span>›</span>
+                  </div>
                   <div className="mvp-sc-row">
-                    <div className="mvp-sc-ico" style={{background:"#d1fae5"}}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <div className="mvp-sc-ico" style={{ background: "#d1fae5" }}>
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#10b981"
+                        strokeWidth="2"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14,2 14,8 20,8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                      </svg>
                     </div>
-                    <div><div className="mvp-sc-t">Blood Test</div><div className="mvp-sc-s">Today</div></div>
+                    <div>
+                      <div className="mvp-sc-t">Blood Test</div>
+                      <div className="mvp-sc-s">Today</div>
+                    </div>
                     <div className="mvp-sc-d">Today</div>
                   </div>
-                  <div className="mvp-div"/>
-                  <div className="mvp-sc-label">Upcoming Appointments <span>›</span></div>
+                  <div className="mvp-div" />
+                  <div className="mvp-sc-label">
+                    Upcoming Appointments <span>›</span>
+                  </div>
                   <div className="mvp-sc-row">
-                    <div className="mvp-sc-ico" style={{background:"#dbeafe"}}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <div className="mvp-sc-ico" style={{ background: "#dbeafe" }}>
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth="2"
+                      >
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                      </svg>
                     </div>
-                    <div><div className="mvp-sc-t">Dr. Sharma</div><div className="mvp-sc-s">Tomorrow</div></div>
+                    <div>
+                      <div className="mvp-sc-t">Dr. Sharma</div>
+                      <div className="mvp-sc-s">Tomorrow</div>
+                    </div>
                     <div className="mvp-sc-d">8:00 PM</div>
                   </div>
                 </div>
                 <div className="mvp-bottom-nav">
-                  <div style={{textAlign:"center"}}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#10b981"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    <div className="mvp-nav-dot"/>
+                  <div style={{ textAlign: "center" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#10b981">
+                      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                    </svg>
+                    <div className="mvp-nav-dot" />
                   </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ab5ad" strokeWidth="2" opacity="0.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ab5ad" strokeWidth="2" opacity="0.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ab5ad" strokeWidth="2" opacity="0.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#9ab5ad"
+                    strokeWidth="2"
+                    opacity="0.6"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  </svg>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#9ab5ad"
+                    strokeWidth="2"
+                    opacity="0.6"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#9ab5ad"
+                    strokeWidth="2"
+                    opacity="0.6"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
                 </div>
-                <div className="mvp-home-bar"/>
+                <div className="mvp-home-bar" />
               </div>
             </div>
           </div>
@@ -196,9 +279,17 @@ export default function MedVaultPhoneSection() {
         {/* Card 1 — AI Insight */}
         <div className="mvp-fc mvp-c1">
           <div className="mvp-fc-ico">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="1.8">
-              <path d="M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6l-.7 2H9l-.7-2A7 7 0 0 1 5 9a7 7 0 0 1 7-7z"/>
-              <line x1="9" y1="21" x2="15" y2="21"/><line x1="9" y1="17" x2="15" y2="17"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="1.8"
+            >
+              <path d="M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6l-.7 2H9l-.7-2A7 7 0 0 1 5 9a7 7 0 0 1 7-7z" />
+              <line x1="9" y1="21" x2="15" y2="21" />
+              <line x1="9" y1="17" x2="15" y2="17" />
             </svg>
           </div>
           <div>
@@ -210,9 +301,18 @@ export default function MedVaultPhoneSection() {
         {/* Card 2 — Report Upload */}
         <div className="mvp-fc mvp-c2">
           <div className="mvp-fc-ico">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14,2 14,8 20,8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
             </svg>
           </div>
           <div>
@@ -223,33 +323,56 @@ export default function MedVaultPhoneSection() {
 
         {/* Card 3 — Medicine Reminder */}
         <div className="mvp-fc mvp-c3">
-          <div className="mvp-fc-ico" style={{width:46,height:46,borderRadius:13}}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
-              <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
-              <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          <div className="mvp-fc-ico" style={{ width: 46, height: 46, borderRadius: 13 }}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="2"
+            >
+              <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
             </svg>
           </div>
           <div>
-            <div className="mvp-fc-title" style={{fontSize:16}}>Medicine reminder</div>
-            <div className="mvp-fc-sub" style={{fontSize:13}}>Take Paracetamol — 8:00 PM</div>
+            <div className="mvp-fc-title" style={{ fontSize: 16 }}>
+              Medicine reminder
+            </div>
+            <div className="mvp-fc-sub" style={{ fontSize: 13 }}>
+              Take Paracetamol — 8:00 PM
+            </div>
           </div>
         </div>
 
         {/* Card 4 — Report Upload + snooze + badge */}
         <div className="mvp-fc mvp-c4">
-          <div className="mvp-fc-ico" style={{marginTop:2}}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <div className="mvp-fc-ico" style={{ marginTop: 2 }}>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14,2 14,8 20,8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
             </svg>
           </div>
-          <div style={{flex:1}}>
+          <div style={{ flex: 1 }}>
             <div className="mvp-fc-title">Report Upload</div>
             <div className="mvp-fc-sub">Blood Test Uploaded</div>
             <div className="mvp-snooze">Snooze</div>
           </div>
-          <div style={{textAlign:"right",paddingLeft:12}}>
-            <div className="mvp-fc-badge">8:00 <span className="mvp-fc-pm">PM</span></div>
+          <div style={{ textAlign: "right", paddingLeft: 12 }}>
+            <div className="mvp-fc-badge">
+              8:00 <span className="mvp-fc-pm">PM</span>
+            </div>
           </div>
         </div>
       </div>

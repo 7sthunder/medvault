@@ -13,7 +13,9 @@ export default async function AcceptCaregiverRoutePage({
   const params = await searchParams;
   const rawToken = params.token;
   const token = (Array.isArray(rawToken) ? rawToken[0] : rawToken)?.trim() ?? "";
-  const nextPath = token ? `/caregiver/accept?token=${encodeURIComponent(token)}` : "/caregiver/accept";
+  const nextPath = token
+    ? `/caregiver/accept?token=${encodeURIComponent(token)}`
+    : "/caregiver/accept";
 
   await requireUser(nextPath);
 

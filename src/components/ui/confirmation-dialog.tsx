@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import type { ComponentProps, ReactNode } from "react"
+import type { ComponentProps, ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,22 +8,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-export interface ConfirmationDialogProps
-  extends Omit<ComponentProps<typeof Dialog>, "children" | "onOpenChange"> {
-  title: string
-  description?: ReactNode
-  children?: ReactNode
-  confirmLabel?: string
-  cancelLabel?: string
+export interface ConfirmationDialogProps extends Omit<
+  ComponentProps<typeof Dialog>,
+  "children" | "onOpenChange"
+> {
+  title: string;
+  description?: ReactNode;
+  children?: ReactNode;
+  confirmLabel?: string;
+  cancelLabel?: string;
   /** "destructive" gives the confirm action the red treatment */
-  tone?: "primary" | "destructive"
-  confirmDisabled?: boolean
-  onConfirm: () => void
+  tone?: "primary" | "destructive";
+  confirmDisabled?: boolean;
+  onConfirm: () => void;
   /** Consumers get a simple (open) callback; Base UI's event details stay internal. */
-  onOpenChange?: (open: boolean) => void
+  onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -51,9 +53,7 @@ export function ConfirmationDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description && (
-            <DialogDescription>{description}</DialogDescription>
-          )}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {children}
         <DialogFooter showCloseButton={false}>
@@ -64,7 +64,7 @@ export function ConfirmationDialog({
             variant={tone === "destructive" ? "destructive" : "default"}
             disabled={confirmDisabled}
             onClick={() => {
-              onConfirm()
+              onConfirm();
             }}
           >
             {confirmLabel}
@@ -72,5 +72,5 @@ export function ConfirmationDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

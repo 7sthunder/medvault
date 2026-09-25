@@ -66,10 +66,14 @@ export const insightsService = {
   async snapshot(db: DbClient, userId: string, timeZone: string): Promise<InsightSnapshot> {
     const at = now();
     const todayKey = localDateKey(at, timeZone);
-    const from = addLocalDays(dayStart(todayKey, timeZone), -(INSIGHT_SNAPSHOT_CAPS.dailyDays - 1), timeZone);
+    const from = addLocalDays(
+      dayStart(todayKey, timeZone),
+      -(INSIGHT_SNAPSHOT_CAPS.dailyDays - 1),
+      timeZone,
+    );
     const to = combineDateAndTime(todayKey, "23:59", timeZone);
     const window: AdherenceWindow = { from, to };
-    const readOnly = { readOnly: true };
+    const readOnly = { readOnly: true, now: at };
 
     const [summary, perMed, snoozeActions] = await Promise.all([
       adherenceService.summary(db, userId, timeZone, window, null, readOnly),
@@ -131,7 +135,11 @@ export const insightsService = {
     const snapshot = await this.snapshot(db, userId, timeZone);
 
     // Empty state — the page shows the prerequisites card, nothing is persisted.
-    if (snapshot.totals.scheduled === 0 && snapshot.totals.taken === 0 && snapshot.totals.missed === 0) {
+    if (
+      snapshot.totals.scheduled === 0 &&
+      snapshot.totals.taken === 0 &&
+      snapshot.totals.missed === 0
+    ) {
       return { items: [], source: "fallback", empty: true };
     }
 
@@ -215,8 +223,14 @@ async function pruneInsights(db: DbClient, userId: string): Promise<void> {
     .orderBy(desc(aiInsights.createdAt))
     .limit(INSIGHT_MAX_ROWS);
   if (keep.length === INSIGHT_MAX_ROWS) {
-    await db
-      .delete(aiInsights)
-      .where(and(eq(aiInsights.userId, userId), notInArray(aiInsights.id, keep.map((r) => r.id))));
+    await db.delete(aiInsights).where(
+      and(
+        eq(aiInsights.userId, userId),
+        notInArray(
+          aiInsights.id,
+          keep.map((r) => r.id),
+        ),
+      ),
+    );
   }
 }

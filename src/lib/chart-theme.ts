@@ -24,7 +24,7 @@ export const CHART_AXIS = "#94a3b8";
 export const CHART_FONT_FAMILY = "var(--font-jakarta), system-ui, sans-serif";
 
 export function chartColor(index: number): string {
-  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE[0]
+  return CHART_PALETTE[index % CHART_PALETTE.length] ?? CHART_PALETTE[0];
 }
 
 export interface ChartSeries {

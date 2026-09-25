@@ -108,7 +108,9 @@ describe("shared/times — rangeByPreset", () => {
       const { from, to } = rangeByPreset(preset, { now: nowDt, timeZone: "UTC" });
       const toKey = localDateKey(to, "UTC");
       const fromKey = localDateKey(from, "UTC");
-      expect(fromKey).toBe(preset === "7d" ? "2026-05-14" : preset === "30d" ? "2026-04-21" : "2026-02-20");
+      expect(fromKey).toBe(
+        preset === "7d" ? "2026-05-14" : preset === "30d" ? "2026-04-21" : "2026-02-20",
+      );
       expect(toKey).toBe("2026-05-20");
       expect(to.getTime()).toBeGreaterThan(from.getTime()); // end-of-day > start-of-day
     }
@@ -126,7 +128,9 @@ describe("shared/times — rangeByPreset", () => {
     const to = new Date("2026-01-05T00:00:00.000Z");
     expect(rangeByPreset("custom", { from, to })).toEqual({ from, to });
     // Compile-time the overload requires from/to; the runtime guard is defensive.
-    expect(() => rangeByPreset("custom", {} as { from: Date; to: Date })).toThrow(/requires explicit/);
+    expect(() => rangeByPreset("custom", {} as { from: Date; to: Date })).toThrow(
+      /requires explicit/,
+    );
   });
 });
 

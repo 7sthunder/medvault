@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { useNow } from "@/components/layout/clock-context";
 import { useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,17 +26,18 @@ type HistoryStatus = "taken" | "missed" | "skipped" | "snoozed";
 export function HistoryPage() {
   const { user } = useShell();
   const timeZone = user.timezone;
+  const now = useNow();
   const [from, setFrom] = useState<string>(() => {
-    const { from } = rangeByPreset("30d", { now: new Date(), timeZone });
+    const { from } = rangeByPreset("30d", { now, timeZone });
     return localDateKey(from, timeZone);
   });
-  const [to, setTo] = useState<string>(() => localDateKey(new Date(), timeZone));
+  const [to, setTo] = useState<string>(() => localDateKey(now, timeZone));
   const [medicationId, setMedicationId] = useState<string | undefined>();
   const [status, setStatus] = useState<HistoryStatus | undefined>();
   const [cursor, setCursor] = useState<string | null>(null);
 
   const meds = api.medication.list.useQuery(undefined, { staleTime: 30_000 });
-  const medications = [...meds.data?.medications ?? [], ...meds.data?.archived ?? []];
+  const medications = [...(meds.data?.medications ?? []), ...(meds.data?.archived ?? [])];
   const history = api.history.query.useQuery(
     { from, to, medicationId, status, cursor: cursor ?? undefined },
     { staleTime: 15_000, placeholderData: (prev) => prev },
@@ -57,13 +59,25 @@ export function HistoryPage() {
         timeZone={timeZone}
         from={from}
         to={to}
-        onFromChange={(v) => { setFrom(v); setCursor(null); }}
-        onToChange={(v) => { setTo(v); setCursor(null); }}
+        onFromChange={(v) => {
+          setFrom(v);
+          setCursor(null);
+        }}
+        onToChange={(v) => {
+          setTo(v);
+          setCursor(null);
+        }}
         medications={medications}
         medicationId={medicationId}
-        onMedicationChange={(v) => { setMedicationId(v ?? undefined); setCursor(null); }}
+        onMedicationChange={(v) => {
+          setMedicationId(v ?? undefined);
+          setCursor(null);
+        }}
         status={status}
-        onStatusChange={(v) => { setStatus((v as HistoryStatus) ?? undefined); setCursor(null); }}
+        onStatusChange={(v) => {
+          setStatus((v as HistoryStatus) ?? undefined);
+          setCursor(null);
+        }}
       />
 
       <div className="mt-5">
@@ -175,7 +189,13 @@ function FilterBar(props: {
 }
 
 /** §11.10 timeline — the `dose_actions` entries grouped by local day. */
-function HistoryTimeline({ items, timeZone }: { items: HistoryPageDTO["items"]; timeZone: string }) {
+function HistoryTimeline({
+  items,
+  timeZone,
+}: {
+  items: HistoryPageDTO["items"];
+  timeZone: string;
+}) {
   const byDay = new Map<string, HistoryPageDTO["items"]>();
   for (const item of items) {
     const key = localDateKey(item.occurredAt, timeZone);
@@ -233,7 +253,11 @@ function HistoryRow({ row, timeZone }: { row: HistoryPageDTO["items"][number]; t
 
   return (
     <li>
-      <ListRow title={title} subtitle={subtitle || undefined} right={<span className="text-xs text-muted-foreground">{time}</span>} />
+      <ListRow
+        title={title}
+        subtitle={subtitle || undefined}
+        right={<span className="text-xs text-muted-foreground">{time}</span>}
+      />
     </li>
   );
 }

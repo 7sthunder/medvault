@@ -60,7 +60,10 @@ describe("LoginForm (phase 06)", () => {
   });
 
   it("maps invalid credentials to the §5 destructive Alert", async () => {
-    mocks.signInEmail.mockResolvedValue({ data: null, error: { code: "invalid_email_or_password" } });
+    mocks.signInEmail.mockResolvedValue({
+      data: null,
+      error: { code: "invalid_email_or_password" },
+    });
     const user = userEvent.setup();
     render(<LoginForm next={null} />);
 
@@ -68,7 +71,9 @@ describe("LoginForm (phase 06)", () => {
     await user.type(screen.getByPlaceholderText("••••••••"), "wrongPass1");
     await user.click(screen.getByRole("button", { name: /Access Vault/i }));
 
-    expect(await screen.findByText("That email or password is incorrect. Try again.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("That email or password is incorrect. Try again."),
+    ).toBeInTheDocument();
     expect(mocks.push).not.toHaveBeenCalled();
   });
 });

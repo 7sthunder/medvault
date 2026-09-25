@@ -14,18 +14,24 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import type { DbClient } from "@/server/db/helpers";
 import { uuidv7 } from "@/server/db/helpers";
-import { doseActions, doseEvents, userPreferences, users } from "@/server/db/schema";
+import { doseActions, doseEvents, medications, userPreferences, users } from "@/server/db/schema";
 import type { DoseEventStatus } from "@/shared/enums";
-import { MISSED_AFTER_DEFAULT } from "@/shared/constants";
+import { MISSED_AFTER_DEFAULT, REMINDER_BEFORE_DEFAULT } from "@/shared/constants";
 import { deriveNextStatus, PENDING_EVENT_STATUSES } from "@/shared/calc/doseState";
 import type { PendingEventLike } from "@/shared/calc/doseState";
 import { now as sharedNow } from "@/shared/times";
 
-import { missedFlowProducers } from "./producers";
-import type { MissedDoseRef } from "./producers";
+import { doseReminderProducers, missedFlowProducers } from "./producers";
+import type { DoseReminderRef, MissedDoseRef } from "./producers";
 
 /** One dose-event row as reconcile sees it (join shape). */
 type PendingRow = typeof doseEvents.$inferSelect & PendingEventLike;
+
+type PendingScanRow = {
+  event: PendingRow;
+  medicationName: string;
+  remindersEnabled: boolean;
+};
 
 export interface ReconcileOptions {
   now?: Date;
@@ -37,13 +43,25 @@ export interface ReconcileResult {
   missed: number;
 }
 
-async function settingsFor(db: DbClient, userId: string): Promise<{ missedAfterMinutes: number }> {
-  const [prefs] = await db
-    .select({ missedAfterMinutes: userPreferences.missedAfterMinutes })
+async function settingsFor(
+  db: DbClient,
+  userId: string,
+): Promise<{ missedAfterMinutes: number; reminderBeforeMinutes: number; timeZone: string }> {
+  const [row] = await db
+    .select({
+      missedAfterMinutes: userPreferences.missedAfterMinutes,
+      reminderBeforeMinutes: userPreferences.reminderBeforeMinutes,
+      timeZone: users.timezone,
+    })
     .from(userPreferences)
+    .innerJoin(users, eq(users.id, userPreferences.userId))
     .where(eq(userPreferences.userId, userId))
     .limit(1);
-  return { missedAfterMinutes: prefs?.missedAfterMinutes ?? MISSED_AFTER_DEFAULT };
+  return {
+    missedAfterMinutes: row?.missedAfterMinutes ?? MISSED_AFTER_DEFAULT,
+    reminderBeforeMinutes: row?.reminderBeforeMinutes ?? REMINDER_BEFORE_DEFAULT,
+    timeZone: row?.timeZone ?? "UTC",
+  };
 }
 
 /**
@@ -56,7 +74,11 @@ export async function applyReconcileToEvent(
   db: DbClient,
   event: PendingRow,
   opts: { userId: string; now: Date; missedAfterMinutes: number },
-): Promise<{ status: DoseEventStatus; changed: boolean; transition: "missed" | "due" | "snooze-expired" | null }> {
+): Promise<{
+  status: DoseEventStatus;
+  changed: boolean;
+  transition: "missed" | "due" | "snooze-expired" | null;
+}> {
   const derived = deriveNextStatus(event, opts.now, opts.missedAfterMinutes);
   if (!derived.changed || derived.at === null) return derived;
 
@@ -97,29 +119,61 @@ export async function applyReconcileToEvent(
  * Reconcile every pending event for one user at `now` (defaults to the shared clock so
  * demo time flows through). Returns a tally for logging/test assertions.
  */
-export async function reconcileUser(db: DbClient, userId: string, options: ReconcileOptions = {}): Promise<ReconcileResult> {
+export async function reconcileUser(
+  db: DbClient,
+  userId: string,
+  options: ReconcileOptions = {},
+): Promise<ReconcileResult> {
   const at = options.now ?? sharedNow();
-  const { missedAfterMinutes } = await settingsFor(db, userId);
+  const { missedAfterMinutes, reminderBeforeMinutes, timeZone } = await settingsFor(db, userId);
 
   const pending = (await db
-    .select()
+    .select({
+      event: doseEvents,
+      medicationName: medications.name,
+      remindersEnabled: medications.remindersEnabled,
+    })
     .from(doseEvents)
-    .where(and(eq(doseEvents.userId, userId), inArray(doseEvents.status, PENDING_EVENT_STATUSES)))) as PendingRow[];
+    .innerJoin(medications, eq(medications.id, doseEvents.medicationId))
+    .where(
+      and(eq(doseEvents.userId, userId), inArray(doseEvents.status, PENDING_EVENT_STATUSES)),
+    )) as PendingScanRow[];
 
   let reconciled = 0;
   let missed = 0;
-  for (const event of pending) {
+  for (const pendingRow of pending) {
+    const event = pendingRow.event as PendingRow;
     const derived = await applyReconcileToEvent(db, event, { userId, now: at, missedAfterMinutes });
     if (derived.changed) {
       reconciled += 1;
       if (derived.status === "missed") missed += 1;
+    }
+
+    if (!pendingRow.remindersEnabled) continue;
+    const ref: DoseReminderRef = {
+      id: event.id,
+      medicationId: event.medicationId,
+      medicationName: pendingRow.medicationName,
+      scheduledFor: event.scheduledFor,
+    };
+    if (derived.status === "missed") continue;
+    if (derived.status === "due") {
+      if (derived.changed) await doseReminderProducers.onDue(db, userId, ref, at, timeZone);
+      continue;
+    }
+    const reminderOpensAt = event.scheduledFor.getTime() - reminderBeforeMinutes * 60_000;
+    if (derived.status === "upcoming" && at.getTime() >= reminderOpensAt) {
+      await doseReminderProducers.onUpcoming(db, userId, ref, at, timeZone);
     }
   }
   return { scanned: pending.length, reconciled, missed };
 }
 
 /** Reconcile all onboarded users (scheduler safety net). */
-export async function reconcileAll(db: DbClient, options: ReconcileOptions = {}): Promise<{ users: number; reconciled: number; missed: number }> {
+export async function reconcileAll(
+  db: DbClient,
+  options: ReconcileOptions = {},
+): Promise<{ users: number; reconciled: number; missed: number }> {
   const onboarded = await db
     .select({ id: users.id })
     .from(users)

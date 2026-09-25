@@ -23,7 +23,12 @@ import { RELATION_LABEL } from "./caregiver-utils";
  * feed and a leave action. Never exposes another patient: `patientUserId` is always the
  * relationship target and the server re-checks `requireCaregiverAccess`.
  */
-export function PatientOverviewCard({ relationshipId, patientUserId, patientName, relationType }: {
+export function PatientOverviewCard({
+  relationshipId,
+  patientUserId,
+  patientName,
+  relationType,
+}: {
   relationshipId: string;
   patientUserId: string;
   patientName: string;
@@ -34,10 +39,7 @@ export function PatientOverviewCard({ relationshipId, patientUserId, patientName
   const utils = api.useUtils();
   const [leaving, setLeaving] = useState(false);
 
-  const overview = api.caregiver.patientOverview.useQuery(
-    { patientUserId },
-    { staleTime: 30_000 },
-  );
+  const overview = api.caregiver.patientOverview.useQuery({ patientUserId }, { staleTime: 30_000 });
   const leave = api.caregiver.leave.useMutation({
     onSuccess: () => {
       toast.success(`You're no longer caring for ${patientName}.`);
@@ -47,11 +49,7 @@ export function PatientOverviewCard({ relationshipId, patientUserId, patientName
   });
 
   const leaveButton = (
-    <Button
-      size="sm"
-      variant="destructive"
-      onClick={() => setLeaving(true)}
-    >
+    <Button size="sm" variant="destructive" onClick={() => setLeaving(true)}>
       Leave
     </Button>
   );
@@ -61,7 +59,9 @@ export function PatientOverviewCard({ relationshipId, patientUserId, patientName
       <CardHeader className="flex flex-row items-start justify-between gap-2">
         <div>
           <CardTitle>{patientName}</CardTitle>
-          <p className="text-xs text-muted-foreground">Relation: {RELATION_LABEL[relationType as keyof typeof RELATION_LABEL] ?? relationType}</p>
+          <p className="text-xs text-muted-foreground">
+            Relation: {RELATION_LABEL[relationType as keyof typeof RELATION_LABEL] ?? relationType}
+          </p>
         </div>
         {leaveButton}
       </CardHeader>
@@ -121,7 +121,9 @@ export function PatientOverviewCard({ relationshipId, patientUserId, patientName
               </div>
             )}
             {overview.data.medications.length === 0 && (
-              <p className="text-xs text-muted-foreground">Medication access isn&apos;t enabled or there are no active medications.</p>
+              <p className="text-xs text-muted-foreground">
+                Medication access isn&apos;t enabled or there are no active medications.
+              </p>
             )}
 
             <div className="flex flex-col gap-2">

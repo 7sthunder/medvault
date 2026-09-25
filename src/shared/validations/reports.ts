@@ -27,11 +27,16 @@ export function reportsSchemaFor(todayKey?: string) {
 
   return reportsBaseSchema.superRefine((data, ctx) => {
     if (data.from > data.to) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["from"], message: "Start date must be before the end date." });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["from"],
+        message: "Start date must be before the end date.",
+      });
       return;
     }
     const span = Math.round(
-      (new Date(`${data.to}T00:00:00Z`).getTime() - new Date(`${data.from}T00:00:00Z`).getTime()) / 86_400_000,
+      (new Date(`${data.to}T00:00:00Z`).getTime() - new Date(`${data.from}T00:00:00Z`).getTime()) /
+        86_400_000,
     );
     if (span > REPORT_MAX_SPAN_DAYS) {
       ctx.addIssue({

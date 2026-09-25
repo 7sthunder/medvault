@@ -22,6 +22,7 @@ import {
   updateMedication,
 } from "./repo";
 import { ensureDoseEvents, voidFutureEvents } from "../doseEvents/service";
+import { materializeEffectiveRange } from "../adherence/materialize";
 import { medicationExtras } from "./extras";
 
 export interface CreateMedicationArgs {
@@ -45,8 +46,20 @@ export interface MedicationListResult {
 const DEFAULT_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 /** Local `YYYY-MM-DD` for "today" (demo-aware clock, user's timezone). */
-function todayKey(timezone: string): string {
-  return localDateKey(now(), timezone);
+function todayKey(timezone: string, at = now()): string {
+  return localDateKey(at, timezone);
+}
+
+async function refreshAffectedDays(
+  db: DbTx,
+  userId: string,
+  timezone: string,
+  fromKey: string,
+  at: Date,
+): Promise<void> {
+  const toKey = todayKey(timezone, at);
+  if (fromKey > toKey) return;
+  await materializeEffectiveRange(db, { userId, fromKey, toKey, timeZone: timezone, now: at });
 }
 
 export const medicationService = {
@@ -93,7 +106,9 @@ export const medicationService = {
       { id: dto.id, name: dto.name, color: dto.color, frequencyLabel: dto.frequencyLabel },
     ]);
     const extra = extras.get(dto.id);
-    return extra ? { ...dto, nextDoseAt: extra.nextDoseAt, adherencePercent: extra.adherencePercent } : dto;
+    return extra
+      ? { ...dto, nextDoseAt: extra.nextDoseAt, adherencePercent: extra.adherencePercent }
+      : dto;
   },
 
   /** create → master row + schedule slots + dose-event generation seam (§10.1). */
@@ -127,18 +142,22 @@ export const medicationService = {
       });
 
       // §10.1: empty times/days → default a single 08:00 daily slot.
-      const slotInserts = (schedule?.slots.length ? schedule.slots : [defaultSlot(DEFAULT_DAYS, DEFAULT_SLOT_TIMES[0]!)]).map(
-        (s) => toSlotInsert(s, id),
-      );
+      const slotInserts = (
+        schedule?.slots.length
+          ? schedule.slots
+          : [defaultSlot(DEFAULT_DAYS, DEFAULT_SLOT_TIMES[0]!)]
+      ).map((s) => toSlotInsert(s, id));
       await replaceSlots(tx, id, slotInserts);
 
       // §10.2: expand from startDate through the horizon (idempotent upsert).
+      const at = now();
       await ensureDoseEvents(tx, {
         userId,
         medicationId: id,
         timeZone: timezone,
         from: medication.startDate,
       });
+      await refreshAffectedDays(tx, userId, timezone, medication.startDate, at);
 
       const rows = await listSlotsByMedicationIds(tx, [id]);
       const med = await getMedicationById(tx, userId, id);
@@ -160,7 +179,10 @@ export const medicationService = {
         throw new TRPCError({ code: "NOT_FOUND", message: "Medication not found." });
       }
       if (med.archivedAt) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Archived medications cannot be edited." });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Archived medications cannot be edited.",
+        });
       }
 
       const duplicate = await findActiveByName(tx, userId, medication.name, id);
@@ -186,15 +208,23 @@ export const medicationService = {
 
       if (schedule?.slots) {
         // Diff: void anything generated from today onward, then regenerate (idempotent).
-        await voidFutureEvents(tx, userId, id, todayKey(timezone), timezone);
-        await replaceSlots(tx, id, schedule.slots.map((s) => toSlotInsert(s, id)));
+        const at = now();
+        await voidFutureEvents(tx, userId, id, todayKey(timezone, at), timezone);
+        await replaceSlots(
+          tx,
+          id,
+          schedule.slots.map((s) => toSlotInsert(s, id)),
+        );
         if (med.status === "active") {
           await ensureDoseEvents(tx, {
             userId,
             medicationId: id,
             timeZone: timezone,
-            from: med.startDate,
+            from: medication.startDate,
           });
+          const fromKey =
+            med.startDate < medication.startDate ? med.startDate : medication.startDate;
+          await refreshAffectedDays(tx, userId, timezone, fromKey, at);
         }
       }
 
@@ -215,13 +245,18 @@ export const medicationService = {
       const med = await getMedicationById(tx, userId, id);
       if (!med) throw new TRPCError({ code: "NOT_FOUND", message: "Medication not found." });
       if (med.archivedAt) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: "Archived medications cannot be resumed." });
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Archived medications cannot be resumed.",
+        });
       }
 
       await repoSetStatus(tx, userId, id, status);
 
+      const at = now();
+      const today = todayKey(timezone, at);
       if (status === "paused") {
-        await voidFutureEvents(tx, userId, id, todayKey(timezone), timezone);
+        await voidFutureEvents(tx, userId, id, today, timezone);
       } else {
         await ensureDoseEvents(tx, {
           userId,
@@ -230,6 +265,7 @@ export const medicationService = {
           from: med.startDate,
         });
       }
+      await refreshAffectedDays(tx, userId, timezone, today, at);
 
       const updated = await getMedicationById(tx, userId, id);
       const rows = await listSlotsByMedicationIds(tx, [id]);
@@ -239,7 +275,12 @@ export const medicationService = {
   },
 
   /** archive → soft delete; history preserved; future events voided (§8.3). */
-  async archive(db: Db | DbTx, userId: string, timezone: string, id: string): Promise<MedicationDTO> {
+  async archive(
+    db: Db | DbTx,
+    userId: string,
+    timezone: string,
+    id: string,
+  ): Promise<MedicationDTO> {
     return db.transaction(async (tx) => {
       const med = await getMedicationById(tx, userId, id);
       if (!med) throw new TRPCError({ code: "NOT_FOUND", message: "Medication not found." });
@@ -247,7 +288,10 @@ export const medicationService = {
       const archived = await repoArchive(tx, userId, id);
       if (!archived) throw new TRPCError({ code: "NOT_FOUND", message: "Medication not found." });
 
-      await voidFutureEvents(tx, userId, id, todayKey(timezone), timezone);
+      const at = now();
+      const today = todayKey(timezone, at);
+      await voidFutureEvents(tx, userId, id, today, timezone);
+      await refreshAffectedDays(tx, userId, timezone, today, at);
 
       const rows = await listSlotsByMedicationIds(tx, [id]);
       return toMedicationDTO(archived, rows);

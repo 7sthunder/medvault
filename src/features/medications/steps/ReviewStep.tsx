@@ -38,7 +38,9 @@ export function ReviewStep({ values, slots }: ReviewStepProps) {
                 className="size-3 shrink-0 rounded-full"
                 style={{ backgroundColor: color }}
               />
-              <CardTitle className="font-heading font-bold text-ink-900">{values.name || "Untitled medication"}</CardTitle>
+              <CardTitle className="font-heading font-bold text-ink-900">
+                {values.name || "Untitled medication"}
+              </CardTitle>
             </div>
             <CardDescription>
               {values.dosageAmount} {values.dosageUnit} · started {formatDateKey(values.startDate)}
@@ -49,7 +51,10 @@ export function ReviewStep({ values, slots }: ReviewStepProps) {
             <ListRow
               icon={Pill}
               iconClass={medTintClasses(color)}
-              title={dosageLabel({ dosageAmount: Number(values.dosageAmount) || 0, dosageUnit: values.dosageUnit })}
+              title={dosageLabel({
+                dosageAmount: Number(values.dosageAmount) || 0,
+                dosageUnit: values.dosageUnit,
+              })}
               subtitle="Dose"
             />
             <ListRow
@@ -72,9 +77,7 @@ export function ReviewStep({ values, slots }: ReviewStepProps) {
         <Card>
           <CardHeader>
             <CardTitle className="font-heading font-bold text-ink-900">
-              {slots.length === 1
-                ? `1 time`
-                : `${slots.length} times`}
+              {slots.length === 1 ? `1 time` : `${slots.length} times`}
             </CardTitle>
             <CardDescription>
               {slots.length > 0
@@ -92,15 +95,23 @@ export function ReviewStep({ values, slots }: ReviewStepProps) {
                   <div className="min-w-0">
                     <p className="font-semibold text-ink-900">
                       {formatHhmm(slot.timeOfDay)}
-                      {!slot.enabled ? <span className="ml-2 text-xs font-medium text-ink-400">disabled</span> : null}
+                      {!slot.enabled ? (
+                        <span className="ml-2 text-xs font-medium text-ink-400">disabled</span>
+                      ) : null}
                     </p>
-                    <p className="truncate text-xs text-muted-foreground">{daysLabel(slot.daysOfWeek)}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {daysLabel(slot.daysOfWeek)}
+                    </p>
                   </div>
                   <div className="text-right text-xs text-muted-foreground">
                     {slot.dosageAmount ? (
-                      <p className="font-medium text-ink-800">{slot.dosageAmount} {values.dosageUnit}</p>
+                      <p className="font-medium text-ink-800">
+                        {slot.dosageAmount} {values.dosageUnit}
+                      </p>
                     ) : null}
-                    {slot.instructionOverride ? <p className="max-w-40 truncate">{slot.instructionOverride}</p> : null}
+                    {slot.instructionOverride ? (
+                      <p className="max-w-40 truncate">{slot.instructionOverride}</p>
+                    ) : null}
                   </div>
                 </li>
               ))}

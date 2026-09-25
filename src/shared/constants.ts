@@ -7,6 +7,7 @@
  */
 
 import type { TimeBucket } from "./enums";
+import { BRAND } from "./brand";
 
 /* ── §10.2/§10.8 — Engine defaults ───────────────────────────────────────── */
 
@@ -69,7 +70,7 @@ export const ADHERENCE_PRUNE_DAYS = 120;
 /* ── §19 / §10.8 — Demo identities ────────────────────────────────────────── */
 
 export const DEMO_USER_EMAIL = "demo@medvault.demo";
-export const DEMO_USER_NAME = "MedVault Demo";
+export const DEMO_USER_NAME = `${BRAND.name} Demo`;
 export const DEMO_PASSWORD_HINT = "auto-generated demo credentials";
 
 /** The seed demo patient (plan §19, shared with `demo-seed.ts`). */

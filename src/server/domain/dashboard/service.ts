@@ -54,7 +54,9 @@ export const dashboardService = {
     const dueNow = today.filter((e) => e.status === "due-now");
     const nextDose =
       today.find(
-        (e) => (e.status === "upcoming" || e.status === "due-now") && e.scheduledFor.getTime() >= at.getTime(),
+        (e) =>
+          (e.status === "upcoming" || e.status === "due-now") &&
+          e.scheduledFor.getTime() >= at.getTime(),
       ) ?? null;
 
     // 7-day adherence window (same `AdherenceSummaryDTO` the /adherence page renders).
@@ -76,7 +78,11 @@ export const dashboardService = {
 
     return {
       stats: {
-        adherenceToday: adherencePercent({ taken: takenToday, missed: missedToday, skipped: skippedToday }),
+        adherenceToday: adherencePercent({
+          taken: takenToday,
+          missed: missedToday,
+          skipped: skippedToday,
+        }),
         currentStreak: summary.streak.current,
         nextDoseTime: nextDose?.scheduledFor ?? null,
         missedToday,
@@ -100,10 +106,7 @@ function dayStart(dateKey: string, timeZone: string): Date {
 }
 
 /** §11.4 caregiver widget counts: connections as patient + new alerts handed to me. */
-async function caregiverStats(
-  db: Db | DbTx,
-  userId: string,
-): Promise<DashboardCaregiverDTO> {
+async function caregiverStats(db: Db | DbTx, userId: string): Promise<DashboardCaregiverDTO> {
   const [patientRows, alertRows] = await Promise.all([
     db
       .select()

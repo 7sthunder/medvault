@@ -8,11 +8,11 @@ import Hero from "@/features/landing/Hero";
 import HowItWorks from "@/features/landing/HowItWorks";
 import Nav from "@/features/landing/Nav";
 import Testimonials from "@/features/landing/Testimonials";
+import { BRAND } from "@/shared/brand";
 
 export const metadata: Metadata = {
-  title: "MedVault — AI Smart Medical Adherence & Tracker",
-  description:
-    "MedVault brings your medical records, medicine schedules, appointments, and AI-powered health guidance into one beautifully simple, secure platform.",
+  title: `${BRAND.name} — AI Smart Medical Adherence & Tracker`,
+  description: `${BRAND.name} brings your medical records, medicine schedules, appointments, and AI-powered health guidance into one beautifully simple, secure platform.`,
 };
 
 export default function LandingPage() {

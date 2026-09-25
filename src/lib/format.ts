@@ -76,7 +76,8 @@ export function plural(count: number, singular: string, pluralForm?: string): st
 export function formatDateRange(from: string, to: string): string {
   const fromYear = from.slice(0, 4);
   const toYear = to.slice(0, 4);
-  if (fromYear === toYear) return `${formatDateKey(from, "short")} – ${formatDateKey(to, "short")}, ${toYear}`;
+  if (fromYear === toYear)
+    return `${formatDateKey(from, "short")} – ${formatDateKey(to, "short")}, ${toYear}`;
   return `${formatDateKey(from)} – ${formatDateKey(to)}`;
 }
 

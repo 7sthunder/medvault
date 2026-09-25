@@ -37,7 +37,13 @@ function resolveStatus(status: string): FilterableStatus | null {
 /** Start/end instants for the range keys (inclusive local-day window, user TZ). */
 function rangeBounds(timeZone: string, from?: string, to?: string): { start?: Date; end?: Date } {
   const start = from ? combineDateAndTime(from, "00:00", timeZone) : undefined;
-  const end = to ? combineDateAndTime(localDateKey(combineDateAndTime(to, "23:59", timeZone), timeZone), "23:59", timeZone) : undefined;
+  const end = to
+    ? combineDateAndTime(
+        localDateKey(combineDateAndTime(to, "23:59", timeZone), timeZone),
+        "23:59",
+        timeZone,
+      )
+    : undefined;
   return { start, end };
 }
 
@@ -47,14 +53,22 @@ export const historyService = {
    * `snoozed` maps to `due`/`snoozed` events (snoozeCount > 0) since events can be snoozed
    * while the final status is `taken`. Archived meds still resolve (soft-delete).
    */
-  async query(db: DbClient, userId: string, timeZone: string, q: HistoryQuery): Promise<HistoryPageDTO> {
+  async query(
+    db: DbClient,
+    userId: string,
+    timeZone: string,
+    q: HistoryQuery,
+  ): Promise<HistoryPageDTO> {
     const { start, end } = rangeBounds(timeZone, q.from, q.to);
     const where = [eq(doseActions.userId, userId)];
     if (start) where.push(gte(doseActions.occurredAt, start));
     if (end) where.push(lte(doseActions.occurredAt, end));
     if (q.cursor) where.push(lt(doseActions.occurredAt, new Date(q.cursor)));
     if (q.medicationId) {
-      where.push(eq(doseActions.doseEventId, doseEvents.id), eq(doseEvents.medicationId, q.medicationId));
+      where.push(
+        eq(doseActions.doseEventId, doseEvents.id),
+        eq(doseEvents.medicationId, q.medicationId),
+      );
     }
 
     const status = resolveStatus(q.status ?? "");
@@ -98,7 +112,10 @@ export const historyService = {
       )
       .filter((dto): dto is NonNullable<typeof dto> => Boolean(dto?.medication));
 
-    const nextCursor = hasMore && items.length > 0 ? new Date(items[items.length - 1]!.occurredAt).toISOString() : null;
+    const nextCursor =
+      hasMore && items.length > 0
+        ? new Date(items[items.length - 1]!.occurredAt).toISOString()
+        : null;
     return { items, nextCursor };
   },
 };

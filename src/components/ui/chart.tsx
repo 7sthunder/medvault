@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import type { ChartDatum } from "./chart-types"
+import type { ChartDatum } from "./chart-types";
 import {
   Area,
   Bar,
@@ -12,35 +12,35 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts"
-import { cn } from "cn"
-import { TrendingUp } from "lucide-react"
+} from "recharts";
+import { cn } from "cn";
+import { TrendingUp } from "lucide-react";
 
-import { EmptyState } from "@/components/ui/empty-state"
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   CHART_AXIS,
   CHART_FONT_FAMILY,
   CHART_GRID,
   chartColor,
   type ChartSeries,
-} from "@/lib/chart-theme"
+} from "@/lib/chart-theme";
 
 interface TooltipRow {
-  name?: string | number
-  value?: number | string
-  color?: string
+  name?: string | number;
+  value?: number | string;
+  color?: string;
 }
 
 interface ChartTooltipProps {
-  active?: boolean
-  label?: string | number
-  payload?: TooltipRow[]
-  formatValue: (value: number | string) => string
+  active?: boolean;
+  label?: string | number;
+  payload?: TooltipRow[];
+  formatValue: (value: number | string) => string;
 }
 
 /** Glass tooltip (plan §5.4) — matched §2 popover surface, theme-aware. */
 function ChartTooltip({ active, label, payload, formatValue }: ChartTooltipProps) {
-  if (!active || !payload?.length) return null
+  if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-border bg-card/95 p-2.5 shadow-card backdrop-blur-md">
       {label != null && <p className="mb-1.5 text-xs font-semibold text-ink-900">{label}</p>}
@@ -63,24 +63,24 @@ function ChartTooltip({ active, label, payload, formatValue }: ChartTooltipProps
         ))}
       </ul>
     </div>
-  )
+  );
 }
 
 export interface TrendChartProps {
-  kind?: "area" | "line" | "bar"
-  data: readonly ChartDatum[]
-  series: readonly ChartSeries[]
+  kind?: "area" | "line" | "bar";
+  data: readonly ChartDatum[];
+  series: readonly ChartSeries[];
   /** Key on each datum used for the X category axis. */
-  xKey: string
-  height?: number
+  xKey: string;
+  height?: number;
   /** Formats tooltip values + y-axis ticks (e.g. `(v) => `${v}%``). */
-  formatValue?: (value: number | string) => string
+  formatValue?: (value: number | string) => string;
   /** Compact the X labels (e.g. `MMM d` → `May 14` from a full key). */
-  xTickFormatter?: (value: string | number) => string
-  legend?: boolean
-  emptyTitle?: string
-  emptyDescription?: string
-  className?: string
+  xTickFormatter?: (value: string | number) => string;
+  legend?: boolean;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  className?: string;
 }
 
 /**
@@ -112,7 +112,7 @@ export function TrendChart({
       >
         <EmptyState compact icon={TrendingUp} title={emptyTitle} description={emptyDescription} />
       </div>
-    )
+    );
   }
 
   return (
@@ -129,7 +129,9 @@ export function TrendChart({
             tickLine={false}
             axisLine={{ stroke: CHART_AXIS }}
             tick={{ fontSize: 11, fill: CHART_AXIS }}
-            tickFormatter={(value) => (xTickFormatter ? xTickFormatter(value as string | number) : value)}
+            tickFormatter={(value) =>
+              xTickFormatter ? xTickFormatter(value as string | number) : value
+            }
             minTickGap={24}
           />
           <YAxis
@@ -144,14 +146,10 @@ export function TrendChart({
             cursor={{ stroke: CHART_AXIS, strokeDasharray: "4 4" }}
           />
           {legend && (
-            <Legend
-              iconType="circle"
-              iconSize={8}
-              wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
-            />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 4 }} />
           )}
           {series.map((s, index) => {
-            const color = s.color ?? chartColor(index)
+            const color = s.color ?? chartColor(index);
             if (kind === "line") {
               return (
                 <Line
@@ -164,7 +162,7 @@ export function TrendChart({
                   dot={false}
                   activeDot={{ r: 4, strokeWidth: 0 }}
                 />
-              )
+              );
             }
             if (kind === "bar") {
               return (
@@ -176,7 +174,7 @@ export function TrendChart({
                   radius={[4, 4, 0, 0]}
                   maxBarSize={32}
                 />
-              )
+              );
             }
             return (
               <Area
@@ -191,10 +189,10 @@ export function TrendChart({
                 dot={false}
                 activeDot={{ r: 4, strokeWidth: 0 }}
               />
-            )
+            );
           })}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
-  )
+  );
 }
