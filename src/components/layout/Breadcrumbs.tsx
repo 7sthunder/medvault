@@ -8,8 +8,8 @@ import { getPageContext } from "@/components/layout/nav-model";
 import { useShell } from "@/components/layout/shell-context";
 
 export function Breadcrumbs({ className }: { className?: string }) {
-  const { pathname } = useShell();
-  const { crumbs } = getPageContext(pathname);
+  const { pathname, basePath } = useShell();
+  const { crumbs } = getPageContext(pathname, basePath);
 
   return (
     <nav aria-label="Breadcrumbs" className={cn("min-w-0 flex-1 items-center gap-1.5 text-sm", className)}>

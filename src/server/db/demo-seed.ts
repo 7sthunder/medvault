@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 
-import type { Db, DbTx } from "./helpers";
+import type { DbClient, DbTx } from "./helpers";
 import { addDays, atTime, upsertUser, utcDateKey, uuidv7 } from "./helpers";
 import {
   adherenceDaily,
@@ -80,7 +80,11 @@ async function wipeDemoRows(tx: DbTx, userId: string) {
  * Rebuild the §19 demo workspace transactionally. Idempotent: every run ends with the same
  * row counts (the 17-day window rolls with "today" so the totals are invariant).
  */
-export async function seedDemoWorkspace(db: Db): Promise<{
+/**
+ * `Db | DbTx` so the demo domain can seed inside an existing transaction (drizzle turns the
+ * nested `transaction` into a savepoint), which is what lets the demo tests roll back cleanly.
+ */
+export async function seedDemoWorkspace(db: DbClient): Promise<{
   userId: string;
   scheduled: number;
   taken: number;
@@ -299,7 +303,7 @@ export async function seedDemoWorkspace(db: Db): Promise<{
 }
 
 /** §19 totals pulled live from the DB (sums are seeds computed independently here). */
-export async function demoTotals(db: Db) {
+export async function demoTotals(db: DbClient) {
   const [demoUser] = await db.select({ id: users.id }).from(users).where(eq(users.email, DEMO_USER_EMAIL)).limit(1);
   if (!demoUser) return null;
 

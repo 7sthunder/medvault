@@ -9,6 +9,7 @@ import {
   NAV_ITEMS,
   SETTINGS_NAV,
 } from "@shared/nav";
+import { HELP_CARDS, HELP_FAQS, HELP_SECTIONS } from "@/features/help/help-content";
 
 interface RouteOwner {
   owner: "aadhi" | "bala" | "hp";
@@ -24,19 +25,19 @@ interface RouteOwner {
 const ROUTE_MANIFEST: Readonly<Record<string, RouteOwner>> = {
   "/dashboard": { owner: "bala", phase: 18, existsNow: true },
   "/medications": { owner: "aadhi", phase: 15, existsNow: true },
-  "/schedule": { owner: "aadhi", phase: 14 },
+  "/schedule": { owner: "aadhi", phase: 14, existsNow: true },
   "/history": { owner: "bala", phase: 19, existsNow: true },
   "/adherence": { owner: "bala", phase: 16, existsNow: true },
   "/insights": { owner: "hp", phase: 23, existsNow: true },
   "/reports": { owner: "bala", phase: 20, existsNow: true },
   "/caregiver": { owner: "hp", phase: 17, existsNow: true },
   "/notifications": { owner: "hp", phase: 22, existsNow: true },
-  "/settings/profile": { owner: "bala", phase: 24 },
-  "/settings/reminders": { owner: "bala", phase: 24 },
-  "/settings/caregiver": { owner: "bala", phase: 24 },
-  "/settings/appearance": { owner: "bala", phase: 24 },
-  "/settings/data": { owner: "bala", phase: 24 },
-  "/help": { owner: "hp", phase: 30 },
+  "/settings/profile": { owner: "bala", phase: 24, existsNow: true },
+  "/settings/reminders": { owner: "bala", phase: 24, existsNow: true },
+  "/settings/caregiver": { owner: "bala", phase: 24, existsNow: true },
+  "/settings/appearance": { owner: "bala", phase: 24, existsNow: true },
+  "/settings/data": { owner: "bala", phase: 24, existsNow: true },
+  "/help": { owner: "hp", phase: 30, existsNow: true },
   "/medications/new": { owner: "aadhi", phase: 15, existsNow: true },
   "/medications/[id]": { owner: "aadhi", phase: 15, existsNow: true },
   "/medications/[id]/edit": { owner: "aadhi", phase: 15, existsNow: true },
@@ -63,6 +64,12 @@ const EXPECTED_ROUTE_FILES: Readonly<Record<string, string>> = {
   "/history": "src/app/(app)/history/page.tsx",
   "/reports": "src/app/(app)/reports/page.tsx",
   "/notifications": "src/app/(app)/notifications/page.tsx",
+  "/settings/profile": "src/app/(app)/settings/profile/page.tsx",
+  "/settings/reminders": "src/app/(app)/settings/reminders/page.tsx",
+  "/settings/caregiver": "src/app/(app)/settings/caregiver/page.tsx",
+  "/settings/appearance": "src/app/(app)/settings/appearance/page.tsx",
+  "/settings/data": "src/app/(app)/settings/data/page.tsx",
+  "/help": "src/app/help/page.tsx",
 };
 
 describe("nav model invariants", () => {
@@ -131,6 +138,71 @@ describe("nav route manifest (no dead links)", () => {
       expect(file, `no file mapping for ${href}`).toBeDefined();
       if (!file) continue;
       expect(existsSync(path.resolve(process.cwd(), file)), `${file} should exist`).toBe(true);
+    }
+  });
+});
+
+/**
+ * Phase 18 landed `/demo` and the consolidated `/help`. `/demo` is not a canonical nav href, so it
+ * cannot go in `ROUTE_MANIFEST` without breaking the "no undocumented routes" invariant — but both
+ * *are* linked from the marketing footer, the settings data page and the help cards, so a missing
+ * file would be a dead link. Pinned explicitly.
+ */
+const PHASE_18_ROUTE_FILES: readonly string[] = [
+  "src/app/help/page.tsx",
+  "src/app/(marketing)/demo/page.tsx",
+  "src/app/demo/workspace/layout.tsx",
+  ...["dashboard", "schedule", "medications", "history", "adherence", "insights", "reports", "caregiver", "help"].map(
+    (screen) => `src/app/demo/workspace/${screen}/page.tsx`,
+  ),
+];
+
+/**
+ * Help cards link to real app screens; `/demo` is the one that lives in the marketing group,
+ * because it is a landing page rather than an app screen. Keyed by href so the expectation is
+ * explicit — deriving the path from the href silently mis-resolves group-scoped routes.
+ */
+const HELP_CARD_ROUTE_FILES: Readonly<Record<string, string>> = {
+  "/medications/new": "src/app/(app)/medications/new/page.tsx",
+  "/settings/reminders": "src/app/(app)/settings/reminders/page.tsx",
+  "/settings/appearance": "src/app/(app)/settings/appearance/page.tsx",
+  "/caregiver": "src/app/(app)/caregiver/page.tsx",
+  "/settings/data": "src/app/(app)/settings/data/page.tsx",
+  "/schedule": "src/app/(app)/schedule/page.tsx",
+  "/history": "src/app/(app)/history/page.tsx",
+  "/adherence": "src/app/(app)/adherence/page.tsx",
+  "/insights": "src/app/(app)/insights/page.tsx",
+  "/demo": "src/app/(marketing)/demo/page.tsx",
+};
+
+describe("phase 18 routes (settings, demo, help) have no dead links", () => {
+  it("every file exists", () => {
+    for (const file of PHASE_18_ROUTE_FILES) {
+      expect(existsSync(path.resolve(process.cwd(), file)), `${file} should exist`).toBe(true);
+    }
+    for (const file of Object.values(HELP_CARD_ROUTE_FILES)) {
+      expect(existsSync(path.resolve(process.cwd(), file)), `${file} should exist`).toBe(true);
+    }
+  });
+
+  it("every href in the help content is a mapped, real screen", () => {
+    const hrefs = HELP_CARDS.map((card) => card.href).filter((href): href is string => Boolean(href));
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const href of hrefs) {
+      expect(href.startsWith("/")).toBe(true);
+      expect(HELP_CARD_ROUTE_FILES[href], `${href} is not a mapped route`).toBeDefined();
+      expect(ROUTE_MANIFEST[href] ?? href === "/demo", `${href} is not a known route`).toBeTruthy();
+    }
+  });
+
+  it("help content keeps every section and faq addressable", () => {
+    expect(HELP_SECTIONS.length).toBeGreaterThan(0);
+    for (const card of HELP_CARDS) {
+      expect(HELP_SECTIONS.map((s) => s.id)).toContain(card.sectionId);
+    }
+    for (const faq of HELP_FAQS) {
+      expect(faq.question.length).toBeGreaterThan(0);
+      expect(faq.answer.length).toBeGreaterThan(0);
     }
   });
 });

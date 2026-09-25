@@ -9,6 +9,7 @@ const FOOTER_COLUMNS = [
       { label: "How It Works", href: "#how-it-works" },
       { label: "Features", href: "#features" },
       { label: "AI Insights", href: "#features" },
+      { label: "Try the Demo", href: "/demo" },
       { label: "Reviews", href: "#testimonials" },
     ],
   },

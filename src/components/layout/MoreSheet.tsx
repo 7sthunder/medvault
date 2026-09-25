@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/drawer";
 import { NAV_GROUP_ORDER, NAV_ITEMS, type NavGroup } from "@shared/nav";
 
-import { isNavItemActive } from "@/components/layout/nav-model";
+import { isNavItemActive, withBasePath } from "@/components/layout/nav-model";
 import { useShell } from "@/components/layout/shell-context";
 
 const GROUP_LABELS: Readonly<Partial<Record<NavGroup, string>>> = {
@@ -25,7 +25,7 @@ const GROUP_LABELS: Readonly<Partial<Record<NavGroup, string>>> = {
 };
 
 export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { pathname } = useShell();
+  const { pathname, basePath } = useShell();
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -48,11 +48,11 @@ export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                   </p>
                 )}
                 {items.map((item) => {
-                  const active = isNavItemActive(item.href, pathname);
+                  const active = isNavItemActive(item.href, pathname, basePath);
                   return (
                     <Link
                       key={item.href}
-                      href={item.href}
+                      href={withBasePath(item.href, basePath)}
                       onClick={() => onOpenChange(false)}
                       aria-current={active ? "page" : undefined}
                       className={cn(

@@ -8,7 +8,7 @@ import { Brand } from "@/components/brand/Brand";
 import { NavIcon } from "@/components/ui/nav-icon";
 import { NAV_GROUP_ORDER, NAV_ITEMS, type NavGroup, type NavIconName } from "@shared/nav";
 
-import { isNavItemActive } from "@/components/layout/nav-model";
+import { isNavItemActive, withBasePath } from "@/components/layout/nav-model";
 import { useShell } from "@/components/layout/shell-context";
 
 const GROUP_LABELS: Readonly<Record<NavGroup, string>> = {
@@ -31,11 +31,11 @@ interface SidebarLinkProps {
 }
 
 function SidebarLink({ href, label, icon }: SidebarLinkProps) {
-  const { pathname } = useShell();
-  const active = isNavItemActive(href, pathname);
+  const { pathname, basePath } = useShell();
+  const active = isNavItemActive(href, pathname, basePath);
   return (
     <Link
-      href={href}
+      href={withBasePath(href, basePath)}
       aria-current={active ? "page" : undefined}
       className={cn(
         "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",

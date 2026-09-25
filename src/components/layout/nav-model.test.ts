@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getPageContext, isNavItemActive } from "@/components/layout/nav-model";
+import { getPageContext, isNavItemActive, stripBasePath, withBasePath } from "@/components/layout/nav-model";
 
 describe("isNavItemActive", () => {
   it("matches the exact pathname", () => {
@@ -95,6 +95,52 @@ describe("getPageContext", () => {
     expect(getPageContext("/some-page")).toEqual({
       title: "Some page",
       crumbs: [{ label: "Home", href: "/dashboard" }, { label: "Some page" }],
+    });
+  });
+});
+describe("demo base path", () => {
+  const BASE = "/demo/workspace";
+
+  it("prefixes nav hrefs but leaves the more pseudo-href alone", () => {
+    expect(withBasePath("/dashboard", BASE)).toBe("/demo/workspace/dashboard");
+    expect(withBasePath("/settings/profile", BASE)).toBe("/demo/workspace/settings/profile");
+    expect(withBasePath("more", BASE)).toBe("more");
+    expect(withBasePath("/dashboard", undefined)).toBe("/dashboard");
+  });
+
+  it("matches nav items against the un-prefixed path", () => {
+    expect(isNavItemActive("/dashboard", "/demo/workspace/dashboard", BASE)).toBe(true);
+    expect(isNavItemActive("/schedule", "/demo/workspace/schedule", BASE)).toBe(true);
+    expect(isNavItemActive("/settings/profile", "/demo/workspace/settings/data", BASE)).toBe(true);
+    expect(isNavItemActive("/medications", "/demo/workspace/schedule", BASE)).toBe(false);
+  });
+
+
+  it("strips the base path and maps the workspace root to the dashboard", () => {
+    expect(stripBasePath("/demo/workspace/schedule", BASE)).toBe("/schedule");
+    expect(stripBasePath("/demo/workspace", BASE)).toBe("/dashboard");
+    expect(stripBasePath("/demo/workspace/", BASE)).toBe("/dashboard");
+  });
+
+  it("leaves paths outside the base path alone", () => {
+    expect(stripBasePath("/settings/data", BASE)).toBe("/settings/data");
+    expect(isNavItemActive("/settings/data", "/settings/data", BASE)).toBe(true);
+  });
+
+  it("builds breadcrumbs that all point back into the workspace", () => {
+    const ctx = getPageContext("/demo/workspace/settings/reminders", BASE);
+    expect(ctx.title).toBe("Reminders");
+    expect(ctx.crumbs).toEqual([
+      { label: "Home", href: "/demo/workspace/dashboard" },
+      { label: "Settings", href: "/demo/workspace/settings/profile" },
+      { label: "Reminders" },
+    ]);
+  });
+
+  it("resolves the workspace root to the dashboard context", () => {
+    expect(getPageContext("/demo/workspace", BASE)).toEqual({
+      title: "Dashboard",
+      crumbs: [{ label: "Dashboard" }],
     });
   });
 });

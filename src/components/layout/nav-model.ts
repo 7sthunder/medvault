@@ -46,16 +46,42 @@ const PAGE_TITLES: Readonly<Record<string, string>> = Object.fromEntries([
   ...SETTINGS_NAV.map((i) => [i.href, i.label]),
 ]);
 
-export function isNavItemActive(itemHref: string, pathname: string): boolean {
+/**
+ * Phase 18 (§10.8) — the demo workspace serves the *same* screens under `/demo/workspace/…`.
+ *
+ * Rather than forking the nav, the shell carries a `basePath` and every href/active-check is
+ * resolved through these two helpers. One place to reason about means a demo link can never point
+ * at a route that only exists for real accounts, and the route-manifest test keeps working because
+ * the underlying `NAV_ITEMS` are unchanged.
+ */
+export function stripBasePath(pathname: string, basePath?: string): string {
+  if (!basePath) return normalize(pathname);
   const p = normalize(pathname);
+  if (p === basePath) return "/dashboard";
+  if (p.startsWith(`${basePath}/`)) return p.slice(basePath.length);
+  return p;
+}
+
+export function withBasePath(href: string, basePath?: string): string {
+  if (!basePath || href === "more") return href;
+  return `${basePath}${href}`;
+}
+
+export function isNavItemActive(itemHref: string, pathname: string, basePath?: string): boolean {
+  return isNavItemActiveRaw(stripBasePath(pathname, basePath), itemHref);
+}
+
+function isNavItemActiveRaw(p: string, itemHref: string): boolean {
   if (itemHref === p) return true;
   if (itemHref === "/settings/profile" && p.startsWith("/settings/")) return true;
   if (SECTION_ROOTS.has(itemHref) && p.startsWith(itemHref + "/")) return true;
   return false;
 }
 
-export function getPageContext(pathname: string): ShellPageContext {
-  const p = normalize(pathname);
+export function getPageContext(pathname: string, basePath?: string): ShellPageContext {
+  const p = stripBasePath(pathname, basePath);
+  const home = withBasePath("/dashboard", basePath);
+  const settings = withBasePath("/settings/profile", basePath);
 
   if (p === "/dashboard") {
     return { title: "Dashboard", crumbs: [{ label: "Dashboard" }] };
@@ -66,8 +92,8 @@ export function getPageContext(pathname: string): ShellPageContext {
     return {
       title: label,
       crumbs: [
-        { label: "Home", href: "/dashboard" },
-        { label: "Settings", href: "/settings/profile" },
+        { label: "Home", href: home },
+        { label: "Settings", href: settings },
         { label },
       ],
     };
@@ -78,7 +104,7 @@ export function getPageContext(pathname: string): ShellPageContext {
     return {
       title: exact,
       crumbs: [
-        { label: "Home", href: "/dashboard" },
+        { label: "Home", href: home },
         { label: exact },
       ],
     };
@@ -90,8 +116,8 @@ export function getPageContext(pathname: string): ShellPageContext {
     return {
       title: sectionTitle,
       crumbs: [
-        { label: "Home", href: "/dashboard" },
-        { label: sectionTitle, href: root },
+        { label: "Home", href: home },
+        { label: sectionTitle, href: withBasePath(root, basePath) },
         { label: childLabel(p.slice(root.length + 1)) },
       ],
     };
@@ -101,7 +127,7 @@ export function getPageContext(pathname: string): ShellPageContext {
   return {
     title,
     crumbs: [
-      { label: "Home", href: "/dashboard" },
+      { label: "Home", href: home },
       { label: title },
     ],
   };

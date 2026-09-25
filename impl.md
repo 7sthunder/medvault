@@ -49,7 +49,7 @@
 | 15 | Medication CRUD UI + Dashboard | `done` | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section |
 | 16 | History + Reports + Notifications | `done` | `(this log)` | verified: typecheck/lint/test — see Phase 16 section |
 | 17 | Caregiver system + AI insights | `done` | `(this log)` | verified: typecheck/lint/test/build — see Phase 17 section |
-| 18 | Settings + Demo mode + /help | `pending` | — | |
+| 18 | Settings + Demo mode + /help | `done` | `(this log)` | verified: typecheck/lint/test/build - see Phase 18 section |
 | 19 | Quality sweep, test completion, E2E & delivery | `pending` | — | |
 
 > **Renumbering note:** `plan.md` §21 was consolidated from 30 phases to **19** (`Phase 01 → Phase 19`)
@@ -1348,3 +1348,115 @@ The dashboard insight + caregiver tiles are now real reads, not stubs.
   `{ tone, insights[] }` with `INSIGHT_CATEGORIES` / `SUGGESTED_ACTIONS` members, or it silently
   falls back to the rule engine.
 
+
+## Phase 18 - Settings + Demo mode + /help
+
+### What was built
+
+Three deliverables, in dependency order: the settings surface (plan §11.14), the demo mode
+(§10.8 / §11.16), and `/help` (§11.15).
+
+**Settings.** A `settingsService` domain layer, a `settings` tRPC router, five screens under
+`/settings/*` (profile, reminders, caregiver, appearance, data) with a settings sub-navigation, and
+an `AppearanceController` that applies theme / density / reduced-motion to the document before
+first paint. Profile writes re-bucket history when the timezone changes, so day boundaries stay
+honest. Reminders are editable globally and per medication, with optimistic toggles. Data offers
+CSV export (medications / history / both) and two destructive flows — delete-all-data and
+delete-account — each behind a `ConfirmationDialog` requiring a typed confirmation phrase.
+
+**Demo mode.** A signed, httpOnly `medvault_demo_session` cookie (HMAC-SHA256, 12h TTL, compared
+with `timingSafeEqual`, fails closed) plus a `demoService` that drives the **real** services:
+`simulateAction` goes through `doseActionsService`, `applyScenario` rewrites 14 days of events and
+recomputes adherence through `recomputeRange`, `generateCaregiverAlert` and `generateInsight` call
+the real caregiver and insights pipelines. The simulated clock is threaded through the existing
+`now()` seam (`setNowImpl`) so every date-sensitive service sees the same instant. A real session
+always beats the demo cookie — a signed-in user exploring `/demo` keeps their own account.
+
+**Help.** Static content in `src/features/help/help-content.ts` (5 sections, 10 cards, 9 FAQs)
+rendered by one shared `HelpContent` component. The AI disclaimer is copy the plan requires
+explicitly, not a footnote: insights describe patterns, they do not diagnose or prescribe.
+
+### Files created/modified
+
+| Path | Action | Purpose |
+|---|---|---|
+| `src/shared/validations/settings.ts` | created | confirmation phrases, delete/export/reminder/scenario schemas, `DEMO_ACTIONS` |
+| `src/shared/types.ts` | edited | `ProfileDTO`, `ReminderSettingsPanelDTO`, `DemoStateDTO`, reshaped `DemoActionResultDTO`, extended `DataOverviewDTO` |
+| `src/server/domain/settings/service.ts` | created | profile, reminders, appearance, data overview, CSV export, delete-all, delete-account |
+| `src/server/domain/settings/service.test.ts` | created | 12 DB-gated tests (timezone re-bucketing, reminder patches, export contents, delete scoping) |
+| `src/server/trpc/routers/settings.ts` | created | `profile`, `reminders`, `appearance`, `dataOverview`, `exportCsv`, `deleteAllData`, `deleteAccount` |
+| `src/server/domain/demo/token.ts` | created | signed demo cookie: `issueDemoToken` / `verifyDemoToken` |
+| `src/server/domain/demo/service.ts` | created | `ensureDemoUser`, `simulateAction`, `applyScenario`, `generateCaregiverAlert`, `generateInsight`, `setTime`, `advanceDays`, `reset` |
+| `src/server/domain/demo/service.test.ts` | created | 14 DB-gated tests (cookie round-trip + tamper, all four dose actions, scenario rewrite bounds, clock advance, reset) |
+| `src/server/trpc/context.ts` | edited | demo-cookie subject resolution + `setNowImpl` / `resetNowImpl` |
+| `src/server/trpc/routers/demo.ts` | created | `enter`/`leave`/`state`/`simulateAction`/`applyScenario`/`generateCaregiverAlert`/`generateInsight`/`setTime`/`advanceDays`/`reset` |
+| `src/server/auth/resolve-demo-subject.ts` | created | server-side demo subject for layouts, installing the same clock override |
+| `src/features/settings/*.tsx` | created | `appearance-controller`, `SettingsNav`, `ProfileForm`, `ReminderSettings`, `CaregiverSettings`, `AppearancePanel`, `ExportButtons`, `DeleteFlow`, `DataOverview` |
+| `src/app/(app)/settings/**` | created | settings layout + 5 pages |
+| `src/features/demo/DemoBanner.tsx`, `DemoDock.tsx` | created | banner + floating simulation dock (bottom-right) with clock badge |
+| `src/features/demo/DemoLanding.tsx` | created | signed-out `/demo` landing page and enter CTA |
+| `src/app/demo/workspace/**` | created | demo shell + 8 thin re-exports of the real screens |
+| `src/components/layout/{nav-model,shell-context,AppShell,Sidebar,TopNav,MoreSheet,Breadcrumbs,BottomNav}.tsx` | edited | `basePath` support so the demo workspace reuses the real nav |
+| `src/features/help/{help-content.ts,HelpContent.tsx}`, `src/app/help/page.tsx` | created | `/help` content + single auth-aware route |
+| `src/features/landing/{Footer,AiChatFab}.tsx` | edited | demo link; FAB label now states the AI is informational |
+| `src/components/layout/nav-manifest.test.ts` | edited | `/settings/*`, `/help`, `/demo` pinned; new Phase 18 dead-link suite |
+| `src/components/layout/nav-model.test.ts` | edited | 6 new tests for `stripBasePath` / `withBasePath` / base-path breadcrumbs |
+
+### Deviations & decisions (precise > faithful)
+
+- **The demo reuses the real screens under a prefix, it does not fork them.** The plan said "real
+  app pages reused"; the natural Next.js reading is route groups, but route groups do not namespace
+  URLs, so `(demo)/schedule` would collide with `/schedule`. Instead the shell carries an optional
+  `basePath` (`/demo/workspace`) and every href, active check and breadcrumb resolves through
+  `withBasePath` / `stripBasePath`. One nav model, one set of screens, no duplicated logic — and the
+  existing route-manifest test keeps its meaning.
+- **`/help` is one route, not two.** The plan asked for "authenticated + marketing both". Two pages
+  at `/help` (one per group) is a hard build error — Next rejects duplicate paths outright. One
+  server component reads the session and renders `AppShell` when signed in, `HelpContent` bare when
+  not. Same copy either way, and it lives outside both groups so no group layout can force a
+  `bg-white` wrapper over a dark-mode surface.
+- **Appearance is applied on the server.** `(app)/layout.tsx` reads the stored appearance and mounts
+  `AppearanceController` before first paint, because a client-only effect flashes the wrong theme on
+  every navigation. `App Router` layouts cannot take custom props, so the active-section state lives
+  in a client component using `usePathname()` instead.
+- **The demo cookie never overrides a real session.** `resolveDemoSubject` and the tRPC context both
+  try the real session first; the cookie is a fallback, not a takeover. A signed-in user landing on
+  `/demo` keeps their own data and the banner says so.
+- **The demo clock is the existing `now()` seam, not a parallel time source.** `setNowImpl` was
+  already threaded through adherence, caregiver, dashboard, dose actions/events, insights,
+  medications and schedule. Reusing it means the demo cannot drift from the real services; the
+  alternative — a second clock consulted by only some services — would have produced exactly the
+  kind of "the demo says X but the page says Y" bug that makes a demo untrustworthy.
+- **`ensureDemoUser` is called once, in the service.** The router initially called it before each
+  delegation purely to guarantee seeding; the service already does it, so the router calls were dead
+  (and lint said so). Removed, except on `enter`/`state`/`simulationNow`, which genuinely need the
+  subject.
+- **`DemoLanding` splits provider from consumer.** `useMutation` is called in the component body,
+  which Next also executes when server-rendering the page; wrapping the hook's own component in the
+  provider renders fine in the browser and throws "Unable to find tRPC Context" on the server. The
+  view is therefore a child of the provider, not its parent. `/demo` is also `force-dynamic` so the
+  clock badge never shows baked-at-build-time demo state.
+
+### Verification
+
+- `pnpm typecheck` - clean
+- `pnpm lint` - clean (0 warnings; removed the dead `ensureDemoUser` calls and three unused bindings)
+- `pnpm test` - **43 files, 332 tests passed** (up from 41/297: +1 settings suite, +1 demo suite,
+  +7 nav-model base-path tests, +4 Phase 18 dead-link tests)
+- `pnpm build` - compiled clean. Route manifest confirms `/demo`, all 8 `/demo/workspace/*` screens,
+  `/help`, and the 5 `/settings/*` pages.
+
+### Hand-off notes for later phases
+
+- The demo workspace screens are thin re-exports. Any new `(app)` screen the plan adds later
+  (Phase 19+) needs a matching `src/app/demo/workspace/<screen>/page.tsx` **and** an entry in
+  `PHASE_18_ROUTE_FILES` if the nav should reach it, or demo visitors hit a 404.
+- `resolveDemoSubject()` returns `null` when there is neither a session nor a valid demo cookie;
+  callers must handle it (the workspace layout redirects to `/demo#enter`).
+- `applyScenario` rewrites a fixed 14-day window (`SCENARIO_DAYS`). Test fixtures with history
+  outside that window are unaffected, which is why `service.test.ts` scopes its assertions to the
+  rewritten range rather than the whole fixture.
+- Two PowerShell round-trips during this phase produced CP1252-mangled em dashes and a mojibake
+  ellipsis; both were caught by `pnpm build` (`stream did not contain valid UTF-8`) and fixed by
+  re-encoding. All `src/**` is verified strict-UTF-8 now. Prefer the editor tools over
+  `Get-Content -Raw | Set-Content` for files containing non-ASCII characters.

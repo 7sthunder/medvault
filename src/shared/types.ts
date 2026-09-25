@@ -13,9 +13,11 @@
  * Dependency-free (imports only `enums` + a few scalar unions).
  */
 
+import type { DemoAction } from "./validations/settings";
 import type {
   CaregiverAlertType,
   CaregiverRelationshipStatus,
+  DemoScenario,
   DoseActionType,
   DoseEventStatus,
   DoseStatus,
@@ -470,6 +472,67 @@ export interface DataOverviewDTO {
   doseActions: number;
   insights: number;
   notifications: number;
+  /** Oldest / newest dose event, so the data page can show the real span. */
+  firstDoseAt: Date | null;
+  lastDoseAt: Date | null;
+  /** Demo rows are isolated under the demo user and can never be wiped from here. */
+  hasDemoData: boolean;
+}
+
+/** `/settings/profile` — the editable identity fields. */
+export interface ProfileDTO {
+  name: string;
+  email: string;
+  timezone: string;
+  isDemo: boolean;
+  createdAt: Date;
+}
+
+/** One row of the `/settings/reminders` per-medication table. */
+export interface MedicationReminderRowDTO {
+  id: string;
+  name: string;
+  dosageAmount: string;
+  dosageUnit: string;
+  remindersEnabled: boolean;
+}
+
+/** `/settings/reminders` — global defaults + pref toggles + the per-med table. */
+export interface ReminderSettingsPanelDTO extends ReminderSettingsDTO {
+  medications: MedicationReminderRowDTO[];
+}
+
+/* ── Demo mode (§8.14 demo_state, §10.8) ─────────────────────────────────── */
+
+/** Everything the `/demo` dock + clock need to render the current simulation. */
+export interface DemoStateDTO {
+  /** `false` until `demo.enter` has seeded the workspace. */
+  active: boolean;
+  scenario: DemoScenario;
+  simulationNow: Date | null;
+  /** Real "now" at the time of the read, so the clock can show the offset. */
+  realNow: Date;
+  hasCaregiverDemoData: boolean;
+  totals: { scheduled: number; taken: number; missed: number; skipped: number; snoozed: number };
+}
+
+/**
+ * Result of a simulation action, so the dock can report what it changed.
+ *
+ * `action` covers the four dose outcomes plus the three "generate" affordances, which is what the
+ * dock actually offers; `ok: false` means the request was understood but nothing could change
+ * (nothing due, no missed dose yet) — not an error, so the dock reports it in place.
+ */
+export type DemoResultAction = DemoAction | "scenario" | "caregiver_alert" | "insight";
+
+export interface DemoActionResultDTO {
+  ok: boolean;
+  action: DemoResultAction;
+  /** Human-readable summary of the row(s) touched, shown next to the dock. */
+  detail: string;
+  doseEventId: string | null;
+  /** Rows actually changed (`0` when the request was a no-op). */
+  changed: number;
 }
 
 /* ── Shared query input (plan §9 `TimeRange`) ─────────────────────────────── */

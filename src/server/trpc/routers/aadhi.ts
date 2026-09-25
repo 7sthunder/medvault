@@ -19,6 +19,8 @@ import { historyRouter } from "./history";
 import { reportsRouter } from "./reports";
 import { caregiverRouter } from "./caregiver";
 import { insightsRouter } from "./insights";
+import { settingsRouter } from "./settings";
+import { demoRouter } from "./demo";
 
 export const aadhiRouters = {
   medication: medicationRouter,
@@ -32,4 +34,6 @@ export const aadhiRouters = {
   reports: reportsRouter,
   caregiver: caregiverRouter,
   insights: insightsRouter,
+  settings: settingsRouter,
+  demo: demoRouter,
 };

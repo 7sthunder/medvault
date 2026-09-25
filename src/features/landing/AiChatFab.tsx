@@ -6,7 +6,10 @@ import Link from "next/link";
 
 import { useInView } from "@/features/landing/use-in-view";
 
-/* Port of `App.jsx:1221–1297` (AiChatFab) → routes to `/help`. */
+/* Port of `App.jsx:1221–1297` (AiChatFab) → routes to `/help`.
+   Plan §11.15: the affordance must not imply a live medical adviser, so the label says what it
+   actually is — a link to the help page, where the "informational, not medical advice" note
+   lives. The visual copy is unchanged. */
 export default function AiChatFab() {
   const [fabRef, fabIn] = useInView<HTMLDivElement>();
 
@@ -28,7 +31,7 @@ export default function AiChatFab() {
         <Link
           href="/help"
           className="flex items-center gap-2 text-sm font-bold text-white"
-          aria-label="AI Health Assistant"
+          aria-label="About MedVault AI — informational only, not medical advice"
         >
           <Ambulance size={21} aria-hidden />
           <span className="hidden sm:inline">Ask AI</span>
