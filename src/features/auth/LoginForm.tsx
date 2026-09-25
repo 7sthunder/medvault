@@ -86,7 +86,7 @@ export default function LoginForm({ next }: { next: string | null }) {
 
       <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1">
         {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
-        Access Vault
+        Sign in to MediTrack AI
         {!isSubmitting && <ArrowRight aria-hidden="true" />}
       </Button>
     </form>

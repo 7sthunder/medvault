@@ -58,7 +58,7 @@ async function inRollbackTransaction<T>(fn: (tx: DbTx, actors: Actors) => Promis
           .values({
             id: uuidv7(),
             name,
-            email: `settings-${uuidv7()}@medvault.local`,
+            email: `settings-${uuidv7()}@meditrackai.local`,
             timezone: "UTC",
             onboardingCompleted: true,
           })
@@ -159,21 +159,21 @@ dbTests("settings profile (§10.11)", () => {
 
       const updated = await settingsService.updateProfile(tx, owner, {
         name: "  Renamed Owner  ",
-        email: "  Renamed@MedVault.Local ",
+        email: "  Renamed@MediTrack AI.Local ",
         timezone: "Asia/Kolkata",
       });
       expect(updated.name).toBe("Renamed Owner"); // trimmed
-      expect(updated.email).toBe("renamed@medvault.local"); // lower-cased
+      expect(updated.email).toBe("renamed@meditrackai.local"); // lower-cased
       expect(updated.timezone).toBe("Asia/Kolkata");
 
       // Re-saving the *same* email is not a conflict.
       await expect(
         settingsService.updateProfile(tx, owner, {
           name: "Renamed Owner",
-          email: "renamed@medvault.local",
+          email: "renamed@meditrackai.local",
           timezone: "Asia/Kolkata",
         }),
-      ).resolves.toMatchObject({ email: "renamed@medvault.local" });
+      ).resolves.toMatchObject({ email: "renamed@meditrackai.local" });
     });
   }, 30_000);
 
@@ -200,7 +200,7 @@ dbTests("settings profile (§10.11)", () => {
 
       await settingsService.updateProfile(tx, owner, {
         name: "Settings Owner",
-        email: "settings-owner@medvault.local",
+        email: "settings-owner@meditrackai.local",
         timezone: "Pacific/Auckland",
       });
 
@@ -348,7 +348,7 @@ dbTests("settings data governance (§10.11)", () => {
 
       const meds = await settingsService.exportCsv(tx, owner, "medications");
       expect(meds.filename).toBe(
-        `medvault-medications-${new Date().toISOString().slice(0, 10)}.csv`,
+        `meditrackai-medications-${new Date().toISOString().slice(0, 10)}.csv`,
       );
       const medHeader = meds.csv.split("\n")[0]!;
       expect(medHeader).toBe(
@@ -362,7 +362,7 @@ dbTests("settings data governance (§10.11)", () => {
       expect(events.csv).toContain("Feeling fine");
 
       const all = await settingsService.exportCsv(tx, owner, "all");
-      expect(all.filename).toContain("medvault-vault-");
+      expect(all.filename).toContain("meditrackai-vault-");
       expect(all.csv).toContain("Aspirin"); // both sections present
       expect(all.csv).toContain("scheduled_for");
     });
@@ -441,7 +441,7 @@ dbTests("settings data governance (§10.11)", () => {
       await tx.insert(users).values({
         id: demoId,
         name: "Demo",
-        email: `demo-guard-${uuidv7()}@medvault.local`,
+        email: `demo-guard-${uuidv7()}@meditrackai.local`,
         isDemo: true,
       });
       await expect(settingsService.deleteAllData(tx, demoId)).rejects.toBeInstanceOf(SettingsError);

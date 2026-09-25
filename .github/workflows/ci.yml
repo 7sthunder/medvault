@@ -92,7 +92,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: medvault_e2e
+          POSTGRES_DB: meditrackai_e2e
         ports:
           - 5432:5432
         options: >-
@@ -102,9 +102,9 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/medvault_e2e
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/meditrackai_e2e
       # Explicit, so the E2E suite can never fall back to a real account's database.
-      E2E_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/medvault_e2e
+      E2E_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/meditrackai_e2e
       SUPABASE_URL: https://placeholder.supabase.co
       SUPABASE_PUBLISHABLE_KEY: placeholder-publishable-key
       SUPABASE_SECRET_KEY: placeholder-secret-key

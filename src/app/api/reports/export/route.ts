@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   ]);
   const csv = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
 
-  const filename = `medvault-report-${input.from}_${input.to}-${input.granularity}.csv`;
+  const filename = `meditrackai-report-${input.from}_${input.to}-${input.granularity}.csv`;
   return new Response(csv, {
     status: 200,
     headers: {

@@ -1,7 +1,7 @@
-# MedVault (MediTrack AI) — Complete Implementation Plan
+# MediTrack AI — Complete Implementation Plan
 
 > Product: **MediTrack AI — AI Smart Medical Adherence & Tracker**
-> Working brand (from the Stitch landing page): **MedVault**
+> Working brand (from the Stitch landing page): **MediTrack AI**
 > Tool: Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · Lucide · tRPC · TanStack Query · Better Auth · PostgreSQL · Drizzle ORM · Recharts · date-fns · Vercel AI SDK · Vitest · React Testing Library · Playwright · pnpm
 
 This document is the single source of truth for building the application. A coding agent must be able to read **only** the repository, the Stitch export under `Landingpage/`, and this file, and implement the full application without guessing.
@@ -41,7 +41,7 @@ This document is the single source of truth for building the application. A codi
 - The folders named in the plan are the target layout. The existing `Landingpage/` folder is the **design reference** and is never to be deleted or "cleaned up"; it contains the Stitch export we must not depend on at runtime, but from which source code is _ported_ into the Next.js app.
 - All shared strings/types (statuses, route paths, enums, dashboard quick actions) must be imported from `src/shared/`, never re-typed inline.
 - All business rules live in `src/server/domain/**`. UI never computes adherence/status/streak itself; it calls tRPC procedures or imports pure shared helpers (`src/shared/calc/*`) that are also used by the domain services (the two must stay in sync — the domain service is the authority; the shared helpers are the same code paths, exported as pure functions).
-- Language in the UI is English. Brand text uses the MedVault wordmark exactly as in the Stitch export.
+- Language in the UI is English. Brand text uses the MediTrack AI wordmark exactly as in the Stitch export.
 
 ---
 
@@ -53,7 +53,7 @@ This document is the single source of truth for building the application. A codi
 
 The repository has two commits on `main`:
 
-- `621377a "Add MedVault landing page"` (all of `Landingpage/`)
+- `621377a "Add MediTrack AI landing page"` (all of `Landingpage/`)
 - `7d8e76e "Add MediTrack AI implementation plan (plan.md)"`
 
 Tracked tree: root `plan.md` + `Landingpage/` (33 tracked files). On disk but **ignored**:
@@ -69,13 +69,13 @@ that define the visual language. Key files:
 | `src/components/HeroVisual.jsx`                                                                   | Hero phone + 4 floating notification chips. Defines the "notification card" glass-chip motif. Imports `../mobile`.                                                                                                                                                                                     |
 | `src/components/FloatingCard.jsx`                                                                 | Glass-card recipe (dashboard/insight card motif). **Not imported at runtime** — recipe-only reference.                                                                                                                                                                                                 |
 | `src/mobile.jsx`                                                                                  | Phone mockup part 1: CSS recipes, feed rows + section labels + bottom nav (PhoneScreen 129–234), parallax scene. Defines the **mobile app UI visual** (list rows, bottom tab with active dot).                                                                                                         |
-| `MedVaultAuthIllustration.jsx` **(root, not `src/`)**                                             | Login/Sign-up split screen. **Direct design reference for `/login` and `/register`.**                                                                                                                                                                                                                  |
-| `MedVaultPhoneSection.jsx` **(root, not `src/`)**                                                 | Phone mockup part 2: floating glass-card composition (AI Insight, Report Upload, Medicine reminder, Snooze pill, `8:00 PM` badge). **Not imported anywhere** — composition reference; defines the dashboard insight-card + DoseCard snooze motifs.                                                     |
+| `MediTrackAIAuthIllustration.jsx` **(root, not `src/`)**                                          | Login/Sign-up split screen. **Direct design reference for `/login` and `/register`.**                                                                                                                                                                                                                  |
+| `MediTrackAIPhoneSection.jsx` **(root, not `src/`)**                                              | Phone mockup part 2: floating glass-card composition (AI Insight, Report Upload, Medicine reminder, Snooze pill, `8:00 PM` badge). **Not imported anywhere** — composition reference; defines the dashboard insight-card + DoseCard snooze motifs.                                                     |
 | `src/index.css`, `src/App.css`                                                                    | Left-over Vite template CSS (`@import "tailwindcss"` + a `:root`/dark-mode var block). The var block is **not** part of the design — ignore `--accent:#aa3bff`.                                                                                                                                        |
-| `public/favicon.svg`                                                                              | Purple Vite bolt (`#863bff`), linked only by `index.html`. Leftover — the MedVault favicon is the **emerald→cyan gradient square + white HeartPulse** (`App.jsx:709–720`).                                                                                                                             |
+| `public/favicon.svg`                                                                              | Purple Vite bolt (`#863bff`), linked only by `index.html`. Leftover — the MediTrack AI favicon is the **emerald→cyan gradient square + white HeartPulse** (`App.jsx:709–720`).                                                                                                                         |
 | `public/icons.svg`                                                                                | Leftover Vite social sprite; unreferenced. Ignore.                                                                                                                                                                                                                                                     |
 | `public/how-it-works/{ai-doctor,prescription,reminders-mobile}.png`                               | **Referenced** at runtime (`App.jsx:192,172,219`). Port.                                                                                                                                                                                                                                               |
-| `public/imagessss/login_page.jpeg`                                                                | **Referenced** (auth left panel, `MedVaultAuthIllustration.jsx:187`). Port (rename dir — "imagessss" is a Stitch typo).                                                                                                                                                                                |
+| `public/imagessss/login_page.jpeg`                                                                | **Referenced** (auth left panel, `MediTrackAIAuthIllustration.jsx:187`). Port (rename dir — "imagessss" is a Stitch typo).                                                                                                                                                                             |
 | `public/hero/hero-art.png`, `public/hero/hero-phone-mockup.png`, `public/images/mascots-team.png` | Present but **referenced by no runtime code** (mascots are inline SVG). Do not port unless needed later.                                                                                                                                                                                               |
 | `public/images/hero-final.png`                                                                    | **MD5-identical** to root `Gemini_Generated_Image_jr77vyjr77vyjr77.png` (duplicate, unreferenced).                                                                                                                                                                                                     |
 | root `imagessss/{login_page.jpeg, login ku.png}`                                                  | **Duplicates/strays** of the public/auth assets; unreferenced. Ignore.                                                                                                                                                                                                                                 |
@@ -97,7 +97,7 @@ are logged in `docs/stitch-analysis.md` §8.
 
 ## 3. PRODUCT PURPOSE & SCOPE
 
-MedVault is a **medication adherence and tracking** app. It answers two questions immediately: _"What medicine do I need to take now?"_ and _"How well am I following my medication schedule?"_
+MediTrack AI is a **medication adherence and tracking** app. It answers two questions immediately: _"What medicine do I need to take now?"_ and _"How well am I following my medication schedule?"_
 
 **AI is strictly behavioral/adherence intelligence.** It may surface patterns in missed doses, timing, trends, reminder/snooze behavior, and medication-by-medication adherence. AI **must never** diagnose disease, recommend treatment, recommend changing a medication or dosage, prescribe, or make clinical decisions. This boundary is enforced by (a) the system prompt, (b) the input data schema (adherence-only), (c) the validated output schema, and (d) the fact that AI output is **read-only** — it can never mutate medications, schedules, or dose events.
 
@@ -105,9 +105,9 @@ MedVault is a **medication adherence and tracking** app. It answers two question
 
 ### 3.1 Brand naming decision (documented, do not revisit)
 
-- The Stitch export brands everything **MedVault** (logo: `linear-gradient(135deg,#10b981,#06b6d4)` rounded square + white `HeartPulse` icon; wordmark **MedVault** with _Vault_ in `#10b981`; AI assistant named **MedVault AI**).
-- **Decision:** the in-app UI, logo, favicon, wordmark, AI assistant name, and marketing copy all use the **MedVault** brand verbatim from the Stitch export.
-- "MediTrack AI" is the product/project full name used in page metadata, `<title>`, SEO/OG, package name, and documentation (e.g., title tag `MediTrack AI · MedVault`).
+- The Stitch export brands everything **MediTrack AI** (logo: `linear-gradient(135deg,#10b981,#06b6d4)` rounded square + white `HeartPulse` icon; wordmark **MediTrack AI** with _AI_ in `#10b981`; AI assistant named **MediTrack AI**).
+- **Decision:** the in-app UI, logo, favicon, wordmark, AI assistant name, and marketing copy all use the **MediTrack AI** brand verbatim from the Stitch export.
+- "MediTrack AI" is the product/project full name used in page metadata, `<title>`, SEO/OG, package name, and documentation (e.g., title tag `MediTrack AI · MediTrack AI`).
 - All brand usage goes through exactly one source: `src/shared/brand.ts` (name, tagline, colors, logo recipe) and one `Brand` component. Changing the product name later is a one-file change.
 
 ---
@@ -160,7 +160,7 @@ Rules:
 ### 4.1 Directory layout (target)
 
 ```
-D:\My ShYts\MedVault\
+D:\My ShYts\MediTrack AI\
 ├─ plan.md
 ├─ Landingpage/                    # Stitch design reference (UNTOUCHED)
 ├─ package.json                    # root = the Next.js web app (name: meditrack-ai)
@@ -250,8 +250,8 @@ D:\My ShYts\MedVault\
 ### 5.1 Brand
 
 - **Logo tile:** 36–44px, `border-radius: 10–12px`, `background: linear-gradient(135deg, #10b981, #06b6d4)`, white `HeartPulse` (lucide) icon centered, shadow `0 4px 12px rgba(16,185,129,0.25)`.
-- **Wordmark:** `Plus Jakarta Sans`, weight 900, ~20px, `#0f172a`, `letter-spacing: -0.02em`. Text = `Med` + `<span color:#10b981>Vault</span>`.
-- **AI assistant brand:** "MedVault AI" with a `Bot` icon; header gradient `linear-gradient(135deg,#10b981,#059669)`; status text `rgba(255,255,255,0.8)`.
+- **Wordmark:** `Plus Jakarta Sans`, weight 900, ~20px, `#0f172a`, `letter-spacing: -0.02em`. Text = `MediTrack` + `<span color:#10b981>AI</span>`.
+- **AI assistant brand:** "MediTrack AI" with a `Bot` icon; header gradient `linear-gradient(135deg,#10b981,#059669)`; status text `rgba(255,255,255,0.8)`.
 
 ### 5.2 Typography
 
@@ -363,7 +363,7 @@ file:line anchors live in `docs/stitch-analysis.md` §7. Summary of the non-obvi
 - **All other §5.3 tokens are verified verbatim**, including the exact hero gradient
   `linear-gradient(150deg,#f0fdf4 0%,#f8fafc 50%,#f0f9ff 100%)` (`App.jsx:755`).
 - **Glass-card radius has no single source value**: 16 px (`FloatingCard.jsx` / feature records
-  mock), 18 px (`MedVaultPhoneSection .mvp-fc`), 22 px (`HeroVisual` notifications). Adopt
+  mock), 18 px (`MediTrackAIPhoneSection .mvp-fc`), 22 px (`HeroVisual` notifications). Adopt
   `--radius-glass: 18px` (matches the phone motifs).
 - **Phone-mockup text uses `#9ab5ad`/`#0d1f1a` (phone tokens)**, app surfaces use ink tokens;
   keep the two namespaces separate (§5.3).
@@ -378,18 +378,18 @@ Verified against the actual compositions during Phase 01 — the source location
 `docs/stitch-analysis.md` §9. Non-goal motifs (Report Upload/OCR, Vitals, appointments) keep their
 visual language but map to **no route** (§3 non-goals).
 
-| Stitch screen                                           | Source composition                                             | Product screen                                                                       | Route(s)                                        |
-| ------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------- |
-| Landing page                                            | `App.jsx` (whole)                                              | Marketing home                                                                       | `/` (app `(marketing)` group)                   |
-| Auth split screen                                       | `MedVaultAuthIllustration.jsx`                                 | Login / Register                                                                     | `/login`, `/register`                           |
-| Phone feed (Recent Reports / Upcoming)                  | `mobile.jsx` PhoneScreen                                       | Today's Schedule / History feeds (same list-row motifs)                              | `/schedule`, `/history`, `/notifications`       |
-| Floating "AI Insight" glass card                        | `MedVaultPhoneSection.jsx` c1                                  | AI Insight cards on Dashboard & `/insights`                                          | `/dashboard`, `/insights`                       |
-| "Medicine reminder … Snooze" card                       | `MedVaultPhoneSection.jsx` c3/c4                               | DoseCard with Snooze/Take/Skip                                                       | `/schedule`, `/schedule/[doseId]`, `/dashboard` |
-| Snooze pill + time badge                                | `MedVaultPhoneSection.jsx` c4 (`.mvp-snooze`, `8:00 PM` badge) | Dose action controls + Due time badge                                                | all dose surfaces                               |
-| Bottom nav (home active w/ dot)                         | `mobile.jsx:186–230`                                           | Mobile bottom navigation                                                             | `(app)` shell on mobile                         |
-| "AI chat" FAB                                           | `App.jsx:1221–1297` (decorative MedVault AI panel)             | Help/insight chat entry (decorative→links to /help)                                  | shell, `/help`                                  |
-| Footer / trust sections                                 | `App.jsx:1072–1219`                                            | /help and marketing footer (port)                                                    | `/`, `/help`                                    |
-| "Report Upload"/"Vitals Tracked"/"Upcoming Visit" chips | `MedVaultPhoneSection.jsx` c2/c4, `HeroVisual.jsx:104–130`     | design language only — **no route** (OCR/upload, vitals, appointments are non-goals) | —                                               |
+| Stitch screen                                           | Source composition                                                | Product screen                                                                       | Route(s)                                        |
+| ------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Landing page                                            | `App.jsx` (whole)                                                 | Marketing home                                                                       | `/` (app `(marketing)` group)                   |
+| Auth split screen                                       | `MediTrackAIAuthIllustration.jsx`                                 | Login / Register                                                                     | `/login`, `/register`                           |
+| Phone feed (Recent Reports / Upcoming)                  | `mobile.jsx` PhoneScreen                                          | Today's Schedule / History feeds (same list-row motifs)                              | `/schedule`, `/history`, `/notifications`       |
+| Floating "AI Insight" glass card                        | `MediTrackAIPhoneSection.jsx` c1                                  | AI Insight cards on Dashboard & `/insights`                                          | `/dashboard`, `/insights`                       |
+| "Medicine reminder … Snooze" card                       | `MediTrackAIPhoneSection.jsx` c3/c4                               | DoseCard with Snooze/Take/Skip                                                       | `/schedule`, `/schedule/[doseId]`, `/dashboard` |
+| Snooze pill + time badge                                | `MediTrackAIPhoneSection.jsx` c4 (`.mvp-snooze`, `8:00 PM` badge) | Dose action controls + Due time badge                                                | all dose surfaces                               |
+| Bottom nav (home active w/ dot)                         | `mobile.jsx:186–230`                                              | Mobile bottom navigation                                                             | `(app)` shell on mobile                         |
+| "AI chat" FAB                                           | `App.jsx:1221–1297` (decorative MediTrack AI panel)               | Help/insight chat entry (decorative→links to /help)                                  | shell, `/help`                                  |
+| Footer / trust sections                                 | `App.jsx:1072–1219`                                               | /help and marketing footer (port)                                                    | `/`, `/help`                                    |
+| "Report Upload"/"Vitals Tracked"/"Upcoming Visit" chips | `MediTrackAIPhoneSection.jsx` c2/c4, `HeroVisual.jsx:104–130`     | design language only — **no route** (OCR/upload, vitals, appointments are non-goals) | —                                               |
 
 Routes with no Stitch equivalent (dashboard grid, medication forms, tables, charts, caregiver, reports, settings, history filters, demo) inherit the design system from §5 (cards, tokens, inputs, status chips, charts use the palette).
 
@@ -607,8 +607,8 @@ Each action = one transaction:
 
 ### 10.8 Demo domain (`server/domain/demo`)
 
-- A dedicated seeded **demo user** (`isDemo=true`, email `demo@medvault.demo`, password random) owns all demo data → **isolation by userId is automatic**; real users' data is never mixed.
-- `/demo` entry (from marketing or logged-out banner): `demo.enter` tRPC → issues a scoped cookie `medvault_demo_session` (random token stored server-side or a short-lived JWT) that the `(demo)` layout uses to present the demo user's data. Real session is untouched. Leaving `/demo` clears the cookie. If an authenticated user enters, they keep their own session; demo data still isolated under the demo user.
+- A dedicated seeded **demo user** (`isDemo=true`, email `demo@meditrackai.demo`, password random) owns all demo data → **isolation by userId is automatic**; real users' data is never mixed.
+- `/demo` entry (from marketing or logged-out banner): `demo.enter` tRPC → issues a scoped cookie `meditrackai_demo_session` (random token stored server-side or a short-lived JWT) that the `(demo)` layout uses to present the demo user's data. Real session is untouched. Leaving `/demo` clears the cookie. If an authenticated user enters, they keep their own session; demo data still isolated under the demo user.
 - Seed (`server/db/demo-seed.ts`) reproduces the sample dataset exactly (§19): Arun Kumar profile, 4 medications with the given schedules, and dose events spanning ~12 weeks such that totals = 84 scheduled / 76 taken / 5 missed / 3 skipped / 8 snoozed, 7-day streak, 90.4–90.5% adherence, including afternoon-miss pattern for the AI insight and a snoozed-every-morning pattern.
 - Simulation controls (all go through real domain services so state stays coherent):
   - `simulate.action(doseId or nextDue, 'take'|'miss'|'skip'|'snooze')` — maps to take/skip/snooze or directly marks missed.
@@ -742,7 +742,7 @@ Shared settings layout: left vertical menu (Stitch ghost/nav-link style) + conte
 
 ### 11.15 `/help` (no auth shell — or public under shell? Make it authenticated + marketing both)
 
-- Purpose: how-to cards, FAQ accordions (Stitch cards + pills), links to settings/demo; and the "MedVault AI" FAB becomes a link to this page with a note that AI here is informational. Reuse the marketing footer style.
+- Purpose: how-to cards, FAQ accordions (Stitch cards + pills), links to settings/demo; and the "MediTrack AI" FAB becomes a link to this page with a note that AI here is informational. Reuse the marketing footer style.
 - Data: static content in `src/features/help/help-content.ts`. Auth: accessible to all (public page under `(marketing)` or standalone); keep under `(app)` when logged in via shell too — implement as two lightweight routes sharing a component.
 
 ### 11.16 `/demo`
@@ -892,7 +892,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **Why:** Guarantees the build is based on the real design; prevents re-inventing UI decisions.
 - **Dependencies:** none.
 - **Files:** `plan.md` (this document — finalize §2,§5,§6); `docs/stitch-analysis.md` (inventory checklist + per-file notes + port list). No `Landingpage/` changes.
-- **Details:** Enumerate every file; identify that `index.css`/`App.css`/`favicon.svg`/`icons.svg` are leftover templates (ignored); mark which JSX files are ported (App.jsx sections, HeroVisual, FloatingCard, mobile.jsx, MedVaultPhoneSection, MedVaultAuthIllustration) and which are reference-only.
+- **Details:** Enumerate every file; identify that `index.css`/`App.css`/`favicon.svg`/`icons.svg` are leftover templates (ignored); mark which JSX files are ported (App.jsx sections, HeroVisual, FloatingCard, mobile.jsx, MediTrackAIPhoneSection, MediTrackAIAuthIllustration) and which are reference-only.
 - **DB:** none.
 - **Routes:** none.
 - **Components:** none.
@@ -959,7 +959,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
 - **Business logic:** none.
 - **Validation:** none.
 - **State/flow:** `useInView` scroll reveals (kept from Stitch).
-- **States:** image `onError` fallbacks; SEO metadata + OG (MediTrack AI · MedVault).
+- **States:** image `onError` fallbacks; SEO metadata + OG (MediTrack AI · MediTrack AI).
 - **Responsive:** preserve Stitch 768/1024 behaviors (nav hides center links, hero wraps, grids collapse; phone-mockup hidden or scaled on small).
 - **Security:** no user input; external font already bundled by next/font (no remote `@import`).
 - **Testing:** `getByRole` smoke (nav, CTAs present); e2e: `/` → click "Create Vault" → lands `/register`.
@@ -1254,7 +1254,7 @@ Each phase is independently executable. **Definition of done** for a phase: code
   - `src/server/domain/settings/service.ts` + `src/server/trpc/routers/settings.ts` (per-area get/update; export; delete) + `src/features/settings/{ProfileForm,ReminderSettings,CaregiverSettings,AppearancePanel,DataOverview,ExportButtons,DeleteFlow}.tsx` + `src/app/(app)/settings/{layout,profile,reminders,caregiver,appearance,data}/…`
   - `src/server/domain/demo/service.ts` (enter/leave/reset/action/scenario/time/insight/alert) + `src/server/trpc/routers/demo.ts` + `src/app/demo/layout.tsx` + `src/features/demo/{DemoDock,DemoClock,ScenarioControl,ResetButton}.tsx` + `demoNow()` threaded through `server/trpc/context.ts` (demo cookie) and `shared/times.ts`
   - `src/features/help/help-content.ts` + `src/app/(marketing)/help/page.tsx` + `src/app/(app)/help/page.tsx` (two lightweight routes sharing one component + the marketing footer style)
-- **Details:** settings — appearance applies the theme class on `<html>` immediately (light default; system listener), density + `reduceMotion`; reminder defaults bounded by `VALUE_LIMITS` + per-medication `remindersEnabled` bulk toggle; caregiver prefs reuse Phase 17 components; data export streams CSV (meds + events); delete-all transactional (keep account); account deletion typed-confirm. Demo — scoped `medvault_demo_session` cookie (real session untouched; leaving `/demo` clears it); every simulate action routes through the real domain services with the demo user id + `demoNow()` so all surfaces react live; `setTime` writes `demo_state.simulationNow`; scenario buttons mutate recent days via seeded blocks preserving §19 totals semantics; reset reseeds transactionally; prominent "This is demo data — enter real app" banner; floating simulation dock (collapsible sheet on mobile). `/help` — how-to cards + FAQ accordions (Stitch cards/pills), links to settings/demo; the AI-chat FAB on the marketing site links here with a note that AI there is informational only.
+- **Details:** settings — appearance applies the theme class on `<html>` immediately (light default; system listener), density + `reduceMotion`; reminder defaults bounded by `VALUE_LIMITS` + per-medication `remindersEnabled` bulk toggle; caregiver prefs reuse Phase 17 components; data export streams CSV (meds + events); delete-all transactional (keep account); account deletion typed-confirm. Demo — scoped `meditrackai_demo_session` cookie (real session untouched; leaving `/demo` clears it); every simulate action routes through the real domain services with the demo user id + `demoNow()` so all surfaces react live; `setTime` writes `demo_state.simulationNow`; scenario buttons mutate recent days via seeded blocks preserving §19 totals semantics; reset reseeds transactionally; prominent "This is demo data — enter real app" banner; floating simulation dock (collapsible sheet on mobile). `/help` — how-to cards + FAQ accordions (Stitch cards/pills), links to settings/demo; the AI-chat FAB on the marketing site links here with a note that AI there is informational only.
 - **DB:** `user_preferences`, `users`, `demo_state`, demo-owned rows (all under the dedicated demo user for isolation).
 - **Routes:** `/settings/profile`, `/settings/reminders`, `/settings/caregiver`, `/settings/appearance`, `/settings/data`, `/demo`, `/help`.
 - **Components:** forms, switches, segmented radios, confirm dialogs, table, demo dock/clock/banner, accordions.

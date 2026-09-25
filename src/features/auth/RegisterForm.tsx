@@ -83,7 +83,7 @@ export default function RegisterForm({ next }: { next: string | null }) {
 
       <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1">
         {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
-        Create Vault
+        Create MediTrack AI account
         {!isSubmitting && <ArrowRight aria-hidden="true" />}
       </Button>
     </form>

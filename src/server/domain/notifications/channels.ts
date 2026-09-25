@@ -8,11 +8,7 @@ import type { DbClient } from "@/server/db/helpers";
 import { notifications } from "@/server/db/schema";
 import { log } from "@/lib/log";
 import { isPushConfigured, sendPush } from "@/server/domain/push/server";
-import {
-  deleteSubscription,
-  isDemoUser,
-  listSubscriptions,
-} from "@/server/domain/push/store";
+import { deleteSubscription, isDemoUser, listSubscriptions } from "@/server/domain/push/store";
 import type { NotificationType } from "@/shared/enums";
 import type { NotifDTO } from "@/shared/types";
 
@@ -130,4 +126,8 @@ export const webPushChannel: NotificationChannel = {
 };
 
 /** Default channel set for `notifications.create` (override in tests). */
-export const defaultChannels: NotificationChannel[] = [inAppChannel, consoleChannel, webPushChannel];
+export const defaultChannels: NotificationChannel[] = [
+  inAppChannel,
+  consoleChannel,
+  webPushChannel,
+];

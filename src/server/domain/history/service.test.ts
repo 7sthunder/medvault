@@ -102,7 +102,7 @@ afterAll(async () => {
 
 dbTests("historyService (§11.10)", () => {
   it("returns newest-first actions with a resolved medication", async () => {
-    await inRollbackTransaction("Hist One", "hist-one@medvault.local", async (tx, userId) => {
+    await inRollbackTransaction("Hist One", "hist-one@meditrackai.local", async (tx, userId) => {
       const medId = await seedMedication(tx, userId, "Metformin");
       await seedDose(tx, userId, medId, {
         scheduledFor: new Date("2026-05-01T08:00:00Z"),
@@ -128,7 +128,7 @@ dbTests("historyService (§11.10)", () => {
   });
 
   it("status=taken includes take-late events (event status stays taken)", async () => {
-    await inRollbackTransaction("Hist Two", "hist-two@medvault.local", async (tx, userId) => {
+    await inRollbackTransaction("Hist Two", "hist-two@meditrackai.local", async (tx, userId) => {
       const medId = await seedMedication(tx, userId, "Metformin");
       await seedDose(tx, userId, medId, {
         scheduledFor: new Date("2026-05-01T08:00:00Z"),
@@ -155,33 +155,37 @@ dbTests("historyService (§11.10)", () => {
   });
 
   it("status=snoozed returns snooze audit rows", async () => {
-    await inRollbackTransaction("Hist Three", "hist-three@medvault.local", async (tx, userId) => {
-      const medId = await seedMedication(tx, userId, "Vitamin D");
-      // A dose that was snoozed then taken: final status taken, but snooze rows exist.
-      await seedDose(tx, userId, medId, {
-        scheduledFor: new Date("2026-05-01T09:00:00Z"),
-        status: "taken",
-        action: "snooze",
-        occurredAt: new Date("2026-05-01T09:00:00Z"),
-      });
-      await seedDose(tx, userId, medId, {
-        scheduledFor: new Date("2026-05-02T09:00:00Z"),
-        status: "taken",
-        action: "take",
-        occurredAt: new Date("2026-05-02T09:01:00Z"),
-      });
+    await inRollbackTransaction(
+      "Hist Three",
+      "hist-three@meditrackai.local",
+      async (tx, userId) => {
+        const medId = await seedMedication(tx, userId, "Vitamin D");
+        // A dose that was snoozed then taken: final status taken, but snooze rows exist.
+        await seedDose(tx, userId, medId, {
+          scheduledFor: new Date("2026-05-01T09:00:00Z"),
+          status: "taken",
+          action: "snooze",
+          occurredAt: new Date("2026-05-01T09:00:00Z"),
+        });
+        await seedDose(tx, userId, medId, {
+          scheduledFor: new Date("2026-05-02T09:00:00Z"),
+          status: "taken",
+          action: "take",
+          occurredAt: new Date("2026-05-02T09:01:00Z"),
+        });
 
-      const snoozed = await historyService.query(tx, userId, "UTC", {
-        status: "snoozed",
-        limit: 10,
-      });
-      expect(snoozed.items).toHaveLength(1);
-      expect(snoozed.items[0]!.action).toBe("snooze");
-    });
+        const snoozed = await historyService.query(tx, userId, "UTC", {
+          status: "snoozed",
+          limit: 10,
+        });
+        expect(snoozed.items).toHaveLength(1);
+        expect(snoozed.items[0]!.action).toBe("snooze");
+      },
+    );
   });
 
   it("filters by medicationId", async () => {
-    await inRollbackTransaction("Hist Four", "hist-four@medvault.local", async (tx, userId) => {
+    await inRollbackTransaction("Hist Four", "hist-four@meditrackai.local", async (tx, userId) => {
       const a = await seedMedication(tx, userId, "Metformin");
       const b = await seedMedication(tx, userId, "Lisinopril");
       await seedDose(tx, userId, a, {
@@ -204,7 +208,7 @@ dbTests("historyService (§11.10)", () => {
   });
 
   it("cursor pagination returns successive pages", async () => {
-    await inRollbackTransaction("Hist Five", "hist-five@medvault.local", async (tx, userId) => {
+    await inRollbackTransaction("Hist Five", "hist-five@meditrackai.local", async (tx, userId) => {
       const medId = await seedMedication(tx, userId, "Metformin");
       for (let i = 1; i <= 3; i++) {
         await seedDose(tx, userId, medId, {
@@ -230,7 +234,7 @@ dbTests("historyService (§11.10)", () => {
   });
 
   it("still resolves archived medications", async () => {
-    await inRollbackTransaction("Hist Six", "hist-six@medvault.local", async (tx, userId) => {
+    await inRollbackTransaction("Hist Six", "hist-six@meditrackai.local", async (tx, userId) => {
       const medId = await seedMedication(tx, userId, "Old Med", new Date("2026-04-01T00:00:00Z"));
       await seedDose(tx, userId, medId, {
         scheduledFor: new Date("2026-03-01T08:00:00Z"),

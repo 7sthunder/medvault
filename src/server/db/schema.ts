@@ -433,7 +433,6 @@ export const pushSubscriptions = pgTable(
   ],
 );
 
-
 export const aiInsights = pgTable(
   "ai_insights",
   {

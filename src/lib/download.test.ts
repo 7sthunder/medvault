@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { triggerFileDownload } from "@/lib/download";
 
 describe("triggerFileDownload", () => {
-  const createObjectURL = vi.fn(() => "blob:medvault-test");
+  const createObjectURL = vi.fn(() => "blob:meditrackai-test");
   const revokeObjectURL = vi.fn();
 
   beforeEach(() => {
@@ -30,11 +30,11 @@ describe("triggerFileDownload", () => {
       return node;
     });
 
-    triggerFileDownload("medvault-report-2026-01-01_2026-01-30-daily.csv", "a,b\n1,2\n");
+    triggerFileDownload("meditrackai-report-2026-01-01_2026-01-30-daily.csv", "a,b\n1,2\n");
 
     expect(clicks).toHaveLength(1);
-    expect(clicks[0]?.download).toBe("medvault-report-2026-01-01_2026-01-30-daily.csv");
-    expect(clicks[0]?.href).toBe("blob:medvault-test");
+    expect(clicks[0]?.download).toBe("meditrackai-report-2026-01-01_2026-01-30-daily.csv");
+    expect(clicks[0]?.href).toBe("blob:meditrackai-test");
     // The anchor is removed so it never accumulates in the document.
     expect(document.querySelector("a[download]")).toBeNull();
   });
@@ -45,7 +45,7 @@ describe("triggerFileDownload", () => {
 
     expect(revokeObjectURL).not.toHaveBeenCalled();
     vi.runAllTimers();
-    expect(revokeObjectURL).toHaveBeenCalledWith("blob:medvault-test");
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:meditrackai-test");
   });
 
   it("passes a Blob straight through instead of re-wrapping it", () => {

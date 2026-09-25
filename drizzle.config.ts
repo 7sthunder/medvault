@@ -6,7 +6,7 @@ try {
   /* no .env — DATABASE_URL must already be in the environment */
 }
 
-const url = process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/medvault";
+const url = process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/meditrackai";
 const connectionString = (() => {
   const u = new URL(url);
   if (!u.searchParams.has("sslmode")) u.searchParams.set("sslmode", "require");

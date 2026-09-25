@@ -40,7 +40,7 @@ export function Brand({
   );
 }
 
-/** Optional trailing chip for the AI assistant brand (§5.1 MedVault AI). */
+/** Optional trailing chip for the AI assistant brand (§5.1 MediTrack AI). */
 export function AiBrandLockup({
   Icon,
   title = BRAND.ai.name,

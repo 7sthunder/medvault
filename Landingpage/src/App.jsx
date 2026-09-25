@@ -29,7 +29,7 @@ import {
   X,
 } from "lucide-react";
 import HeroVisual from "./components/HeroVisual";
-import MedVaultAuthIllustration from "../MedVaultAuthIllustration";
+import MediTrackAIAuthIllustration from "../MediTrackAIAuthIllustration";
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 const useInView = (threshold = 0.12) => {
@@ -1060,7 +1060,7 @@ const FeatureFindCare = () => (
 );
 
 /* ──────────────────────────── MAIN ────────────────────────────── */
-export default function MedVaultLanding() {
+export default function MediTrackAILanding() {
   const [scrolled, setScrolled] = useState(false);
   const [heroIn, setHeroIn] = useState(false);
   const [view, setView] = useState("landing"); // "landing" or "auth"
@@ -1099,7 +1099,7 @@ export default function MedVaultLanding() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMsg, setChatMsg] = useState("");
   const [chatHistory, setChatHistory] = useState([
-    { from: "bot", text: "Hi! I'm MedVault AI 🤖. How can I help with your health today?" },
+    { from: "bot", text: "Hi! I'm MediTrack AI 🤖. How can I help with your health today?" },
   ]);
 
   useEffect(() => {
@@ -1137,7 +1137,7 @@ export default function MedVaultLanding() {
       initial: "A",
       bg: "linear-gradient(135deg,#10b981,#06b6d4)",
       delay: "0s",
-      text: "MediVault changed how I manage my health. The AI reminders for my insulin shots are a lifesaver — literally.",
+      text: "MediTrack AI changed how I manage my health. The AI reminders for my insulin shots are a lifesaver — literally.",
     },
     {
       name: "Priya Sundar",
@@ -1153,7 +1153,7 @@ export default function MedVaultLanding() {
       initial: "R",
       bg: "linear-gradient(135deg,#f59e0b,#ef4444)",
       delay: "0.24s",
-      text: "I recommend MedVault to all my patients. Health records access makes consultations 10× more efficient.",
+      text: "I recommend MediTrack AI to all my patients. Health records access makes consultations 10× more efficient.",
     },
   ];
 
@@ -1280,7 +1280,7 @@ export default function MedVaultLanding() {
                   color: "#0f172a",
                 }}
               >
-                Med<span style={{ color: "#10b981" }}>Vault</span>
+                MediTrack<span style={{ color: "#10b981" }}>AI</span>
               </span>
             </div>
 
@@ -1408,7 +1408,7 @@ export default function MedVaultLanding() {
                     transition: "all 0.7s ease 0.2s",
                   }}
                 >
-                  MedVault brings your medical records, medicine schedules, appointments, and
+                  MediTrack AI brings your medical records, medicine schedules, appointments, and
                   AI-powered health guidance into one beautifully simple, secure platform.
                 </p>
 
@@ -1874,8 +1874,8 @@ export default function MedVaultLanding() {
                       maxWidth: 640,
                     }}
                   >
-                    Set up your full medication schedule once. MedVault adapts to your routine and
-                    sends reminders at the exact right moment.
+                    Set up your full medication schedule once. MediTrack AI adapts to your routine
+                    and sends reminders at the exact right moment.
                   </p>
                   <ul
                     style={{
@@ -1987,7 +1987,7 @@ export default function MedVaultLanding() {
                     }}
                   >
                     Locate the nearest verified hospitals, clinics, and pharmacies. Real-time hours,
-                    ratings, and turn-by-turn directions — all inside MedVault.
+                    ratings, and turn-by-turn directions — all inside MediTrack AI.
                   </p>
                   <ul
                     style={{
@@ -2257,7 +2257,7 @@ export default function MedVaultLanding() {
                       color: "white",
                     }}
                   >
-                    Med<span style={{ color: "#10b981" }}>Vault</span>
+                    MediTrack<span style={{ color: "#10b981" }}>AI</span>
                   </span>
                 </div>
                 <p style={{ color: "#64748b", fontSize: 13.5, lineHeight: 1.7, maxWidth: 240 }}>
@@ -2356,7 +2356,7 @@ export default function MedVaultLanding() {
                 <div style={{ color: "#64748b", fontSize: 13, lineHeight: 1.7 }}>
                   <div>📍 12, Health Square, Chennai 600001</div>
                   <div style={{ marginTop: 8 }}>📞 +91 98400 00000</div>
-                  <div style={{ marginTop: 8 }}>✉️ hello@medvault.in</div>
+                  <div style={{ marginTop: 8 }}>✉️ hello@meditrackai.in</div>
                 </div>
               </div>
             </div>
@@ -2373,9 +2373,9 @@ export default function MedVaultLanding() {
               }}
             >
               <div style={{ color: "#334155", fontSize: 12.5 }}>
-                © 2026 MedVault · All Rights Reserved.
+                © 2026 MediTrack AI · All Rights Reserved.
               </div>
-              <div style={{ color: "#334155", fontSize: 12.5 }}>Designed by MedVault Team</div>
+              <div style={{ color: "#334155", fontSize: 12.5 }}>Designed by MediTrack AI Team</div>
             </div>
           </footer>
 
@@ -2408,7 +2408,9 @@ export default function MedVaultLanding() {
                 >
                   <Bot size={24} color="white" />
                   <div>
-                    <div style={{ color: "white", fontWeight: 700, fontSize: 14 }}>MedVault AI</div>
+                    <div style={{ color: "white", fontWeight: 700, fontSize: 14 }}>
+                      MediTrack AI
+                    </div>
                     <div style={{ color: "rgba(255,255,255,0.8)", fontSize: 11 }}>
                       ● Online · Replies instantly
                     </div>
@@ -2552,7 +2554,7 @@ export default function MedVaultLanding() {
           </div>
         </>
       ) : (
-        <MedVaultAuthIllustration initialMode={authMode} onClose={closeAuth} />
+        <MediTrackAIAuthIllustration initialMode={authMode} onClose={closeAuth} />
       )}
     </>
   );

@@ -12,7 +12,7 @@ import { resetNowImpl, setNowImpl } from "@/shared/times";
  * request headers so every procedure sees `{ user, session, db }`.
  *
  * Phase 18 (plan §10.8) adds demo mode. `/demo` is reachable while signed out, so the context
- * also resolves a *demo subject* from the signed `medvault_demo_session` cookie. When one is
+ * also resolves a *demo subject* from the signed `meditrackai_demo_session` cookie. When one is
  * present and that browser is not authenticated, every procedure runs as the demo user and the
  * shared clock is overridden with `demo_state.simulationNow`, which is what makes the schedule,
  * dashboard and adherence views respond live to the demo clock.

@@ -32,7 +32,7 @@ const EyeClosed = () => (
   </svg>
 );
 
-export default function MedVaultAuthIllustration({ initialMode = "login", onClose }) {
+export default function MediTrackAIAuthIllustration({ initialMode = "login", onClose }) {
   const [mode, setMode] = useState(initialMode);
   const [showPass, setShowPass] = useState(false);
   const [focus, setFocus] = useState(null);
@@ -203,7 +203,7 @@ export default function MedVaultAuthIllustration({ initialMode = "login", onClos
           <div className="auth-left">
             <img
               src="/imagessss/login_page.jpeg"
-              alt="MedVault"
+              alt="MediTrack AI"
               style={{
                 width: "100%",
                 height: "100%",
@@ -278,7 +278,7 @@ export default function MedVaultAuthIllustration({ initialMode = "login", onClos
                       letterSpacing: "-0.02em",
                     }}
                   >
-                    Med<span style={{ color: "#10b981" }}>Vault</span>
+                    MediTrack<span style={{ color: "#10b981" }}>AI</span>
                   </span>
                 </div>
 
@@ -296,9 +296,9 @@ export default function MedVaultAuthIllustration({ initialMode = "login", onClos
                       </>
                     ) : (
                       <>
-                        Initialize
+                        Create your
                         <br />
-                        <span style={{ color: "#10b981" }}>your vault.</span>
+                        <span style={{ color: "#10b981" }}>MediTrack AI account.</span>
                       </>
                     )}
                   </h1>
@@ -458,7 +458,7 @@ export default function MedVaultAuthIllustration({ initialMode = "login", onClos
                   </div>
 
                   <button className="btn-primary" style={{ marginTop: 8 }}>
-                    {mode === "login" ? "Access Vault" : "Create Vault"}
+                    {mode === "login" ? "Sign in to MediTrack AI" : "Create MediTrack AI account"}
                     <svg
                       width="20"
                       height="20"
@@ -510,7 +510,9 @@ export default function MedVaultAuthIllustration({ initialMode = "login", onClos
                         fontFamily: "'Plus Jakarta Sans', sans-serif",
                       }}
                     >
-                      {mode === "login" ? "Don't have a vault? " : "Already have a vault? "}
+                      {mode === "login"
+                        ? "Don't have a MediTrack AI account? "
+                        : "Already have a MediTrack AI account? "}
                       <button
                         onClick={() => setMode(mode === "login" ? "signup" : "login")}
                         style={{

@@ -75,7 +75,7 @@ dbTests("medicationService CRUD (§10.1)", () => {
     const name = `Metformin ${uuidv7().slice(0, 8)}`;
     const outcome = await inRollbackTransaction(
       "Med Crud One",
-      "med-crud-one@medvault.local",
+      "med-crud-one@meditrackai.local",
       async (tx, userId) => {
         const created = await medicationService.create(tx, userId, "UTC", {
           medication: validMedication(name),
@@ -101,7 +101,7 @@ dbTests("medicationService CRUD (§10.1)", () => {
   it("create rejects duplicate active names", async () => {
     await inRollbackTransaction(
       "Med Crud Dup",
-      "med-crud-dup@medvault.local",
+      "med-crud-dup@meditrackai.local",
       async (tx, userId) => {
         const input = { medication: validMedication(`Dup ${uuidv7().slice(0, 8)}`) };
         await medicationService.create(tx, userId, "UTC", input);
@@ -116,14 +116,14 @@ dbTests("medicationService CRUD (§10.1)", () => {
     const name = `Metformin ${uuidv7().slice(0, 8)}`;
     await inRollbackTransaction(
       "Med Crud Owner",
-      "med-crud-owner@medvault.local",
+      "med-crud-owner@meditrackai.local",
       async (tx, ownerId) => {
         const [outsider] = await tx
           .insert(users)
           .values({
             id: uuidv7(),
             name: "Med Crud Outsider",
-            email: "med-crud-outsider@medvault.local",
+            email: "med-crud-outsider@meditrackai.local",
             timezone: "UTC",
           })
           .returning({ id: users.id });
@@ -141,7 +141,7 @@ dbTests("medicationService CRUD (§10.1)", () => {
     const name = `Metformin ${uuidv7().slice(0, 8)}`;
     await inRollbackTransaction(
       "Med Crud Update",
-      "med-crud-update@medvault.local",
+      "med-crud-update@meditrackai.local",
       async (tx, userId) => {
         const created = await medicationService.create(tx, userId, "UTC", {
           medication: validMedication(name),
@@ -179,14 +179,14 @@ dbTests("medicationService CRUD (§10.1)", () => {
     const name = `Metformin ${uuidv7().slice(0, 8)}`;
     await inRollbackTransaction(
       "Med Crud U2",
-      "med-crud-u2@medvault.local",
+      "med-crud-u2@meditrackai.local",
       async (tx, ownerId) => {
         const [outsider] = await tx
           .insert(users)
           .values({
             id: uuidv7(),
             name: "Med Crud U3",
-            email: "med-crud-u3@medvault.local",
+            email: "med-crud-u3@meditrackai.local",
             timezone: "UTC",
           })
           .returning({ id: users.id });
@@ -207,7 +207,7 @@ dbTests("medicationService CRUD (§10.1)", () => {
     const name = `Metformin ${uuidv7().slice(0, 8)}`;
     await inRollbackTransaction(
       "Med Crud Archive",
-      "med-crud-archive@medvault.local",
+      "med-crud-archive@meditrackai.local",
       async (tx, userId) => {
         const created = await medicationService.create(tx, userId, "UTC", {
           medication: validMedication(name),

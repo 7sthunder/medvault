@@ -53,7 +53,7 @@ export const INSERT_SCHEMAS: InsertSchemaEntry[] = [
     demoRow: {
       id: "user-demo",
       name: "Arun Kumar",
-      email: "demo@medvault.local",
+      email: "demo@meditrackai.local",
       timezone: "Asia/Kolkata",
       onboardingCompleted: true,
       isDemo: true,
@@ -112,7 +112,7 @@ export const INSERT_SCHEMAS: InsertSchemaEntry[] = [
     }),
     demoRow: {
       id: "verification-demo",
-      identifier: "demo@medvault.local",
+      identifier: "demo@meditrackai.local",
       value: "abc123",
       expiresAt: new Date(),
     } satisfies typeof verifications.$inferInsert,
@@ -274,7 +274,7 @@ export const INSERT_SCHEMAS: InsertSchemaEntry[] = [
     demoRow: {
       id: "inv-demo",
       patientUserId: "user-demo",
-      email: "caregiver@medvault.local",
+      email: "caregiver@meditrackai.local",
       token: "invite_token_demo",
       permissions: { viewAdherence: true, viewMedications: false },
       expiresAt: new Date(),

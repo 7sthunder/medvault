@@ -8,7 +8,7 @@ export interface WordmarkProps {
 }
 
 /**
- * §5.1 wordmark — Plus Jakarta Sans, "Med" + primary "Vault".
+ * §5.1 wordmark — Plus Jakarta Sans, "MediTrack" + primary "AI".
  * Colour via tokens (text-ink / text-primary), size via inline em for crisp scaling.
  */
 export function Wordmark({ size = 20, className }: WordmarkProps) {

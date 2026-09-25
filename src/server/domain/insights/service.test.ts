@@ -44,7 +44,7 @@ async function inRollbackTransaction<T>(fn: (tx: DbTx, userId: string) => Promis
         .values({
           id: uuidv7(),
           name: "Insight Tester",
-          email: `insight-${uuidv7()}@medvault.local`,
+          email: `insight-${uuidv7()}@meditrackai.local`,
           timezone: "UTC",
           onboardingCompleted: true,
         })

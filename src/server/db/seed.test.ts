@@ -89,7 +89,7 @@ dbTests("demo user has a medication named after §19 (Arun Kumar / Metformin)", 
     const demoUser = await db
       .select({ id: users.id })
       .from(users)
-      .where(eq(users.email, "arun@medvault.local"))
+      .where(eq(users.email, "arun@meditrackai.local"))
       .limit(1);
     expect(demoUser.length).toBe(1);
     const meds = await db.select().from(medications).where(eq(medications.userId, demoUser[0]!.id));

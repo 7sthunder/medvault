@@ -24,7 +24,9 @@ export function AuthFooter({ mode, next }: { mode: "login" | "register"; next?: 
       </Button>
 
       <p className="mt-8 pb-4 text-center text-sm text-muted-foreground">
-        {mode === "login" ? "Don't have a vault? " : "Already have a vault? "}
+        {mode === "login"
+          ? "Don't have a MediTrack AI account? "
+          : "Already have a MediTrack AI account? "}
         <Link href={target} className="font-extrabold text-primary hover:underline">
           {mode === "login" ? "Sign up" : "Log in"}
         </Link>

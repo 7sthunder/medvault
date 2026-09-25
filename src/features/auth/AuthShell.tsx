@@ -10,7 +10,7 @@ export interface AuthShellProps extends React.PropsWithChildren {
 }
 
 /**
- * Phase 06 — Stitch auth split layout (MedVaultAuthIllustration): full-height
+ * Phase 06 — Stitch auth split layout (MediTrackAIAuthIllustration): full-height
  * image panel hidden below 900px, centered form column max-w 460px, mobile:
  * single column with a back button pinned top-right.
  */

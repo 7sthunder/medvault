@@ -32,7 +32,7 @@ describe("LoginForm (phase 06)", () => {
     const user = userEvent.setup();
     render(<LoginForm next={null} />);
 
-    await user.click(screen.getByRole("button", { name: /Access Vault/i }));
+    await user.click(screen.getByRole("button", { name: /Sign in to MediTrack AI/i }));
 
     expect(await screen.findByText("Enter a valid email address.")).toBeInTheDocument();
     expect(screen.getByText("Password is required.")).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe("LoginForm (phase 06)", () => {
 
     await user.type(screen.getByLabelText(/Email Address/i), "  Alice@Example.com ");
     await user.type(screen.getByPlaceholderText("••••••••"), "vaultPass9");
-    await user.click(screen.getByRole("button", { name: /Access Vault/i }));
+    await user.click(screen.getByRole("button", { name: /Sign in to MediTrack AI/i }));
 
     await waitFor(() => {
       expect(mocks.signInEmail).toHaveBeenCalledWith({
@@ -69,7 +69,7 @@ describe("LoginForm (phase 06)", () => {
 
     await user.type(screen.getByLabelText(/Email Address/i), "alice@example.com");
     await user.type(screen.getByPlaceholderText("••••••••"), "wrongPass1");
-    await user.click(screen.getByRole("button", { name: /Access Vault/i }));
+    await user.click(screen.getByRole("button", { name: /Sign in to MediTrack AI/i }));
 
     expect(
       await screen.findByText("That email or password is incorrect. Try again."),
@@ -86,7 +86,7 @@ describe("RegisterForm (phase 06)", () => {
     await user.type(screen.getByLabelText(/Full Name/i), "Alice");
     await user.type(screen.getByLabelText(/Email Address/i), "alice@example.com");
     await user.type(screen.getByPlaceholderText("At least 8 chars, letter + number"), "abc123");
-    await user.click(screen.getByRole("button", { name: /Create Vault/i }));
+    await user.click(screen.getByRole("button", { name: /Create MediTrack AI account/i }));
 
     expect(await screen.findByText("Password must be at least 8 characters.")).toBeInTheDocument();
     expect(mocks.signUpEmail).not.toHaveBeenCalled();
@@ -101,7 +101,7 @@ describe("RegisterForm (phase 06)", () => {
     await user.type(screen.getByLabelText(/Full Name/i), "Sarah Jenkins");
     await user.type(screen.getByLabelText(/Email Address/i), "sarah@example.com");
     await user.type(screen.getByPlaceholderText("At least 8 chars, letter + number"), "vaultPass9");
-    await user.click(screen.getByRole("button", { name: /Create Vault/i }));
+    await user.click(screen.getByRole("button", { name: /Create MediTrack AI account/i }));
 
     await waitFor(() => {
       expect(mocks.signUpEmail).toHaveBeenCalledWith({

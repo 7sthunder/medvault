@@ -35,7 +35,7 @@ export function DownloadButton({
         credentials: "include",
       });
       if (!res.ok) throw new Error((await res.json().catch(() => null))?.error);
-      triggerFileDownload(`medvault-report-${from}_${to}-${granularity}.csv`, await res.blob());
+      triggerFileDownload(`meditrackai-report-${from}_${to}-${granularity}.csv`, await res.blob());
     } catch {
       toast.error("Export failed — try again in a moment.");
     } finally {

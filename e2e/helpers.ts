@@ -26,7 +26,7 @@ export async function registerAndOnboard(page: Page, prefix = "e2e"): Promise<st
   await page.getByLabel(/Full Name/i).fill("E2E Tester");
   await page.getByLabel(/Email Address/i).fill(email);
   await page.getByPlaceholder("At least 8 chars, letter + number").fill(E2E_PASSWORD);
-  await page.getByRole("button", { name: /Create Vault/i }).click();
+  await page.getByRole("button", { name: /Create MediTrack AI account/i }).click();
 
   await expect(page).toHaveURL(/\/onboarding/, { timeout: 60_000 });
   await completeOnboarding(page);
@@ -46,7 +46,7 @@ export async function login(page: Page, email: string): Promise<void> {
   await page.goto("/login");
   await page.getByLabel(/Email Address/i).fill(email);
   await page.getByPlaceholder("••••••••").fill(E2E_PASSWORD);
-  await page.getByRole("button", { name: /Access Vault/i }).click();
+  await page.getByRole("button", { name: /Sign in to MediTrack AI/i }).click();
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 60_000 });
 }
 

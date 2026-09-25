@@ -29,7 +29,7 @@ async function rollbackUser<T>(fn: (tx: DbTx, userId: string) => Promise<T>): Pr
         .values({
           id: uuidv7(),
           name: "Prefs Tester",
-          email: `prefs-${uuidv7().slice(0, 8)}@medvault.local`,
+          email: `prefs-${uuidv7().slice(0, 8)}@meditrackai.local`,
           timezone: "UTC",
         })
         .returning({ id: users.id });

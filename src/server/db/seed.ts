@@ -11,8 +11,8 @@ import { userPreferences } from "./schema";
  * Idempotent — `pnpm db:seed` twice yields identical row counts (verified in `seed.test.ts`).
  */
 export const DEV_USERS = [
-  { email: "alice@medvault.local", name: "Alice Hartono", timezone: "Asia/Kolkata" },
-  { email: "bob@medvault.local", name: "Bob Mensah", timezone: "Africa/Accra" },
+  { email: "alice@meditrackai.local", name: "Alice Hartono", timezone: "Asia/Kolkata" },
+  { email: "bob@meditrackai.local", name: "Bob Mensah", timezone: "Africa/Accra" },
 ] as const;
 
 export async function seedAll(target: Db = db) {

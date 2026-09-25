@@ -1,4 +1,4 @@
-# MedVault (MediTrack AI) — Implemented Work Log
+# MediTrack AI — Implemented Work Log
 
 > Companion to `plan.md`. This file records, phase by phase, **what was actually implemented**
 > with respect to the plan: deviations, precise decisions, verification results, and the commit
@@ -30,27 +30,27 @@
 
 ## Phase status matrix
 
-| Phase | Title                                                                      | Status    | Commit       | Notes                                                                                                                                       |
-| ----- | -------------------------------------------------------------------------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 01    | Repository & Stitch analysis                                               | `done`    | `5dfeb44`    | pushed to `origin/main`                                                                                                                     |
-| 02    | Project foundation (Next.js + TS + Tailwind + tooling)                     | `done`    | `6eabea5`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
-| 03    | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done`    | `1721431`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
-| 04    | Landing page migration (`/` from Stitch)                                   | `done`    | `1340f05`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
-| 05    | Database foundation (Drizzle schema + client + migrate + seed)             | `done`    | `016f1be`    | verified: typecheck/lint/test/build                                                                                                         |
-| 06    | Authentication & session plumbing (Better Auth)                            | `done`    | `3006415`    | verified: typecheck/lint/test/build/e2e                                                                                                     |
-| 07    | Shared contracts & validation layer                                        | `done`    | `2794983`    | pushed to `origin/main`                                                                                                                     |
-| 08    | Reusable component system completion                                       | `done`    | `e23dc9b`    | pushed to `origin/main`                                                                                                                     |
-| 09    | Global shell & navigation `(app)`                                          | `done`    | `a583979`    | pushed to `origin/main`                                                                                                                     |
-| 10    | Onboarding                                                                 | `done`    | `b3933d8`    | verified: typecheck/lint/test/build; e2e deferred                                                                                           |
-| 11    | Medication domain service (server)                                         | `done`    | `f91530b`    | verified: typecheck/lint/test/build                                                                                                         |
-| 12    | Medication schedule & dose-event generation (domain)                       | `done`    | `4f6e5b4`    | verified: typecheck/lint/test/build                                                                                                         |
-| 13    | Dose engine & adherence engine (domain)                                    | `done`    | `9a72716`    | verified: typecheck/lint/test                                                                                                               |
-| 14    | Dose & adherence UI (Today's Schedule + Adherence pages)                   | `done`    | `14f378f`    | verified: typecheck/lint/test; adherence pages split to parallel worker                                                                     |
-| 15    | Medication CRUD UI + Dashboard                                             | `done`    | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section |
-| 16    | History + Reports + Notifications                                          | `done`    | `(this log)` | verified: typecheck/lint/test — see Phase 16 section                                                                                        |
-| 17    | Caregiver system + AI insights                                             | `done`    | `(this log)` | verified: typecheck/lint/test/build — see Phase 17 section                                                                                  |
-| 18    | Settings + Demo mode + /help                                               | `done`    | `(this log)` | verified: typecheck/lint/test/build - see Phase 18 section                                                                                  |
-| 19    | Quality sweep, test completion, E2E & delivery                             | `in progress` | —         | Code complete: typecheck/lint/format clean, 49 files / 366 tests + coverage thresholds green. Pending: production build, full E2E run, server suite — see Phase 19 section |
+| Phase | Title                                                                      | Status        | Commit       | Notes                                                                                                                                                                      |
+| ----- | -------------------------------------------------------------------------- | ------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 01    | Repository & Stitch analysis                                               | `done`        | `5dfeb44`    | pushed to `origin/main`                                                                                                                                                    |
+| 02    | Project foundation (Next.js + TS + Tailwind + tooling)                     | `done`        | `6eabea5`    | verified: typecheck/lint/test/build/e2e                                                                                                                                    |
+| 03    | Design system implementation (Stitch tokens → Tailwind theme + primitives) | `done`        | `1721431`    | verified: typecheck/lint/test/build/e2e                                                                                                                                    |
+| 04    | Landing page migration (`/` from Stitch)                                   | `done`        | `1340f05`    | verified: typecheck/lint/test/build/e2e                                                                                                                                    |
+| 05    | Database foundation (Drizzle schema + client + migrate + seed)             | `done`        | `016f1be`    | verified: typecheck/lint/test/build                                                                                                                                        |
+| 06    | Authentication & session plumbing (Better Auth)                            | `done`        | `3006415`    | verified: typecheck/lint/test/build/e2e                                                                                                                                    |
+| 07    | Shared contracts & validation layer                                        | `done`        | `2794983`    | pushed to `origin/main`                                                                                                                                                    |
+| 08    | Reusable component system completion                                       | `done`        | `e23dc9b`    | pushed to `origin/main`                                                                                                                                                    |
+| 09    | Global shell & navigation `(app)`                                          | `done`        | `a583979`    | pushed to `origin/main`                                                                                                                                                    |
+| 10    | Onboarding                                                                 | `done`        | `b3933d8`    | verified: typecheck/lint/test/build; e2e deferred                                                                                                                          |
+| 11    | Medication domain service (server)                                         | `done`        | `f91530b`    | verified: typecheck/lint/test/build                                                                                                                                        |
+| 12    | Medication schedule & dose-event generation (domain)                       | `done`        | `4f6e5b4`    | verified: typecheck/lint/test/build                                                                                                                                        |
+| 13    | Dose engine & adherence engine (domain)                                    | `done`        | `9a72716`    | verified: typecheck/lint/test                                                                                                                                              |
+| 14    | Dose & adherence UI (Today's Schedule + Adherence pages)                   | `done`        | `14f378f`    | verified: typecheck/lint/test; adherence pages split to parallel worker                                                                                                    |
+| 15    | Medication CRUD UI + Dashboard                                             | `done`        | `(this log)` | Medication CRUD UI from the parallel worker + dashboard phase-bundle + deferred `/adherence` pages verified together — see Phase 15 section                                |
+| 16    | History + Reports + Notifications                                          | `done`        | `(this log)` | verified: typecheck/lint/test — see Phase 16 section                                                                                                                       |
+| 17    | Caregiver system + AI insights                                             | `done`        | `(this log)` | verified: typecheck/lint/test/build — see Phase 17 section                                                                                                                 |
+| 18    | Settings + Demo mode + /help                                               | `done`        | `(this log)` | verified: typecheck/lint/test/build - see Phase 18 section                                                                                                                 |
+| 19    | Quality sweep, test completion, E2E & delivery                             | `in progress` | —            | Code complete: typecheck/lint/format clean, 49 files / 366 tests + coverage thresholds green. Pending: production build, full E2E run, server suite — see Phase 19 section |
 
 > **Renumbering note:** `plan.md` §21 was consolidated from 30 phases to **19** (`Phase 01 → Phase 19`)
 > on the instruction to finish faster without cutting scope. Phases 01–12 are unchanged; the remaining
@@ -79,9 +79,9 @@ screen→route map confirmed (§6). No `Landingpage/` changes (per Phase 01 cons
 
 ### Key verified facts that shaped the plan text
 
-- `MedVaultAuthIllustration.jsx` and `MedVaultPhoneSection.jsx` live at `Landingpage/` **root**,
+- `MediTrackAIAuthIllustration.jsx` and `MediTrackAIPhoneSection.jsx` live at `Landingpage/` **root**,
   not `src/` — §2 previously implied `src/`. Fixed.
-- `MedVaultPhoneSection.jsx` and `src/components/FloatingCard.jsx` are imported by **nothing**
+- `MediTrackAIPhoneSection.jsx` and `src/components/FloatingCard.jsx` are imported by **nothing**
   (recipe/reference-only) — recorded so Phase 04 knows they are ported-by-knolwedge, not by import.
 - MD5-confirmed duplicates: `Gemini_Generated_Image_jr77vyjr77vyjr77.png` ==
   `public/images/hero-final.png`; root `imagessss/` mirrors `public/imagessss/`.
@@ -143,7 +143,7 @@ shadcn/ui scaffold, ESLint/Prettier, Vitest, Playwright, drizzle config, env sca
 | `.gitignore`                        | `node_modules .next out build .env* e2e-report playwright-report test-results coverage`                                                              |
 | `.prettierrc.json`                  | 100-print-width, semicolons, double quotes                                                                                                           |
 | `components.json`                   | shadcn v4 "base-nova" style, RSC, `css: src/app/globals.css`, lucide icons                                                                           |
-| `src/app/layout.tsx`                | **Plus Jakarta Sans** via `next/font/google` (`--font-jakarta`), metadata (MedVault · MediTrack AI)                                                  |
+| `src/app/layout.tsx`                | **Plus Jakarta Sans** via `next/font/google` (`--font-jakarta`), metadata (MediTrack AI · MediTrack AI)                                              |
 | `src/app/globals.css`               | Tailwind v4 + shadcn neutral theme tokens + `@import "shadcn/tailwind.css"` + `tw-animate-css` + font mapping + `.dark` block                        |
 | `src/app/page.tsx`                  | placeholder `/` (brand tile §5.1 + Button); replaced by landing in Phase 04                                                                          |
 | `src/lib/utils.ts`                  | `export { cn } from "cn"` (shadcn v4)                                                                                                                |
@@ -151,7 +151,7 @@ shadcn/ui scaffold, ESLint/Prettier, Vitest, Playwright, drizzle config, env sca
 | `src/components/ui/button.tsx`      | shadcn scaffold (Base UI Button, cva variants default/outline/secondary/ghost/destructive/link, sizes)                                               |
 | `src/components/ui/input.tsx`       | shadcn scaffold                                                                                                                                      |
 | `src/components/ui/button.test.tsx` | example component test (jsdom)                                                                                                                       |
-| `e2e/home.spec.ts`                  | example e2e hitting `/` (heading MedVault + "Get started" button)                                                                                    |
+| `e2e/home.spec.ts`                  | example e2e hitting `/` (heading MediTrack AI + "Get started" button)                                                                                |
 
 ### Pinned versions (deliberate, deviations from plan wording)
 
@@ -439,7 +439,7 @@ insert demo row".
   "7-day current streak".
 - **`DemoSscenario` union name** (double-s) is a recording typo in `schema.ts` — kept as-is (consistent,
   typechecks; rename would churn migration naming).
-- **Dev users** `alice@medvault.local` (Asia/Kolkata) + `bob@medvault.local` (Africa/Accra) with
+- **Dev users** `alice@meditrackai.local` (Asia/Kolkata) + `bob@meditrackai.local` (Africa/Accra) with
   `user_preferences`, upserted via `users.email` uniqueness (stable ids across reruns).
 
 ### Verification (all green)
@@ -1364,7 +1364,7 @@ honest. Reminders are editable globally and per medication, with optimistic togg
 CSV export (medications / history / both) and two destructive flows — delete-all-data and
 delete-account — each behind a `ConfirmationDialog` requiring a typed confirmation phrase.
 
-**Demo mode.** A signed, httpOnly `medvault_demo_session` cookie (HMAC-SHA256, 12h TTL, compared
+**Demo mode.** A signed, httpOnly `meditrackai_demo_session` cookie (HMAC-SHA256, 12h TTL, compared
 with `timingSafeEqual`, fails closed) plus a `demoService` that drives the **real** services:
 `simulateAction` goes through `doseActionsService`, `applyScenario` rewrites 14 days of events and
 recomputes adherence through `recomputeRange`, `generateCaregiverAlert` and `generateInsight` call
@@ -1488,36 +1488,36 @@ Code-complete. The release gate (`typecheck` -> `lint` -> `format:check` -> `tes
 - **A stale `upcoming_dose` notification survived a direct `upcoming` -> `missed` transition.**
   Covered by `src/server/domain/doseEvents/reconcile.test.ts`.
 - **`Vitest` silently dropped a whole test file.** Under v8 coverage a recycled worker could fail
-  to start ("Timeout waiting for worker to respond"), which Vitest reports as an *unhandled error*
+  to start ("Timeout waiting for worker to respond"), which Vitest reports as an _unhandled error_
   while still exiting 0 - 48 files reported green out of 49. The unit pool is now pinned to
   `maxWorkers: 1`; `docs/verification.md` explains how to detect a recurrence.
 - **The status filter on the medication list did not filter.** Picking "Paused" still listed active
   rows and vice versa, and an archived-only search reported a misleading "no match" empty state.
-- **A per-medication reminder lead-time picker was dead UI.** `reminderBeforeMinutes` is a *user*
+- **A per-medication reminder lead-time picker was dead UI.** `reminderBeforeMinutes` is a _user_
   preference (`user_preferences.reminder_before_minutes`), not a medications column, so a picker on
   the wizard would validate, round-trip and then be discarded by the server. Removed from the
   wizard; the real control is Settings -> Reminders.
 - **The E2E suite asserted the bugs it should have caught.** `shell.spec.ts` expected
-  `heading[name="404"]` to be *visible* after clicking `/schedule`, written when the route did not
+  `heading[name="404"]` to be _visible_ after clicking `/schedule`, written when the route did not
   exist. It would have stayed green forever while a shipped nav link 404'd.
 - **No skip link anywhere in the app** (WCAG 2.4.1). Added as the first tab stop. The shell
-  deliberately does *not* add its own `<main>`: each feature screen owns that landmark, and a
+  deliberately does _not_ add its own `<main>`: each feature screen owns that landmark, and a
   second or nested one is invalid and trips axe's duplicate-main rule.
 
 ### Tests added
 
-| File | Covers |
-|---|---|
-| `src/server/domain/doseEvents/reconcile.test.ts` | reminder producers, preference/medication gating, missed transition, stale-notification fix |
-| `src/features/medications/medication-utils.test.ts` | `filterMedications` (name/dose/unit/time, status scoping, empty state) + display helpers |
-| `src/lib/download.test.ts` | CSV download anchor, deferred `revokeObjectURL` (Safari), Blob passthrough |
-| `src/components/layout/clock-context.test.tsx` | demo clock: initial value, dock push, release-to-real-time, provider-less `useClock` |
-| `src/components/layout/AppShell.test.tsx` | skip link + focusable target, no duplicate `<main>` |
-| `src/components/layout/nav-manifest.test.ts` | every canonical nav href also resolves under `/demo/workspace` |
-| `e2e/demo.spec.ts` | the 401 regression guard: every demo destination renders, hrefs stay in-base, reset confirm/cancel |
-| `e2e/medications.spec.ts` | wizard create, search, status filter, pause/resume, detail, validation |
-| `e2e/a11y.spec.ts` | axe WCAG 2.0/2.1 A+AA over marketing/app/demo, one `<main>` + one `<h1>`, named icon controls |
-| `e2e/responsive.spec.ts` | mobile/tablet/desktop overflow, sidebar vs bottom nav, sheet focus + Escape |
+| File                                                | Covers                                                                                             |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/server/domain/doseEvents/reconcile.test.ts`    | reminder producers, preference/medication gating, missed transition, stale-notification fix        |
+| `src/features/medications/medication-utils.test.ts` | `filterMedications` (name/dose/unit/time, status scoping, empty state) + display helpers           |
+| `src/lib/download.test.ts`                          | CSV download anchor, deferred `revokeObjectURL` (Safari), Blob passthrough                         |
+| `src/components/layout/clock-context.test.tsx`      | demo clock: initial value, dock push, release-to-real-time, provider-less `useClock`               |
+| `src/components/layout/AppShell.test.tsx`           | skip link + focusable target, no duplicate `<main>`                                                |
+| `src/components/layout/nav-manifest.test.ts`        | every canonical nav href also resolves under `/demo/workspace`                                     |
+| `e2e/demo.spec.ts`                                  | the 401 regression guard: every demo destination renders, hrefs stay in-base, reset confirm/cancel |
+| `e2e/medications.spec.ts`                           | wizard create, search, status filter, pause/resume, detail, validation                             |
+| `e2e/a11y.spec.ts`                                  | axe WCAG 2.0/2.1 A+AA over marketing/app/demo, one `<main>` + one `<h1>`, named icon controls      |
+| `e2e/responsive.spec.ts`                            | mobile/tablet/desktop overflow, sidebar vs bottom nav, sheet focus + Escape                        |
 
 ### Coverage
 

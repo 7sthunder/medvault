@@ -19,7 +19,7 @@ import {
   type DoseEventStatus,
 } from "./schema";
 
-export const DEMO_USER_EMAIL = "arun@medvault.local";
+export const DEMO_USER_EMAIL = "arun@meditrackai.local";
 export const DEMO_PATIENT_NAME = "Arun Kumar";
 
 /* ── §19 exact construction ──

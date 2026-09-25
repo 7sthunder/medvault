@@ -5,7 +5,25 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * MedVault design system — Stitch export turned into Tailwind v4 tokens.
+ * Sidebar rail width.
+ *
+ * A single variable drives both the fixed rail (`w-(--sidebar-width)`) and the content offset
+ * that keeps page content clear of it (`lg:pl-(--sidebar-width)`). Declaring it once here is what
+ * stops the two from drifting apart when a width is tweaked.
+ *
+ * Collapsed is 4.5rem rather than 4rem so an 18px nav icon still lands on a ~40px pointer target.
+ * Set by the `data-sidebar` attribute on the shell root, see AppShell.tsx.
+ */
+[data-sidebar="open"] {
+  --sidebar-width: 17rem;
+}
+
+[data-sidebar="collapsed"] {
+  --sidebar-width: 4.5rem;
+}
+
+/*
+ * MediTrack AI design system — Stitch export turned into Tailwind v4 tokens.
  * Source of truth: plan.md §5 (verified against Landingpage/ in docs/stitch-analysis.md §7).
  *
  * Strategy:

@@ -16,8 +16,8 @@ try {
 }
 
 const globalForDb = globalThis as unknown as {
-  __medvaultDb?: ReturnType<typeof createClient>;
-  __medvaultPool?: Pool;
+  __meditrackaiDb?: ReturnType<typeof createClient>;
+  __meditrackaiPool?: Pool;
 };
 
 function createClient() {
@@ -33,12 +33,12 @@ function createClient() {
 }
 
 const instance =
-  globalForDb.__medvaultDb ??
+  globalForDb.__meditrackaiDb ??
   (() => {
     const created = createClient();
     if (process.env.NODE_ENV !== "production") {
-      globalForDb.__medvaultDb = created;
-      globalForDb.__medvaultPool = created.pool;
+      globalForDb.__meditrackaiDb = created;
+      globalForDb.__meditrackaiPool = created.pool;
     }
     return created;
   })();

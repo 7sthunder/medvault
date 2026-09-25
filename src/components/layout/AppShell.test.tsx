@@ -1,5 +1,5 @@
 /* @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const { pathname, router } = vi.hoisted(() => ({
@@ -128,5 +128,59 @@ describe("AppShell", () => {
     // Hidden until focused, but still in the a11y tree so it stays discoverable.
     expect(skip.className).toContain("sr-only");
     expect(skip.className).toContain("focus:not-sr-only");
+  });
+
+  describe("desktop sidebar collapse", () => {
+    // The choice is persisted, so each case has to start from a clean slate.
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it("starts expanded and toggles to a collapsed icon rail", async () => {
+      renderShell();
+      const aside = document.getElementById("sidebar");
+      expect(aside?.getAttribute("data-collapsed")).toBe("false");
+
+      const toggle = screen.getByRole("button", { name: "Collapse sidebar" });
+      expect(toggle.getAttribute("aria-expanded")).toBe("true");
+      expect(toggle.getAttribute("aria-controls")).toBe("sidebar");
+
+      fireEvent.click(toggle);
+
+      await waitFor(() =>
+        expect(document.getElementById("sidebar")?.getAttribute("data-collapsed")).toBe("true"),
+      );
+      expect(
+        screen.getByRole("button", { name: "Expand sidebar" }).getAttribute("aria-expanded"),
+      ).toBe("false");
+    });
+
+    it("keeps nav links reachable by accessible name when collapsed", async () => {
+      renderShell();
+      fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
+      await waitFor(() =>
+        expect(document.getElementById("sidebar")?.getAttribute("data-collapsed")).toBe("true"),
+      );
+
+      // The label is visually hidden but must stay in the a11y tree, otherwise the icon-only
+      // links become unlabelled and unusable with a screen reader.
+      const link = screen.getByRole("link", { name: "Dashboard" });
+      expect(link.getAttribute("href")).toBe("/dashboard");
+      expect(link.getAttribute("title")).toBe("Dashboard");
+      expect(link.querySelector("span")?.className).toContain("sr-only");
+    });
+
+    it("persists the collapsed choice", async () => {
+      renderShell();
+      fireEvent.click(screen.getByRole("button", { name: "Collapse sidebar" }));
+      await waitFor(() =>
+        expect(localStorage.getItem("meditrackai.sidebar-collapsed")).toBe("true"),
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "Expand sidebar" }));
+      await waitFor(() =>
+        expect(localStorage.getItem("meditrackai.sidebar-collapsed")).toBe("false"),
+      );
+    });
   });
 });

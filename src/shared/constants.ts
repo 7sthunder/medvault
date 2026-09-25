@@ -69,7 +69,7 @@ export const ADHERENCE_PRUNE_DAYS = 120;
 
 /* ── §19 / §10.8 — Demo identities ────────────────────────────────────────── */
 
-export const DEMO_USER_EMAIL = "demo@medvault.demo";
+export const DEMO_USER_EMAIL = "demo@meditrackai.demo";
 export const DEMO_USER_NAME = `${BRAND.name} Demo`;
 export const DEMO_PASSWORD_HINT = "auto-generated demo credentials";
 

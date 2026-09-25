@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -11,13 +11,29 @@ import { ShellContext, type ShellUser } from "@/components/layout/shell-context"
 import { TRPCProvider } from "@/lib/trpc";
 
 const SIDEBAR_STORAGE_KEY = "meditrackai.sidebar-collapsed";
+const SIDEBAR_EVENT = "meditrackai:sidebar-collapsed";
 
-function readStoredCollapsed(): boolean {
+function readCollapsed(): boolean {
   try {
     return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true";
   } catch {
     return false;
   }
+}
+
+/**
+ * The collapsed choice lives in localStorage so it survives a reload, but reading it during render
+ * would make the first client render disagree with the server HTML. `useSyncExternalStore` keeps
+ * the server snapshot at `false` and adopts the stored value immediately after hydration, so the
+ * rail starts expanded and then settles without a mismatch or a cascading re-render.
+ */
+function subscribeToCollapsed(onStoreChange: () => void) {
+  window.addEventListener(SIDEBAR_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
+  return () => {
+    window.removeEventListener(SIDEBAR_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
+  };
 }
 
 export function AppShell({
@@ -41,24 +57,16 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sidebarCollapsed = useSyncExternalStore(subscribeToCollapsed, readCollapsed, () => false);
 
-  // Applied after mount so the server-rendered markup and the first client render agree.
-  useEffect(() => {
-    setSidebarCollapsed(readStoredCollapsed());
+  const toggleSidebar = useCallback(() => {
+    try {
+      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(!readCollapsed()));
+    } catch {
+      // Storage can be unavailable (private mode); the toggle still works for this session.
+    }
+    window.dispatchEvent(new Event(SIDEBAR_EVENT));
   }, []);
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed((prev) => {
-      const next = !prev;
-      try {
-        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
-      } catch {
-        // Storage can be unavailable (private mode); the toggle still works for this session.
-      }
-      return next;
-    });
-  };
 
   return (
     <TRPCProvider>

@@ -1,7 +1,7 @@
 /**
  * Phase 07 — timezone-aware date/time helpers (plan §9 `times.ts`).
  *
- * MedVault stores every instant as `timestamptz`; calendar days and dose "times" are
+ * MediTrack AI stores every instant as `timestamptz`; calendar days and dose "times" are
  * interpreted in the *user's* timezone (`user_preferences.timezone`, default `UTC`).
  * All "local day" math goes through these helpers so dashboard/schedule/adherence stay
  * consistent. Uses date-fns v4 + the `@date-fns/tz` timezone package.

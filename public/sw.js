@@ -1,5 +1,5 @@
 /*
- * MedVault push service worker.
+ * MediTrack AI push service worker.
  *
  * Two jobs: display a notification when the push service delivers one, and route a click back
  * into the app. Deliberately dependency-free and cache-free — it never intercepts fetches, so
@@ -22,11 +22,11 @@ self.addEventListener("push", (event) => {
     payload = {};
   }
 
-  const title = payload.title || "MedVault";
+  const title = payload.title || "MediTrack AI";
   const options = {
     body: payload.body || "",
     // `tag` collapses a repeat of the same alert instead of stacking duplicates.
-    tag: payload.tag || "medvault",
+    tag: payload.tag || "meditrackai",
     renotify: false,
     icon: "/icon.svg",
     badge: "/icon.svg",

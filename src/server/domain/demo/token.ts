@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  * Phase 18 — demo session token (plan §10.8).
  *
  * `/demo` is reachable while signed out, so it cannot rely on the Better Auth session. Instead a
- * short-lived HMAC-signed cookie (`medvault_demo_session`) carries the demo user id.
+ * short-lived HMAC-signed cookie (`meditrackai_demo_session`) carries the demo user id.
  *
  * Two properties matter, and neither is about secrecy of the demo data (which is public sample
  * data by design):
@@ -16,7 +16,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
  *     worst re-enter the demo workspace, never reach a real account.
  */
 
-export const DEMO_COOKIE = "medvault_demo_session";
+export const DEMO_COOKIE = "meditrackai_demo_session";
 
 /** Demo sessions are short-lived by design; a stale link should not keep a shared machine in demo mode. */
 const TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
@@ -29,7 +29,7 @@ interface DemoTokenPayload {
 function secret(): string {
   // A stable per-deployment value. Falls back to a fixed dev string so local/demo builds work
   // without extra env setup; production should always set BETTER_AUTH_SECRET (or this).
-  return process.env.BETTER_AUTH_SECRET ?? process.env.AUTH_SECRET ?? "medvault-demo-dev-secret";
+  return process.env.BETTER_AUTH_SECRET ?? process.env.AUTH_SECRET ?? "meditrackai-demo-dev-secret";
 }
 
 function sign(value: string): string {

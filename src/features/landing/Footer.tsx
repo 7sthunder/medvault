@@ -38,8 +38,8 @@ const CONTACT_ROWS = [
   { icon: CalendarCheck2, text: "+1 (000) 000-0000", href: "tel:+10000000000" },
   {
     icon: MessageCircleHeart,
-    text: "hello@medvault.example",
-    href: "mailto:hello@medvault.example",
+    text: "hello@meditrackai.example",
+    href: "mailto:hello@meditrackai.example",
   },
   { icon: MapPin, text: "123 Health St, MedVille, MV 00000", href: undefined },
 ];

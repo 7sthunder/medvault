@@ -1,4 +1,4 @@
-export default function MedVaultPhoneSection() {
+export default function MediTrackAIPhoneSection() {
   return (
     <>
       <style>{`

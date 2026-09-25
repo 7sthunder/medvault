@@ -4,13 +4,13 @@
  */
 export const BRAND = {
   /** Product name — always rendered as wordmark, never a raw string alone */
-  name: "MedVault",
-  /** Wordmark split so the accent syllable can be recoloured (Med + Vault) */
-  wordmark: { active: "Med", accent: "Vault" },
+  name: "MediTrack AI",
+  /** Wordmark split so the accent syllable can be recoloured (MediTrack + AI) */
+  wordmark: { active: "MediTrack", accent: "AI" },
   /** Subline used on marketing/empty states */
   tagline: "Medication reminders & health tracking, beautifully simple.",
   /** AI assistant brand (§5.1) */
-  ai: { name: "MedVault AI", gradient: "linear-gradient(135deg,#10b981,#059669)" },
+  ai: { name: "MediTrack AI", gradient: "linear-gradient(135deg,#10b981,#059669)" },
 } as const;
 
 export interface LogoConfig {

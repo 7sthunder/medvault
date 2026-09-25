@@ -27,7 +27,7 @@ async function rollbackTx<T>(fn: (tx: DbTx, userId: string) => Promise<T>): Prom
         .values({
           id: uuidv7(),
           name: "Dose Evt Tester",
-          email: `dose-evt-${uuidv7().slice(0, 8)}@medvault.local`,
+          email: `dose-evt-${uuidv7().slice(0, 8)}@meditrackai.local`,
           timezone: "UTC",
         })
         .returning({ id: users.id });

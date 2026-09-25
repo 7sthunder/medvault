@@ -5,7 +5,7 @@
  * render byte-identical copy from one source. If a claim here needs to change (a limit, a default,
  * a policy), it changes once.
  *
- * The AI note is not optional copy: the plan requires the "MedVault AI" affordance to state that
+ * The AI note is not optional copy: the plan requires the "MediTrack AI" affordance to state that
  * insights are informational and not medical advice, and `/help` is where that belongs.
  */
 

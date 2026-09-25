@@ -19,14 +19,15 @@ import { log } from "@/lib/log";
 /** Type-only, so it is erased at compile time and never becomes a runtime import. */
 type WebPushClient = typeof import("web-push");
 
-const requireRuntime = createRequire(`${process.cwd()}/package.json`);
-
 let cached: WebPushClient | null = null;
 
 /** Resolve `web-push` on first use. Returns null if it is missing or unloadable. */
 function getWebPush(): WebPushClient | null {
   if (cached) return cached;
   try {
+    // Built lazily, inside the call: webpack has a parser hook for `createRequire` and warns
+    // "failed parsing argument" when it is invoked with a non-literal at module scope.
+    const requireRuntime = createRequire(`${process.cwd()}/package.json`);
     cached = requireRuntime("web-push") as WebPushClient;
   } catch (error) {
     log.warn("web-push could not be loaded; push delivery is disabled", {

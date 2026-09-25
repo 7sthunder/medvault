@@ -34,7 +34,7 @@ async function rollbackTx<T>(fn: (tx: DbTx, userId: string) => Promise<T>): Prom
         .values({
           id: uuidv7(),
           name: "Dashboard Tester",
-          email: `dash-${uuidv7().slice(0, 8)}@medvault.local`,
+          email: `dash-${uuidv7().slice(0, 8)}@meditrackai.local`,
           timezone: "UTC",
         })
         .returning({ id: users.id });

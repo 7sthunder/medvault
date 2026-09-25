@@ -21,7 +21,7 @@ export default async function LoginPage({
         <span className="text-primary">back.</span>
       </h1>
       <p className="mt-4 mb-9 text-base text-muted-foreground">
-        Securely access your medical timeline.
+        Sign in to MediTrack AI to securely access your medical timeline.
       </p>
 
       <LoginForm next={next} />

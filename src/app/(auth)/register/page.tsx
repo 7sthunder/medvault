@@ -16,12 +16,12 @@ export default async function RegisterPage({
   return (
     <>
       <h1 className="font-heading text-4xl leading-none font-black tracking-tight text-ink-900 sm:text-5xl">
-        Initialize
+        Create your
         <br />
-        <span className="text-primary">your vault.</span>
+        <span className="text-primary">MediTrack AI account.</span>
       </h1>
       <p className="mt-4 mb-9 text-base text-muted-foreground">
-        Join thousands protecting their health data.
+        Join thousands protecting their health data with MediTrack AI.
       </p>
 
       <RegisterForm next={next} />
