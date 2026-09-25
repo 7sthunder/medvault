@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { AlarmClock, Check, CheckCircle2, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useI18n } from "@/lib/i18n/context";
 import { canSkipDose, canSnoozeDose, canTakeDose } from "@/shared/calc/doseState";
 import type { DoseEventStatus, DoseStatus } from "@/shared/enums";
 import type { DoseEventDTO } from "@/shared/types";
@@ -28,6 +29,7 @@ export function DoseCard({
   onOpenSkip,
   isTaking = false,
 }: DoseCardProps) {
+  const { t } = useI18n();
   const displayStatus = toDisplayStatus(dose.status);
   const scheduledTime = format(new Date(dose.scheduledFor), "h:mm a");
 
@@ -68,14 +70,14 @@ export function DoseCard({
           {dose.status === "snoozed" && dose.snoozeUntil && (
             <span className="flex items-center gap-1 font-medium text-amber-600 dark:text-amber-400">
               <AlarmClock className="size-3.5" />
-              Snoozed until {format(new Date(dose.snoozeUntil), "h:mm a")} ({dose.snoozeCount}/3)
+              {t("dashboard.snoozedUntil", "Snoozed until")} {format(new Date(dose.snoozeUntil), "h:mm a")} ({dose.snoozeCount}/3)
             </span>
           )}
 
           {dose.status === "taken" && dose.takenAt && (
             <span className="flex items-center gap-1 font-medium text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="size-3.5" />
-              Taken at {format(new Date(dose.takenAt), "h:mm a")}
+              {t("dashboard.takenAt", "Taken at")} {format(new Date(dose.takenAt), "h:mm a")}
             </span>
           )}
 
@@ -99,7 +101,7 @@ export function DoseCard({
             className="text-xs text-muted-foreground hover:text-destructive"
           >
             <X className="mr-1 size-3.5" />
-            Skip
+            {t("dashboard.skip", "Skip")}
           </Button>
         )}
 
@@ -113,7 +115,7 @@ export function DoseCard({
             className="text-xs border-amber/30 text-amber hover:bg-amber-tint dark:text-amber-400 dark:hover:bg-amber-900/30"
           >
             <AlarmClock className="mr-1 size-3.5" />
-            Snooze
+            {t("dashboard.snooze", "Snooze")}
           </Button>
         )}
 
@@ -126,7 +128,11 @@ export function DoseCard({
             className="bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold shadow-primary-btn hover:scale-102 active:scale-98 transition-all"
           >
             <Check className="mr-1 size-3.5" />
-            {isTaking ? "Taking…" : dose.status === "missed" ? "Take Late" : "Take"}
+            {isTaking
+              ? t("dashboard.logging", "Taking…")
+              : dose.status === "missed"
+                ? t("dashboard.takeLate", "Take Late")
+                : t("dashboard.take", "Take")}
           </Button>
         )}
       </div>

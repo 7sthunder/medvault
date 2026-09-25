@@ -19,6 +19,7 @@ import { api } from "@/lib/trpc";
 import type { DoseEventDTO } from "@/shared/types";
 import { motion, type Variants } from "framer-motion";
 import { AppointmentsWidget } from "@/features/appointments/AppointmentsWidget";
+import { useI18n } from "@/lib/i18n/context";
 import { AdherenceWidget } from "./AdherenceWidget";
 import { CaregiverStatus } from "./CaregiverStatus";
 import { InsightWidget } from "./InsightWidget";
@@ -51,6 +52,7 @@ const itemVariants: Variants = {
 };
 
 export function DashboardPage() {
+  const { t } = useI18n();
   const [snoozeDose, setSnoozeDose] = useState<DoseEventDTO | null>(null);
   const [skipDose, setSkipDose] = useState<DoseEventDTO | null>(null);
   const [takingId, setTakingId] = useState<string | null>(null);
@@ -188,36 +190,36 @@ export function DashboardPage() {
       <motion.section variants={itemVariants} aria-label="Key adherence and medication metrics">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Today's Adherence"
-            value={stats.adherenceToday !== null ? `${stats.adherenceToday}%` : "No doses yet"}
+            title={t("dashboard.todayAdherence", "Today's Adherence")}
+            value={stats.adherenceToday !== null ? `${stats.adherenceToday}%` : t("dashboard.noDosesYet", "No doses yet")}
             icon={ShieldCheck}
             tone="emerald"
-            subtitle={`${stats.takenToday} of ${stats.scheduledToday} doses taken`}
+            subtitle={`${stats.takenToday} ${t("dashboard.of", "of")} ${stats.scheduledToday} ${t("dashboard.dosesTakenSuffix", "doses taken")}`}
           />
           <StatCard
-            title="Current Streak"
-            value={`${stats.currentStreak} Day${stats.currentStreak === 1 ? "" : "s"}`}
+            title={t("dashboard.currentStreak", "Current Streak")}
+            value={`${stats.currentStreak} ${stats.currentStreak === 1 ? t("dashboard.day", "Day") : t("dashboard.days", "Days")}`}
             icon={Flame}
             tone="amber"
-            subtitle={stats.currentStreak >= 7 ? "Outstanding consistency!" : "Keep taking doses on time"}
+            subtitle={stats.currentStreak >= 7 ? t("dashboard.outstandingConsistency", "Outstanding consistency!") : t("dashboard.keepTaking", "Keep taking doses on time")}
           />
           <StatCard
-            title="Next Scheduled Dose"
+            title={t("dashboard.nextScheduledDose", "Next Scheduled Dose")}
             value={
               stats.nextDoseTime
                 ? format(new Date(stats.nextDoseTime), "h:mm a")
-                : "All done"
+                : t("dashboard.allDone", "All done")
             }
             icon={CalendarClock}
             tone="cyan"
-            subtitle={nextDose ? nextDose.medication.name : "No more doses today"}
+            subtitle={nextDose ? nextDose.medication.name : t("dashboard.noMoreDosesToday", "No more doses today")}
           />
           <StatCard
-            title="Missed Today"
+            title={t("dashboard.missedToday", "Missed Today")}
             value={`${stats.missedToday}`}
             icon={AlertTriangle}
             tone={stats.missedToday > 0 ? "magenta" : "emerald"}
-            subtitle={stats.missedToday === 0 ? "Zero missed doses" : "Doses need review"}
+            subtitle={stats.missedToday === 0 ? t("dashboard.zeroMissed", "Zero missed doses") : t("dashboard.dosesNeedReview", "Doses need review")}
           />
         </div>
       </motion.section>

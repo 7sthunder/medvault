@@ -16,14 +16,25 @@ import { RelationshipList } from "./RelationshipList";
 import type { CaregiverTab } from "./types";
 
 export function CaregiverPage() {
+  const authQuery = api.auth?.me?.useQuery ? api.auth.me.useQuery() : undefined;
+  const currentUser = authQuery?.data;
   const patientsQuery = api.caregiver.listPatients.useQuery();
 
   const patients = useMemo(() => patientsQuery.data ?? [], [patientsQuery.data]);
   const isCaregiverForOthers = patients.length > 0;
+  const isCaregiverRole = (currentUser as { role?: string | null } | null | undefined)?.role === "caregiver";
 
-  const [activeTab, setActiveTab] = useState<CaregiverTab>("caregivers");
+  const [activeTab, setActiveTab] = useState<CaregiverTab>(
+    isCaregiverRole ? "overview" : "caregivers",
+  );
   const [selectedPatientId, setSelectedPatientId] = useState<string>("");
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (isCaregiverRole) {
+      setActiveTab("overview");
+    }
+  }, [isCaregiverRole]);
 
   useEffect(() => {
     if (isCaregiverForOthers && !selectedPatientId && patients[0]) {
@@ -72,22 +83,20 @@ export function CaregiverPage() {
 
       {/* Primary Tab Navigation */}
       <div className="flex items-center gap-1 rounded-xl border border-border bg-muted/60 p-1 w-fit">
-        {isCaregiverForOthers && (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "overview"}
-            onClick={() => setActiveTab("overview")}
-            className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold tracking-wide transition-all ${
-              activeTab === "overview"
-                ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
-                : "text-muted-foreground hover:text-ink-900"
-            }`}
-          >
-            <HeartHandshake className="size-4" />
-            <span>Monitored Patients ({patients.length})</span>
-          </button>
-        )}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "overview"}
+          onClick={() => setActiveTab("overview")}
+          className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold tracking-wide transition-all ${
+            activeTab === "overview"
+              ? "bg-card text-ink-900 shadow-card-sm dark:text-ink-100"
+              : "text-muted-foreground hover:text-ink-900"
+          }`}
+        >
+          <HeartHandshake className="size-4" />
+          <span>Monitored Patients ({patients.length})</span>
+        </button>
 
         <button
           type="button"
@@ -121,7 +130,7 @@ export function CaregiverPage() {
       </div>
 
       {/* Tab Panels */}
-      {activeTab === "overview" && isCaregiverForOthers && (
+      {activeTab === "overview" && (
         <CaregiverOverview
           patients={patients}
           selectedPatientId={selectedPatientId || patients[0]?.patientUserId || ""}

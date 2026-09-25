@@ -6,6 +6,7 @@ import { ArrowRight, Calendar, CalendarX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
 import { DoseCard } from "@/features/schedule/DoseCard";
+import { useI18n } from "@/lib/i18n/context";
 import type { DoseEventDTO } from "@/shared/types";
 
 export interface TodayFeedProps {
@@ -23,6 +24,8 @@ export function TodayFeed({
   onOpenSkip,
   takingId,
 }: TodayFeedProps) {
+  const { t } = useI18n();
+
   // Smart priority sorting: Due & Snoozed first, then Upcoming, then Resolved
   const prioritizedDoses = useMemo(() => {
     const dueAndSnoozed: DoseEventDTO[] = [];
@@ -61,10 +64,10 @@ export function TodayFeed({
       <div className="flex items-center justify-between">
         <div>
           <SectionLabel tone="emerald" leading={<Calendar className="size-3.5" />}>
-            Today&apos;s Schedule
+            {t("dashboard.todaysSchedule", "Today's Schedule")}
           </SectionLabel>
           <h2 className="font-heading text-lg font-bold text-ink-900 dark:text-ink-100">
-            Dose Timeline
+            {t("dashboard.doseTimeline", "Dose Timeline")}
           </h2>
         </div>
 
@@ -75,7 +78,7 @@ export function TodayFeed({
           nativeButton={false}
           render={<Link href="/schedule" />}
         >
-          <span>View all ({today.length})</span>
+          <span>{t("dashboard.viewAll", "View all")} ({today.length})</span>
           <ArrowRight className="size-3.5" />
         </Button>
       </div>
@@ -86,10 +89,10 @@ export function TodayFeed({
             <CalendarX className="size-5" />
           </div>
           <p className="text-sm font-medium text-ink-800 dark:text-ink-200">
-            No doses scheduled for today
+            {t("dashboard.noDosesScheduled", "No doses scheduled for today")}
           </p>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-            You don&apos;t have any active medication schedule slots configured for today.
+            {t("dashboard.noDosesDesc", "You don't have any active medication schedule slots configured for today.")}
           </p>
           <Button
             variant="outline"

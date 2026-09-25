@@ -78,24 +78,24 @@ export function Breadcrumbs({ className }: { className?: string }) {
   const segments = getBreadcrumbSegments(pathname);
 
   return (
-    <nav aria-label="Breadcrumbs" className={cn("flex items-center text-xs sm:text-sm text-muted-foreground", className)}>
+    <nav aria-label="Breadcrumbs" className={cn("flex items-center text-xs sm:text-sm text-slate-300", className)}>
       <ol className="flex items-center flex-wrap gap-1.5" role="list">
         {segments.map((seg, idx) => (
           <li key={idx} className="flex items-center gap-1.5">
             {idx > 0 && (
-              <ChevronRight className="size-3.5 text-muted-foreground/60 shrink-0" aria-hidden="true" />
+              <ChevronRight className="size-3.5 text-slate-500 shrink-0" aria-hidden="true" />
             )}
             {seg.isCurrent || !seg.href ? (
               <span
                 aria-current={seg.isCurrent ? "page" : undefined}
-                className={cn("font-medium", seg.isCurrent && "font-semibold text-ink-900 dark:text-ink-100")}
+                className={cn("font-medium", seg.isCurrent && "font-semibold text-white")}
               >
                 {seg.label}
               </span>
             ) : (
               <Link
                 href={seg.href}
-                className="hover:text-ink-900 dark:hover:text-ink-100 transition-colors"
+                className="hover:text-white text-slate-400 transition-colors"
               >
                 {seg.label}
               </Link>

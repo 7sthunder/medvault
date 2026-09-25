@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useI18n } from "@/lib/i18n/context";
 import { canSkipDose, canSnoozeDose, canTakeDose } from "@/shared/calc/doseState";
 import type { DoseEventStatus, DoseStatus } from "@/shared/enums";
 import type { DoseEventDTO } from "@/shared/types";
@@ -43,6 +44,8 @@ export function NextDoseHero({
   onOpenSkip,
   takingId,
 }: NextDoseHeroProps) {
+  const { t } = useI18n();
+
   // 1. Empty state: No medications registered yet
   if (!hasMedications) {
     return (
@@ -54,14 +57,13 @@ export function NextDoseHero({
           <div className="space-y-2.5 max-w-xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
               <Sparkles className="size-3.5" aria-hidden="true" />
-              <span>Welcome to MedVault</span>
+              <span>{t("dashboard.welcome", "Welcome to MedVault")}</span>
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
-              Start tracking your medications
+              {t("dashboard.startTracking", "Start tracking your medications")}
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Add your first prescription or supplement to activate automatic schedule tracking,
-              daily reminders, and adherence streaks.
+              {t("dashboard.startTrackingDesc", "Add your first prescription or supplement to activate automatic schedule tracking, daily reminders, and adherence streaks.")}
             </p>
           </div>
 
@@ -74,7 +76,7 @@ export function NextDoseHero({
               render={<Link href="/medications/new" />}
             >
               <Plus className="size-5" />
-              <span>Add Your First Medication</span>
+              <span>{t("dashboard.addFirstMedication", "Add Your First Medication")}</span>
             </Button>
           </div>
         </div>
@@ -96,15 +98,11 @@ export function NextDoseHero({
             </div>
             <div className="space-y-1.5">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                <span>All Caught Up</span>
+                <span>{t("dashboard.allCaughtUp", "All Caught Up")}</span>
               </div>
               <h1 className="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight text-ink-900 dark:text-ink-100">
-                You&apos;re all set for today!
+                {t("dashboard.allCaughtUpSubtitle", "You're all set for today!")}
               </h1>
-              <p className="text-sm text-muted-foreground max-w-lg">
-                All scheduled doses for today have been resolved. Your streak is intact and tomorrow&apos;s
-                schedule is prepared.
-              </p>
             </div>
           </div>
 
@@ -171,17 +169,17 @@ export function NextDoseHero({
               {isDueNow ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/15 px-3 py-0.5 text-xs font-bold text-rose-600 shadow-[0_0_12px_rgba(244,63,94,0.2)] animate-pulse dark:text-rose-400">
                   <span className="size-2 rounded-full bg-rose-500" />
-                  Due Now
+                  {t("dashboard.dueNow", "Due Now")}
                 </span>
               ) : isSnoozed ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber/30 bg-amber-tint/40 px-3 py-0.5 text-xs font-bold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                   <AlarmClock className="size-3" />
-                  Snoozed
+                  {t("dashboard.snoozed", "Snoozed")}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-0.5 text-xs font-semibold text-primary shadow-xs">
                   <Clock className="size-3" />
-                  Next Dose · {scheduledTimeStr}
+                  {t("dashboard.nextDose", "Next Dose")} · {scheduledTimeStr}
                 </span>
               )}
               <StatusBadge status={isDueNow ? "due-now" : toDisplayStatus(nextDose.status)} />
@@ -198,7 +196,7 @@ export function NextDoseHero({
 
             {isSnoozed && nextDose.snoozeUntil && (
               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                Snoozed until {format(new Date(nextDose.snoozeUntil), "h:mm a")} ({nextDose.snoozeCount}/3 snoozes used)
+                {t("dashboard.snoozedUntil", "Snoozed until")} {format(new Date(nextDose.snoozeUntil), "h:mm a")} ({nextDose.snoozeCount}/3)
               </p>
             )}
           </div>
@@ -216,7 +214,7 @@ export function NextDoseHero({
               className="gap-2 shadow-primary-btn font-semibold"
             >
               <Check className="size-4" />
-              <span>{isTaking ? "Logging..." : "Take Dose"}</span>
+              <span>{isTaking ? t("dashboard.logging", "Logging...") : t("dashboard.takeDose", "Take Dose")}</span>
             </Button>
           )}
 
@@ -230,7 +228,7 @@ export function NextDoseHero({
               className="gap-2"
             >
               <AlarmClock className="size-4 text-amber" />
-              <span>Snooze</span>
+              <span>{t("dashboard.snooze", "Snooze")}</span>
             </Button>
           )}
 
@@ -244,7 +242,7 @@ export function NextDoseHero({
               className="gap-1.5 text-muted-foreground hover:text-destructive"
             >
               <X className="size-4" />
-              <span>Skip</span>
+              <span>{t("dashboard.skip", "Skip")}</span>
             </Button>
           )}
         </div>

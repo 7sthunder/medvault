@@ -5,11 +5,6 @@ import Image from "next/image";
 
 export type AnimationTheme = "batman" | "spidergwen" | "medical";
 
-interface DynamicBackgroundProps {
-  initialTheme?: AnimationTheme;
-  className?: string;
-}
-
 export const THEME_CONFIG: Record<
   AnimationTheme,
   {
@@ -43,34 +38,59 @@ export const THEME_CONFIG: Record<
   },
 };
 
-export function DynamicBackground({ initialTheme = "medical" }: DynamicBackgroundProps) {
-  const [theme, setTheme] = useState<AnimationTheme>(initialTheme);
-  const [mounted, setMounted] = useState(false);
+export function useAnimationTheme(initial: AnimationTheme = "medical") {
+  const [theme, setThemeState] = useState<AnimationTheme>(initial);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("medvault_animation_theme") as AnimationTheme | null;
       if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical")) {
-        setTheme(saved);
-      } else if (initialTheme) {
-        setTheme(initialTheme);
+        setThemeState(saved);
       }
     } catch {
       // Storage unavailable
     }
-    setMounted(true);
-  }, [initialTheme]);
 
-  // Listen for custom theme change events across windows/settings
-  useEffect(() => {
     const handleStorage = () => {
-      const saved = localStorage.getItem("medvault_animation_theme") as AnimationTheme | null;
-      if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical")) {
-        setTheme(saved);
+      try {
+        const saved = localStorage.getItem("medvault_animation_theme") as AnimationTheme | null;
+        if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical")) {
+          setThemeState(saved);
+        }
+      } catch {
+        // Storage unavailable
       }
     };
     window.addEventListener("medvault_theme_change", handleStorage);
     return () => window.removeEventListener("medvault_theme_change", handleStorage);
+  }, []);
+
+  const setTheme = (newTheme: AnimationTheme) => {
+    setThemeState(newTheme);
+    try {
+      localStorage.setItem("medvault_animation_theme", newTheme);
+      window.dispatchEvent(new Event("medvault_theme_change"));
+    } catch {
+      // Storage unavailable
+    }
+  };
+
+  return { theme, setTheme };
+}
+
+interface DynamicBackgroundProps {
+  initialTheme?: AnimationTheme;
+  forceTheme?: AnimationTheme;
+  className?: string;
+}
+
+export function DynamicBackground({ initialTheme = "medical", forceTheme }: DynamicBackgroundProps) {
+  const { theme: activeTheme } = useAnimationTheme(forceTheme || initialTheme);
+  const theme = forceTheme || activeTheme;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
   const config = THEME_CONFIG[theme] || THEME_CONFIG.medical;

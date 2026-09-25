@@ -20,7 +20,7 @@ export interface AuthShellProps extends React.PropsWithChildren {
 export function AuthShell({ children, className }: AuthShellProps) {
   return (
     <div className={cn("relative grid min-h-dvh bg-background lg:grid-cols-[1.1fr_0.9fr]", className)}>
-      <DynamicBackground initialTheme="medical" />
+      <DynamicBackground forceTheme="medical" />
       <div className="bg-muted relative hidden min-[900px]:block overflow-hidden">
         <Image
           src="/auth/login-page.jpeg"

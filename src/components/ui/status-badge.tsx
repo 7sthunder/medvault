@@ -1,5 +1,8 @@
+"use client";
+
 import type { ComponentProps } from "react";
 import { statusMeta, type DoseStatus } from "@/shared/status";
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
 export interface StatusBadgeProps extends ComponentProps<"span"> {
@@ -12,6 +15,9 @@ export interface StatusBadgeProps extends ComponentProps<"span"> {
  */
 export function StatusBadge({ status, className, ...props }: StatusBadgeProps) {
   const meta = statusMeta(status);
+  const { t } = useI18n();
+  const localizedLabel = t(`status.${status}`, meta.label);
+
   return (
     <span
       role="img"
@@ -39,7 +45,7 @@ export function StatusBadge({ status, className, ...props }: StatusBadgeProps) {
       ) : (
         <meta.Icon className="size-3.5 shrink-0" aria-hidden="true" strokeWidth={2.5} />
       )}
-      <span aria-hidden="true">{meta.label}</span>
+      <span aria-hidden="true">{localizedLabel}</span>
     </span>
   );
 }

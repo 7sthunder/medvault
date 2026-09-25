@@ -5,6 +5,7 @@ import { ArrowRight, Pill, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SectionLabel } from "@/components/ui/section-label";
+import { useI18n } from "@/lib/i18n/context";
 import type { MedicationDTO } from "@/shared/types";
 
 export interface MedSummaryProps {
@@ -12,6 +13,7 @@ export interface MedSummaryProps {
 }
 
 export function MedSummary({ medications }: MedSummaryProps) {
+  const { t } = useI18n();
   const displayMeds = medications.slice(0, 4);
 
   return (
@@ -22,10 +24,10 @@ export function MedSummary({ medications }: MedSummaryProps) {
       <div className="flex items-center justify-between">
         <div>
           <SectionLabel tone="violet" leading={<Pill className="size-3.5" />}>
-            Medications
+            {t("dashboard.medicationsTitle", "Medications")}
           </SectionLabel>
           <h2 className="font-heading text-lg font-bold text-ink-900 dark:text-ink-100">
-            Active Prescriptions
+            {t("dashboard.activePrescriptions", "Active Prescriptions")}
           </h2>
         </div>
 
@@ -36,7 +38,7 @@ export function MedSummary({ medications }: MedSummaryProps) {
           nativeButton={false}
           render={<Link href="/medications" />}
         >
-          <span>Manage ({medications.length})</span>
+          <span>{t("dashboard.manage", "Manage")} ({medications.length})</span>
           <ArrowRight className="size-3.5" />
         </Button>
       </div>
@@ -44,10 +46,10 @@ export function MedSummary({ medications }: MedSummaryProps) {
       {medications.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-8 px-4 text-center">
           <p className="text-sm font-medium text-ink-800 dark:text-ink-200">
-            No active medications
+            {t("dashboard.noActiveMeds", "No active medications")}
           </p>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-            Start by adding your first medication to get reminder alerts and track intake.
+            {t("dashboard.noActiveMedsDesc", "Start by adding your first medication to get reminder alerts and track intake.")}
           </p>
           <Button
             variant="outline"
@@ -57,7 +59,7 @@ export function MedSummary({ medications }: MedSummaryProps) {
             render={<Link href="/medications/new" />}
           >
             <Plus className="size-3.5" />
-            <span>Add Medication</span>
+            <span>{t("dashboard.addMedication", "Add Medication")}</span>
           </Button>
         </div>
       ) : (
@@ -90,7 +92,7 @@ export function MedSummary({ medications }: MedSummaryProps) {
 
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs border-emerald-500/30 text-emerald-600 bg-emerald-500/10">
-                  Active
+                  {t("dashboard.active", "Active")}
                 </Badge>
                 <ArrowRight className="size-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
