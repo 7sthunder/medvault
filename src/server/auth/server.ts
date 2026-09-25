@@ -65,16 +65,39 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
+      age: {
+        type: "number",
+        required: false,
+        input: true,
+      },
+      gender: {
+        type: "string",
+        required: false,
+        input: true,
+      },
+      animationTheme: {
+        type: "string",
+        required: false,
+        defaultValue: "medical",
+        input: true,
+      },
     },
   },
   databaseHooks: {
     user: {
       create: {
         before: async (user) => {
+          let theme = "medical";
+          const parsedAge = typeof user.age === "number" ? user.age : (user.age ? parseInt(String(user.age), 10) : null);
+          if (parsedAge !== null && parsedAge < 27) {
+            if (user.gender === "male") theme = "batman";
+            else if (user.gender === "female") theme = "spidergwen";
+          }
           return {
             data: {
               ...user,
               accessCode: generateAccessCode(),
+              animationTheme: user.animationTheme || theme,
             },
           };
         },

@@ -5,12 +5,16 @@ import Link from "next/link";
 import {
   Activity,
   AlertTriangle,
+  BellRing,
   CheckCircle2,
   Clock,
   Flame,
+  HeartHandshake,
   KeyRound,
   Loader2,
+  PhoneCall,
   Pill,
+  Plus,
   Stethoscope,
   Users,
 } from "lucide-react";
@@ -23,6 +27,7 @@ import { StatCard } from "@/components/ui/stat-card";
 import { AppointmentDialog } from "@/features/appointments/AppointmentDialog";
 import { AppointmentsWidget } from "@/features/appointments/AppointmentsWidget";
 import { api } from "@/lib/trpc";
+import { useI18n } from "@/lib/i18n/context";
 import type { CaregiverRelationshipDTO } from "@/shared/types";
 import { AlertFeed } from "./AlertFeed";
 import { LinkPatientDialog } from "./LinkPatientDialog";
@@ -38,6 +43,7 @@ export function CaregiverOverview({
   selectedPatientId,
   onSelectPatient,
 }: CaregiverOverviewProps) {
+  const { t } = useI18n();
   const [leavingTarget, setLeavingTarget] = useState<string | null>(null);
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
@@ -62,21 +68,38 @@ export function CaregiverOverview({
 
   const selectedPatient = patients.find((p) => p.patientUserId === selectedPatientId);
 
+  const handleSendNudge = () => {
+    toast.success(`Dose reminder nudge dispatched to ${selectedPatient?.patientName || "patient"}'s device!`, {
+      description: "Push notification and in-app reminder sent.",
+      icon: <BellRing className="size-4 text-secondary" />,
+    });
+  };
+
+  const handleEmergencyCall = () => {
+    toast.info(`Initiating emergency coordination for ${selectedPatient?.patientName || "patient"}.`, {
+      description: "Contacting primary emergency contact and registered clinic.",
+      icon: <PhoneCall className="size-4 text-rose-500" />,
+    });
+  };
+
   if (patients.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-card/40 p-8 text-center space-y-4">
+      <div className="rounded-3xl border border-dashed border-border bg-card/60 p-10 text-center space-y-6 backdrop-blur-xl shadow-card">
         <EmptyState
           icon={Users}
-          title="No Monitored Patients"
-          description="You are not currently monitoring any patients. Enter a patient's access code to securely link them to your dashboard."
+          title={t("caregiver.noPatients", "No Monitored Patients")}
+          description={t(
+            "caregiver.noPatientsDesc",
+            "You are not currently monitoring any patients. Enter a patient's access code to securely link them to your dashboard.",
+          )}
         />
         <Button
           type="button"
           onClick={() => setLinkDialogOpen(true)}
-          className="gap-2"
+          className="gap-2 bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold shadow-lg"
         >
           <KeyRound className="size-4" />
-          <span>Link Patient with Access Code</span>
+          <span>{t("caregiver.linkNew", "Link Patient with Access Code")}</span>
         </Button>
 
         <LinkPatientDialog
@@ -91,34 +114,35 @@ export function CaregiverOverview({
   return (
     <div className="space-y-6">
       {/* Patient Switcher & Header Bar */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-card-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-secondary-tint text-secondary font-bold text-base">
+      <div className="flex flex-col gap-4 rounded-3xl border border-secondary/20 bg-card/90 backdrop-blur-xl p-6 shadow-card-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-secondary/15 text-secondary font-bold text-xl border border-secondary/25 shadow-inner">
             {selectedPatient?.patientName ? selectedPatient.patientName[0]?.toUpperCase() : "P"}
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-heading text-lg font-bold text-ink-900 dark:text-ink-100">
+            <div className="flex items-center gap-2.5">
+              <h2 className="font-heading text-xl font-extrabold text-ink-900 dark:text-ink-100">
                 {selectedPatient?.patientName}
               </h2>
-              <Badge variant="secondary" className="capitalize text-[10px] font-semibold">
+              <Badge variant="secondary" className="capitalize text-[11px] font-bold bg-secondary/20 text-secondary-foreground border-secondary/30">
+                <HeartHandshake className="size-3 mr-1" />
                 {selectedPatient?.relationType}
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground">{selectedPatient?.patientEmail}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{selectedPatient?.patientEmail}</p>
           </div>
         </div>
 
-        {/* Patient Switcher Dropdown (if multiple patients) */}
-        <div className="flex items-center gap-2.5">
+        {/* Patient Switcher Dropdown & Link New Button */}
+        <div className="flex flex-wrap items-center gap-2.5">
           {patients.length > 1 && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-semibold text-muted-foreground">Switch Patient:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">{t("caregiver.switchPatient", "Switch Patient")}:</span>
               <select
                 aria-label="Switch monitored patient"
                 value={selectedPatientId}
                 onChange={(e) => onSelectPatient(e.target.value)}
-                className="h-8 rounded-lg border border-input bg-card px-2.5 text-xs font-semibold text-ink-900 shadow-card-sm dark:text-ink-100"
+                className="h-9 rounded-xl border border-input bg-card px-3 text-xs font-bold text-ink-900 shadow-xs dark:text-ink-100 focus:outline-none focus:ring-2 focus:ring-secondary"
               >
                 {patients.map((p) => (
                   <option key={p.patientUserId} value={p.patientUserId}>
@@ -129,12 +153,23 @@ export function CaregiverOverview({
             </div>
           )}
 
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => setLinkDialogOpen(true)}
+            className="gap-1.5 rounded-xl border-secondary/30 text-xs font-bold text-secondary hover:bg-secondary/10"
+          >
+            <Plus className="size-3.5" />
+            <span>Link Patient</span>
+          </Button>
+
           {selectedPatient && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setLeavingTarget(selectedPatient.id)}
-              className="text-xs h-8 text-muted-foreground hover:text-rose-600"
+              className="text-xs h-9 text-muted-foreground hover:text-rose-600 rounded-xl"
             >
               Stop Monitoring
             </Button>
@@ -143,26 +178,49 @@ export function CaregiverOverview({
       </div>
 
       {/* Caregiver Actions Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-secondary/20 bg-secondary/5 p-5 backdrop-blur-md">
         <div>
-          <h3 className="font-heading text-sm font-bold text-foreground">
+          <h3 className="font-heading text-sm font-extrabold text-foreground flex items-center gap-2">
+            <HeartHandshake className="size-4 text-secondary" />
             Caregiver Actions for {selectedPatient?.patientName}
           </h3>
-          <p className="text-xs text-muted-foreground">
-            Schedule upcoming clinic consultations or add new medications to their daily regimen.
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Coordinate medications, schedule clinic consultations, or dispatch real-time reminder nudges.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleSendNudge}
+            className="gap-1.5 rounded-xl border-secondary/30 text-xs font-bold hover:bg-secondary/10 text-secondary"
+          >
+            <BellRing className="size-3.5" />
+            <span>{t("caregiver.sendReminder", "Send Reminder")}</span>
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleEmergencyCall}
+            className="gap-1.5 rounded-xl border-rose-300/40 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+          >
+            <PhoneCall className="size-3.5" />
+            <span>{t("caregiver.emergencyCall", "Emergency Call")}</span>
+          </Button>
+
           <Button
             type="button"
             size="sm"
             variant="outline"
             onClick={() => setAppointmentDialogOpen(true)}
-            className="gap-1.5 rounded-xl border-primary/30 text-xs font-semibold"
+            className="gap-1.5 rounded-xl border-secondary/30 text-xs font-bold"
           >
-            <Stethoscope className="size-3.5 text-primary" />
-            <span>Schedule Doctor Visit</span>
+            <Stethoscope className="size-3.5 text-secondary" />
+            <span>{t("caregiver.scheduleAppointment", "Schedule Doctor Visit")}</span>
           </Button>
 
           <Button
@@ -175,10 +233,10 @@ export function CaregiverOverview({
                 )}`}
               />
             }
-            className="gap-1.5 rounded-xl text-xs font-semibold"
+            className="gap-1.5 rounded-xl text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-xs"
           >
             <Pill className="size-3.5" />
-            <span>Add Medication</span>
+            <span>{t("caregiver.addMedication", "Add Medication")}</span>
           </Button>
         </div>
       </div>

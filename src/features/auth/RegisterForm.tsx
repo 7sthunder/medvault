@@ -29,20 +29,32 @@ export default function RegisterForm({ next }: { next: string | null }) {
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues, unknown, RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "", role: "patient" },
+    defaultValues: { name: "", email: "", password: "", role: "patient", age: undefined, gender: undefined },
   });
 
   const selectedRole = watch("role");
+  const selectedGender = watch("gender");
 
   const onSubmit = async (values: RegisterInput) => {
     setServerError(null);
-    const payload = {
+    let theme: "batman" | "spidergwen" | "medical" = "medical";
+    if (values.age && values.age < 27) {
+      if (values.gender === "male") theme = "batman";
+      else if (values.gender === "female") theme = "spidergwen";
+    }
+
+    const payload: Record<string, unknown> = {
       name: values.name,
       email: values.email,
       password: values.password,
       ...(values.role && values.role !== "patient" ? { role: values.role } : {}),
+      ...(values.age ? { age: Number(values.age) } : {}),
+      ...(values.gender ? { gender: values.gender } : {}),
+      ...(values.age || values.gender ? { animationTheme: theme } : {}),
     };
-    const res = await authClient.signUp.email(payload);
+    const res = await authClient.signUp.email(
+      payload as Parameters<typeof authClient.signUp.email>[0],
+    );
     if (res.error) {
       setServerError(authErrorMessage(res.error.code, res.error.message));
       return;
@@ -104,6 +116,42 @@ export default function RegisterForm({ next }: { next: string | null }) {
           {...register("name")}
         />
       </FormField>
+
+      {/* Age & Gender Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <FormField label="Age" error={errors.age?.message}>
+          <Input
+            type="number"
+            min={1}
+            max={120}
+            placeholder="e.g. 24"
+            disabled={isSubmitting}
+            {...register("age")}
+          />
+        </FormField>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-ink-600 dark:text-ink-300">
+            Gender
+          </label>
+          <div className="grid grid-cols-3 gap-1 rounded-xl bg-ink-100/60 p-1 dark:bg-ink-900/60 border border-ink-200/50 dark:border-ink-800/50">
+            {(["male", "female", "other"] as const).map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setValue("gender", g)}
+                className={`rounded-lg py-2 text-xs font-medium capitalize transition-all ${
+                  selectedGender === g
+                    ? "bg-white dark:bg-ink-800 text-teal-700 dark:text-teal-400 shadow-xs ring-1 ring-teal-500/20 font-bold"
+                    : "text-ink-600 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <FormField label="Email Address" error={errors.email?.message} required>
         <Input

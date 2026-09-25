@@ -16,6 +16,12 @@ export const registerSchema = z.object({
     .regex(/[a-zA-Z]/, "Password must include a letter.")
     .regex(/[0-9]/, "Password must include a number."),
   role: z.enum(["patient", "caregiver"]).optional(),
+  age: z.preprocess(
+    (val) => (val === "" || val === undefined || val === null || Number.isNaN(Number(val)) ? undefined : Number(val)),
+    z.number().int().min(1, "Please enter a valid age").max(120, "Please enter a valid age").optional(),
+  ),
+  gender: z.enum(["male", "female", "other"]).optional().nullable(),
+  animationTheme: z.enum(["batman", "spidergwen", "medical"]).optional(),
 });
 
 export const loginSchema = z.object({

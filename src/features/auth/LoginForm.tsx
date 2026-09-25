@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, HeartHandshake, Loader2, User } from "lucide-react";
 import { useController, useForm } from "react-hook-form";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -21,6 +21,7 @@ import { PasswordInput } from "./PasswordInput";
 export default function LoginForm({ next }: { next: string | null }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [portalTab, setPortalTab] = useState<"patient" | "caregiver">("patient");
 
   const {
     register,
@@ -56,6 +57,44 @@ export default function LoginForm({ next }: { next: string | null }) {
         </Alert>
       )}
 
+      {/* Portal Selection Tabs */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-semibold uppercase tracking-wider text-ink-500">
+          Sign In Portal
+        </label>
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-ink-100/70 p-1 dark:bg-ink-900/70 border border-ink-200/50 dark:border-ink-800/50">
+          <button
+            type="button"
+            onClick={() => setPortalTab("patient")}
+            className={`flex items-center justify-center gap-2 rounded-lg py-2.5 px-3 text-xs font-semibold transition-all ${
+              portalTab === "patient"
+                ? "bg-white dark:bg-ink-800 text-primary dark:text-primary-tint shadow-xs ring-1 ring-primary/20"
+                : "text-ink-600 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+            }`}
+          >
+            <User className="h-4 w-4" />
+            <span>Patient Vault</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPortalTab("caregiver")}
+            className={`flex items-center justify-center gap-2 rounded-lg py-2.5 px-3 text-xs font-semibold transition-all ${
+              portalTab === "caregiver"
+                ? "bg-white dark:bg-ink-800 text-secondary dark:text-secondary-tint shadow-xs ring-1 ring-secondary/20"
+                : "text-ink-600 hover:text-ink-900 dark:text-ink-400 dark:hover:text-ink-100"
+            }`}
+          >
+            <HeartHandshake className="h-4 w-4" />
+            <span>Caregiver Portal</span>
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {portalTab === "patient"
+            ? "Sign in to manage your prescriptions, track daily doses, and view health insights."
+            : "Sign in to monitor patients, schedule appointments, and coordinate family care."}
+        </p>
+      </div>
+
       <FormField label="Email Address" error={errors.email?.message} required>
         <Input
           type="email"
@@ -76,7 +115,7 @@ export default function LoginForm({ next }: { next: string | null }) {
         />
       </FormField>
 
-      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-ink-700">
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-ink-700 dark:text-ink-300">
         <Checkbox
           checked={rememberMe.field.value}
           onCheckedChange={(checked) => rememberMe.field.onChange(checked === true)}
@@ -85,9 +124,18 @@ export default function LoginForm({ next }: { next: string | null }) {
         Remember me
       </label>
 
-      <Button type="submit" size="lg" disabled={isSubmitting} className="mt-1">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isSubmitting}
+        className={`mt-1 ${
+          portalTab === "caregiver"
+            ? "bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+            : ""
+        }`}
+      >
         {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
-        Access Vault
+        {portalTab === "caregiver" ? "Access Caregiver Portal" : "Access Vault"}
         {!isSubmitting && <ArrowRight aria-hidden="true" />}
       </Button>
     </form>

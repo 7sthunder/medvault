@@ -19,6 +19,8 @@ export interface ProfileMenuUser {
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  role?: string | null;
+  animationTheme?: string | null;
 }
 
 export function getInitials(name?: string | null, email?: string | null): string {

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { requireUser } from "@/server/auth/require-user";
 import { DashboardPage as DashboardView } from "@/features/dashboard/DashboardPage";
@@ -8,7 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  await requireUser();
+  const session = await requireUser();
+  if (session.user.role === "caregiver") {
+    redirect("/caregiver");
+  }
 
   return <DashboardView />;
 }

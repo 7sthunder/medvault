@@ -5,6 +5,9 @@ import { ArrowLeft } from "lucide-react";
 import { Brand } from "@/components/brand/Brand";
 import { cn } from "@/lib/utils";
 
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { DynamicBackground } from "@/components/theme/DynamicBackground";
+
 export interface AuthShellProps extends React.PropsWithChildren {
   className?: string;
 }
@@ -16,7 +19,8 @@ export interface AuthShellProps extends React.PropsWithChildren {
  */
 export function AuthShell({ children, className }: AuthShellProps) {
   return (
-    <div className={cn("grid min-h-dvh bg-background lg:grid-cols-[1.1fr_0.9fr]", className)}>
+    <div className={cn("relative grid min-h-dvh bg-background lg:grid-cols-[1.1fr_0.9fr]", className)}>
+      <DynamicBackground initialTheme="medical" />
       <div className="bg-muted relative hidden min-[900px]:block overflow-hidden">
         <Image
           src="/auth/login-page.jpeg"
@@ -33,13 +37,16 @@ export function AuthShell({ children, className }: AuthShellProps) {
       </div>
 
       <div className="relative flex flex-col">
-        <Link
-          href="/"
-          aria-label="Back to landing"
-          className="absolute top-6 right-6 z-10 flex size-11 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-ink-800 focus-visible:ring-2 focus-visible:ring-primary-ring focus-visible:outline-none sm:top-8 sm:right-8"
-        >
-          <ArrowLeft className="size-5" />
-        </Link>
+        <div className="absolute top-6 right-6 z-10 flex items-center gap-3 sm:top-8 sm:right-8">
+          <LanguageSwitcher variant="pill" />
+          <Link
+            href="/"
+            aria-label="Back to landing"
+            className="flex size-11 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-ink-800 focus-visible:ring-2 focus-visible:ring-primary-ring focus-visible:outline-none"
+          >
+            <ArrowLeft className="size-5" />
+          </Link>
+        </div>
 
         <div className="m-auto flex w-full max-w-[460px] flex-col px-6 py-12 sm:px-10">
           <div className="mb-10">

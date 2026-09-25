@@ -72,6 +72,9 @@ export const users = pgTable("users", {
   isDemo: boolean("is_demo").notNull().default(false),
   role: text("role").$type<"patient" | "caregiver">().notNull().default("patient"),
   accessCode: text("access_code").unique(),
+  age: integer("age"),
+  gender: text("gender").$type<"male" | "female" | "other">(),
+  animationTheme: text("animation_theme").$type<"batman" | "spidergwen" | "medical">().default("medical"),
 });
 
 export const sessions = pgTable("session", {

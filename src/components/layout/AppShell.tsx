@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { TopNav } from "@/components/layout/TopNav";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MoreSheet } from "@/components/layout/MoreSheet";
+import { DynamicBackground } from "@/components/theme/DynamicBackground";
 import type { ProfileMenuUser } from "@/components/layout/ProfileMenu";
 
 export interface AppShellProps {
@@ -17,6 +18,9 @@ export function AppShell({ user, children }: AppShellProps) {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground flex">
+      {/* Ambient Theme Background Animation */}
+      <DynamicBackground initialTheme={(user?.animationTheme as "batman" | "spidergwen" | "medical") || "medical"} />
+
       {/* Skip to Main Content Link for Keyboard Accessibility (WCAG 2.1 AA) */}
       <a
         href="#main-content"

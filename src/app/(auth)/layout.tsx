@@ -12,7 +12,8 @@ import { auth } from "@/server/auth/server";
 export default async function AuthLayout({ children }: { children: ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) {
-    redirect(session.user.onboardingCompleted ? "/dashboard" : "/onboarding");
+    const role = (session.user as { role?: string }).role;
+    redirect(role === "caregiver" ? "/caregiver" : session.user.onboardingCompleted ? "/dashboard" : "/onboarding");
   }
   return <AuthShell>{children}</AuthShell>;
 }

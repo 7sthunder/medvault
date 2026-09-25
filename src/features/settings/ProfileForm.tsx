@@ -30,6 +30,29 @@ export function ProfileForm() {
   const [timezone, setTimezone] = useState("UTC");
   const [isDirty, setIsDirty] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [animationTheme, setAnimationTheme] = useState<"batman" | "spidergwen" | "medical">("medical");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("medvault_animation_theme") as "batman" | "spidergwen" | "medical" | null;
+      if (saved) setAnimationTheme(saved);
+    } catch {
+      // Storage unavailable
+    }
+  }, []);
+
+  const handleThemeChange = (newTheme: "batman" | "spidergwen" | "medical") => {
+    setAnimationTheme(newTheme);
+    try {
+      localStorage.setItem("medvault_animation_theme", newTheme);
+      window.dispatchEvent(new Event("medvault_theme_change"));
+      toast.success(
+        `Background theme changed to ${
+          newTheme === "batman" ? "Batman" : newTheme === "spidergwen" ? "Spider-Gwen" : "Medical Neutral"
+        }!`,
+      );
+    } catch {}
+  };
 
   useEffect(() => {
     if (profile) {
@@ -324,6 +347,41 @@ export function ProfileForm() {
             </div>
             <p className="text-[11px] text-muted-foreground">
               All dose reminders, appointments, and adherence day calculations are aligned to this timezone.
+            </p>
+          </div>
+
+          {/* Ambient Animation Theme Selector */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <Sparkles className="size-3.5 text-secondary" />
+              <span>Ambient Animation Theme</span>
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {[
+                { id: "batman", title: "Batman Dark Knight", desc: "Male < 27 / Cyberpunk" },
+                { id: "spidergwen", title: "Spider-Gwen Neon", desc: "Female < 27 / Spider-Verse" },
+                { id: "medical", title: "Medical Neutral", desc: "Age 28+ / Translucent Glass" },
+              ].map((th) => {
+                const isSelected = animationTheme === th.id;
+                return (
+                  <button
+                    key={th.id}
+                    type="button"
+                    onClick={() => handleThemeChange(th.id as "batman" | "spidergwen" | "medical")}
+                    className={`flex flex-col text-left p-3 rounded-2xl border transition-all text-xs ${
+                      isSelected
+                        ? "border-secondary bg-secondary/15 ring-2 ring-secondary/30 font-bold shadow-xs"
+                        : "border-border hover:bg-muted/70 text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span className="font-semibold text-foreground">{th.title}</span>
+                    <span className="text-[10px] text-muted-foreground mt-0.5">{th.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Automatically assigned from age and gender during registration, customizable anytime.
             </p>
           </div>
         </div>

@@ -55,6 +55,17 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Help", href: "/help", icon: "help", group: "bottom" },
 ] as const;
 
+/** Caregiver Portal navigation items */
+export const CAREGIVER_NAV_ITEMS: readonly NavItem[] = [
+  { label: "Caregiver Hub", href: "/caregiver", icon: "caregiver", group: "overview" },
+  { label: "Patient Medications", href: "/caregiver#medications", icon: "medications", group: "management" },
+  { label: "Doctor Appointments", href: "/caregiver#appointments", icon: "schedule", group: "management" },
+  { label: "Patient Adherence", href: "/caregiver#adherence", icon: "adherence", group: "intelligence" },
+  { label: "Notifications", href: "/notifications", icon: "notifications", group: "bottom" },
+  { label: "Settings", href: "/settings/profile", icon: "settings", group: "bottom" },
+  { label: "Help", href: "/help", icon: "help", group: "bottom" },
+] as const;
+
 /** Settings vertical menu (plan §11.14 layout). */
 export interface SettingsNavItem {
   label: string;
