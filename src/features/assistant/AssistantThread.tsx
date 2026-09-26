@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Loader2, Mic, MicOff, RotateCcw, Volume2 } from "lucide-react";
 
 import { cn } from "cn";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatBubble } from "@/components/ui/chat-bubble";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -55,6 +56,8 @@ export function AssistantThread({
     setContinuous,
     micBlocked,
     requestMicAccess,
+    error,
+    dismissError,
   } = useAssistant();
 
   const [typed, setTyped] = useState("");
@@ -157,16 +160,32 @@ export function AssistantThread({
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        {micBlocked ? (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void requestMicAccess()}
-            className="gap-2"
+        {micBlocked || error ? (
+          <Alert
+            variant="destructive"
+            className="w-full items-start gap-2 py-2 text-sm"
+            role="alert"
           >
-            <Mic className="size-4" aria-hidden />
-            Enable microphone
-          </Button>
+            <Mic className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <AlertDescription className="flex-1">{error}</AlertDescription>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void requestMicAccess()}
+              className="shrink-0 gap-1.5"
+            >
+              <Mic className="size-3.5" aria-hidden />
+              Enable microphone
+            </Button>
+            <button
+              type="button"
+              onClick={dismissError}
+              className="shrink-0 text-xs underline underline-offset-2"
+            >
+              Dismiss
+            </button>
+          </Alert>
         ) : null}
         {listening ? (
           <Button type="button" onClick={stopRecording} className="gap-2">
