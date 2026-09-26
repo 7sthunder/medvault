@@ -53,6 +53,8 @@ export function AssistantThread({
     reset,
     setAutoSpeak,
     setContinuous,
+    micBlocked,
+    requestMicAccess,
   } = useAssistant();
 
   const [typed, setTyped] = useState("");
@@ -155,6 +157,17 @@ export function AssistantThread({
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
+        {micBlocked ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void requestMicAccess()}
+            className="gap-2"
+          >
+            <Mic className="size-4" aria-hidden />
+            Enable microphone
+          </Button>
+        ) : null}
         {listening ? (
           <Button type="button" onClick={stopRecording} className="gap-2">
             <MicOff className="size-4" aria-hidden />

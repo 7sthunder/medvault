@@ -69,6 +69,10 @@ export interface AssistantValue {
   setAutoSpeak: (on: boolean) => void;
   setContinuous: (on: boolean) => void;
   dismissError: () => void;
+  /** True once the browser has recorded a "Block" decision for the microphone. */
+  micBlocked: boolean;
+  /** Re-requests the mic from a user gesture. Resolves true when access is granted. */
+  requestMicAccess: () => Promise<boolean>;
 }
 
 const AssistantContext = createContext<AssistantValue | null>(null);
@@ -97,6 +101,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [language, setLanguage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [micBlocked, setMicBlocked] = useState(false);
   const [needsConfirm, setNeedsConfirm] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [continuous, setContinuous] = useState(false);
@@ -274,18 +279,20 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicBlocked(false);
     } catch (cause) {
       const name = cause instanceof DOMException ? cause.name : "";
-      const text =
-        name === "NotAllowedError" || name === "SecurityError"
-          ? "Microphone permission was denied. You can type your answer instead."
-          : name === "NotFoundError" || name === "DevicesNotFoundError"
-            ? "No microphone was found. You can type your answer instead."
-            : name === "NotReadableError"
-              ? "Your microphone is in use by another app."
-              : "The microphone could not be started. You can type your answer instead.";
+      const denied = name === "NotAllowedError" || name === "SecurityError";
+      const text = denied
+        ? "Microphone permission was denied. You can type your answer instead."
+        : name === "NotFoundError" || name === "DevicesNotFoundError"
+          ? "No microphone was found. You can type your answer instead."
+          : name === "NotReadableError"
+            ? "Your microphone is in use by another app."
+            : "The microphone could not be started. You can type your answer instead.";
       setPhase("idle");
       setError(text);
+      setMicBlocked(denied);
       push({ role: "system", kind: "system", text });
       return;
     }
@@ -373,6 +380,35 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   const dismissError = useCallback(() => setError(null), []);
 
+  /**
+   * Re-offer the microphone.
+   *
+   * Once a user answers "Block" the browser remembers that decision and `getUserMedia` rejects
+   * without ever showing a prompt again, so pressing Speak silently does nothing. This must run
+   * from a real click to count as a user gesture, and it deliberately opens then immediately
+   * closes the stream: acquiring a track is what clears a `prompt` state, and the caller then
+   * starts a fresh recording.
+   */
+  const requestMicAccess = useCallback(async () => {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) return false;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((t) => t.stop());
+      setMicBlocked(false);
+      setError(null);
+      return true;
+    } catch (cause) {
+      const name = cause instanceof DOMException ? cause.name : "";
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        setMicBlocked(true);
+        setError(
+          "Still blocked. Click the padlock or camera icon beside the address bar, set Microphone to Allow, then reload the page.",
+        );
+      }
+      return false;
+    }
+  }, []);
+
   useEffect(
     () => () => {
       recorder.current?.stop();
@@ -403,6 +439,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       setAutoSpeak,
       setContinuous,
       dismissError,
+      micBlocked,
+      requestMicAccess,
     }),
     [
       messages,
@@ -422,6 +460,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       stopRecording,
       reset,
       dismissError,
+      micBlocked,
+      requestMicAccess,
     ],
   );
 
