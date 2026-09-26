@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNow } from "@/components/layout/clock-context";
 import { useShell } from "@/components/layout/shell-context";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorState } from "@/components/ui/error-state";
 import { RangePicker, type DateRange } from "@/components/ui/range-picker";
 import { SectionLabel } from "@/components/ui/section-label";
@@ -14,10 +14,16 @@ import { StatCard } from "@/components/ui/stat-card";
 import { TrendChart } from "@/components/ui/chart";
 import type { ChartDatum } from "@/components/ui/chart-types";
 import { api } from "@/lib/trpc";
-import { formatCount, formatDateKey, formatDayHeading } from "@/lib/format";
+import {
+  formatCount,
+  formatDateKey,
+  formatDateRange,
+  formatDayHeading,
+  formatMonthCaption,
+} from "@/lib/format";
 import { TIME_BUCKET_TEXT } from "@/shared/enums";
 import type { RangePreset } from "@/shared/enums";
-import type { AdherenceSummaryDTO } from "@/shared/types";
+import type { AdherenceDay, AdherenceSummaryDTO } from "@/shared/types";
 import { localDateKey, rangeByPreset } from "@/shared/times";
 
 /**
@@ -82,7 +88,7 @@ export function AdherencePage() {
           <StatRail summary={summary.data} />
           <TrendCard data={summary.data} />
           <PatternCard summary={summary.data} />
-          <MissedStrip summary={summary.data} />
+          <MissedCalendar summary={summary.data} todayKey={localDateKey(now, timeZone)} />
         </div>
       )}
     </main>
@@ -200,43 +206,202 @@ function PatternCard({ summary }: { summary: AdherenceSummaryDTO }) {
   );
 }
 
-/** §11.8 missed-dose calendar heat strip — tinted squares per resolved day. */
-function MissedStrip({ summary }: { summary: AdherenceSummaryDTO }) {
+/** §11.8 missed-dose calendar — one month block per calendar month the window touches. */
+function MissedCalendar({ summary, todayKey }: { summary: AdherenceSummaryDTO; todayKey: string }) {
   const days = summary.days;
-  const withDoses = days.filter((d) => d.scheduled > 0);
+  const byDate = new Map(days.map((d) => [d.date, d]));
+  const months = monthBlocks(days);
+  const first = days.at(0);
+  const last = days.at(-1);
+  // `days` is the whole requested window, so "no doses anywhere in it" — not "no days" — is the
+  // state worth calling out.
+  const hasDoses = days.some((d) => d.scheduled > 0);
+
   return (
-    <section aria-label="Missed dose heat strip">
+    <section aria-label="Missed dose calendar">
       <SectionLabel tone="emerald">
         <span>Daily overview</span>
       </SectionLabel>
-      {withDoses.length === 0 ? (
+      {!hasDoses || !first || !last ? (
         <p className="mt-2 text-sm text-muted-foreground">No doses resolved in this window yet.</p>
       ) : (
-        <div className="mt-2 grid grid-cols-7 gap-1.5 sm:grid-cols-12">
-          {days.map((d) => {
-            const tone =
-              d.scheduled === 0
-                ? "bg-muted"
-                : d.missed > 0
-                  ? "bg-red-tint text-red"
-                  : d.adherencePercent == null
-                    ? "bg-muted"
-                    : d.adherencePercent >= 75
-                      ? "bg-primary-tint text-primary-dark"
-                      : "bg-amber-tint text-amber-600";
+        <Card className="mt-2 shadow-card-sm">
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold text-ink-900">
+              Missed doses by day · {formatDateRange(first.date, last.date)}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-7 sm:gap-y-6">
+            {months.map((month) => (
+              <MonthGrid key={month.key} month={month} byDate={byDate} todayKey={todayKey} />
+            ))}
+          </CardContent>
+          <CardFooter className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-muted-foreground">
+            <LegendSwatch tone="bg-primary-tint text-primary-dark" label="All doses taken" />
+            <LegendSwatch tone="bg-amber-tint text-amber-600" label="Partly taken" />
+            <LegendSwatch tone="bg-red-tint text-red" label="Missed a dose" />
+            <LegendSwatch tone="bg-muted" label="No doses due" />
+            <span className="ml-auto">Ringed day is today</span>
+          </CardFooter>
+        </Card>
+      )}
+    </section>
+  );
+}
+
+/** Column headers, Sunday-first to match the 12-hour times used elsewhere in the app. */
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+/** How a day is tinted. One source of truth, so the calendar and its legend cannot drift. */
+type DayTone = "full" | "partial" | "missed" | "empty" | "outside";
+
+/** One month of cells: leading blanks, then every day of that month, cut into whole weeks. */
+interface MonthBlock {
+  /** First day of the month as a date key — the caption is formatted from it. */
+  key: string;
+  /** `null` is a blank cell that keeps the week grid square. */
+  days: (string | null)[];
+}
+
+/**
+ * The calendar months a day series spans.
+ *
+ * Date keys are timezone-less, so every hop goes through `Date.UTC`: a local `getDay()` here
+ * would shift the whole grid by one day for anyone west of UTC, which is the trap the shared
+ * formatters avoid by pinning date keys to UTC.
+ */
+function monthBlocks(days: AdherenceDay[]): MonthBlock[] {
+  const first = days[0]?.date;
+  const last = days[days.length - 1]?.date;
+  if (!first || !last) return [];
+
+  const blocks: MonthBlock[] = [];
+  const endYear = Number(last.slice(0, 4));
+  const endMonth = Number(last.slice(5, 7)) - 1;
+
+  for (let year = Number(first.slice(0, 4)), month = Number(first.slice(5, 7)) - 1; ; month++) {
+    if (year > endYear || (year === endYear && month > endMonth)) break;
+    const prefix = `${year}-${pad2(month + 1)}`;
+    const leading = new Date(Date.UTC(year, month, 1)).getUTCDay();
+    const length = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    blocks.push({
+      key: `${prefix}-01`,
+      days: [
+        ...Array.from<null, null>({ length: leading }, () => null),
+        ...Array.from({ length }, (_, i) => `${prefix}-${pad2(i + 1)}`),
+      ],
+    });
+    if (month === 11) {
+      year += 1;
+      month = -1;
+    }
+  }
+  return blocks;
+}
+
+function pad2(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function dayTone(day: AdherenceDay | undefined): DayTone {
+  if (!day) return "outside";
+  if (day.scheduled === 0) return "empty";
+  if (day.missed > 0) return "missed";
+  if (day.adherencePercent == null) return "empty";
+  return day.adherencePercent >= 75 ? "full" : "partial";
+}
+
+const DAY_TONE_CLASS: Record<DayTone, string> = {
+  full: "bg-primary-tint text-primary-dark",
+  partial: "bg-amber-tint text-amber-600",
+  missed: "bg-red-tint text-red",
+  empty: "bg-muted",
+  // Outside the requested window: still shown, so the month reads as a real calendar, but flat.
+  outside: "text-ink-500/50",
+};
+
+function MonthGrid({
+  month,
+  byDate,
+  todayKey,
+}: {
+  month: MonthBlock;
+  byDate: Map<string, AdherenceDay>;
+  todayKey: string;
+}) {
+  const weeks: (string | null)[][] = [];
+  for (let i = 0; i < month.days.length; i += 7) weeks.push(month.days.slice(i, i + 7));
+
+  return (
+    <div
+      role="grid"
+      aria-label={formatMonthCaption(month.key)}
+      className="w-full min-w-[15rem] flex-1 sm:max-w-xs"
+    >
+      <p aria-hidden="true" className="mb-2 text-xs font-semibold text-ink-800">
+        {formatMonthCaption(month.key)}
+      </p>
+      <div role="row" className="grid grid-cols-7 gap-1">
+        {WEEKDAYS.map((weekday) => (
+          <div
+            key={weekday}
+            role="columnheader"
+            aria-label={weekday}
+            className="pb-1 text-center text-[10px] font-semibold uppercase text-ink-500"
+          >
+            {weekday.slice(0, 1)}
+          </div>
+        ))}
+      </div>
+      {weeks.map((week) => (
+        <div
+          role="row"
+          key={week.map((d) => d ?? "_").join("-")}
+          className="grid grid-cols-7 gap-1"
+        >
+          {week.map((key, i) => {
+            if (key === null) {
+              return <div key={`blank-${i}`} role="gridcell" aria-hidden="true" />;
+            }
+            const day = byDate.get(key);
+            const detail = dayCellDetail(key, day);
+            const isToday = key === todayKey;
             return (
               <div
-                key={d.date}
-                title={`${formatDateKey(d.date)} · ${d.adherencePercent ?? "—"}%`}
-                className={`flex aspect-square flex-col items-center justify-center rounded-md text-[10px] font-semibold ${tone}`}
+                key={key}
+                role="gridcell"
+                title={detail}
+                aria-label={detail}
+                aria-current={isToday ? "date" : undefined}
+                className={`flex aspect-square items-center justify-center rounded-md text-[11px] font-semibold ${DAY_TONE_CLASS[dayTone(day)]} ${
+                  isToday ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""
+                }`}
               >
-                <span aria-hidden="true">{Number(d.date.slice(8))}</span>
+                <span aria-hidden="true">{Number(key.slice(8))}</span>
               </div>
             );
           })}
         </div>
-      )}
-    </section>
+      ))}
+    </div>
+  );
+}
+
+/** What a day says on hover, and what a screen reader hears for it. */
+function dayCellDetail(key: string, day: AdherenceDay | undefined): string {
+  if (!day) return `${formatDateKey(key)} — outside this range`;
+  if (day.scheduled === 0) return `${formatDateKey(key)} — no doses due`;
+  const percent = day.adherencePercent == null ? "—" : `${day.adherencePercent}%`;
+  const missed = day.missed > 0 ? `, ${day.missed} missed` : "";
+  return `${formatDateKey(key)} — ${percent} (${day.taken} of ${day.scheduled} taken${missed})`;
+}
+
+function LegendSwatch({ tone, label }: { tone: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span aria-hidden="true" className={`size-3 rounded-sm ${tone}`} />
+      {label}
+    </span>
   );
 }
 

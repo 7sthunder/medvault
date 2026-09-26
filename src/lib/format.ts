@@ -23,6 +23,11 @@ export function formatDayHeading(dateKey: string): string {
   return format(keyDate(dateKey), "EEE, MMM d");
 }
 
+/** `2026-09-01` → `"September 2026"` (calendar month caption). */
+export function formatMonthCaption(dateKey: string): string {
+  return format(keyDate(dateKey), "MMMM yyyy");
+}
+
 /** `"08:00"` → `"8:00 AM"` (12h) or `"08:00"` (24h, hour12: false). */
 export function formatHhmm(hhmm: string, options: { hour12?: boolean } = {}): string {
   const [hour = "0", minute = "0"] = hhmm.split(":");
