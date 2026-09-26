@@ -21,6 +21,14 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      // Real installed Chrome. Microphone capture is gated by an OS-level consent decision
+      // that Playwright's bundled Chromium is not necessarily covered by, so a mic failure
+      // reproduced only in bundled Chromium says nothing about what the user experiences.
+      // Run with: pnpm exec playwright test --project=chrome
+      name: "chrome",
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
+    },
   ],
   webServer: {
     // Dev server by default, as before. Set E2E_TARGET=prod to run against the production build,
