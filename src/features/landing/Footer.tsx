@@ -64,11 +64,11 @@ export default function Footer() {
             <div>
               <FooterBrand />
               <p className="mt-5 text-sm leading-relaxed text-slate-500 max-w-xs">
-                Your complete medical history, medications, and AI-powered insights — safe in one secure
-                vault. Hold your health story in your hands.
+                Your complete medical history, medications, and AI-powered insights — safe in one
+                secure vault. Hold your health story in your hands.
               </p>
             </div>
-            
+
             <div className="flex flex-col gap-4">
               {CONTACT_ROWS.map((r, i) => {
                 const Icon = r.icon;
@@ -99,10 +99,16 @@ export default function Footer() {
           <div className="flex flex-wrap gap-10 lg:gap-16 lg:w-2/3 lg:justify-end mt-4 lg:mt-0">
             {FOOTER_COLUMNS.map((col) => (
               <div key={col.title} className="min-w-[140px]">
-                <div className="mb-6 text-sm font-bold text-ink-900 uppercase tracking-wider">{col.title}</div>
+                <div className="mb-6 text-sm font-bold text-ink-900 uppercase tracking-wider">
+                  {col.title}
+                </div>
                 <div className="flex flex-col gap-4">
                   {col.links.map((l) => (
-                    <a key={l.label} href={l.href} className="text-sm text-slate-500 transition-colors hover:text-primary font-medium">
+                    <a
+                      key={l.label}
+                      href={l.href}
+                      className="text-sm text-slate-500 transition-colors hover:text-primary font-medium"
+                    >
                       {l.label}
                     </a>
                   ))}

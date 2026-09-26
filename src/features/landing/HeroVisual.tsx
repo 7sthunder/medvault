@@ -47,7 +47,11 @@ function FloatingNotification({
         scale: { duration: 0.8, delay, type: "spring", stiffness: 100 },
         y: { duration: 6, repeat: Infinity, ease: "easeInOut", delay },
       }}
-      className="z-20 flex items-center gap-[14px] rounded-[22px] border border-primary/[0.28] bg-white/90 px-[18px] py-[14px] shadow-[0_15px_40px_rgba(15,23,42,0.1),0_5px_15px_rgba(15,23,42,0.04)] backdrop-blur-[14px]"
+      // `hidden sm:flex` — these cards overhang the scene on desktop, so they are dropped on the
+      // narrowest screens; see the note at the call site. Written as a responsive pair rather than
+      // a base `flex` plus an overriding `hidden`, because two unprefixed display utilities have no
+      // defined cascade order, whereas Tailwind always emits variants after base utilities.
+      className="z-20 hidden items-center gap-[14px] rounded-[22px] border border-primary/[0.28] bg-white/90 px-[18px] py-[14px] shadow-[0_15px_40px_rgba(15,23,42,0.1),0_5px_15px_rgba(15,23,42,0.04)] backdrop-blur-[14px] sm:flex"
       style={{
         position: "absolute",
         minWidth: width,
@@ -104,6 +108,13 @@ export default function HeroVisual({ isVisible }: { isVisible: boolean }) {
 
   return (
     <div className="hero-visual-container">
+      {/* The cards are positioned with negative `left`/`right` percentages so they overhang the
+          scene on desktop, where the hero has room to spare. That overhang is exactly what breaks
+          a phone: at 375px the container is ~330px, so `left: -22%` pushes a 230px card ~72px off
+          the left edge. From `sm` up the overhang is a deliberate design flourish again, so the
+          cards are dropped on the narrowest screens rather than repositioned. They stay direct
+          children of the `position: relative` container — wrapping them would change the
+          containing block their percentage offsets resolve against. */}
       <FloatingNotification
         icon={Pill}
         title="Medication Reminder"

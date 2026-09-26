@@ -63,7 +63,12 @@ export default function HowItWorks() {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6" style={{ alignItems: "stretch", width: "100%" }}>
+      {/* `grid-cols-3` at 375px leaves ~100px columns with 22px of inline padding on each side,
+          which crushes both the icon and the step copy. Stacks to one column, then two. */}
+      <div
+        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        style={{ alignItems: "stretch", width: "100%" }}
+      >
         {STEPS.map((step, i) => (
           <div
             key={step.num}

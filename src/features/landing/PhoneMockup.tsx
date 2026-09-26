@@ -1,23 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useSpring, useTransform } from "framer-motion";
+
+import { useFitScale } from "@/lib/use-fit-scale";
 
 /* Port of `Landingpage/src/mobile.jsx` — phone mockup (CSS → globals.css `.mvp-*`).
    Icon/stroke colours resolve through tokens (SVG fills/strokes via Tailwind classes);
    the soft auras stay as gradient strings (visual-identical, lint-allowed composites). */
 
-function useIsNarrow(bp = 768) {
-  const [narrow, setNarrow] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(`(max-width:${bp - 1}px)`);
-    const update = () => setNarrow(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, [bp]);
-  return narrow;
-}
+/** The scene is authored at this size; it is scaled down (never up) to fit narrow viewports. */
+const SCENE_WIDTH = 756;
+const SCENE_HEIGHT = 729;
 
 function useParallax(sceneRef: React.RefObject<HTMLDivElement | null>) {
   const rawX = useSpring(0, { stiffness: 55, damping: 18 });
@@ -174,8 +168,8 @@ const STARS = [
 ];
 
 export default function PhoneMockup({ isVisible = true }: { isVisible?: boolean }) {
-  const isMobile = useIsNarrow(768);
   const sceneRef = useRef<HTMLDivElement | null>(null);
+  const { ref: fitRef, scale } = useFitScale(SCENE_WIDTH);
   const { rawX, rawY } = useParallax(sceneRef);
 
   const phoneX = useTransform(rawX, (v) => v * 10);
@@ -183,22 +177,34 @@ export default function PhoneMockup({ isVisible = true }: { isVisible?: boolean 
   const phoneRotY = useTransform(rawX, (v) => -18 + v * 6);
   const phoneRotX = useTransform(rawY, (v) => 4 + v * 4);
 
+  // Null until measured (see `useFitScale`): render at 1:1 for the server pass and the first
+  // client paint, then settle to the fitted scale. A brief over-wide frame is clipped by the
+  // hero rather than flashing a shrunken phone.
+  const k = scale ?? 1;
+
   return (
+    // One element with both refs: `fitRef` measures the space available, `sceneRef` is what the
+    // parallax maths measures against. Both want the *post-layout* box, and the height below is
+    // derived from the measured scale, so measuring the rendered element is correct for both.
     <div
-      ref={sceneRef}
+      ref={(node) => {
+        fitRef.current = node;
+        sceneRef.current = node;
+      }}
       className="font-sans"
       style={{
         width: "100%",
-        minHeight: isMobile ? 580 : 820,
+        // The scaled scene occupies exactly this box, so the hero reserves no dead space below it.
+        height: SCENE_HEIGHT * k,
         background: "transparent",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         position: "relative",
         overflow: "visible",
       }}
     >
-      <div aria-hidden style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+      <div
+        aria-hidden
+        style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}
+      >
         <div
           style={{
             position: "absolute",
@@ -287,38 +293,53 @@ export default function PhoneMockup({ isVisible = true }: { isVisible?: boolean 
         />
       ))}
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={isVisible ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.7 }}
-        style={{ position: "relative", width: 756, height: 729 }}
+      {/* Fixed-size scene, centred and scaled to fit. `top: 0` + `transformOrigin: "top center"`
+          keeps it pinned to the top of the (already height-adjusted) fit box, so the composition
+          grows downward from a stable origin as the viewport widens instead of drifting. */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          width: SCENE_WIDTH,
+          height: SCENE_HEIGHT,
+          transform: `translateX(-50%) scale(${k})`,
+          transformOrigin: "top center",
+        }}
       >
         <motion.div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            x: phoneX,
-            y: phoneY,
-            rotateY: phoneRotY,
-            rotateX: phoneRotX,
-            perspective: 900,
-          }}
+          initial={{ opacity: 0 }}
+          animate={isVisible ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.7 }}
+          style={{ position: "relative", width: SCENE_WIDTH, height: SCENE_HEIGHT }}
         >
-          <div className="mvp-phone-wrap">
-            <div className="mvp-phone-outer">
-              <div className="mvp-phone-inner">
-                <div className="mvp-btn-r" />
-                <div className="mvp-btn-l1" />
-                <div className="mvp-btn-l2" />
-                <PhoneScreen />
+          <motion.div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              x: phoneX,
+              y: phoneY,
+              rotateY: phoneRotY,
+              rotateX: phoneRotX,
+              perspective: 900,
+            }}
+          >
+            <div className="mvp-phone-wrap">
+              <div className="mvp-phone-outer">
+                <div className="mvp-phone-inner">
+                  <div className="mvp-btn-r" />
+                  <div className="mvp-btn-l1" />
+                  <div className="mvp-btn-l2" />
+                  <PhoneScreen />
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }

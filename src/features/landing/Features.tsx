@@ -1,7 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, FileText, FlaskConical, FolderHeart, Hospital, Pill, Share2, ShieldCheck, Stethoscope } from "lucide-react";
+import {
+  CheckCircle2,
+  FileText,
+  FlaskConical,
+  FolderHeart,
+  Hospital,
+  Pill,
+  Share2,
+  ShieldCheck,
+  Stethoscope,
+} from "lucide-react";
 
 import { useInView } from "@/features/landing/use-in-view";
 import { BRAND } from "@/shared/brand";
@@ -21,7 +31,7 @@ function FeatureMedicalRecords() {
   // Reset (9.5s - 10s) -> 0.95 - 1.0
 
   const DURATION = 10;
-  
+
   return (
     <div className="relative mx-auto flex items-center justify-center w-full max-w-[480px] h-[340px]">
       <motion.div
@@ -30,16 +40,27 @@ function FeatureMedicalRecords() {
         transition={{ duration: 0.3 }}
       >
         {/* Subtle grid background for the "dashboard" feel */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#172033 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: "radial-gradient(#172033 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        />
 
         {/* --- CENTRAL VAULT / ORGANIZER (Appears in P3/P4) --- */}
         <motion.div
           animate={{
             opacity: [0, 0, 1, 1, 0, 0],
             scale: [0.9, 0.9, 1, 1, 0.9, 0.9],
-            y: [20, 20, 0, 0, 20, 20]
+            y: [20, 20, 0, 0, 20, 20],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.45, 0.5, 0.75, 0.8, 1], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.45, 0.5, 0.75, 0.8, 1],
+            ease: "easeInOut",
+          }}
           className="absolute z-10 flex flex-col items-center justify-center w-[160px] h-[160px] rounded-3xl bg-[#F0FAF7] border border-[#DDECE7] shadow-sm"
         >
           <div className="relative">
@@ -63,13 +84,20 @@ function FeatureMedicalRecords() {
             opacity: [0, 1, 1, 0, 0],
             x: [-100, -60, -80, 0, 0],
             y: [-80, -40, -40, 0, 0],
-            scale: [0.8, 1, 0.85, 0.6, 0.6]
+            scale: [0.8, 1, 0.85, 0.6, 0.6],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.1, 0.35, 0.5, 1], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.1, 0.35, 0.5, 1],
+            ease: "easeInOut",
+          }}
           className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-50 text-blue-500"><FlaskConical size={12} /></div>
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-50 text-blue-500">
+              <FlaskConical size={12} />
+            </div>
             <div className="text-[10px] font-bold text-[#172033]">Lab Report</div>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
@@ -82,13 +110,20 @@ function FeatureMedicalRecords() {
             opacity: [0, 1, 1, 0, 0],
             x: [100, 70, 80, 0, 0],
             y: [60, 30, 30, 0, 0],
-            scale: [0.8, 1, 0.85, 0.6, 0.6]
+            scale: [0.8, 1, 0.85, 0.6, 0.6],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.12, 0.35, 0.5, 1], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.12, 0.35, 0.5, 1],
+            ease: "easeInOut",
+          }}
           className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-purple-50 text-purple-500"><Pill size={12} /></div>
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-purple-50 text-purple-500">
+              <Pill size={12} />
+            </div>
             <div className="text-[10px] font-bold text-[#172033]">Prescription</div>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
@@ -101,13 +136,20 @@ function FeatureMedicalRecords() {
             opacity: [0, 1, 1, 0, 0],
             x: [-80, -40, -50, 0, 0],
             y: [80, 50, 50, 0, 0],
-            scale: [0.8, 1, 0.85, 0.6, 0.6]
+            scale: [0.8, 1, 0.85, 0.6, 0.6],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.14, 0.35, 0.5, 1], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.14, 0.35, 0.5, 1],
+            ease: "easeInOut",
+          }}
           className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[#F0FAF7] text-[#00A88F]"><FileText size={12} /></div>
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[#F0FAF7] text-[#00A88F]">
+              <FileText size={12} />
+            </div>
             <div className="text-[10px] font-bold text-[#172033]">Scan Report</div>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
@@ -120,13 +162,20 @@ function FeatureMedicalRecords() {
             opacity: [0, 1, 1, 1, 1, 0],
             x: [90, 40, 50, 0, 80, 80],
             y: [-90, -50, -50, 0, -40, -40],
-            scale: [0.8, 1, 0.85, 0, 1, 1]
+            scale: [0.8, 1, 0.85, 0, 1, 1],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.16, 0.35, 0.5, 0.75, 0.95], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.16, 0.35, 0.5, 0.75, 0.95],
+            ease: "easeInOut",
+          }}
           className="absolute z-30 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-lg p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-500"><Stethoscope size={12} /></div>
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-500">
+              <Stethoscope size={12} />
+            </div>
             <div className="text-[10px] font-bold text-[#172033]">Summary</div>
           </div>
           <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
@@ -137,23 +186,38 @@ function FeatureMedicalRecords() {
         <motion.div
           animate={{
             opacity: [0, 0, 1, 1, 0, 0],
-            top: ["0%", "0%", "10%", "90%", "90%", "100%"]
+            top: ["0%", "0%", "10%", "90%", "90%", "100%"],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.15, 0.16, 0.3, 0.31, 1], ease: "linear" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.15, 0.16, 0.3, 0.31, 1],
+            ease: "linear",
+          }}
           className="absolute left-0 right-0 z-40 h-[2px] bg-[#00A88F] shadow-[0_0_12px_#00A88F]"
         />
 
         {/* --- TEXT LABELS --- */}
         <motion.div
           animate={{ opacity: [0, 0, 1, 0, 0, 0] }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.15, 0.2, 0.3, 0.35, 1], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.15, 0.2, 0.3, 0.35, 1],
+            ease: "easeInOut",
+          }}
           className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#172033] text-white text-[11px] font-semibold shadow-lg"
         >
           Scanning records...
         </motion.div>
         <motion.div
           animate={{ opacity: [0, 0, 0, 1, 0, 0] }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.3, 0.35, 0.45, 0.5, 1], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.3, 0.35, 0.45, 0.5, 1],
+            ease: "easeInOut",
+          }}
           className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#172033] text-white text-[11px] font-semibold shadow-lg"
         >
           Organizing...
@@ -164,9 +228,14 @@ function FeatureMedicalRecords() {
           animate={{
             opacity: [0, 0, 0, 0, 1, 0],
             scale: [0.8, 0.8, 0.8, 0.8, 1, 1],
-            x: [0, 0, 0, 0, -80, -80]
+            x: [0, 0, 0, 0, -80, -80],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.6, 0.7, 0.75, 0.8, 0.95], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.6, 0.7, 0.75, 0.8, 0.95],
+            ease: "easeInOut",
+          }}
           className="absolute z-20 flex flex-col items-center justify-center w-[90px] h-[90px] rounded-2xl bg-white border border-slate-100 shadow-md"
         >
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#F0FAF7] text-[#00A88F] mb-1">
@@ -179,21 +248,30 @@ function FeatureMedicalRecords() {
         <motion.div
           animate={{
             opacity: [0, 0, 0, 0, 1, 0],
-            width: [0, 0, 0, 0, 60, 60]
+            width: [0, 0, 0, 0, 60, 60],
           }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.75, 0.8, 0.85, 0.9, 0.95], ease: "easeOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.75, 0.8, 0.85, 0.9, 0.95],
+            ease: "easeOut",
+          }}
           className="absolute z-10 h-[2px] border-t-2 border-dashed border-[#00A88F]/40"
           style={{ top: "45%", left: "50%", transform: "translateX(-50%)" }}
         />
-        
+
         <motion.div
           animate={{ opacity: [0, 0, 0, 0, 1, 0] }}
-          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.7, 0.8, 0.85, 0.9, 0.95], ease: "easeInOut" }}
+          transition={{
+            duration: DURATION,
+            repeat: Infinity,
+            times: [0, 0.7, 0.8, 0.85, 0.9, 0.95],
+            ease: "easeInOut",
+          }}
           className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#00A88F] text-white text-[11px] font-semibold shadow-lg"
         >
           Secure link ready
         </motion.div>
-
       </motion.div>
     </div>
   );

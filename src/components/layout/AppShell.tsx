@@ -52,7 +52,7 @@ export function AppShell({
                 <div
                   id="main-content"
                   tabIndex={-1}
-                  className="flex-1 pb-24 focus:outline-none md:pb-10"
+                  className="flex-1 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] focus:outline-none md:pb-10"
                 >
                   <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
                     {children}

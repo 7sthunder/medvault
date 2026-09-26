@@ -9,6 +9,11 @@ export interface BrandProps extends LogoProps {
   showWordmark?: boolean;
   /** Wordmark size in px (§5.1) */
   wordmarkSize?: number;
+  /**
+   * Extra classes for the wordmark only, so a caller in a width-constrained bar (the marketing
+   * nav) can drop it on the narrowest screens without dropping the logo tile's accessible name.
+   */
+  wordmarkClassName?: string;
   /** Visually de-emphasise (nav header vs hero) */
   weight?: "normal" | "strong";
   className?: string;
@@ -22,6 +27,7 @@ export function Brand({
   size = 36,
   showWordmark = true,
   wordmarkSize,
+  wordmarkClassName,
   href = BRAND_HREF,
   label = BRAND.name,
   weight = "strong",
@@ -33,7 +39,7 @@ export function Brand({
       {showWordmark && (
         <Wordmark
           size={wordmarkSize ?? (weight === "strong" ? 20 : 18)}
-          className={cn(weight === "normal" && "text-ink-800 font-bold")}
+          className={cn(wordmarkClassName, weight === "normal" && "text-ink-800 font-bold")}
         />
       )}
     </span>

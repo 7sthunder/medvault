@@ -127,7 +127,10 @@ export function DemoDock() {
   const clockLabel = simulated ? formatInstant(simulated, DEMO_ZONE) : "Real time";
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-3 md:justify-end md:px-6 md:pb-6">
+    /* Sits *above* the mobile bottom nav (`BottomNav` is `h-16` + the home-indicator inset) so the
+       two never overlap; from `md` up there is no bottom nav and the dock returns to the corner.
+       `z-40` matches the nav's own z-index — safe now that the boxes are disjoint. */
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] z-40 flex justify-center px-3 pb-3 md:bottom-0 md:justify-end md:px-6 md:pb-6">
       <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card shadow-card-lg">
         <button
           type="button"
@@ -150,7 +153,9 @@ export function DemoDock() {
         </button>
 
         {open && (
-          <div className="grid gap-4 border-t border-border px-4 py-4">
+          /* `dvh` + scroll: the expanded dock lists ~12 controls, which overflows a landscape
+             phone (or a short browser with the keyboard up) if it is allowed to grow freely. */
+          <div className="grid max-h-[min(70dvh,32rem)] gap-4 overflow-y-auto overscroll-contain border-t border-border px-4 py-4">
             {state.isLoading ? (
               <Skeleton className="h-40 w-full rounded-xl" aria-busy="true" />
             ) : (
@@ -159,7 +164,7 @@ export function DemoDock() {
                   <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Simulate a dose
                   </h2>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 gap-2 xs:grid-cols-4">
                     {DEMO_ACTIONS.map((action) => (
                       <Button
                         key={action}

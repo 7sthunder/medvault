@@ -192,9 +192,16 @@ export function MedicationWizard({ mode, medicationId }: MedicationWizardProps) 
         </p>
       </header>
 
-      <nav aria-label="Wizard steps" className="mt-6 flex items-center gap-2">
+      {/* The three step pills plus their connectors need ~335px, which overflows a 360–375px
+          phone. Scroll this strip rather than letting it widen the page; the pills keep their
+          natural width so nothing is squashed, and `overscroll-contain` stops the horizontal
+          scroll from chaining to the page behind it. */}
+      <nav
+        aria-label="Wizard steps"
+        className="mt-6 flex items-center gap-2 overflow-x-auto overscroll-x-contain pb-1"
+      >
         {STEPS.map((label, index) => (
-          <span key={label} className="flex items-center gap-2">
+          <span key={label} className="flex shrink-0 items-center gap-2">
             <span
               aria-current={index === step ? "step" : undefined}
               className={cn(
@@ -234,7 +241,9 @@ export function MedicationWizard({ mode, medicationId }: MedicationWizardProps) 
         {step === 2 && <ReviewStep values={values} slots={slots} />}
       </div>
 
-      <footer className="mt-10 flex items-center justify-between gap-3">
+      {/* `flex-wrap` so a long "Save medication" label drops to its own line on a narrow phone
+          instead of squeezing the Back button's tap target. */}
+      <footer className="mt-10 flex flex-wrap items-center justify-between gap-3">
         <Button
           type="button"
           variant="outline"

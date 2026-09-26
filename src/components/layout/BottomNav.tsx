@@ -20,7 +20,9 @@ export function BottomNav() {
         aria-label="Bottom navigation"
         className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background md:hidden"
       >
-        <div className="mx-auto grid h-16 max-w-md grid-cols-4">
+        {/* `h-16` grows by the home-indicator inset so the 4 columns keep their full 64px and the
+            inset is reserved as padding beneath them, rather than eating into the tap targets. */}
+        <div className="mx-auto grid h-[calc(4rem+env(safe-area-inset-bottom,0px))] max-w-md grid-cols-4 pb-[env(safe-area-inset-bottom,0px)]">
           {BOTTOM_NAV.map((item) => {
             if (item.add) {
               return (

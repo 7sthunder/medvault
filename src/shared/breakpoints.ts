@@ -11,6 +11,9 @@
  * - hero phone heights: 820 px desktop / 580 px < 768
  */
 export const BREAKPOINTS = {
+  /** Project addition (see the `--breakpoint-xs` note in `globals.css`): the default ladder jumps
+   *  0 → 640px, which is too coarse to tune layouts for a 375px phone. Not a Stitch tier. */
+  xs: 480,
   sm: 640,
   md: 768,
   lg: 1024,

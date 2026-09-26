@@ -29,6 +29,13 @@
   --font-sans: var(--font-jakarta);
   --font-heading: var(--font-jakarta);
 
+  /* Breakpoints. Tailwind v4 defaults (sm 640 · md 768 · lg 1024 · xl 1280) are kept as-is; `xs`
+     is added below them because a 375–639px phone is the primary target and the default ladder
+     jumps straight from 0 → 640px, which is too coarse to tune phone layouts against. 480px sits
+     just under the narrowest common phone (iPhone SE 375px is below it, Galaxy Fold cover screen
+     is 280px). Mirrored in `src/shared/breakpoints.ts` — keep the two in sync. */
+  --breakpoint-xs: 480px;
+
   /* §5.3 core brand */
   --color-primary: #10b981;
   --color-primary-dark: #059669;
@@ -203,8 +210,15 @@
   body {
     @apply bg-background font-sans text-foreground antialiased;
     /* Stitch root body: `overflow-x:hidden` (App.jsx:626) — keeps hero blobs from
-       creating a horizontal scrollbar on the marketing route. */
+       creating a horizontal scrollbar on the marketing route.
+       NOTE: this clips overflow silently rather than fixing it, so it also hides genuine
+       layout bugs (and defeats the overflow assertion in e2e/responsive.spec.ts). It is kept
+       only as a decorative-blob safety net; every layout must fit 375px on its own merits. */
     overflow-x: hidden;
+    /* Stops iOS Safari from re-flowing text after an orientation change unless the page is
+       genuinely wider than the viewport. */
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
   }
 
   /* §5.5 scrollbar (track = bg-soft, thumb = border) */
@@ -287,6 +301,46 @@
   }
   .footer-link:hover {
     color: #10b981;
+  }
+
+  /* ---- Mobile utilities (responsive pass) ---- */
+
+  /* WCAG 2.5.8 (Target Size Minimum, AA) only requires 24×24, but both Apple and Google
+     recommend 44px for anything primary. Gated behind `(pointer: coarse)` so desktop and
+     mouse-driven hit areas — and the existing visual density — are left completely alone. */
+  @media (pointer: coarse) {
+    .tap-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    /* For text-only controls (nav rows, inline list actions) where a 44px-wide box would force
+       an unwanted layout change: grow the vertical hit area only. */
+    .tap-target-y {
+      min-height: 44px;
+    }
+  }
+
+  /* `env(safe-area-inset-*)` helpers. The `, 0px` fallback keeps these valid in browsers that
+     don't support `viewport-fit=cover`, and yields a no-op where there's no inset. Pair with a
+     `calc()` when a fixed height/padding must *grow* by the inset, e.g.
+     `h-[calc(4rem+env(safe-area-inset-bottom,0px))]`. */
+  .safe-t {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-b {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-x {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Applied to a wrapper that holds a wide child (tables, marquees, horizontally scrolling tab
+     strips). Gives the scroller `min-w-0` so it can actually shrink inside a flex/grid parent
+     instead of forcing the whole page wider. */
+  .min-w-0-safe {
+    min-width: 0;
+    max-width: 100%;
   }
 }
 

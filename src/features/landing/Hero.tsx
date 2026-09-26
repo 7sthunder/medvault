@@ -11,7 +11,16 @@ import { BRAND } from "@/shared/brand";
 /* Bundle-split heavy hero visuals; framer-motion phone floats render client-only. */
 const HeroVisual = dynamic(() => import("@/features/landing/HeroVisual"), {
   ssr: false,
-  loading: () => <div className="hero-visual-container" style={{ minHeight: 580 }} />,
+  // Reserve height so the hero doesn't jump when the chunk lands. `min()` keeps the reservation
+  // sane on a phone (where the real scene scales to roughly 320px tall) without hardcoding a
+  // second copy of the scene's dimensions.
+  loading: () => (
+    <div
+      className="hero-visual-container"
+      style={{ minHeight: "min(580px, 60vh)" }}
+      aria-hidden
+    />
+  ),
 });
 
 const AVATARS = [
@@ -57,10 +66,9 @@ export default function Hero() {
       />
 
       <div
-        className="relative z-[2] flex w-full flex-wrap items-center"
-        style={{ gap: "6%", padding: "40px 6% 80px" }}
+        className="relative z-[2] flex w-full flex-wrap items-center gap-8 px-5 pt-8 pb-16 sm:gap-[6%] sm:px-[6%] sm:pt-10 sm:pb-20"
       >
-        <div style={{ flex: "1 1 480px", minWidth: 320 }}>
+        <div className="min-w-0" style={{ flex: "1 1 480px" }}>
           <h1
             className="font-heading text-ink-900"
             style={{
@@ -176,10 +184,7 @@ export default function Hero() {
           </div>
         </div>
 
-        <div
-          className="relative z-[2] flex min-w-[320px] items-center justify-center"
-          style={{ flex: "1 1 520px" }}
-        >
+        <div className="relative z-[2] flex min-w-0 items-center justify-center" style={{ flex: "1 1 520px" }}>
           <HeroVisual isVisible={heroIn} />
         </div>
       </div>

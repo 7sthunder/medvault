@@ -138,7 +138,7 @@ export function AssistantThread({
 
       {/* Pinned so the collected values are always visible, not buried in the thread. */}
       <div className="mt-3 rounded-xl border border-border bg-surface p-3">
-        <dl className="grid grid-cols-3 gap-2 text-xs">
+        <dl className="grid grid-cols-1 gap-2 text-xs min-[420px]:grid-cols-3">
           {DRAFT_LABELS.map(({ key, label }) => (
             <div key={key} className="rounded-lg bg-background px-2 py-1.5">
               <dt className="text-ink-500">{label}</dt>

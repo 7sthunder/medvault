@@ -73,9 +73,7 @@ function NavGroupBlock({ group }: { group: NavGroup }) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>
-        {GROUP_LABELS[group]}
-      </SidebarGroupLabel>
+      <SidebarGroupLabel>{GROUP_LABELS[group]}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (

@@ -376,7 +376,10 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-header"
       data-sidebar="header"
-      className={cn("flex flex-col p-4 pb-2 border-b border-[#DDECE7]/50 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:pt-4", className)}
+      className={cn(
+        "flex flex-col p-4 pb-2 border-b border-[#DDECE7]/50 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:pt-4",
+        className,
+      )}
       {...props}
     />
   );
@@ -398,7 +401,10 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-content"
       data-sidebar="content"
-      className={cn("flex min-h-0 flex-1 flex-col gap-6 group-data-[collapsible=icon]:gap-4 overflow-y-auto overflow-x-hidden pt-6", className)}
+      className={cn(
+        "flex min-h-0 flex-1 flex-col gap-6 group-data-[collapsible=icon]:gap-4 overflow-y-auto overflow-x-hidden pt-6",
+        className,
+      )}
       {...props}
     />
   );
@@ -409,7 +415,10 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center", className)}
+      className={cn(
+        "relative flex w-full min-w-0 flex-col px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center",
+        className,
+      )}
       {...props}
     />
   );
@@ -446,7 +455,10 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
     <ul
       data-slot="sidebar-menu"
       data-sidebar="menu"
-      className={cn("flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center", className)}
+      className={cn(
+        "flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center",
+        className,
+      )}
       {...props}
     />
   );
@@ -457,7 +469,10 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("group/menu-item relative group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center", className)}
+      className={cn(
+        "group/menu-item relative group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center",
+        className,
+      )}
       {...props}
     />
   );
@@ -469,8 +484,7 @@ const sidebarMenuButtonVariants = cva(
     variants: {
       variant: {
         default: "",
-        outline:
-          "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))]",
+        outline: "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))]",
       },
       size: {
         default: "h-11 px-3",
