@@ -39,7 +39,12 @@ export function buildSecurityHeaders(
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "X-Frame-Options", value: "DENY" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-    { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=()" },
+    // Microphone is deliberately NOT disabled here. The voice assistant records medication
+    // details, so it needs mic access, and `microphone=()` makes every getUserMedia call fail
+    // with NotAllowedError in every browser regardless of the user's own site setting. The
+    // allowlist form (`microphone=(self)`) keeps the feature off third-party frames, which is
+    // the actual threat this header exists to stop.
+    { key: "Permissions-Policy", value: "camera=(), geolocation=(), microphone=(self)" },
     { key: "X-DNS-Prefetch-Control", value: "off" },
     { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
   ];
