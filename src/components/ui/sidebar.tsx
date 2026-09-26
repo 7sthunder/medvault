@@ -40,7 +40,7 @@ import { useIsDesktop } from "@/lib/use-media-query";
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "240px";
-const SIDEBAR_WIDTH_ICON = "60px";
+const SIDEBAR_WIDTH_ICON = "72px";
 const SIDEBAR_WIDTH_MOBILE = "240px";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -268,7 +268,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex h-full w-full flex-col bg-[#F0FAF7] text-[#172033] group-data-[side=left]:border-r group-data-[side=left]:border-[#DDECE7] overflow-x-hidden overflow-y-hidden group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
+          className="flex h-full w-full flex-col bg-[#F0FAF7] text-[#172033] group-data-[side=left]:border-r group-data-[side=left]:border-[#DDECE7] overflow-x-hidden overflow-y-hidden transition-all duration-200 group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -376,7 +376,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-header"
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-4 pb-2 border-b border-[#DDECE7]/50", className)}
+      className={cn("flex flex-col p-4 pb-2 border-b border-[#DDECE7]/50 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:pt-4", className)}
       {...props}
     />
   );
@@ -387,7 +387,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      className={cn("flex flex-col p-2 group-data-[collapsible=icon]:items-center", className)}
       {...props}
     />
   );
@@ -398,7 +398,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-content"
       data-sidebar="content"
-      className={cn("flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden pt-6", className)}
+      className={cn("flex min-h-0 flex-1 flex-col gap-6 group-data-[collapsible=icon]:gap-4 overflow-y-auto overflow-x-hidden pt-6", className)}
       {...props}
     />
   );
@@ -409,7 +409,7 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-group"
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col px-3", className)}
+      className={cn("relative flex w-full min-w-0 flex-col px-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center", className)}
       {...props}
     />
   );
@@ -422,7 +422,7 @@ function SidebarGroupLabel({ className, ...props }: React.ComponentProps<"div">)
       data-sidebar="group-label"
       className={cn(
         "flex h-6 shrink-0 items-center rounded-md px-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider mb-2",
-        "group-data-[collapsible=icon]:sr-only",
+        "group-data-[collapsible=icon]:hidden",
         className,
       )}
       {...props}
@@ -446,7 +446,7 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
     <ul
       data-slot="sidebar-menu"
       data-sidebar="menu"
-      className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+      className={cn("flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:items-center", className)}
       {...props}
     />
   );
@@ -457,14 +457,14 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("group/menu-item relative", className)}
+      className={cn("group/menu-item relative group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center", className)}
       {...props}
     />
   );
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-[10px] text-left text-[15px] font-medium text-[#172033] outline-hidden ring-sidebar-ring transition-[width,height,padding,background-color] duration-200 hover:bg-[#E7F7F2] hover:text-[#172033] focus-visible:ring-2 active:bg-[#E7F7F2] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-[#DDF7EC] data-active:font-semibold data-active:text-[#00A88F] data-[state=open]:hover:bg-[#E7F7F2] data-[state=open]:hover:text-[#172033] group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-[18px] [&>svg]:shrink-0 [&>svg]:text-[#536174] hover:[&>svg]:text-[#172033] data-active:[&>svg]:text-[#00A88F] relative data-active:before:absolute data-active:before:left-0 data-active:before:top-1/2 data-active:before:-translate-y-1/2 data-active:before:h-6 data-active:before:w-[3px] data-active:before:bg-[#00A88F] data-active:before:rounded-r-md",
+  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-[10px] text-left text-[15px] font-medium text-[#172033] outline-hidden ring-sidebar-ring transition-[width,height,padding,background-color] duration-200 hover:bg-[#E7F7F2] hover:text-[#172033] focus-visible:ring-2 active:bg-[#E7F7F2] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-[#DDF7EC] data-active:font-semibold data-active:text-[#00A88F] data-[state=open]:hover:bg-[#E7F7F2] data-[state=open]:hover:text-[#172033] group-data-[collapsible=icon]:w-[48px]! group-data-[collapsible=icon]:h-[44px]! group-data-[collapsible=icon]:m-0! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-[12px] [&>span:last-child]:truncate [&>svg]:size-[19px] [&>svg]:shrink-0 [&>svg]:text-[#536174] hover:[&>svg]:text-[#172033] data-active:[&>svg]:text-[#00A88F] relative data-active:before:absolute data-active:before:left-0 data-active:before:top-1/2 data-active:before:-translate-y-1/2 data-active:before:h-6 data-active:before:w-[3px] data-active:before:bg-[#00A88F] data-active:before:rounded-r-md group-data-[collapsible=icon]:data-active:before:hidden",
   {
     variants: {
       variant: {
