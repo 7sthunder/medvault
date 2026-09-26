@@ -20,6 +20,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -73,8 +74,12 @@ export interface AssistantValue {
   micBlocked: boolean;
   /** Re-requests the mic from a user gesture. Resolves true when access is granted. */
   requestMicAccess: () => Promise<boolean>;
-  /** Resolved permission state, so the UI can explain the real reason instead of guessing. */
-  micState: MicState;
+  /**
+   * Resolved permission state, so the UI can explain the real reason instead of guessing.
+   * `null` until the browser has answered — which is only ever on the client, never on the server,
+   * where there is no microphone to ask about.
+   */
+  micState: MicState | null;
   /** Re-runs the permission probe (also re-checks secure context). */
   probeMic: () => Promise<MicState>;
   /** True while the browser's permission prompt is open, so the UI can say so. */
@@ -102,8 +107,87 @@ export function useOptionalAssistant(): AssistantValue | null {
 }
 
 /** What `navigator.permissions` reports for the microphone, plus the two environments where the
- *  API is unavailable and the browser will never prompt at all. */
+ *  API is unavailable and the browser will never prompt at all.
+ *
+ *  - `insecure`    — served over plain http on a non-localhost host. The browser forbids mic
+ *                    outright and shows no prompt, whatever the site setting says.
+ *  - `unsupported` — no `getUserMedia` at all (insecure context, or a browser without it).
+ *  - `denied`      — the user answered "Block"; the browser will not prompt again.
+ *  - `prompt`      — asking is all that is needed.
+ *  - `granted`     — ready to record. */
 type MicState = "granted" | "prompt" | "denied" | "insecure" | "unsupported";
+
+/**
+ * The microphone verdict, held in a small store outside React instead of in component state.
+ *
+ * `navigator.permissions.query` is the only way to learn the *real* reason the microphone is
+ * unavailable, and it answers asynchronously, so the answer cannot be derived during render.
+ * Reading it through `useSyncExternalStore` puts the write where one belongs — inside a
+ * subscription callback — rather than in a mount effect that sets state and cascades an extra
+ * render through every page that mounts the assistant. It also means the browser is asked once
+ * per page load instead of once per effect run, and the `change` event is observed by one
+ * listener rather than a new one per probe.
+ *
+ * The store is module-level on purpose: the answer belongs to the origin, not to a component, so
+ * the `/assistant` page and the floating launcher share it.
+ */
+let micAnswer: MicState | null = null;
+let micStatus: PermissionStatus | null = null;
+let micProbeStarted = false;
+const micListeners = new Set<() => void>();
+
+function publishMicState(state: MicState | null) {
+  if (state === micAnswer) return;
+  micAnswer = state;
+  for (const listener of micListeners) listener();
+}
+
+/**
+ * The part of the verdict that needs no async call, because it is a property of the environment
+ * rather than of the user. `null` means the environment is fine and the browser has to be asked.
+ */
+function readMicEnv(): MicState | null {
+  if (typeof window === "undefined") return null;
+  if (!window.isSecureContext) return "insecure";
+  if (!navigator.mediaDevices?.getUserMedia) return "unsupported";
+  return null;
+}
+
+/** The verdict as it stands: the environment if it rules the microphone out, else the browser's. */
+function getMicState(): MicState | null {
+  return readMicEnv() ?? micAnswer;
+}
+
+/** Ask the browser and publish what it says. Safe to call repeatedly, e.g. from a retry button. */
+async function refreshMicState(): Promise<MicState> {
+  if (typeof navigator === "undefined") return "unsupported";
+  let status: PermissionStatus | null = null;
+  try {
+    status = (await navigator.permissions?.query({ name: "microphone" as PermissionName })) ?? null;
+  } catch {
+    // Safari and Firefox reject the query for `microphone`; treat it as "ask and see".
+  }
+  if (status && status !== micStatus) {
+    micStatus = status;
+    status.addEventListener("change", () => publishMicState(micStatus?.state as MicState));
+  }
+  publishMicState(status ? (status.state as MicState) : "prompt");
+  return getMicState() ?? "prompt";
+}
+
+function subscribeMicState(onStoreChange: () => void) {
+  micListeners.add(onStoreChange);
+  if (!micProbeStarted) {
+    micProbeStarted = true;
+    void refreshMicState();
+  }
+  return () => {
+    micListeners.delete(onStoreChange);
+  };
+}
+
+/** The server has no microphone to ask about, and hydration must not guess at one. */
+const getServerMicState = () => null;
 
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -112,7 +196,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [micBlocked, setMicBlocked] = useState(false);
-  const [micState, setMicState] = useState<MicState>("prompt");
+  const micState = useSyncExternalStore(subscribeMicState, getMicState, getServerMicState);
   const [needsConfirm, setNeedsConfirm] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [continuous, setContinuous] = useState(false);
@@ -285,7 +369,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     // when it was never even offered.
     if (typeof window !== "undefined" && !window.isSecureContext) {
       const text = `The microphone is blocked because this page is not on a secure connection (you are on ${window.location.host}). Browsers forbid the microphone on plain http for any host other than localhost, and show no permission prompt. Open http://localhost:3000/assistant instead.`;
-      setMicState("insecure");
       setError(text);
       push({ role: "system", kind: "system", text });
       setPhase("idle");
@@ -295,7 +378,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     }
     if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       const text = "This browser cannot record audio. Please type instead.";
-      setMicState("unsupported");
+      publishMicState("unsupported");
       setError(text);
       push({ role: "system", kind: "system", text });
       setPhase("idle");
@@ -324,7 +407,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       setPhase("idle");
       setError(text);
       setMicBlocked(denied);
-      if (denied) setMicState("denied");
+      if (denied) publishMicState("denied");
       push({ role: "system", kind: "system", text });
 
       requesting.current = false;
@@ -417,44 +500,11 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   }, [hush]);
 
   /**
-   * Live microphone preflight.
-   *
-   * `getUserMedia` has three distinct failure modes that all look identical from the UI, so this
-   * reports which one is actually in play instead of guessing:
-   *
-   *  - `insecure`    — served over plain http on a non-localhost host. The browser forbids mic
-   *                    outright and shows no prompt, whatever the site setting says.
-   *  - `unsupported` — no `getUserMedia` at all (insecure context, or a browser without it).
-   *  - `denied`      — the user answered "Block"; the browser will not prompt again.
-   *  - `prompt`      — asking is all that is needed.
-   *  - `granted`     — ready to record.
+   * Live microphone preflight, for the moments the UI asks for it again (the "Enable microphone"
+   * retry, after a grant or a block). The verdict itself is read from the store, which probes the
+   * browser on the first subscribe — see {@link subscribeMicState} for why that is not an effect.
    */
-  const probeMic = useCallback(async (): Promise<MicState> => {
-    if (typeof window === "undefined") return "unsupported";
-    if (!window.isSecureContext) {
-      setMicState("insecure");
-      return "insecure";
-    }
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setMicState("unsupported");
-      return "unsupported";
-    }
-    try {
-      const status = await navigator.permissions?.query({ name: "microphone" as PermissionName });
-      const state = (status?.state ?? "prompt") as MicState;
-      setMicState(state);
-      status?.addEventListener?.("change", () => setMicState(status.state as MicState));
-      return state;
-    } catch {
-      // Safari and Firefox reject the query for `microphone`; treat it as "ask and see".
-      setMicState("prompt");
-      return "prompt";
-    }
-  }, []);
-
-  useEffect(() => {
-    void probeMic();
-  }, [probeMic]);
+  const probeMic = useCallback((): Promise<MicState> => refreshMicState(), []);
 
   const dismissError = useCallback(() => setError(null), []);
 
@@ -473,14 +523,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((t) => t.stop());
       setMicBlocked(false);
-      setMicState("granted");
+      publishMicState("granted");
       setError(null);
       return true;
     } catch (cause) {
       const name = cause instanceof DOMException ? cause.name : "";
       if (name === "NotAllowedError" || name === "SecurityError") {
         setMicBlocked(true);
-        setMicState("denied");
+        publishMicState("denied");
         setError(
           "Still blocked. Click the padlock or camera icon beside the address bar, set Microphone to Allow, then reload the page.",
         );

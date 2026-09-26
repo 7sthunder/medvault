@@ -67,6 +67,26 @@ const eslintConfig = [
       "@typescript-eslint/no-require-imports": "off",
     },
   },
+  {
+    // `eslint-plugin-react-hooks` reaches this config transitively, through `eslint-config-next`,
+    // and the resolved major is not the same on every machine: a pnpm install gives v5 (two rules)
+    // while Netlify's build image gives v7 (the React Compiler rules). Both are accepted here
+    // deliberately, because the alternative is a rule set that depends on the installer — and a
+    // build that only fails on the deploy.
+    //
+    // These two files read an external system (the Notification API, the OS scheduler) and write
+    // the answer to state from an async callback, which is what effects are for; v7 flags the call
+    // because it cannot see the `await` that stands between the effect and the write. The
+    // exemption is stated here rather than in a comment so it survives both plugin versions: an
+    // `eslint-disable` line naming a rule the installed plugin does not have is itself an error.
+    files: [
+      "src/features/notifications/PushOptIn.tsx",
+      "apps/mobile/src/hooks/use-reminder-sync.ts",
+    ],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

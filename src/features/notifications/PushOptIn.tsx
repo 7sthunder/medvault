@@ -54,10 +54,10 @@ export function PushOptIn() {
   }, []);
 
   // Reading the Notification API is a genuine external-system sync, which is what effects are for.
-  // The rule fires because `sync` eventually calls `setStatus`, but every one of those calls sits
-  // behind an `await`, so none of them can run during this commit or cascade a render.
+  // `set-state-in-effect` is switched off for this file in `eslint.config.mjs`: the rule fires
+  // because `sync` eventually calls `setStatus`, but every one of those calls sits behind an
+  // `await`, so none of them can run during this commit or cascade a render.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void sync();
   }, [sync]);
 
