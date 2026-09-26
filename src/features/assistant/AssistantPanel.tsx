@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Mic } from "lucide-react";
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { AssistantThread } from "@/features/assistant/AssistantThread";
+import { AssistantProvider, useOptionalAssistant } from "@/features/assistant/assistant-context";
 
 /**
  * Chrome around {@link AssistantThread}. `variant` only changes the surrounding frame — the
@@ -18,6 +19,31 @@ import { AssistantThread } from "@/features/assistant/AssistantThread";
  * store.
  */
 export function AssistantPanel({
+  variant,
+  className,
+}: {
+  variant: "page" | "sheet";
+  className?: string;
+}) {
+  return (
+    <AssistantScope>
+      <AssistantPanelInner variant={variant} className={className} />
+    </AssistantScope>
+  );
+}
+
+/**
+ * Shares the shell's conversation when there is one, and otherwise supplies a private store so
+ * the panel still works. The context is read in a wrapper rather than conditionally inside the
+ * panel, so hooks stay unconditional and the thread never remounts mid-conversation.
+ */
+function AssistantScope({ children }: { children: ReactNode }) {
+  const existing = useOptionalAssistant();
+  if (existing) return <>{children}</>;
+  return <AssistantProvider>{children}</AssistantProvider>;
+}
+
+function AssistantPanelInner({
   variant,
   className,
 }: {

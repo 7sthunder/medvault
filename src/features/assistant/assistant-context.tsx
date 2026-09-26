@@ -79,6 +79,18 @@ export function useAssistant(): AssistantValue {
   return value;
 }
 
+/**
+ * The context value if one is already above us, else `null`.
+ *
+ * This exists so {@link AssistantPanel} can mount its own provider when it is rendered outside
+ * the app shell. A panel reached without the shell should degrade to a private conversation,
+ * not crash the page — an earlier refactor of `AppShell` dropped the provider and took
+ * `/assistant` down with an exception instead of a working page.
+ */
+export function useOptionalAssistant(): AssistantValue | null {
+  return useContext(AssistantContext);
+}
+
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState<MedicationDraft>(emptyDraft);

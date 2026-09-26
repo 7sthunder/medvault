@@ -21,6 +21,7 @@ export const NAV_ICONS: Readonly<Record<NavIconName, IoniconName>> = {
   history: "time-outline",
   adherence: "checkmark-done-outline",
   insights: "sparkles-outline",
+  assistant: "mic-outline",
   reports: "bar-chart-outline",
   caregiver: "people-outline",
   notifications: "notifications-outline",

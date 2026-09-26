@@ -62,7 +62,9 @@ export function AssistantThread({
   const busy = phase === "thinking";
 
   useEffect(() => {
-    bottom.current?.scrollIntoView({ block: "end" });
+    // Optional call: jsdom does not implement scrollIntoView, and an older engine may not
+    // either. Auto-scrolling is a nicety, so never let it break the render.
+    bottom.current?.scrollIntoView?.({ block: "end" });
   }, [messages, needsConfirm]);
 
   const submit = () => {

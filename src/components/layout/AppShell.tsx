@@ -9,6 +9,8 @@ import { TopNav } from "@/components/layout/TopNav";
 import { ClockProvider } from "@/components/layout/clock-context";
 import { ShellContext, type ShellUser } from "@/components/layout/shell-context";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AssistantLauncher } from "@/features/assistant/AssistantPanel";
+import { AssistantProvider } from "@/features/assistant/assistant-context";
 import { TRPCProvider } from "@/lib/trpc";
 
 export function AppShell({
@@ -34,31 +36,36 @@ export function AppShell({
 
   return (
     <TRPCProvider>
-      <ClockProvider enabled={isDemo} initialSimulationNow={simulationNow}>
-        <ShellContext.Provider value={{ pathname, user, isDemo, basePath }}>
-          {/* The provider owns the collapse state and the two width tokens; `SidebarInset` picks up
+      <AssistantProvider>
+        <ClockProvider enabled={isDemo} initialSimulationNow={simulationNow}>
+          <ShellContext.Provider value={{ pathname, user, isDemo, basePath }}>
+            {/* The provider owns the collapse state and the two width tokens; `SidebarInset` picks up
               the content offset from the sidebar's in-flow gap, so nothing here hardcodes a width. */}
-          <SidebarProvider>
-            <SkipLink />
-            <Sidebar />
-            <SidebarInset>
-              <TopNav />
-              {/* Skip-link target. Deliberately a plain focusable div, not a second <main>: every
+            <SidebarProvider>
+              <SkipLink />
+              <Sidebar />
+              <SidebarInset>
+                <TopNav />
+                {/* Skip-link target. Deliberately a plain focusable div, not a second <main>: every
                 feature page already renders its own <main> landmark, and nesting or duplicating
                 them is invalid and trips axe's `landmark-no-duplicate-main`. */}
-              <div
-                id="main-content"
-                tabIndex={-1}
-                className="flex-1 pb-24 focus:outline-none md:pb-10"
-              >
-                <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">{children}</div>
-              </div>
-            </SidebarInset>
-            <BottomNav />
-            {overlay}
-          </SidebarProvider>
-        </ShellContext.Provider>
-      </ClockProvider>
+                <div
+                  id="main-content"
+                  tabIndex={-1}
+                  className="flex-1 pb-24 focus:outline-none md:pb-10"
+                >
+                  <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+                    {children}
+                  </div>
+                </div>
+              </SidebarInset>
+              <BottomNav />
+              {overlay}
+              <AssistantLauncher />
+            </SidebarProvider>
+          </ShellContext.Provider>
+        </ClockProvider>
+      </AssistantProvider>
     </TRPCProvider>
   );
 }
