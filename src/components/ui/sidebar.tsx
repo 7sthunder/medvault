@@ -268,7 +268,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex h-full w-full flex-col bg-[#FCFEFD] group-data-[side=left]:border-r group-data-[side=left]:border-[#E7EFEC] overflow-x-hidden overflow-y-hidden group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
+          className="flex h-full w-full flex-col bg-[#F0FAF7] text-[#172033] group-data-[side=left]:border-r group-data-[side=left]:border-[#DDECE7] overflow-x-hidden overflow-y-hidden group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -286,7 +286,7 @@ function Sidebar({
           data-slot="sidebar-mobile"
           data-mobile="true"
           style={{ "--sidebar-width": SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
-          className="fixed inset-y-0 left-0 z-50 flex w-(--sidebar-width) max-w-[85vw] flex-col border-r border-[#E7EFEC] bg-[#FCFEFD] text-[#172033] outline-none duration-300 data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-left-2 data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-left-2"
+          className="fixed inset-y-0 left-0 z-50 flex w-(--sidebar-width) max-w-[85vw] flex-col border-r border-[#DDECE7] bg-[#F0FAF7] text-[#172033] outline-none duration-300 data-open:animate-in data-open:fade-in-0 data-open:slide-in-from-left-2 data-closed:animate-out data-closed:fade-out-0 data-closed:slide-out-to-left-2"
         >
           <DrawerPrimitive.Title className="sr-only">Navigation menu</DrawerPrimitive.Title>
           <button
@@ -376,7 +376,7 @@ function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-header"
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-4 pb-2 border-b border-[#E7EFEC]/50", className)}
+      className={cn("flex flex-col gap-2 p-4 pb-2 border-b border-[#DDECE7]/50", className)}
       {...props}
     />
   );
@@ -421,7 +421,7 @@ function SidebarGroupLabel({ className, ...props }: React.ComponentProps<"div">)
       data-slot="sidebar-group-label"
       data-sidebar="group-label"
       className={cn(
-        "flex h-6 shrink-0 items-center rounded-md px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2",
+        "flex h-6 shrink-0 items-center rounded-md px-3 text-[11px] font-semibold text-[#718096] uppercase tracking-wider mb-2",
         "group-data-[collapsible=icon]:sr-only",
         className,
       )}
@@ -464,7 +464,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-[10px] text-left text-[15px] font-medium text-[#172033] outline-hidden ring-sidebar-ring transition-[width,height,padding,background-color] hover:bg-[#F2FBF7] hover:text-[#172033] focus-visible:ring-2 active:bg-[#F2FBF7] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-[#EAFBF4] data-active:font-semibold data-active:text-primary data-[state=open]:hover:bg-[#F2FBF7] data-[state=open]:hover:text-[#172033] group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-[18px] [&>svg]:shrink-0 [&>svg]:text-slate-500 hover:[&>svg]:text-[#172033] data-active:[&>svg]:text-primary relative data-active:before:absolute data-active:before:left-0 data-active:before:top-1/2 data-active:before:-translate-y-1/2 data-active:before:h-6 data-active:before:w-[3px] data-active:before:bg-primary data-active:before:rounded-r-md",
+  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-[10px] text-left text-[15px] font-medium text-[#172033] outline-hidden ring-sidebar-ring transition-[width,height,padding,background-color] duration-200 hover:bg-[#E7F7F2] hover:text-[#172033] focus-visible:ring-2 active:bg-[#E7F7F2] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-[#DDF7EC] data-active:font-semibold data-active:text-[#00A88F] data-[state=open]:hover:bg-[#E7F7F2] data-[state=open]:hover:text-[#172033] group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-[18px] [&>svg]:shrink-0 [&>svg]:text-[#536174] hover:[&>svg]:text-[#172033] data-active:[&>svg]:text-[#00A88F] relative data-active:before:absolute data-active:before:left-0 data-active:before:top-1/2 data-active:before:-translate-y-1/2 data-active:before:h-6 data-active:before:w-[3px] data-active:before:bg-[#00A88F] data-active:before:rounded-r-md",
   {
     variants: {
       variant: {
@@ -528,7 +528,7 @@ function SidebarSeparator({ className, ...props }: React.ComponentProps<typeof S
     <Separator
       data-slot="sidebar-separator"
       data-sidebar="separator"
-      className={cn("mx-4 w-auto bg-[#E7EFEC]", className)}
+      className={cn("mx-4 w-auto bg-[#DDECE7]", className)}
       {...props}
     />
   );
