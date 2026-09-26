@@ -1,9 +1,42 @@
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 import { expandSchedule } from "@shared/calc/schedule";
 import type { MedicationDTO } from "@shared/types";
 import { addLocalDays, localDateKey } from "@shared/times";
+
+/**
+ * `expo-notifications` *throws while the module is being evaluated* when it is loaded under Expo
+ * Go: SDK 53 removed remote push from Expo Go and the package throws to say so.
+ *
+ * That makes a plain top-level `import` actively destructive. Metro evaluates the graph eagerly, so
+ * the throw happens on the single import line and takes everything downstream with it:
+ * `lib/notifications` -> `hooks/use-reminder-sync` -> `app/_layout` all fail to finish evaluating.
+ * expo-router then sees a route module that is `undefined`, reports the misleading
+ * `Route "./_layout.tsx" is missing the required default export`, and finally dies inside
+ * `fromImport` on `Cannot read property 'ErrorBoundary' of undefined` — a white screen, with the
+ * real cause buried several frames up.
+ *
+ * So the module is resolved through a guarded, memoised accessor instead. Nothing throws at import
+ * time, and if the native module is unavailable every entry point below degrades to a harmless
+ * no-op rather than taking the app down. Local scheduled reminders still work under Expo Go — only
+ * *remote* push is unavailable there, which this app does not use on mobile anyway (see below).
+ */
+type NotificationsModule = typeof import("expo-notifications");
+
+/** `undefined` = not yet probed, `null` = probed and unavailable. */
+let cachedModule: NotificationsModule | null | undefined;
+
+function notifications(): NotificationsModule | null {
+  if (cachedModule !== undefined) return cachedModule;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    cachedModule = require("expo-notifications") as NotificationsModule;
+  } catch {
+    // Expected under Expo Go. Remember the failure so this is only paid for once.
+    cachedModule = null;
+  }
+  return cachedModule;
+}
 
 /**
  * Medication reminders on a phone.
@@ -43,7 +76,8 @@ let handlerConfigured = false;
  * silently dropped on Android.
  */
 export function configureNotifications(): void {
-  if (handlerConfigured) return;
+  const Notifications = notifications();
+  if (!Notifications || handlerConfigured) return;
   handlerConfigured = true;
 
   Notifications.setNotificationHandler({
@@ -71,6 +105,8 @@ export function configureNotifications(): void {
 export type PermissionState = "granted" | "denied" | "undetermined";
 
 export async function getPermission(): Promise<PermissionState> {
+  const Notifications = notifications();
+  if (!Notifications) return "undetermined";
   configureNotifications();
   const { status } = await Notifications.getPermissionsAsync();
   if (status === "granted") return "granted";
@@ -80,6 +116,8 @@ export async function getPermission(): Promise<PermissionState> {
 
 /** Ask for notification permission. Safe to call repeatedly — the OS only prompts once. */
 export async function requestPermission(): Promise<PermissionState> {
+  const Notifications = notifications();
+  if (!Notifications) return "undetermined";
   configureNotifications();
   const current = await getPermission();
   if (current !== "undetermined") return current;
@@ -161,6 +199,8 @@ export function planReminders(
  * against — a lot of state to save a handful of `scheduleNotificationAsync` calls.
  */
 export async function syncReminders(entries: readonly ReminderPlanEntry[]): Promise<number> {
+  const Notifications = notifications();
+  if (!Notifications) return 0;
   configureNotifications();
 
   if ((await getPermission()) !== "granted") return 0;
@@ -193,10 +233,14 @@ export async function syncReminders(entries: readonly ReminderPlanEntry[]): Prom
 }
 
 export async function cancelAllReminders(): Promise<void> {
+  const Notifications = notifications();
+  if (!Notifications) return;
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
 /** Diagnostics for the Settings → Reminders screen. */
 export async function pendingCount(): Promise<number> {
+  const Notifications = notifications();
+  if (!Notifications) return 0;
   return (await Notifications.getAllScheduledNotificationsAsync()).length;
 }
