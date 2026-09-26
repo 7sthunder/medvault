@@ -73,7 +73,7 @@ function NavGroupBlock({ group }: { group: NavGroup }) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-[11px] font-bold tracking-[0.12em] uppercase">
+      <SidebarGroupLabel>
         {GROUP_LABELS[group]}
       </SidebarGroupLabel>
       <SidebarGroupContent>
