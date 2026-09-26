@@ -44,83 +44,86 @@ const CONTACT_ROWS = [
   { icon: MapPin, text: "123 Health St, MedVille, MV 00000", href: undefined },
 ];
 
-/* Port of `App.jsx:1150–1219` (Footer). Dark `ink-900` surface; logo lockup hand-built
-   (`.footer-brand-label` white text) because `Wordmark` is fixed `text-ink-900`. */
+/* Port of `App.jsx:1150–1219` (Footer). Rebuilt for floating, premium SaaS look. */
 function FooterBrand() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <Logo size={38} />
-      <span className="footer-brand-label">{BRAND.name}</span>
+    <div className="flex items-center gap-3">
+      <Logo size={36} />
+      <span className="text-ink-900 text-xl font-bold tracking-tight">{BRAND.name}</span>
     </div>
   );
 }
 
 export default function Footer() {
   return (
-    <footer
-      className="bg-ink-900 text-white"
-      style={{ padding: "80px 6% 36px", borderTopLeftRadius: 48, borderTopRightRadius: 48 }}
-    >
-      <div className="flex flex-wrap gap-16">
-        <div style={{ flex: "1 1 300px", minWidth: 260 }}>
-          <FooterBrand />
-          <p className="text-white/70 mt-6 text-sm" style={{ lineHeight: 1.7, maxWidth: 300 }}>
-            Your complete medical history, medications, and AI-powered insights — safe in one secure
-            vault. Hold your health story in your hands.
-          </p>
-        </div>
-
-        {FOOTER_COLUMNS.map((col) => (
-          <div key={col.title} style={{ flex: "1 1 180px" }}>
-            <div className="text-white/85 mb-6 text-base font-bold">{col.title}</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {col.links.map((l) => (
-                <a key={l.label} href={l.href} className="footer-link">
-                  {l.label}
-                </a>
-              ))}
+    <div className="px-4 md:px-8 pb-8 md:pb-10 pt-4">
+      <footer className="mx-auto max-w-[1400px] rounded-[36px] border border-teal-900/10 bg-[#E5F2F0] px-6 py-10 md:px-12 md:py-12 shadow-sm">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 justify-between">
+          {/* Brand & Contact Section */}
+          <div className="flex flex-col gap-8 lg:w-1/3">
+            <div>
+              <FooterBrand />
+              <p className="mt-5 text-sm leading-relaxed text-slate-500 max-w-xs">
+                Your complete medical history, medications, and AI-powered insights — safe in one secure
+                vault. Hold your health story in your hands.
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-4">
+              {CONTACT_ROWS.map((r, i) => {
+                const Icon = r.icon;
+                return r.href ? (
+                  <a
+                    key={i}
+                    href={r.href}
+                    className="flex items-center gap-3 text-sm text-slate-500 transition-colors hover:text-ink-900"
+                  >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white border border-teal-900/5 shadow-sm">
+                      <Icon size={18} className="text-primary" />
+                    </span>
+                    <span className="break-all">{r.text}</span>
+                  </a>
+                ) : (
+                  <div key={i} className="flex items-center gap-3 text-sm text-slate-500">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white border border-teal-900/5 shadow-sm">
+                      <Icon size={18} className="text-primary" />
+                    </span>
+                    <span className="break-all">{r.text}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        ))}
 
-        <div style={{ flex: "1 1 260px", minWidth: 240 }}>
-          <div className="text-white/85 mb-6 text-base font-bold">Contact</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            {CONTACT_ROWS.map((r, i) => {
-              const Icon = r.icon;
-              return r.href ? (
-                <a
-                  key={i}
-                  href={r.href}
-                  className="flex items-center gap-3 text-sm text-white/75 transition-colors duration-300 hover:text-white"
-                >
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                    <Icon size={17} className="text-primary" />
-                  </span>
-                  <span className="break-all">{r.text}</span>
-                </a>
-              ) : (
-                <div key={i} className="flex items-center gap-3 text-sm text-white/75">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                    <Icon size={17} className="text-primary" />
-                  </span>
-                  <span className="break-all">{r.text}</span>
+          {/* Links Section */}
+          <div className="flex flex-wrap gap-10 lg:gap-16 lg:w-2/3 lg:justify-end mt-4 lg:mt-0">
+            {FOOTER_COLUMNS.map((col) => (
+              <div key={col.title} className="min-w-[140px]">
+                <div className="mb-6 text-sm font-bold text-ink-900 uppercase tracking-wider">{col.title}</div>
+                <div className="flex flex-col gap-4">
+                  {col.links.map((l) => (
+                    <a key={l.label} href={l.href} className="text-sm text-slate-500 transition-colors hover:text-primary font-medium">
+                      {l.label}
+                    </a>
+                  ))}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
-      </div>
 
-      <div className="border-t border-white/10" style={{ margin: "60px 0 28px" }} />
+        {/* Divider */}
+        <div className="my-10 border-t border-teal-900/10" />
 
-      <div className="text-white/50 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <span>© 2026 {BRAND.name}. All rights reserved.</span>
-        <span>
-          Made with <span className="text-primary">💚</span> for your health ·{" "}
-          <span className="text-white/70">Privacy-first</span>
-        </span>
-      </div>
-    </footer>
+        {/* Copyright & Meta */}
+        <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-500">
+          <span>© 2026 {BRAND.name}. All rights reserved.</span>
+          <span>
+            Made with <span className="text-primary">💚</span> for your health ·{" "}
+            <span className="font-medium text-slate-600">Privacy-first</span>
+          </span>
+        </div>
+      </footer>
+    </div>
   );
 }
