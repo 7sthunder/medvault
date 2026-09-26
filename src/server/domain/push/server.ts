@@ -5,14 +5,18 @@
  * VAPID keys are read lazily (not at module load) so a missing key degrades to "push disabled"
  * instead of crashing the server at import time, and so tests can stub `process.env`.
  *
- * The library itself is also loaded lazily, through `createRequire`, rather than a static
- * `import`. `web-push` reaches `agent-base`, which does a bare `require("http")` that webpack
- * cannot resolve when the module is bundled, so a static import breaks the whole server build
- * ("Module not found: Can't resolve 'http'") from anything that transitively imports this file
- * — including `src/instrumentation.ts`. Resolving it at runtime keeps it out of the module graph.
+ * `web-push` reaches `agent-base`, which does a bare `require("http")` that webpack cannot resolve
+ * when the module is bundled. It is therefore listed in `serverExternalPackages` in
+ * `next.config.ts`, so Next leaves it out of the server bundle and Node `require`s it from
+ * `node_modules` at runtime. That is what lets it be a normal static import here: the previous
+ * `createRequire` workaround existed only to keep the module out of the graph, and it defeated
+ * itself — webpack's `createRequire` hook cannot statically parse a non-literal argument, so the
+ * loader always returned null and push delivery was silently disabled.
+ *
+ * The import is still wrapped in a lazy `require` so that a missing optional dependency degrades
+ * to "push disabled" rather than breaking the server build, which is what the `IgnorePlugin` in
+ * `next.config.ts` and the lazy VAPID read below are both there to guarantee.
  */
-
-import { createRequire } from "node:module";
 
 import { log } from "@/lib/log";
 
@@ -25,14 +29,11 @@ let cached: WebPushClient | null = null;
 function getWebPush(): WebPushClient | null {
   if (cached) return cached;
   try {
-    // Built lazily, inside the call. The argument must stay non-literal: webpack's `createRequire`
-    // hook only tolerates a literal, and with one it tries to statically resolve and bundle
-    // `web-push` (and its `agent-base` -> `http` chain) into the server chunk, which stalls
-    // compilation of `/instrumentation` indefinitely. With a template it declines to parse, logs a
-    // non-fatal "failed parsing argument", and `getWebPush` simply returns null — push delivery
-    // degrades, the server still boots.
-    const requireRuntime = createRequire(`${process.cwd()}/package.json`);
-    cached = requireRuntime("web-push") as WebPushClient;
+    // `web-push` is in `serverExternalPackages`, so this resolves from `node_modules` at runtime
+    // rather than being pulled into the bundle. The indirection is kept only so a missing optional
+    // dependency downgrades to "push disabled" instead of failing the build.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    cached = require("web-push") as WebPushClient;
   } catch (error) {
     log.warn("web-push could not be loaded; push delivery is disabled", {
       message: (error as Error).message,

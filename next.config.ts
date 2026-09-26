@@ -8,6 +8,20 @@ const SCHEDULER_BOOTSTRAP = "@/server/scheduler-bootstrap";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Keep these out of the server bundle so Node `require()`s them from `node_modules` at runtime.
+  //
+  // `web-push` reaches `agent-base`, which does a bare `require("http")`. Webpack's `createRequire`
+  // parser hook only tolerates a literal argument, so the lazy loader in
+  // `src/server/domain/push/server.ts` could not be statically analysed: with a template literal
+  // webpack logs "module.createRequire failed parsing argument" and `getWebPush()` returns null, so
+  // push delivery is silently disabled. With a literal it instead tries to bundle the whole
+  // `web-push` -> `agent-base` -> `http` graph, which stalls `/instrumentation` compilation
+  // indefinitely. Externing it removes the trade-off entirely and lets the module be imported
+  // normally.
+  //
+  // `pg-native` is the optional native accelerator `pg/lib/native` probes for; it is a compiled
+  // addon and must never be bundled.
+  serverExternalPackages: ["web-push", "pg-native"],
   webpack: (config, { nextRuntime, webpack }) => {
     // `instrumentation.ts` is compiled twice: once for Node, once for Edge. The Edge pass has no
     // `fs` / `net` / `tls`, so the whole `pg` graph has to be kept out of that bundle —
