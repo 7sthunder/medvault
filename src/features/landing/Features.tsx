@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FolderHeart, Pill, Hospital } from "lucide-react";
+import { CheckCircle2, FileText, FlaskConical, FolderHeart, Hospital, Pill, Share2, ShieldCheck, Stethoscope } from "lucide-react";
 
 import { useInView } from "@/features/landing/use-in-view";
 import { BRAND } from "@/shared/brand";
@@ -12,117 +12,188 @@ import { BRAND } from "@/shared/brand";
    strings (lint-safe: they do not begin with `#` or `rgba(`). */
 
 function FeatureMedicalRecords() {
+  // We use a 10s continuous loop.
+  // P1: Arrive (0s - 1.2s) -> 0 - 0.12
+  // P2: Scan (1.5s - 3s) -> 0.15 - 0.3
+  // P3: Organize (3.5s - 5s) -> 0.35 - 0.5
+  // P4: Secure (5.5s - 7s) -> 0.55 - 0.7
+  // P5: Share (7.5s - 9s) -> 0.75 - 0.9
+  // Reset (9.5s - 10s) -> 0.95 - 1.0
+
+  const DURATION = 10;
+  
   return (
-    <div
-      style={{
-        position: "relative",
-        width: 400,
-        height: 420,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        margin: "0 auto",
-      }}
-    >
+    <div className="relative mx-auto flex items-center justify-center w-full max-w-[480px] h-[340px]">
       <motion.div
-        animate={{
-          opacity: [0, 1, 1, 0, 0],
-          filter: ["blur(12px)", "blur(0px)", "blur(0px)", "blur(12px)", "blur(12px)"],
-        }}
-        transition={{
-          duration: 4.5,
-          repeat: Infinity,
-          times: [0, 0.05, 0.88, 0.95, 1],
-          ease: "easeInOut",
-        }}
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
+        className="relative flex items-center justify-center w-full h-full rounded-[32px] bg-white border border-slate-100 shadow-[0_20px_40px_rgba(0,0,0,0.04)] overflow-hidden"
+        whileHover={{ y: -4, boxShadow: "0 24px 48px rgba(0,0,0,0.08)" }}
+        transition={{ duration: 0.3 }}
       >
-        <motion.div
-          animate={{ y: [60, -40, -40] }}
-          transition={{ duration: 4.5, repeat: Infinity, times: [0, 0.15, 1], ease: "easeOut" }}
-          className="absolute border border-white/40 bg-white/40 backdrop-blur-[10px]"
-          style={{ width: 310, height: 200, borderRadius: 20, top: 100 }}
-        />
-        <motion.div
-          animate={{ y: [60, -10, -10] }}
-          transition={{ duration: 4.5, repeat: Infinity, times: [0, 0.18, 1], ease: "easeOut" }}
-          className="absolute border border-white/50 bg-white/60 backdrop-blur-[12px]"
-          style={{ width: 340, height: 220, borderRadius: 24, top: 110 }}
-        />
+        {/* Subtle grid background for the "dashboard" feel */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(#172033 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+
+        {/* --- CENTRAL VAULT / ORGANIZER (Appears in P3/P4) --- */}
         <motion.div
           animate={{
-            y: [60, 20, 20],
-            scale: [0.95, 1.05, 1.05],
-            boxShadow: [
-              "0 24px 48px rgba(0,0,0,0.06)",
-              "0 32px 64px rgba(0,0,0,0.12)",
-              "0 32px 64px rgba(0,0,0,0.12)",
-            ],
+            opacity: [0, 0, 1, 1, 0, 0],
+            scale: [0.9, 0.9, 1, 1, 0.9, 0.9],
+            y: [20, 20, 0, 0, 20, 20]
           }}
-          transition={{ duration: 4.5, repeat: Infinity, times: [0, 0.22, 1], ease: "easeOut" }}
-          className="absolute flex flex-col border border-primary/20 bg-white/95 backdrop-blur-[16px]"
-          style={{ width: 380, height: 270, borderRadius: 28, top: 100, padding: 32 }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.45, 0.5, 0.75, 0.8, 1], ease: "easeInOut" }}
+          className="absolute z-10 flex flex-col items-center justify-center w-[160px] h-[160px] rounded-3xl bg-[#F0FAF7] border border-[#DDECE7] shadow-sm"
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div className="text-primary flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary-tint">
-              <FolderHeart size={28} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div className="bg-border mb-[10px] h-4 rounded-md" style={{ width: 140 }} />
-              <div className="bg-bg-soft h-3 rounded-md" style={{ width: 100 }} />
-            </div>
+          <div className="relative">
+            <ShieldCheck size={48} className="text-[#00A88F]" />
+            <motion.div
+              animate={{ opacity: [0.2, 0.6, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute inset-0 bg-[#00A88F] rounded-full blur-[24px] -z-10"
+            />
           </div>
-          <div className="bg-bg-soft h-px" style={{ margin: "8px 0 16px" }} />
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%" }}>
-            <motion.div
-              animate={{ width: ["0%", "100%", "100%"] }}
-              transition={{
-                duration: 4.5,
-                repeat: Infinity,
-                times: [0.1, 0.35, 1],
-                ease: "easeOut",
-              }}
-              className="bg-background h-3 rounded-md"
-            />
-            <motion.div
-              animate={{ width: ["0%", "85%", "85%"] }}
-              transition={{
-                duration: 4.5,
-                repeat: Infinity,
-                times: [0.15, 0.4, 1],
-                ease: "easeOut",
-              }}
-              className="bg-background h-3 rounded-md"
-            />
-            <motion.div
-              animate={{ width: ["0%", "60%", "60%"] }}
-              transition={{
-                duration: 4.5,
-                repeat: Infinity,
-                times: [0.2, 0.45, 1],
-                ease: "easeOut",
-              }}
-              className="bg-background h-3 rounded-md"
-            />
-            <motion.div
-              animate={{ width: ["0%", "75%", "75%"] }}
-              transition={{
-                duration: 4.5,
-                repeat: Infinity,
-                times: [0.25, 0.5, 1],
-                ease: "easeOut",
-              }}
-              className="bg-background h-3 rounded-md"
-            />
+          <div className="mt-3 text-xs font-bold text-[#172033]">Securely stored</div>
+          <div className="flex items-center gap-1 mt-1 text-[10px] font-semibold text-[#00A88F]">
+            <CheckCircle2 size={10} /> Organized
           </div>
         </motion.div>
+
+        {/* --- DOCUMENTS --- */}
+        {/* 1. Lab Report */}
+        <motion.div
+          animate={{
+            opacity: [0, 1, 1, 0, 0],
+            x: [-100, -60, -80, 0, 0],
+            y: [-80, -40, -40, 0, 0],
+            scale: [0.8, 1, 0.85, 0.6, 0.6]
+          }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.1, 0.35, 0.5, 1], ease: "easeInOut" }}
+          className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-50 text-blue-500"><FlaskConical size={12} /></div>
+            <div className="text-[10px] font-bold text-[#172033]">Lab Report</div>
+          </div>
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
+          <div className="w-2/3 h-1.5 bg-slate-100 rounded-full" />
+        </motion.div>
+
+        {/* 2. Prescription */}
+        <motion.div
+          animate={{
+            opacity: [0, 1, 1, 0, 0],
+            x: [100, 70, 80, 0, 0],
+            y: [60, 30, 30, 0, 0],
+            scale: [0.8, 1, 0.85, 0.6, 0.6]
+          }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.12, 0.35, 0.5, 1], ease: "easeInOut" }}
+          className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-purple-50 text-purple-500"><Pill size={12} /></div>
+            <div className="text-[10px] font-bold text-[#172033]">Prescription</div>
+          </div>
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
+          <div className="w-3/4 h-1.5 bg-slate-100 rounded-full" />
+        </motion.div>
+
+        {/* 3. Scan Report */}
+        <motion.div
+          animate={{
+            opacity: [0, 1, 1, 0, 0],
+            x: [-80, -40, -50, 0, 0],
+            y: [80, 50, 50, 0, 0],
+            scale: [0.8, 1, 0.85, 0.6, 0.6]
+          }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.14, 0.35, 0.5, 1], ease: "easeInOut" }}
+          className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[#F0FAF7] text-[#00A88F]"><FileText size={12} /></div>
+            <div className="text-[10px] font-bold text-[#172033]">Scan Report</div>
+          </div>
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
+          <div className="w-1/2 h-1.5 bg-slate-100 rounded-full" />
+        </motion.div>
+
+        {/* 4. Discharge Summary (This one will be shared in P5) */}
+        <motion.div
+          animate={{
+            opacity: [0, 1, 1, 1, 1, 0],
+            x: [90, 40, 50, 0, 80, 80],
+            y: [-90, -50, -50, 0, -40, -40],
+            scale: [0.8, 1, 0.85, 0, 1, 1]
+          }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.16, 0.35, 0.5, 0.75, 0.95], ease: "easeInOut" }}
+          className="absolute z-30 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-lg p-3"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-500"><Stethoscope size={12} /></div>
+            <div className="text-[10px] font-bold text-[#172033]">Summary</div>
+          </div>
+          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
+          <div className="w-4/5 h-1.5 bg-slate-100 rounded-full" />
+        </motion.div>
+
+        {/* --- SCANNING LINE (P2) --- */}
+        <motion.div
+          animate={{
+            opacity: [0, 0, 1, 1, 0, 0],
+            top: ["0%", "0%", "10%", "90%", "90%", "100%"]
+          }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.15, 0.16, 0.3, 0.31, 1], ease: "linear" }}
+          className="absolute left-0 right-0 z-40 h-[2px] bg-[#00A88F] shadow-[0_0_12px_#00A88F]"
+        />
+
+        {/* --- TEXT LABELS --- */}
+        <motion.div
+          animate={{ opacity: [0, 0, 1, 0, 0, 0] }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.15, 0.2, 0.3, 0.35, 1], ease: "easeInOut" }}
+          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#172033] text-white text-[11px] font-semibold shadow-lg"
+        >
+          Scanning records...
+        </motion.div>
+        <motion.div
+          animate={{ opacity: [0, 0, 0, 1, 0, 0] }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.3, 0.35, 0.45, 0.5, 1], ease: "easeInOut" }}
+          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#172033] text-white text-[11px] font-semibold shadow-lg"
+        >
+          Organizing...
+        </motion.div>
+
+        {/* --- DOCTOR / SHARE ICON (P5) --- */}
+        <motion.div
+          animate={{
+            opacity: [0, 0, 0, 0, 1, 0],
+            scale: [0.8, 0.8, 0.8, 0.8, 1, 1],
+            x: [0, 0, 0, 0, -80, -80]
+          }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.6, 0.7, 0.75, 0.8, 0.95], ease: "easeInOut" }}
+          className="absolute z-20 flex flex-col items-center justify-center w-[90px] h-[90px] rounded-2xl bg-white border border-slate-100 shadow-md"
+        >
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#F0FAF7] text-[#00A88F] mb-1">
+            <Share2 size={20} />
+          </div>
+          <div className="text-[10px] font-bold text-[#172033]">Dr. Smith</div>
+        </motion.div>
+
+        {/* --- SHARE CONNECT LINE (P5) --- */}
+        <motion.div
+          animate={{
+            opacity: [0, 0, 0, 0, 1, 0],
+            width: [0, 0, 0, 0, 60, 60]
+          }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.75, 0.8, 0.85, 0.9, 0.95], ease: "easeOut" }}
+          className="absolute z-10 h-[2px] border-t-2 border-dashed border-[#00A88F]/40"
+          style={{ top: "45%", left: "50%", transform: "translateX(-50%)" }}
+        />
+        
+        <motion.div
+          animate={{ opacity: [0, 0, 0, 0, 1, 0] }}
+          transition={{ duration: DURATION, repeat: Infinity, times: [0, 0.7, 0.8, 0.85, 0.9, 0.95], ease: "easeInOut" }}
+          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#00A88F] text-white text-[11px] font-semibold shadow-lg"
+        >
+          Secure link ready
+        </motion.div>
+
       </motion.div>
     </div>
   );
