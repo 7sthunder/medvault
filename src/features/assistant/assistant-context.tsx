@@ -77,6 +77,8 @@ export interface AssistantValue {
   micState: MicState;
   /** Re-runs the permission probe (also re-checks secure context). */
   probeMic: () => Promise<MicState>;
+  /** True while the browser's permission prompt is open, so the UI can say so. */
+  asking: boolean;
 }
 
 const AssistantContext = createContext<AssistantValue | null>(null);
@@ -118,6 +120,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [replay, setReplay] = useState<ChatMessage | null>(null);
 
   const recorder = useRef<MediaRecorder | null>(null);
+  const requesting = useRef(false);
+  const [asking, setAsking] = useState(false);
   const chunks = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const audioEl = useRef<HTMLAudioElement | null>(null);
@@ -265,6 +269,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const startRecording = useCallback(async () => {
+    // Re-entrancy guard. A pointerdown and the click that follows it land back to back, and a
+    // second getUserMedia while the first still awaits the permission prompt yields two competing
+    // streams and a discarded recorder — which presents to the user as a microphone that simply
+    // never turns on. Only the first caller is allowed to proceed.
+    if (requesting.current || recorder.current) return;
+
+    requesting.current = true;
+    setAsking(true);
     setError(null);
     hush();
 
@@ -276,6 +288,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       setMicState("insecure");
       setError(text);
       push({ role: "system", kind: "system", text });
+      setPhase("idle");
+      requesting.current = false;
+      setAsking(false);
       return;
     }
     if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
@@ -283,6 +298,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       setMicState("unsupported");
       setError(text);
       push({ role: "system", kind: "system", text });
+      setPhase("idle");
+      requesting.current = false;
+      setAsking(false);
       return;
     }
 
@@ -290,6 +308,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setMicBlocked(false);
+      requesting.current = false;
+      setAsking(false);
+      setPhase("listening");
     } catch (cause) {
       const name = cause instanceof DOMException ? cause.name : "";
       const denied = name === "NotAllowedError" || name === "SecurityError";
@@ -305,6 +326,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       setMicBlocked(denied);
       if (denied) setMicState("denied");
       push({ role: "system", kind: "system", text });
+
+      requesting.current = false;
+      setAsking(false);
+      requesting.current = false;
       return;
     }
 
@@ -335,6 +360,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     };
     rec.start();
     recorder.current = rec;
+    requesting.current = false;
+    setAsking(false);
     setPhase("listening");
 
     // Zero-dependency activity meter. An `AnalyserNode` RMS is enough to tell "talking" from
@@ -496,6 +523,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       requestMicAccess,
       micState,
       probeMic,
+      asking,
     }),
     [
       messages,
@@ -519,6 +547,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       requestMicAccess,
       micState,
       probeMic,
+      asking,
     ],
   );
 

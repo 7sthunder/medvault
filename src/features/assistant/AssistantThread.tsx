@@ -63,12 +63,14 @@ export function AssistantThread({
     dismissError,
     micState,
     probeMic,
+    asking,
   } = useAssistant();
 
   const [typed, setTyped] = useState("");
   const host = typeof window === "undefined" ? "this site" : window.location.host;
   const bottom = useRef<HTMLDivElement | null>(null);
   const held = useRef(false);
+  const pointerStarted = useRef(false);
   const listening = phase === "listening";
   const busy = phase === "thinking";
 
@@ -230,13 +232,23 @@ export function AssistantThread({
         ) : (
           <Button
             type="button"
-            onClick={() => void startRecording()}
             disabled={busy}
             className="select-none gap-2 touch-none"
-            // Hold-to-talk is the fast path; the click/Enter toggle above stays the accessible
-            // equivalent, so nothing depends on holding a button down.
+            // Hold-to-talk is the fast path; click/Enter remains the accessible equivalent, so
+            // nothing depends on holding a button down.
             onPointerDown={() => {
+              // Guard against the click that always follows: without this, a plain click ran
+              // startRecording twice, and the second call's hush() tore down the first stream
+              // while getUserMedia was still resolving, so the mic never actually started.
+              pointerStarted.current = true;
               held.current = true;
+              void startRecording();
+            }}
+            onClick={() => {
+              if (pointerStarted.current) {
+                pointerStarted.current = false;
+                return;
+              }
               void startRecording();
             }}
             onPointerUp={() => {
@@ -253,12 +265,12 @@ export function AssistantThread({
             }}
             aria-pressed={listening}
           >
-            {busy ? (
+            {busy || asking ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
             ) : (
               <Mic className="size-4" aria-hidden />
             )}
-            {busy ? "Listening…" : "Speak"}
+            {asking ? "Waiting for permission…" : busy ? "Thinking…" : "Speak"}
           </Button>
         )}
 
