@@ -30,25 +30,31 @@ export function ProfileForm() {
   const [timezone, setTimezone] = useState("UTC");
   const [isDirty, setIsDirty] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
-  const [animationTheme, setAnimationTheme] = useState<"batman" | "spidergwen" | "medical">("medical");
+  const [animationTheme, setAnimationTheme] = useState<"batman" | "spidergwen" | "medical" | "plain">("medical");
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("medvault_animation_theme") as "batman" | "spidergwen" | "medical" | null;
+      const saved = localStorage.getItem("medvault_animation_theme") as "batman" | "spidergwen" | "medical" | "plain" | null;
       if (saved) setAnimationTheme(saved);
     } catch {
       // Storage unavailable
     }
   }, []);
 
-  const handleThemeChange = (newTheme: "batman" | "spidergwen" | "medical") => {
+  const handleThemeChange = (newTheme: "batman" | "spidergwen" | "medical" | "plain") => {
     setAnimationTheme(newTheme);
     try {
       localStorage.setItem("medvault_animation_theme", newTheme);
       window.dispatchEvent(new Event("medvault_theme_change"));
       toast.success(
         `Background theme changed to ${
-          newTheme === "batman" ? "Batman" : newTheme === "spidergwen" ? "Spider-Gwen" : "Medical Neutral"
+          newTheme === "batman"
+            ? "Batman"
+            : newTheme === "spidergwen"
+              ? "Spider-Gwen"
+              : newTheme === "plain"
+                ? "Minimalist Plain White"
+                : "Medical Neutral"
         }!`,
       );
     } catch {}
@@ -356,18 +362,19 @@ export function ProfileForm() {
               <Sparkles className="size-3.5 text-secondary" />
               <span>Ambient Animation Theme</span>
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               {[
                 { id: "batman", title: "Batman Dark Knight", desc: "Male < 27 / Cyberpunk" },
                 { id: "spidergwen", title: "Spider-Gwen Neon", desc: "Female < 27 / Spider-Verse" },
                 { id: "medical", title: "Medical Neutral", desc: "Age 28+ / Translucent Glass" },
+                { id: "plain", title: "Minimalist Plain White", desc: "Clean canvas / Zero distraction" },
               ].map((th) => {
                 const isSelected = animationTheme === th.id;
                 return (
                   <button
                     key={th.id}
                     type="button"
-                    onClick={() => handleThemeChange(th.id as "batman" | "spidergwen" | "medical")}
+                    onClick={() => handleThemeChange(th.id as "batman" | "spidergwen" | "medical" | "plain")}
                     className={`flex flex-col text-left p-3 rounded-2xl border transition-all text-xs ${
                       isSelected
                         ? "border-secondary bg-secondary/15 ring-2 ring-secondary/30 font-bold shadow-xs"

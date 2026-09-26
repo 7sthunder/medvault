@@ -17,7 +17,7 @@ export function BottomNav({ onMoreClick, isMoreOpen = false }: BottomNavProps) {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 border-t border-border bg-white/95 dark:bg-card/95 backdrop-blur-md px-2"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 h-16 pb-[max(0px,env(safe-area-inset-bottom))] border-t border-border bg-white/95 dark:bg-card/95 backdrop-blur-md px-2"
     >
       <div className="grid h-full grid-cols-5 items-center">
         {BOTTOM_NAV.map((item) => {

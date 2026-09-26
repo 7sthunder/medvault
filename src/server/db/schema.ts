@@ -74,7 +74,7 @@ export const users = pgTable("users", {
   accessCode: text("access_code").unique(),
   age: integer("age"),
   gender: text("gender").$type<"male" | "female" | "other">(),
-  animationTheme: text("animation_theme").$type<"batman" | "spidergwen" | "medical">().default("medical"),
+  animationTheme: text("animation_theme").$type<"batman" | "spidergwen" | "medical" | "plain">().default("medical"),
 });
 
 export const sessions = pgTable("session", {

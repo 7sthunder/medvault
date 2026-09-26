@@ -37,7 +37,7 @@ export default function RegisterForm({ next }: { next: string | null }) {
 
   const onSubmit = async (values: RegisterInput) => {
     setServerError(null);
-    let theme: "batman" | "spidergwen" | "medical" = "medical";
+    let theme: "batman" | "spidergwen" | "medical" | "plain" = "medical";
     if (values.age && values.age < 27) {
       if (values.gender === "male") theme = "batman";
       else if (values.gender === "female") theme = "spidergwen";

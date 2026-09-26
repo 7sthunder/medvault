@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export type AnimationTheme = "batman" | "spidergwen" | "medical";
+export type AnimationTheme = "batman" | "spidergwen" | "medical" | "plain";
 
 export const THEME_CONFIG: Record<
   AnimationTheme,
@@ -36,6 +36,13 @@ export const THEME_CONFIG: Record<
     glow2: "rgba(6, 182, 212, 0.25)",
     accentClass: "from-emerald-950/30 via-teal-950/15 to-transparent",
   },
+  plain: {
+    name: "Minimalist Plain White",
+    image: "",
+    glow1: "transparent",
+    glow2: "transparent",
+    accentClass: "from-white via-slate-50 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950",
+  },
 };
 
 export function useAnimationTheme(initial: AnimationTheme = "medical") {
@@ -44,7 +51,7 @@ export function useAnimationTheme(initial: AnimationTheme = "medical") {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("medvault_animation_theme") as AnimationTheme | null;
-      if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical")) {
+      if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical" || saved === "plain")) {
         setThemeState(saved);
       }
     } catch {
@@ -54,7 +61,7 @@ export function useAnimationTheme(initial: AnimationTheme = "medical") {
     const handleStorage = () => {
       try {
         const saved = localStorage.getItem("medvault_animation_theme") as AnimationTheme | null;
-        if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical")) {
+        if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical" || saved === "plain")) {
           setThemeState(saved);
         }
       } catch {
@@ -97,6 +104,19 @@ export function DynamicBackground({ initialTheme = "medical", forceTheme }: Dyna
 
   if (!mounted) {
     return null;
+  }
+
+  // Minimalist Clean White Theme: Pure crisp canvas with zero distracting animations or heavy wallpapers
+  if (theme === "plain") {
+    return (
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 select-none bg-slate-50 dark:bg-slate-950 transition-colors duration-500"
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50/70 to-slate-100/40 dark:from-slate-950 dark:via-slate-900/60 dark:to-slate-950" />
+        <div className="absolute inset-0 bg-dot-grid-light opacity-15 dark:opacity-10" />
+      </div>
+    );
   }
 
   return (

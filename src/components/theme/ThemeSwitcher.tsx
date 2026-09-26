@@ -13,6 +13,7 @@ export const THEME_OPTIONS: { id: AnimationTheme; label: string; icon: string; t
   { id: "batman", label: "Batman Dark Knight", icon: "🦇", tag: "Male < 27" },
   { id: "spidergwen", label: "Spider-Gwen Neon", icon: "🕸️", tag: "Female < 27" },
   { id: "medical", label: "Medical Neutral Glass", icon: "🔬", tag: "Age 28+" },
+  { id: "plain", label: "Minimalist Plain White", icon: "⚪", tag: "Clean Canvas" },
 ];
 
 export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
@@ -23,7 +24,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("medvault_animation_theme") as AnimationTheme | null;
-      if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical")) {
+      if (saved && (saved === "batman" || saved === "spidergwen" || saved === "medical" || saved === "plain")) {
         setTheme(saved);
       }
     } catch {

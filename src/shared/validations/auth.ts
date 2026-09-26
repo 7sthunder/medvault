@@ -21,7 +21,7 @@ export const registerSchema = z.object({
     z.number().int().min(1, "Please enter a valid age").max(120, "Please enter a valid age").optional(),
   ),
   gender: z.enum(["male", "female", "other"]).optional().nullable(),
-  animationTheme: z.enum(["batman", "spidergwen", "medical"]).optional(),
+  animationTheme: z.enum(["batman", "spidergwen", "medical", "plain"]).optional(),
 });
 
 export const loginSchema = z.object({

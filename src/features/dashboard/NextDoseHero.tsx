@@ -203,7 +203,7 @@ export function NextDoseHero({
         </div>
 
         {/* Hero Actions */}
-        <div className="flex flex-wrap items-center gap-2.5 sm:self-center">
+        <div className="flex flex-wrap items-center gap-2.5 sm:self-center w-full sm:w-auto">
           {showTake && (
             <Button
               type="button"
@@ -211,7 +211,7 @@ export function NextDoseHero({
               size="lg"
               onClick={() => onTake(nextDose.id)}
               disabled={isTaking}
-              className="gap-2 shadow-primary-btn font-semibold"
+              className="w-full sm:w-auto gap-2 shadow-primary-btn font-semibold"
             >
               <Check className="size-4" />
               <span>{isTaking ? t("dashboard.logging", "Logging...") : t("dashboard.takeDose", "Take Dose")}</span>
@@ -225,7 +225,7 @@ export function NextDoseHero({
               size="lg"
               onClick={() => onOpenSnooze(nextDose)}
               disabled={isTaking}
-              className="gap-2"
+              className="flex-1 sm:flex-initial gap-2"
             >
               <AlarmClock className="size-4 text-amber" />
               <span>{t("dashboard.snooze", "Snooze")}</span>
@@ -239,7 +239,7 @@ export function NextDoseHero({
               size="lg"
               onClick={() => onOpenSkip(nextDose)}
               disabled={isTaking}
-              className="gap-1.5 text-muted-foreground hover:text-destructive"
+              className="flex-1 sm:flex-initial gap-1.5 text-muted-foreground hover:text-destructive"
             >
               <X className="size-4" />
               <span>{t("dashboard.skip", "Skip")}</span>

@@ -23,13 +23,14 @@ const GROUP_TITLES: Record<NavGroup, string> = {
 export interface SidebarProps {
   user?: ProfileMenuUser | null;
   className?: string;
+  onOpenVoice?: () => void;
 }
 
-export function Sidebar({ user, className }: SidebarProps) {
+export function Sidebar({ user, className, onOpenVoice }: SidebarProps) {
   const pathname = usePathname();
   const { t } = useI18n();
   const { theme } = useAnimationTheme();
-  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [internalVoiceOpen, setInternalVoiceOpen] = useState(false);
   const isCaregiver = user?.role === "caregiver";
   const initials = getInitials(user?.name, user?.email);
   const displayName = user?.name || user?.email?.split("@")[0] || "User";
@@ -90,6 +91,18 @@ export function Sidebar({ user, className }: SidebarProps) {
       voiceBtn: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]",
       voicePing: "bg-emerald-400/40",
       voiceWave: "bg-emerald-400",
+    },
+    plain: {
+      aside: "bg-white/95 dark:bg-slate-900/95 border-slate-200 dark:border-slate-800 shadow-md text-slate-800 dark:text-slate-100 backdrop-blur-2xl",
+      border: "border-slate-200 dark:border-slate-800",
+      active: "bg-slate-100 dark:bg-slate-800 text-slate-950 dark:text-white border-slate-300 dark:border-slate-700 font-bold shadow-xs",
+      indicator: "bg-slate-900 dark:bg-white",
+      iconActive: "text-slate-950 dark:text-white",
+      hover: "hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-950 dark:hover:text-white hover:scale-[1.02] hover:-translate-y-0.5",
+      brandAccent: "text-primary",
+      voiceBtn: "border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200/80 hover:shadow-xs",
+      voicePing: "bg-slate-400/30",
+      voiceWave: "bg-slate-700 dark:bg-slate-300",
     },
   }[theme] || {
     aside: "bg-slate-900/85 border-border shadow-sm text-slate-100 backdrop-blur-2xl",
@@ -212,7 +225,13 @@ export function Sidebar({ user, className }: SidebarProps) {
         <div className="px-2 pb-2">
           <button
             type="button"
-            onClick={() => setVoiceOpen(true)}
+            onClick={() => {
+              if (onOpenVoice) {
+                onOpenVoice();
+              } else {
+                setInternalVoiceOpen(true);
+              }
+            }}
             aria-label="Open voice assistant"
             className={cn(
               "relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold transition-all duration-300 group/voice w-full border",
@@ -260,8 +279,10 @@ export function Sidebar({ user, className }: SidebarProps) {
         </div>
       </aside>
 
-      {/* Voice Assistant Interactive Drawer */}
-      {voiceOpen && <VoiceAssistantDrawer open={voiceOpen} onClose={() => setVoiceOpen(false)} />}
+      {/* Voice Assistant Interactive Drawer (standalone fallback) */}
+      {internalVoiceOpen && (
+        <VoiceAssistantDrawer open={internalVoiceOpen} onClose={() => setInternalVoiceOpen(false)} />
+      )}
     </>
   );
 }

@@ -189,13 +189,13 @@ export function CaregiverOverview({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
           <Button
             type="button"
             size="sm"
             variant="outline"
             onClick={handleSendNudge}
-            className="gap-1.5 rounded-xl border-secondary/30 text-xs font-bold hover:bg-secondary/10 text-secondary"
+            className="flex-1 min-w-[130px] sm:flex-initial sm:min-w-0 gap-1.5 rounded-xl border-secondary/30 text-xs font-bold hover:bg-secondary/10 text-secondary"
           >
             <BellRing className="size-3.5" />
             <span>{t("caregiver.sendReminder", "Send Reminder")}</span>
@@ -206,7 +206,7 @@ export function CaregiverOverview({
             size="sm"
             variant="outline"
             onClick={handleEmergencyCall}
-            className="gap-1.5 rounded-xl border-rose-300/40 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
+            className="flex-1 min-w-[130px] sm:flex-initial sm:min-w-0 gap-1.5 rounded-xl border-rose-300/40 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10"
           >
             <PhoneCall className="size-3.5" />
             <span>{t("caregiver.emergencyCall", "Emergency Call")}</span>
@@ -217,7 +217,7 @@ export function CaregiverOverview({
             size="sm"
             variant="outline"
             onClick={() => setAppointmentDialogOpen(true)}
-            className="gap-1.5 rounded-xl border-secondary/30 text-xs font-bold"
+            className="flex-1 min-w-[140px] sm:flex-initial sm:min-w-0 gap-1.5 rounded-xl border-secondary/30 text-xs font-bold"
           >
             <Stethoscope className="size-3.5 text-secondary" />
             <span>{t("caregiver.scheduleAppointment", "Schedule Doctor Visit")}</span>
@@ -233,7 +233,7 @@ export function CaregiverOverview({
                 )}`}
               />
             }
-            className="gap-1.5 rounded-xl text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-xs"
+            className="flex-1 min-w-[130px] sm:flex-initial sm:min-w-0 gap-1.5 rounded-xl text-xs font-bold bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-xs"
           >
             <Pill className="size-3.5" />
             <span>{t("caregiver.addMedication", "Add Medication")}</span>
