@@ -32,6 +32,9 @@ const STARTERS = [
   "How have I done this week?",
 ];
 
+const MIC_DENIED_TEXT =
+  "Microphone access was denied. Click the padlock or camera icon beside the address bar, set Microphone to Allow, then reload this page.";
+
 export function AssistantThread({
   variant,
   className,
@@ -58,9 +61,12 @@ export function AssistantThread({
     requestMicAccess,
     error,
     dismissError,
+    micState,
+    probeMic,
   } = useAssistant();
 
   const [typed, setTyped] = useState("");
+  const host = typeof window === "undefined" ? "this site" : window.location.host;
   const bottom = useRef<HTMLDivElement | null>(null);
   const held = useRef(false);
   const listening = phase === "listening";
@@ -160,19 +166,36 @@ export function AssistantThread({
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        {micBlocked || error ? (
+        {micState === "insecure" ? (
+          <Alert variant="destructive" className="w-full gap-2 py-2 text-sm" role="alert">
+            <Mic className="size-4 shrink-0" aria-hidden />
+            <AlertDescription className="flex-1">
+              Your browser blocks the microphone on <strong>{host}</strong> because it is not a
+              secure origin. No permission setting can change this. Open{" "}
+              <a
+                href="http://localhost:3000/assistant"
+                className="font-semibold underline underline-offset-2"
+              >
+                http://localhost:3000/assistant
+              </a>{" "}
+              on this computer instead.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        {micState !== "insecure" && (micBlocked || error || micState === "denied") ? (
           <Alert
             variant="destructive"
             className="w-full items-start gap-2 py-2 text-sm"
             role="alert"
           >
             <Mic className="mt-0.5 size-4 shrink-0" aria-hidden />
-            <AlertDescription className="flex-1">{error}</AlertDescription>
+            <AlertDescription className="flex-1">{error ?? MIC_DENIED_TEXT}</AlertDescription>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => void requestMicAccess()}
+              onClick={() => void requestMicAccess().then(() => probeMic())}
               className="shrink-0 gap-1.5"
             >
               <Mic className="size-3.5" aria-hidden />
@@ -186,6 +209,18 @@ export function AssistantThread({
               Dismiss
             </button>
           </Alert>
+        ) : null}
+
+        {micState === "prompt" ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void requestMicAccess().then(() => probeMic())}
+            className="gap-2"
+          >
+            <Mic className="size-4" aria-hidden />
+            Enable microphone
+          </Button>
         ) : null}
         {listening ? (
           <Button type="button" onClick={stopRecording} className="gap-2">

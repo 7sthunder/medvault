@@ -73,6 +73,10 @@ export interface AssistantValue {
   micBlocked: boolean;
   /** Re-requests the mic from a user gesture. Resolves true when access is granted. */
   requestMicAccess: () => Promise<boolean>;
+  /** Resolved permission state, so the UI can explain the real reason instead of guessing. */
+  micState: MicState;
+  /** Re-runs the permission probe (also re-checks secure context). */
+  probeMic: () => Promise<MicState>;
 }
 
 const AssistantContext = createContext<AssistantValue | null>(null);
@@ -95,6 +99,10 @@ export function useOptionalAssistant(): AssistantValue | null {
   return useContext(AssistantContext);
 }
 
+/** What `navigator.permissions` reports for the microphone, plus the two environments where the
+ *  API is unavailable and the browser will never prompt at all. */
+type MicState = "granted" | "prompt" | "denied" | "insecure" | "unsupported";
+
 export function AssistantProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState<MedicationDraft>(emptyDraft);
@@ -102,6 +110,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [micBlocked, setMicBlocked] = useState(false);
+  const [micState, setMicState] = useState<MicState>("prompt");
   const [needsConfirm, setNeedsConfirm] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [continuous, setContinuous] = useState(false);
@@ -263,14 +272,15 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     // silently with no permission prompt — so the user would be told their mic was "denied"
     // when it was never even offered.
     if (typeof window !== "undefined" && !window.isSecureContext) {
-      const text =
-        "The microphone needs a secure connection. Open the app on localhost, or over HTTPS, then try again.";
+      const text = `The microphone is blocked because this page is not on a secure connection (you are on ${window.location.host}). Browsers forbid the microphone on plain http for any host other than localhost, and show no permission prompt. Open http://localhost:3000/assistant instead.`;
+      setMicState("insecure");
       setError(text);
       push({ role: "system", kind: "system", text });
       return;
     }
     if (typeof MediaRecorder === "undefined" || !navigator.mediaDevices?.getUserMedia) {
       const text = "This browser cannot record audio. Please type instead.";
+      setMicState("unsupported");
       setError(text);
       push({ role: "system", kind: "system", text });
       return;
@@ -293,6 +303,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       setPhase("idle");
       setError(text);
       setMicBlocked(denied);
+      if (denied) setMicState("denied");
       push({ role: "system", kind: "system", text });
       return;
     }
@@ -378,6 +389,46 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     speakCount.current = 0;
   }, [hush]);
 
+  /**
+   * Live microphone preflight.
+   *
+   * `getUserMedia` has three distinct failure modes that all look identical from the UI, so this
+   * reports which one is actually in play instead of guessing:
+   *
+   *  - `insecure`    — served over plain http on a non-localhost host. The browser forbids mic
+   *                    outright and shows no prompt, whatever the site setting says.
+   *  - `unsupported` — no `getUserMedia` at all (insecure context, or a browser without it).
+   *  - `denied`      — the user answered "Block"; the browser will not prompt again.
+   *  - `prompt`      — asking is all that is needed.
+   *  - `granted`     — ready to record.
+   */
+  const probeMic = useCallback(async (): Promise<MicState> => {
+    if (typeof window === "undefined") return "unsupported";
+    if (!window.isSecureContext) {
+      setMicState("insecure");
+      return "insecure";
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMicState("unsupported");
+      return "unsupported";
+    }
+    try {
+      const status = await navigator.permissions?.query({ name: "microphone" as PermissionName });
+      const state = (status?.state ?? "prompt") as MicState;
+      setMicState(state);
+      status?.addEventListener?.("change", () => setMicState(status.state as MicState));
+      return state;
+    } catch {
+      // Safari and Firefox reject the query for `microphone`; treat it as "ask and see".
+      setMicState("prompt");
+      return "prompt";
+    }
+  }, []);
+
+  useEffect(() => {
+    void probeMic();
+  }, [probeMic]);
+
   const dismissError = useCallback(() => setError(null), []);
 
   /**
@@ -395,12 +446,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((t) => t.stop());
       setMicBlocked(false);
+      setMicState("granted");
       setError(null);
       return true;
     } catch (cause) {
       const name = cause instanceof DOMException ? cause.name : "";
       if (name === "NotAllowedError" || name === "SecurityError") {
         setMicBlocked(true);
+        setMicState("denied");
         setError(
           "Still blocked. Click the padlock or camera icon beside the address bar, set Microphone to Allow, then reload the page.",
         );
@@ -441,6 +494,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       dismissError,
       micBlocked,
       requestMicAccess,
+      micState,
+      probeMic,
     }),
     [
       messages,
@@ -462,6 +517,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       dismissError,
       micBlocked,
       requestMicAccess,
+      micState,
+      probeMic,
     ],
   );
 
