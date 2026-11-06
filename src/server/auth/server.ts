@@ -51,6 +51,15 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    /**
+     * Password reset — Better Auth calls this to deliver the reset link to the user's email.
+     * In development this logs the reset URL so the forgot-password flow can be tested
+     * end-to-end without an email provider. Production should wire an email provider
+     * (e.g. Resend / SMTP) to deliver `url` to `user.email`.
+     */
+    sendResetPassword: async ({ user, url }: { user: { email?: string }; url: string }) => {
+      console.log("[auth] Password reset link:", url, "for user", user.email);
+    },
   },
   user: {
     additionalFields: {
