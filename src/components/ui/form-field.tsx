@@ -33,7 +33,7 @@ export function FormField({
 
   return (
     <div data-slot="form-field" className={cn("grid gap-1.5", className)} {...props}>
-      <label htmlFor={fieldId} className="text-[13px] font-semibold text-ink-800">
+      <label htmlFor={fieldId} className="block text-[13px] font-semibold text-ink-800">
         {label}
         {required && (
           <span aria-hidden="true" className="ml-0.5 text-red">

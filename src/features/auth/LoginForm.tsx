@@ -111,12 +111,15 @@ export default function LoginForm({ next }: { next: string | null }) {
 
         <FormField
           label={
-            <div className="flex items-center justify-between w-full">
-              Password <span className="text-red">*</span>
+            <div className="flex w-full items-center justify-between">
+              <span>
+                Password<span className="ml-0.5 text-red">*</span>
+              </span>
               <Button
                 type="button"
                 variant="link"
                 size="sm"
+                className="h-auto p-0 text-[13px] font-semibold"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsResetOpen(true);
