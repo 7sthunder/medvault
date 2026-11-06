@@ -110,58 +110,75 @@ export default function LoginForm({ next }: { next: string | null }) {
           />
         </FormField>
 
-        <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
-          <DialogTrigger>
-            <Button type="button" variant="link" size="sm" className="mt-3 self-start">
-              Forgot password?
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Forgot password?</DialogTitle>
-              <DialogDescription>
-                Enter your email address and we will send you a link to reset your password.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={onResetSubmit} className="flex flex-col gap-4">
-              <FormField label="Email Address" required>
-                <Input
-                  type="email"
-                  placeholder="name@example.com"
-                  autoComplete="email"
-                  inputMode="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  disabled={resetStatus === "sending"}
-                />
-              </FormField>
-              {resetMessage && (
-                <Alert variant={resetStatus === "failed" ? "destructive" : "default"}>
-                  <AlertTitle>
-                    {resetStatus === "failed" ? "Reset failed" : "Reset email sent"}
-                  </AlertTitle>
-                  <AlertDescription>{resetMessage}</AlertDescription>
-                </Alert>
-              )}
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsResetOpen(false)}
-                  disabled={resetStatus === "sending"}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={resetStatus === "sending" || !resetEmail.trim()}>
-                  {resetStatus === "sending" && <Loader2 className="animate-spin" aria-hidden="true" />}
-                  Send reset link
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <FormField label="Password" error={errors.password?.message} required>
+        <FormField
+          label={
+            <div className="flex items-center justify-between w-full">
+              Password <span className="ml-0.5 text-red">*</span>
+              <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
+                <DialogTrigger>
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Forgot password?
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Forgot password?</DialogTitle>
+                    <DialogDescription>
+                      Enter your email address and we will send you a link to reset your password.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={onResetSubmit} className="flex flex-col gap-4">
+                    <FormField label="Email Address" required>
+                      <Input
+                        type="email"
+                        placeholder="name@example.com"
+                        autoComplete="email"
+                        inputMode="email"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        disabled={resetStatus === "sending"}
+                      />
+                    </FormField>
+                    {resetMessage && (
+                      <Alert variant={resetStatus === "failed" ? "destructive" : "default"}>
+                        <AlertTitle>
+                          {resetStatus === "failed" ? "Reset failed" : "Reset email sent"}
+                        </AlertTitle>
+                        <AlertDescription>{resetMessage}</AlertDescription>
+                      </Alert>
+                    )}
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsResetOpen(false)}
+                        disabled={resetStatus === "sending"}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={resetStatus === "sending" || !resetEmail.trim()}
+                      >
+                        {resetStatus === "sending" && (
+                          <Loader2 className="animate-spin" aria-hidden="true" />
+                        )}
+                        Send reset link
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          }
+          error={errors.password?.message}
+          required
+        >
           <PasswordInput
             placeholder="••••••••"
             autoComplete="current-password"

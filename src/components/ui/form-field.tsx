@@ -6,7 +6,7 @@ import { AlertCircle } from "lucide-react";
 import { cn } from "cn";
 
 export interface FormFieldProps extends Omit<ComponentProps<"div">, "children"> {
-  label: string;
+  label: ReactNode;
   /** The single control. `FormField` wires `id`, `aria-invalid`, `aria-describedby`. */
   children: ReactElement;
   error?: string | null;
