@@ -133,13 +133,13 @@ export default function LoginForm({ next }: { next: string | null }) {
           Sign in to MediTrack AI
           {!isSubmitting && <ArrowRight aria-hidden="true" />}
         </Button>
-
-        <DialogTrigger>
-          <Button type="button" variant="link" size="sm" className="mt-3 self-start">
-            Forgot password?
-          </Button>
-        </DialogTrigger>
       </form>
+
+      <DialogTrigger>
+        <Button type="button" variant="link" size="sm" className="mt-3 self-start">
+          Forgot password?
+        </Button>
+      </DialogTrigger>
 
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
         <DialogContent>
