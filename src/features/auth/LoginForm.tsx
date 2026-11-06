@@ -135,13 +135,12 @@ export default function LoginForm({ next }: { next: string | null }) {
         </Button>
       </form>
 
-      <DialogTrigger>
-        <Button type="button" variant="link" size="sm" className="mt-3 self-start">
-          Forgot password?
-        </Button>
-      </DialogTrigger>
-
       <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
+        <DialogTrigger>
+          <Button type="button" variant="link" size="sm" className="mt-3 self-start">
+            Forgot password?
+          </Button>
+        </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Forgot password?</DialogTitle>
