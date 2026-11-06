@@ -112,7 +112,7 @@ export default function LoginForm({ next }: { next: string | null }) {
         <FormField
           label={
             <div className="flex items-center justify-between w-full">
-              Password <span className="ml-0.5 text-red">*</span>
+              Password <span className="text-red">*</span>
               <Button
                 type="button"
                 variant="link"
