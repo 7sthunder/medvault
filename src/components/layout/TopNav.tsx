@@ -3,6 +3,7 @@
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { ProfileMenu } from "@/components/layout/ProfileMenu";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function TopNav() {
@@ -14,6 +15,7 @@ export function TopNav() {
       <Breadcrumbs className="hidden md:flex" />
       <div className="ms-auto flex items-center gap-1">
         <NotificationBell />
+        <ThemeToggle />
         <ProfileMenu />
       </div>
     </header>
