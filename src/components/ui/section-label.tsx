@@ -5,10 +5,10 @@ export type SectionLabelTone = "emerald" | "cyan" | "magenta" | "violet" | "blue
 
 const SECTION_LABEL_TONES: Record<SectionLabelTone, string> = {
   emerald: "text-primary",
-  cyan: "text-cyan-700",
-  magenta: "text-pink-600",
-  violet: "text-violet-600",
-  blue: "text-blue-600",
+  cyan: "text-cyan-ink",
+  magenta: "text-magenta-ink",
+  violet: "text-violet-ink",
+  blue: "text-blue-ink",
 };
 
 export interface SectionLabelProps extends ComponentProps<"p"> {

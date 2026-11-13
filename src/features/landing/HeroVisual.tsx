@@ -51,7 +51,7 @@ function FloatingNotification({
       // narrowest screens; see the note at the call site. Written as a responsive pair rather than
       // a base `flex` plus an overriding `hidden`, because two unprefixed display utilities have no
       // defined cascade order, whereas Tailwind always emits variants after base utilities.
-      className="z-20 hidden items-center gap-[14px] rounded-[22px] border border-primary/[0.28] bg-white/90 px-[18px] py-[14px] shadow-[0_15px_40px_rgba(15,23,42,0.1),0_5px_15px_rgba(15,23,42,0.04)] backdrop-blur-[14px] sm:flex"
+      className="z-20 hidden items-center gap-[14px] rounded-[22px] border border-primary/[0.28] bg-card/90 px-[18px] py-[14px] shadow-[0_15px_40px_rgba(15,23,42,0.1),0_5px_15px_rgba(15,23,42,0.04)] backdrop-blur-[14px] sm:flex"
       style={{
         position: "absolute",
         minWidth: width,

@@ -56,7 +56,7 @@ export function HelpContent() {
         <p className="mt-2 max-w-2xl text-base text-muted-foreground">{HELP_INTRO.lede}</p>
       </header>
 
-      <div className="mt-6 flex items-start gap-3 rounded-xl border border-violet-200 bg-violet-tint px-4 py-3 text-sm text-violet-900">
+      <div className="mt-6 flex items-start gap-3 rounded-xl border border-violet/30 bg-violet-tint px-4 py-3 text-sm text-violet-ink">
         <Sparkles className="mt-0.5 size-4 shrink-0" aria-hidden />
         <p>
           <span className="font-semibold">About {BRAND.ai.name}.</span> {HELP_INTRO.aiNote}
@@ -94,7 +94,7 @@ export function HelpContent() {
 
       <section id="faq" className="mt-10 scroll-mt-20">
         <h2 className="font-heading text-xl font-bold text-ink-900">Common questions</h2>
-        <div className="mt-4 divide-y divide-border rounded-xl border border-border bg-white">
+        <div className="mt-4 divide-y divide-border rounded-xl border border-border bg-card">
           {HELP_FAQS.map((faq) => (
             <details key={faq.id} id={faq.id} className="group scroll-mt-20 px-4 py-3">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-ink-900 marker:content-none">

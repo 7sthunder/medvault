@@ -5,12 +5,12 @@ export type ChipTone =
   "emerald" | "cyan" | "magenta" | "violet" | "blue" | "amber" | "slate" | "neutral";
 
 const CHIP_TONES: Record<ChipTone, string> = {
-  emerald: "bg-primary-tint text-primary-dark",
-  cyan: "bg-secondary-tint text-cyan-800",
-  magenta: "bg-magenta-tint text-pink-600",
-  violet: "bg-violet-100 text-violet-600",
-  blue: "bg-blue-tint text-blue-600",
-  amber: "bg-amber-tint text-amber-600",
+  emerald: "bg-primary-tint text-emerald-ink",
+  cyan: "bg-cyan-tint text-cyan-ink",
+  magenta: "bg-magenta-tint text-magenta-ink",
+  violet: "bg-violet-tint text-violet-ink",
+  blue: "bg-blue-tint text-blue-ink",
+  amber: "bg-amber-tint text-amber-ink",
   slate: "bg-bg-soft text-ink-500",
   neutral: "border border-border bg-background text-ink-600",
 };

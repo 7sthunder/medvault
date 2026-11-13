@@ -238,7 +238,7 @@ function MissedCalendar({ summary, todayKey }: { summary: AdherenceSummaryDTO; t
           </CardContent>
           <CardFooter className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-muted-foreground">
             <LegendSwatch tone="bg-primary-tint text-primary-dark" label="All doses taken" />
-            <LegendSwatch tone="bg-amber-tint text-amber-600" label="Partly taken" />
+            <LegendSwatch tone="bg-amber-tint text-amber-ink" label="Partly taken" />
             <LegendSwatch tone="bg-red-tint text-red" label="Missed a dose" />
             <LegendSwatch tone="bg-muted" label="No doses due" />
             <span className="ml-auto">Ringed day is today</span>
@@ -313,7 +313,7 @@ function dayTone(day: AdherenceDay | undefined): DayTone {
 
 const DAY_TONE_CLASS: Record<DayTone, string> = {
   full: "bg-primary-tint text-primary-dark",
-  partial: "bg-amber-tint text-amber-600",
+  partial: "bg-amber-tint text-amber-ink",
   missed: "bg-red-tint text-red",
   empty: "bg-muted",
   // Outside the requested window: still shown, so the month reads as a real calendar, but flat.

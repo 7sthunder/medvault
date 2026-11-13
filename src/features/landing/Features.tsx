@@ -35,7 +35,7 @@ function FeatureMedicalRecords() {
   return (
     <div className="relative mx-auto flex items-center justify-center w-full max-w-[480px] h-[340px]">
       <motion.div
-        className="relative flex items-center justify-center w-full h-full rounded-[32px] bg-white border border-slate-100 shadow-[0_20px_40px_rgba(0,0,0,0.04)] overflow-hidden"
+        className="relative flex items-center justify-center w-full h-full rounded-[32px] bg-card border border-border shadow-[0_20px_40px_rgba(0,0,0,0.04)] overflow-hidden"
         whileHover={{ y: -4, boxShadow: "0 24px 48px rgba(0,0,0,0.08)" }}
         transition={{ duration: 0.3 }}
       >
@@ -61,18 +61,18 @@ function FeatureMedicalRecords() {
             times: [0, 0.45, 0.5, 0.75, 0.8, 1],
             ease: "easeInOut",
           }}
-          className="absolute z-10 flex flex-col items-center justify-center w-[160px] h-[160px] rounded-3xl bg-[#F0FAF7] border border-[#DDECE7] shadow-sm"
+          className="absolute z-10 flex flex-col items-center justify-center w-[160px] h-[160px] rounded-3xl bg-primary-soft border border-primary/20 shadow-sm"
         >
           <div className="relative">
-            <ShieldCheck size={48} className="text-[#00A88F]" />
+            <ShieldCheck size={48} className="text-primary-dark" />
             <motion.div
               animate={{ opacity: [0.2, 0.6, 0.2] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               className="absolute inset-0 bg-[#00A88F] rounded-full blur-[24px] -z-10"
             />
           </div>
-          <div className="mt-3 text-xs font-bold text-[#172033]">Securely stored</div>
-          <div className="flex items-center gap-1 mt-1 text-[10px] font-semibold text-[#00A88F]">
+          <div className="mt-3 text-xs font-bold text-ink-900">Securely stored</div>
+          <div className="flex items-center gap-1 mt-1 text-[10px] font-semibold text-primary-dark">
             <CheckCircle2 size={10} /> Organized
           </div>
         </motion.div>
@@ -92,16 +92,16 @@ function FeatureMedicalRecords() {
             times: [0, 0.1, 0.35, 0.5, 1],
             ease: "easeInOut",
           }}
-          className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
+          className="absolute z-20 flex flex-col w-[120px] bg-card rounded-xl border border-border shadow-sm p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-50 text-blue-500">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-tint text-blue-ink">
               <FlaskConical size={12} />
             </div>
-            <div className="text-[10px] font-bold text-[#172033]">Lab Report</div>
+            <div className="text-[10px] font-bold text-ink-900">Lab Report</div>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
-          <div className="w-2/3 h-1.5 bg-slate-100 rounded-full" />
+          <div className="w-full h-1.5 bg-muted rounded-full mb-1" />
+          <div className="w-2/3 h-1.5 bg-muted rounded-full" />
         </motion.div>
 
         {/* 2. Prescription */}
@@ -118,16 +118,16 @@ function FeatureMedicalRecords() {
             times: [0, 0.12, 0.35, 0.5, 1],
             ease: "easeInOut",
           }}
-          className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
+          className="absolute z-20 flex flex-col w-[120px] bg-card rounded-xl border border-border shadow-sm p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-purple-50 text-purple-500">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-violet-tint text-violet-ink">
               <Pill size={12} />
             </div>
-            <div className="text-[10px] font-bold text-[#172033]">Prescription</div>
+            <div className="text-[10px] font-bold text-ink-900">Prescription</div>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
-          <div className="w-3/4 h-1.5 bg-slate-100 rounded-full" />
+          <div className="w-full h-1.5 bg-muted rounded-full mb-1" />
+          <div className="w-3/4 h-1.5 bg-muted rounded-full" />
         </motion.div>
 
         {/* 3. Scan Report */}
@@ -144,16 +144,16 @@ function FeatureMedicalRecords() {
             times: [0, 0.14, 0.35, 0.5, 1],
             ease: "easeInOut",
           }}
-          className="absolute z-20 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-sm p-3"
+          className="absolute z-20 flex flex-col w-[120px] bg-card rounded-xl border border-border shadow-sm p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-[#F0FAF7] text-[#00A88F]">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-primary-soft text-primary-dark">
               <FileText size={12} />
             </div>
-            <div className="text-[10px] font-bold text-[#172033]">Scan Report</div>
+            <div className="text-[10px] font-bold text-ink-900">Scan Report</div>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
-          <div className="w-1/2 h-1.5 bg-slate-100 rounded-full" />
+          <div className="w-full h-1.5 bg-muted rounded-full mb-1" />
+          <div className="w-1/2 h-1.5 bg-muted rounded-full" />
         </motion.div>
 
         {/* 4. Discharge Summary (This one will be shared in P5) */}
@@ -170,16 +170,16 @@ function FeatureMedicalRecords() {
             times: [0, 0.16, 0.35, 0.5, 0.75, 0.95],
             ease: "easeInOut",
           }}
-          className="absolute z-30 flex flex-col w-[120px] bg-white rounded-xl border border-slate-100 shadow-lg p-3"
+          className="absolute z-30 flex flex-col w-[120px] bg-card rounded-xl border border-border shadow-lg p-3"
         >
           <div className="flex items-center gap-2 mb-2">
-            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-orange-50 text-orange-500">
+            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-amber-tint text-amber-ink">
               <Stethoscope size={12} />
             </div>
-            <div className="text-[10px] font-bold text-[#172033]">Summary</div>
+            <div className="text-[10px] font-bold text-ink-900">Summary</div>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-1" />
-          <div className="w-4/5 h-1.5 bg-slate-100 rounded-full" />
+          <div className="w-full h-1.5 bg-muted rounded-full mb-1" />
+          <div className="w-4/5 h-1.5 bg-muted rounded-full" />
         </motion.div>
 
         {/* --- SCANNING LINE (P2) --- */}
@@ -206,7 +206,7 @@ function FeatureMedicalRecords() {
             times: [0, 0.15, 0.2, 0.3, 0.35, 1],
             ease: "easeInOut",
           }}
-          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#172033] text-white text-[11px] font-semibold shadow-lg"
+          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-foreground text-background text-[11px] font-semibold shadow-lg"
         >
           Scanning records...
         </motion.div>
@@ -218,7 +218,7 @@ function FeatureMedicalRecords() {
             times: [0, 0.3, 0.35, 0.45, 0.5, 1],
             ease: "easeInOut",
           }}
-          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#172033] text-white text-[11px] font-semibold shadow-lg"
+          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-foreground text-background text-[11px] font-semibold shadow-lg"
         >
           Organizing...
         </motion.div>
@@ -236,12 +236,12 @@ function FeatureMedicalRecords() {
             times: [0, 0.6, 0.7, 0.75, 0.8, 0.95],
             ease: "easeInOut",
           }}
-          className="absolute z-20 flex flex-col items-center justify-center w-[90px] h-[90px] rounded-2xl bg-white border border-slate-100 shadow-md"
+          className="absolute z-20 flex flex-col items-center justify-center w-[90px] h-[90px] rounded-2xl bg-card border border-border shadow-md"
         >
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#F0FAF7] text-[#00A88F] mb-1">
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-soft text-primary-dark mb-1">
             <Share2 size={20} />
           </div>
-          <div className="text-[10px] font-bold text-[#172033]">Dr. Smith</div>
+          <div className="text-[10px] font-bold text-ink-900">Dr. Smith</div>
         </motion.div>
 
         {/* --- SHARE CONNECT LINE (P5) --- */}
@@ -256,7 +256,7 @@ function FeatureMedicalRecords() {
             times: [0, 0.75, 0.8, 0.85, 0.9, 0.95],
             ease: "easeOut",
           }}
-          className="absolute z-10 h-[2px] border-t-2 border-dashed border-[#00A88F]/40"
+          className="absolute z-10 h-[2px] border-t-2 border-dashed border-primary-dark/40"
           style={{ top: "45%", left: "50%", transform: "translateX(-50%)" }}
         />
 
@@ -268,7 +268,7 @@ function FeatureMedicalRecords() {
             times: [0, 0.7, 0.8, 0.85, 0.9, 0.95],
             ease: "easeInOut",
           }}
-          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-[#00A88F] text-white text-[11px] font-semibold shadow-lg"
+          className="absolute bottom-6 z-50 px-4 py-1.5 rounded-full bg-primary-dark text-white text-[11px] font-semibold shadow-lg"
         >
           Secure link ready
         </motion.div>
@@ -302,7 +302,7 @@ function FeatureSmartReminders() {
           times: [0, 0.05, 0.88, 0.95, 1],
           ease: "easeInOut",
         }}
-        className="relative overflow-hidden rounded-[36px] bg-white"
+        className="relative overflow-hidden rounded-[36px] bg-card"
         style={{
           width: 230,
           height: 460,
@@ -354,12 +354,12 @@ function FeatureSmartReminders() {
             times: [0, 0.45, 0.55, 1],
             ease: "easeInOut",
           }}
-          className="bg-white/20 absolute inset-0 z-[5] backdrop-blur-[4px]"
+          className="bg-background/20 absolute inset-0 z-[5] backdrop-blur-[4px]"
         />
         <motion.div
           animate={{ y: [-120, -120, 32, 32] }}
           transition={{ duration: 4.5, repeat: Infinity, times: [0, 0.5, 0.6, 1], ease: "easeOut" }}
-          className="absolute inset-x-4 z-20 flex items-center gap-3 rounded-2xl border border-magenta/30 bg-white/95 p-4 shadow-[0_14px_28px_rgba(244,114,182,0.15),0_0_30px_rgba(244,114,182,0.2)] backdrop-blur-[12px]"
+          className="absolute inset-x-4 z-20 flex items-center gap-3 rounded-2xl border border-magenta/30 bg-card/95 p-4 shadow-[0_14px_28px_rgba(244,114,182,0.15),0_0_30px_rgba(244,114,182,0.2)] backdrop-blur-[12px]"
           style={{ top: 0 }}
         >
           <div className="text-magenta flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-magenta-tint">
@@ -489,7 +489,7 @@ function FeatureFindCare() {
             times: [0, 0.35, 0.45, 1],
             ease: "easeOut",
           }}
-          className="absolute bottom-4 left-4 right-4 flex items-center gap-3 rounded-2xl border border-secondary/20 bg-white/95 p-[14px] shadow-[0_12px_28px_rgba(0,0,0,0.08)] backdrop-blur-[12px]"
+          className="absolute bottom-4 left-4 right-4 flex items-center gap-3 rounded-2xl border border-secondary/20 bg-card/95 p-[14px] shadow-[0_12px_28px_rgba(0,0,0,0.08)] backdrop-blur-[12px]"
         >
           <div className="text-secondary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary-tint">
             <Hospital size={22} />
@@ -565,7 +565,7 @@ export default function Features() {
   return (
     <section
       id="features"
-      className="overflow-hidden bg-white"
+      className="overflow-hidden bg-background"
       style={{ padding: "100px 6% 60px" }}
     >
       <div

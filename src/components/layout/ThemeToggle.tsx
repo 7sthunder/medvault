@@ -3,6 +3,7 @@
 import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { persistThemeHint } from "@/features/settings/appearance-controller";
 import { api } from "@/lib/trpc";
 import type { AppearanceSettingsDTO } from "@/shared/types";
 import type { Theme } from "@/shared/enums";
@@ -42,6 +43,7 @@ export function ThemeToggle() {
     const root = document.documentElement;
     root.classList.toggle("dark", willBeDark);
     root.style.colorScheme = willBeDark ? "dark" : "light";
+    persistThemeHint(next);
     update.mutate({ ...query.data, theme: next });
   };
 

@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * The sidebar's two width tokens (`--sidebar-width`, `--sidebar-width-icon`) are set by
@@ -79,6 +79,18 @@
   --color-border-strong: #cbd5e1;
   --color-bg-soft: #f1f5f9;
   --color-surface-dark: #0f172a;
+  --color-surface: #ffffff;
+
+  /* Tinted chip/tile backgrounds and readable accent text, paired so each tone stays legible
+     in both themes. Dark values are declared in the `.dark` block below. */
+  --color-cyan-tint: #cffafe;
+  --color-violet-tint: #ede9fe;
+  --color-cyan-ink: #0e7490;
+  --color-magenta-ink: #db2777;
+  --color-violet-ink: #7c3aed;
+  --color-blue-ink: #2563eb;
+  --color-amber-ink: #b45309;
+  --color-emerald-ink: #047857;
 
   /* shadcn semantic colours that don't flip in dark */
   --color-destructive: #ef4444;
@@ -124,6 +136,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-foreground: var(--sidebar-active-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-icon: var(--sidebar-icon);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -150,14 +166,18 @@
   --accent-foreground: #059669;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
+  --sidebar: #f0faf7;
+  --sidebar-foreground: #172033;
   --sidebar-primary: #10b981;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0fdf4;
-  --sidebar-accent-foreground: #059669;
-  --sidebar-border: #e2e8f0;
+  --sidebar-accent: #e7f7f2;
+  --sidebar-accent-foreground: #172033;
+  --sidebar-border: #ddece7;
   --sidebar-ring: #10b981;
+  --sidebar-active: #ddf7ec;
+  --sidebar-active-foreground: #00a88f;
+  --sidebar-muted: #718096;
+  --sidebar-icon: #536174;
 
   /* §5.4 base radius 14px (inputs/buttons); cards derive at xl/2xl */
   --radius: 0.875rem;
@@ -178,28 +198,118 @@
   --mascot-violet-soft: #a78bfa;
 }
 
-/* §5.7 dark theme (settings/appearance "dark"; no neon) */
+/* §5.7 dark theme (settings/appearance "dark"; no neon).
+ * Layered navy canvas: background < card < popover, each one step lighter so elevation reads
+ * without heavy shadows. Brand hues are lifted slightly so they keep contrast on navy, and the
+ * ink scale is inverted so every existing `text-ink-*` class stays legible. */
 .dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: #1e293b;
-  --card-foreground: #e2e8f0;
-  --popover: #1e293b;
-  --popover-foreground: #e2e8f0;
-  --muted: #25303f;
-  --muted-foreground: #94a3b8;
-  --accent: rgba(16, 185, 129, 0.15);
-  --accent-foreground: #a7f3d0;
-  --border: #334155;
-  --input: #334155;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #e2e8f0;
+  color-scheme: dark;
+
+  --background: #0b1220;
+  --foreground: #e6edf7;
+  --card: #111b2e;
+  --card-foreground: #e6edf7;
+  --popover: #16223a;
+  --popover-foreground: #e6edf7;
+  --muted: #1a2740;
+  --muted-foreground: #9aa9bf;
+  --accent: rgba(16, 185, 129, 0.16);
+  --accent-foreground: #6ee7b7;
+  --border: #223049;
+  --input: #2a3a55;
+  --sidebar: #0d1628;
+  --sidebar-foreground: #d6e0ee;
   --sidebar-primary: #10b981;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(16, 185, 129, 0.18);
-  --sidebar-accent-foreground: #a7f3d0;
-  --sidebar-border: #334155;
+  --sidebar-primary-foreground: #04130d;
+  --sidebar-accent: rgba(16, 185, 129, 0.12);
+  --sidebar-accent-foreground: #6ee7b7;
+  --sidebar-border: #1c2a42;
   --sidebar-ring: #10b981;
+  --sidebar-active: rgba(16, 185, 129, 0.2);
+  --sidebar-active-foreground: #5eead4;
+  --sidebar-muted: #7c8aa0;
+  --sidebar-icon: #9fb0c7;
+
+  --hero-gradient: linear-gradient(150deg, #0b1f1d 0%, #0b1220 50%, #0a1b2c 100%);
+  --glass-border: 1px solid rgba(16, 185, 129, 0.3);
+
+  --color-primary-dark: #34d399;
+  --color-primary-tint: #0f3b2e;
+  --color-primary-tint-2: #155e47;
+  --color-primary-soft: #0f2a24;
+  --color-primary-ring: rgba(16, 185, 129, 0.25);
+  --color-secondary: #22d3ee;
+  --color-secondary-tint: #0c3a44;
+  --color-secondary-soft: #0d2633;
+  --color-magenta: #f472b6;
+  --color-magenta-tint: #4a1d3a;
+  --color-violet: #a78bfa;
+  --color-blue: #60a5fa;
+  --color-blue-tint: #14284a;
+  --color-amber: #fbbf24;
+  --color-amber-tint: #46330f;
+  --color-teal: #2dd4bf;
+  --color-red: #f87171;
+  --color-red-tint: #4c1d22;
+
+  --color-cyan-tint: #0c3a44;
+  --color-violet-tint: #2e1f5c;
+  --color-cyan-ink: #67e8f9;
+  --color-magenta-ink: #f9a8d4;
+  --color-violet-ink: #c4b5fd;
+  --color-blue-ink: #93c5fd;
+  --color-amber-ink: #fcd34d;
+  --color-emerald-ink: #6ee7b7;
+
+  --color-ink-900: #f1f5f9;
+  --color-ink-800: #e2e8f0;
+  --color-ink-700: #cbd5e1;
+  --color-ink-600: #aab6c8;
+  --color-ink-500: #94a3b8;
+  --color-ink-400: #64748b;
+
+  --color-border-strong: #34445f;
+  --color-bg-soft: #16213a;
+  --color-surface: #111b2e;
+  --color-surface-dark: #070d18;
+  --color-destructive: #f87171;
+  --color-ring: #10b981;
+  --color-chart-1: #34d399;
+  --color-chart-2: #22d3ee;
+  --color-chart-3: #f472b6;
+  --color-chart-4: #fbbf24;
+  --color-chart-5: #a78bfa;
+
+  --shadow-card-sm: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glass-lg: 0 20px 50px rgba(0, 0, 0, 0.55);
+  --shadow-primary-btn: 0 12px 24px rgba(16, 185, 129, 0.2);
+  --shadow-primary-btn-lg: 0 12px 40px rgba(16, 185, 129, 0.45);
+  --shadow-fab: 0 8px 28px rgba(16, 185, 129, 0.45);
+  --shadow-leafs: 0 4px 12px rgba(16, 185, 129, 0.2);
+  --shadow-logo: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Tailwind compiles shadow utilities to literal values, so the `--shadow-*` overrides above do not
+   reach them on their own. These mirror the tokens for the shadows the app actually uses. */
+.dark .shadow-card-sm {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+.dark .shadow-card {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.dark .shadow-glass-lg {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+.dark .shadow-glass {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.dark .shadow-primary-btn {
+  box-shadow: 0 12px 24px rgba(16, 185, 129, 0.2);
+}
+.dark .shadow-fab {
+  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.45);
 }
 
 @layer base {
@@ -221,6 +331,14 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Faint emerald and cyan glows behind the dark canvas so it reads as intentional, not flat. */
+  .dark body {
+    background-image:
+      radial-gradient(circle at 12% -10%, rgba(16, 185, 129, 0.1), transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(6, 182, 212, 0.07), transparent 35%);
+    background-attachment: fixed;
+  }
+
   /* §5.5 scrollbar (track = bg-soft, thumb = border) */
   ::-webkit-scrollbar {
     width: 10px;
@@ -236,9 +354,21 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #cbd5e1;
   }
+  .dark ::-webkit-scrollbar-track {
+    background: #0b1220;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #223049;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #34445f;
+  }
 
   ::selection {
     background: rgba(16, 185, 129, 0.2);
+  }
+  .dark ::selection {
+    background: rgba(16, 185, 129, 0.35);
   }
 }
 
@@ -267,8 +397,8 @@
   /* §5.7 dark variants of glass surfaces */
   .dark .glass-card,
   .dark .glass-card-strong {
-    background: rgba(15, 23, 42, 0.85);
-    border-color: rgba(16, 185, 129, 0.35);
+    background: rgba(17, 27, 46, 0.82);
+    border-color: rgba(16, 185, 129, 0.3);
   }
 
   /* §5.4 leaf-shadow focus helper (app state emphasis) */
@@ -296,11 +426,11 @@
   }
   /* Footer quick-link rows (port App.jsx:1174–1201): slate → primary on hover */
   .footer-link {
-    color: #64748b;
+    color: var(--color-ink-500);
     transition: color 0.2s;
   }
   .footer-link:hover {
-    color: #10b981;
+    color: var(--color-primary);
   }
 
   /* ---- Mobile utilities (responsive pass) ---- */

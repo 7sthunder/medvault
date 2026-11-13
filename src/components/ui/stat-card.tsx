@@ -13,12 +13,12 @@ import { cn } from "cn";
 export type StatTone = "emerald" | "cyan" | "magenta" | "violet" | "blue" | "amber";
 
 const STAT_TONES: Record<StatTone, string> = {
-  emerald: "bg-primary-tint text-primary-dark",
-  cyan: "bg-secondary-tint text-cyan-800",
-  magenta: "bg-magenta-tint text-pink-600",
-  violet: "bg-violet-tint text-violet-600",
-  blue: "bg-blue-tint text-blue-600",
-  amber: "bg-amber-tint text-amber-600",
+  emerald: "bg-primary-tint text-emerald-ink",
+  cyan: "bg-cyan-tint text-cyan-ink",
+  magenta: "bg-magenta-tint text-magenta-ink",
+  violet: "bg-violet-tint text-violet-ink",
+  blue: "bg-blue-tint text-blue-ink",
+  amber: "bg-amber-tint text-amber-ink",
 };
 
 export interface StatCardProps extends ComponentProps<typeof Card> {

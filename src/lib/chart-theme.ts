@@ -14,11 +14,11 @@ export const CHART_PALETTE = [
   "var(--color-chart-5)",
 ] as const;
 
-/** §5 table border — CartesianGrid stroke. */
-export const CHART_GRID = "#e2e8f0";
+/** §5 table border — CartesianGrid stroke. Token-driven so it follows light/dark. */
+export const CHART_GRID = "var(--border)";
 
-/** Axis tick + line colour (ink-400). */
-export const CHART_AXIS = "#94a3b8";
+/** Axis tick + line colour (ink-400). Token-driven so it follows light/dark. */
+export const CHART_AXIS = "var(--color-ink-400)";
 
 /** Chart font matches the Plus Jakarta Sans body stack. */
 export const CHART_FONT_FAMILY = "var(--font-jakarta), system-ui, sans-serif";

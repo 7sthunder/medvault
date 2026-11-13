@@ -133,7 +133,7 @@ function RegenerateNotice({
   }
   if (allFallback) {
     return (
-      <p className="rounded-lg bg-violet-100 px-3 py-2 text-sm text-violet-600">
+      <p className="rounded-lg bg-violet-tint px-3 py-2 text-sm text-violet-ink">
         AI is unavailable — these insights were generated from your data instead.
       </p>
     );

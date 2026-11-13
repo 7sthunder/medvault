@@ -52,8 +52,8 @@ export default function Nav() {
       className={cn(
         "fixed inset-x-0 top-0 z-[200] flex h-[68px] items-center justify-between gap-2 border-b border-border px-4 transition-all duration-300 sm:px-[4%]",
         scrolled
-          ? "bg-white/95 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-[16px]"
-          : "bg-white",
+          ? "bg-background/95 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-[16px]"
+          : "bg-background",
       )}
     >
       {/* Below `sm` the wordmark is dropped (the logo tile keeps the brand's accessible name, so

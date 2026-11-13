@@ -72,9 +72,9 @@ describe("design tokens (§5)", () => {
   });
 
   it("dark theme overrides the light surfaces (§5.7)", () => {
-    expect(CSS_NORMALIZED).toContain(normalize("--background:#0f172a"));
-    expect(CSS_NORMALIZED).toContain(normalize("--card:#1e293b"));
-    expect(CSS_NORMALIZED).toContain(normalize("--border:#334155"));
+    expect(CSS_NORMALIZED).toContain(normalize("--background:#0b1220"));
+    expect(CSS_NORMALIZED).toContain(normalize("--card:#111b2e"));
+    expect(CSS_NORMALIZED).toContain(normalize("--border:#223049"));
   });
 
   it("no §5.3 token value drifts from the §7-verified hexes", () => {

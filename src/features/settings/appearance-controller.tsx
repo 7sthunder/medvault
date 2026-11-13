@@ -34,10 +34,23 @@ export function appearanceClassName(
   return resolveTheme(appearance.theme, prefersDark) === "dark" ? "dark" : "";
 }
 
+/** localStorage key read by the pre-paint script in `app/layout.tsx`. */
+export const THEME_STORAGE_KEY = "medvault-theme";
+
+/** Remember the chosen theme so the next page load paints it before hydration. */
+export function persistThemeHint(theme: AppearanceSettingsDTO["theme"]): void {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Storage can be blocked (private mode, disabled cookies); the server value still applies.
+  }
+}
+
 function applyToDocument(appearance: AppearanceSettingsDTO, prefersDark: boolean): void {
   const root = document.documentElement;
   const dark = resolveTheme(appearance.theme, prefersDark) === "dark";
 
+  persistThemeHint(appearance.theme);
   root.classList.toggle("dark", dark);
   // Tells the browser to render native controls (scrollbars, form widgets) dark too.
   root.style.colorScheme = dark ? "dark" : "light";

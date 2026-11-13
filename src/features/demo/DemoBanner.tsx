@@ -34,7 +34,7 @@ export function DemoBanner() {
   return (
     <div
       role="status"
-      className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-900 sm:px-6 lg:px-8"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-amber/30 bg-amber-tint px-4 py-2.5 text-sm text-amber-ink sm:px-6 lg:px-8"
     >
       <FlaskConical className="size-4 shrink-0" aria-hidden />
       <p className="min-w-0 flex-1">

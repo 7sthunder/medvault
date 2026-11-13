@@ -98,7 +98,7 @@ function DemoLandingView() {
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
       <header className="text-center">
-        <span className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">
+        <span className="inline-flex items-center gap-2 rounded-full bg-amber-tint px-3 py-1 text-xs font-semibold text-amber-ink">
           <FlaskConical className="size-3.5" aria-hidden />
           Sample data
         </span>
@@ -117,7 +117,7 @@ function DemoLandingView() {
         </div>
       </header>
 
-      <div className="mt-8 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <div className="mt-8 flex items-start gap-3 rounded-xl border border-amber/30 bg-amber-tint px-4 py-3 text-sm text-amber-ink">
         <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
         <p>
           <span className="font-semibold">This is not a medical record.</span> The workspace belongs

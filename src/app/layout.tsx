@@ -44,13 +44,24 @@ export const viewport: Viewport = {
   ],
 };
 
+/**
+ * Applies the cached theme choice before first paint so a dark-mode user never sees a light flash,
+ * including on marketing and auth routes that don't mount `AppearanceController`. The key mirrors
+ * `THEME_STORAGE_KEY` in `appearance-controller.tsx`; the server-stored preference still wins once
+ * the app hydrates.
+ */
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("medvault-theme");var d=t==="dark"||((!t||t==="system")&&window.matchMedia("(prefers-color-scheme: dark)").matches);if(d){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark";}}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={jakarta.variable}>
+    <html lang="en" className={jakarta.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="font-sans antialiased">
         {children}
         <Toaster position="top-center" richColors />

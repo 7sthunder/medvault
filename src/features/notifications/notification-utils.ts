@@ -19,13 +19,13 @@ export interface NotificationTypeUi {
 
 /** Per-type presentation atoms used by the bell dropdown + `/notifications` page. */
 export const NOTIFICATION_TYPE_UI: Record<NotificationType, NotificationTypeUi> = {
-  upcoming_dose: { icon: CalendarClock, tile: "bg-cyan-tint text-cyan-600" },
-  due_dose: { icon: BellRing, tile: "bg-amber-tint text-amber-600" },
+  upcoming_dose: { icon: CalendarClock, tile: "bg-cyan-tint text-cyan-ink" },
+  due_dose: { icon: BellRing, tile: "bg-amber-tint text-amber-ink" },
   missed_dose: { icon: Siren, tile: "bg-red-tint text-red" },
-  caregiver_alert: { icon: HeartPulse, tile: "bg-violet-tint text-violet-600" },
+  caregiver_alert: { icon: HeartPulse, tile: "bg-violet-tint text-violet-ink" },
   system: { icon: Megaphone, tile: "bg-muted text-ink-500" },
-  insight: { icon: Lightbulb, tile: "bg-emerald-tint text-emerald-700" },
-  demo: { icon: Sparkles, tile: "bg-magenta-tint text-magenta-700" },
+  insight: { icon: Lightbulb, tile: "bg-primary-tint text-emerald-ink" },
+  demo: { icon: Sparkles, tile: "bg-magenta-tint text-magenta-ink" },
 };
 
 /**

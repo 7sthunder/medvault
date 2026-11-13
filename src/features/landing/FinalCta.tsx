@@ -12,7 +12,7 @@ export default function FinalCta() {
   const [ctaRef, ctaIn] = useInView<HTMLDivElement>();
 
   return (
-    <section id="contact" className="overflow-hidden bg-white" style={{ padding: "20px 4% 100px" }}>
+    <section id="contact" className="overflow-hidden bg-background" style={{ padding: "20px 4% 100px" }}>
       <div
         ref={ctaRef}
         style={{

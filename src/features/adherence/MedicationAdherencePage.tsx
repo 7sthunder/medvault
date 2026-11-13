@@ -154,7 +154,7 @@ export function MedicationAdherencePage() {
                 key: "skipped",
                 header: "Skipped",
                 value: (row) => row.skipped,
-                render: (row) => <span className="text-amber-600">{formatCount(row.skipped)}</span>,
+                render: (row) => <span className="text-amber-ink">{formatCount(row.skipped)}</span>,
                 align: "right",
                 hideBelow: "md",
               },

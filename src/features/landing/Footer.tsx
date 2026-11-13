@@ -57,13 +57,13 @@ function FooterBrand() {
 export default function Footer() {
   return (
     <div className="px-4 md:px-8 pb-8 md:pb-10 pt-4">
-      <footer className="mx-auto max-w-[1400px] rounded-[36px] border border-teal-900/10 bg-[#E5F2F0] px-6 py-10 md:px-12 md:py-12 shadow-sm">
+      <footer className="mx-auto max-w-[1400px] rounded-[36px] border border-border bg-muted px-6 py-10 md:px-12 md:py-12 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 justify-between">
           {/* Brand & Contact Section */}
           <div className="flex flex-col gap-8 lg:w-1/3">
             <div>
               <FooterBrand />
-              <p className="mt-5 text-sm leading-relaxed text-slate-500 max-w-xs">
+              <p className="mt-5 text-sm leading-relaxed text-ink-500 max-w-xs">
                 Your complete medical history, medications, and AI-powered insights — safe in one
                 secure vault. Hold your health story in your hands.
               </p>
@@ -76,16 +76,16 @@ export default function Footer() {
                   <a
                     key={i}
                     href={r.href}
-                    className="flex items-center gap-3 text-sm text-slate-500 transition-colors hover:text-ink-900"
+                    className="flex items-center gap-3 text-sm text-ink-500 transition-colors hover:text-ink-900"
                   >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white border border-teal-900/5 shadow-sm">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-card border border-border shadow-sm">
                       <Icon size={18} className="text-primary" />
                     </span>
                     <span className="break-all">{r.text}</span>
                   </a>
                 ) : (
-                  <div key={i} className="flex items-center gap-3 text-sm text-slate-500">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white border border-teal-900/5 shadow-sm">
+                  <div key={i} className="flex items-center gap-3 text-sm text-ink-500">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-card border border-border shadow-sm">
                       <Icon size={18} className="text-primary" />
                     </span>
                     <span className="break-all">{r.text}</span>
@@ -107,7 +107,7 @@ export default function Footer() {
                     <a
                       key={l.label}
                       href={l.href}
-                      className="text-sm text-slate-500 transition-colors hover:text-primary font-medium"
+                      className="text-sm text-ink-500 transition-colors hover:text-primary font-medium"
                     >
                       {l.label}
                     </a>
@@ -119,14 +119,14 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div className="my-10 border-t border-teal-900/10" />
+        <div className="my-10 border-t border-border" />
 
         {/* Copyright & Meta */}
-        <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-500">
+        <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-ink-500">
           <span>© 2026 {BRAND.name}. All rights reserved.</span>
           <span>
             Made with <span className="text-primary">💚</span> for your health ·{" "}
-            <span className="font-medium text-slate-600">Privacy-first</span>
+            <span className="font-medium text-ink-600">Privacy-first</span>
           </span>
         </div>
       </footer>
